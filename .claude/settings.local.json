@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Applications/Cursor.app/Contents/Resources/app/node_modules/.bin/**)",
+      "Read(//usr/local/**)"
+    ]
+  }
+}
