@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Octagon exterior con fill blanco -->
+  <polygon
+    points="133.7,10 181.3,57.6 181.3,142.4 133.7,190 66.3,190 18.7,142.4 18.7,57.6 66.3,10"
+    fill="white" stroke="#1C1C1C" stroke-width="7" stroke-linejoin="round"/>
+  <!-- Segundo anillo interior (efecto doble borde) -->
+  <polygon
+    points="127,23 170,66 170,134 127,177 73,177 30,134 30,66 73,23"
+    fill="none" stroke="#1C1C1C" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Letras AP en naranja intenso -->
+  <text
+    x="100" y="140"
+    text-anchor="middle"
+    dominant-baseline="auto"
+    font-family="'Arial Black','Arial Bold',Impact,sans-serif"
+    font-weight="900"
+    font-size="84"
+    letter-spacing="-3"
+    fill="#EC6E00">AP</text>
+</svg>

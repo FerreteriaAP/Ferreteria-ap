@@ -1,0 +1,932 @@
+// Ferretería AP - Schema completo Fase 1
+// República Dominicana
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Rol {
+  ADMINISTRADOR
+  ASISTENTE_ADMINISTRATIVO
+  VENDEDOR
+  CAJA
+}
+
+enum EstadoTurno {
+  ABIERTO
+  CERRADO
+}
+
+enum TipoContacto {
+  CLIENTE
+  SUPLIDOR
+  AMBOS
+}
+
+enum TipoComprobante {
+  B01 // Crédito Fiscal
+  B02 // Consumidor Final
+  B14 // Regímenes Especiales
+  B15 // Gubernamentales
+}
+
+enum EstadoOrdenCompra {
+  BORRADOR
+  ENVIADA
+  RECIBIDA_PARCIAL
+  RECIBIDA
+  CANCELADA
+}
+
+enum EstadoVenta {
+  COTIZACION
+  ORDEN_VENTA
+  CONDUCE
+  FACTURADA
+  CANCELADA
+  PDV_PENDIENTE   // Creada en el PDV, esperando pago en caja
+}
+
+enum TipoCredito {
+  DIAS_30
+  DIAS_45
+  DIAS_60
+  CONTADO
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO_PARCIAL
+  PAGADO
+  VENCIDO
+}
+
+enum CategoriaInventario {
+  CTC // Construcción
+  FT // Ferretería técnica
+  ET // Eléctrico técnico
+  PL // Plomería
+}
+
+enum TipoMovimientoInventario {
+  ENTRADA_COMPRA
+  ENTRADA_AJUSTE
+  SALIDA_VENTA
+  SALIDA_AJUSTE
+  SALIDA_DEVOLUCION
+  ENTRADA_DEVOLUCION
+}
+
+enum EstadoEmpleado {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
+}
+
+enum TipoGasto {
+  FIJO
+  VARIABLE
+}
+
+enum TipoCuentaBancaria {
+  CORRIENTE
+  AHORROS
+}
+
+enum TipoTransaccionBancaria {
+  DEPOSITO
+  RETIRO
+  TRANSFERENCIA
+  CHEQUE          // Cheque emitido (salida)
+  CHEQUE_RECIBIDO // Cheque recibido (entrada)
+  DEBITO_AUTOMATICO
+}
+
+enum PeriodoNomina {
+  PRIMERA_QUINCENA // 1-15
+  SEGUNDA_QUINCENA // 16-fin
+}
+
+// ============================================================
+// AUTENTICACIÓN (Auth.js / NextAuth compatible)
+// ============================================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================
+// USUARIOS / EMPLEADOS
+// ============================================================
+
+model Usuario {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  password      String? // hash bcrypt
+  nombre        String
+  apellido      String
+  rol           Rol       @default(VENDEDOR)
+  activo        Boolean   @default(true)
+  empleadoId    String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  empleado       Empleado? @relation(fields: [empleadoId], references: [id])
+  accounts       Account[]
+  sessions       Session[]
+  ventasCreadas  Venta[]        @relation("VentaCreador")
+  ventasVendedor Venta[]        @relation("VentaVendedor")
+  compras        Compra[]
+  ordenesCompra  OrdenCompra[]  @relation("OrdenesCompraUsuario")
+  gastos         Gasto[]
+  turnos         TurnoCaja[]
+  notasCredito   NotaCredito[]
+
+  @@map("usuarios")
+}
+
+model Empleado {
+  id              String         @id @default(cuid())
+  cedula          String         @unique
+  nombre          String
+  apellido        String
+  telefono        String?
+  email           String?
+  fechaNacimiento DateTime?
+  fechaIngreso    DateTime
+  cargo           String
+  departamento    String?
+  salarioBase     Decimal        @db.Decimal(12, 2)
+  estado          EstadoEmpleado @default(ACTIVO)
+  // Datos laborales RD
+  nss             String? // Número Seguridad Social (TSS)
+  afp             String? // AFP (SIAPEN, RESERVAS, POPULAR)
+  sfs             String? // SFS (SEMMA, ARS Senasa, etc.)
+  cuentaBancaria  String?
+  bancoCuenta     String?
+  tipoCuenta      String?
+  // Nómina — valores fijos quincenal
+  valorHoraExtra  Decimal        @default(0) @db.Decimal(12, 2) // RD$ por hora extra
+  descuentoSan    Decimal        @default(0) @db.Decimal(12, 2) // SAN fijo quincenal
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  usuario Usuario?
+  nominas NominaEmpleado[]
+
+  @@map("empleados")
+}
+
+// ============================================================
+// CONTACTOS (Clientes / Suplidores)
+// ============================================================
+
+model Contacto {
+  id              String          @id @default(cuid())
+  tipo            TipoContacto    @default(CLIENTE)
+  nombre          String // Nombre comercial o persona
+  nombreLegal     String?
+  rnc             String?         @unique // RNC o Cédula
+  tipoComprobante TipoComprobante @default(B02)
+  email           String?
+  telefono        String?
+  telefonoAlt     String?
+  credito             TipoCredito     @default(CONTADO)
+  limiteCredito       Decimal?        @db.Decimal(12, 2)
+  descuentoFijo       Decimal?        @db.Decimal(5, 2) // % descuento por defecto
+  esEmisorElectronico Boolean         @default(false)  // ¿emite facturas electrónicas?
+  notas               String?         @db.Text
+  activo              Boolean         @default(true)
+  // Regla de precio especial — solo para clientes con margen sobre costo (ej. Kolmen)
+  reglaPrecio         String?         // "MARGEN_COSTO"
+  margenPrecio        Decimal?        @db.Decimal(5, 2) // % sobre (costo+ITBIS), ej. 15.00
+  // Saldo a favor — acumulado por notas de crédito
+  saldoFavor          Decimal         @default(0) @db.Decimal(12, 2)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  direcciones       DireccionEntrega[]
+  preciosEspeciales PrecioEspecial[]
+  ventas            Venta[]
+  compras           Compra[]           @relation("ComprasSuplidor")
+  ordenesCompra     OrdenCompra[]      @relation("OrdenComprasSuplidor")
+  cuentasPorCobrar  CuentaPorCobrar[]
+  cuentasPorPagar   CuentaPorPagar[]
+  notasCredito      NotaCredito[]
+
+  @@map("contactos")
+}
+
+model DireccionEntrega {
+  id          String   @id @default(cuid())
+  contactoId  String
+  etiqueta    String // "Sucursal Norte", "Almacén Principal", etc.
+  direccion   String
+  sector      String?
+  ciudad      String   @default("Santo Domingo")
+  provincia   String?
+  referencia  String?
+  esPrincipal Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  contacto Contacto @relation(fields: [contactoId], references: [id], onDelete: Cascade)
+  ventas   Venta[]
+
+  @@map("direcciones_entrega")
+}
+
+// ============================================================
+// INVENTARIO
+// ============================================================
+
+model Categoria {
+  id          String              @id @default(cuid())
+  codigo      CategoriaInventario
+  nombre      String
+  descripcion String?
+  createdAt   DateTime            @default(now())
+
+  productos Producto[]
+
+  @@map("categorias")
+}
+
+model Producto {
+  id                 String   @id @default(cuid())
+  codigo             String   @unique // Código interno
+  codigoBarras       String?  @unique
+  nombre             String
+  descripcion        String?  @db.Text
+  categoriaId        String
+  unidadMedida       String   @default("UND") // UND, M, M2, KG, LB, GLL, etc.
+  // Fraccionamiento
+  esFraccionable     Boolean  @default(false)
+  unidadFraccion     String? // "PIE" cuando el producto es "ROLLO"
+  factorFraccion     Decimal? @db.Decimal(10, 4) // cuántas fracciones por unidad
+  // Precios
+  costoPromedio      Decimal  @default(0) @db.Decimal(12, 4)
+  costoUltimo        Decimal  @default(0) @db.Decimal(12, 4)
+  porcentajeGanancia Decimal  @default(30) @db.Decimal(5, 2)
+  precioVenta        Decimal  @db.Decimal(12, 2)
+  precioMayoreo      Decimal? @db.Decimal(12, 2)
+  // Stock
+  stockActual        Decimal  @default(0) @db.Decimal(12, 4)
+  stockMinimo        Decimal  @default(0) @db.Decimal(12, 4)
+  stockMaximo        Decimal? @db.Decimal(12, 4)
+  // Impuestos
+  exentoItbis        Boolean  @default(false) // true = exento de ITBIS (ej. agregados)
+  // Metadatos
+  imagen             String?
+  activo             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  categoria         Categoria              @relation(fields: [categoriaId], references: [id])
+  movimientos         MovimientoInventario[]
+  detallesCompra      DetalleCompra[]
+  detallesVenta       DetalleVenta[]
+  detallesOrdenCompra DetalleOrdenCompra[]
+  preciosEspeciales   PrecioEspecial[]
+  alertas             AlertaInventario[]
+
+  @@index([nombre])
+  @@index([codigoBarras])
+  @@map("productos")
+}
+
+model MovimientoInventario {
+  id           String                   @id @default(cuid())
+  productoId   String
+  tipo         TipoMovimientoInventario
+  cantidad     Decimal                  @db.Decimal(12, 4)
+  stockAntes   Decimal                  @db.Decimal(12, 4)
+  stockDespues Decimal                  @db.Decimal(12, 4)
+  costo        Decimal?                 @db.Decimal(12, 4)
+  referencia   String? // ID de venta, compra, ajuste
+  tipoRef      String? // "VENTA", "COMPRA", "AJUSTE"
+  notas        String?
+  usuarioId    String?
+  createdAt    DateTime                 @default(now())
+
+  producto Producto @relation(fields: [productoId], references: [id])
+
+  @@index([productoId, createdAt])
+  @@map("movimientos_inventario")
+}
+
+model AlertaInventario {
+  id         String   @id @default(cuid())
+  productoId String
+  tipo       String // "STOCK_MINIMO", "PRECIO_CAMBIO"
+  mensaje    String
+  leida      Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  producto Producto @relation(fields: [productoId], references: [id])
+
+  @@map("alertas_inventario")
+}
+
+model PrecioEspecial {
+  id         String   @id @default(cuid())
+  productoId String
+  contactoId String
+  precio     Decimal  @db.Decimal(12, 2)
+  descuento  Decimal? @db.Decimal(5, 2) // alternativa: % descuento
+  notas      String?
+  activo     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  producto Producto @relation(fields: [productoId], references: [id])
+  contacto Contacto @relation(fields: [contactoId], references: [id])
+
+  @@unique([productoId, contactoId])
+  @@map("precios_especiales")
+}
+
+// ============================================================
+// COMPRAS
+// ============================================================
+
+model OrdenCompra {
+  id           String            @id @default(cuid())
+  numero       String            @unique // OC-00001
+  suplidorId   String
+  usuarioId    String?
+  estado       EstadoOrdenCompra @default(BORRADOR)
+  fechaEmision DateTime          @default(now())
+  fechaEntrega DateTime?
+  notas        String?           @db.Text
+  subtotal     Decimal           @default(0) @db.Decimal(12, 2)
+  itbis        Decimal           @default(0) @db.Decimal(12, 2)
+  total        Decimal           @default(0) @db.Decimal(12, 2)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  suplidor Contacto             @relation("OrdenComprasSuplidor", fields: [suplidorId], references: [id])
+  usuario  Usuario?             @relation("OrdenesCompraUsuario", fields: [usuarioId], references: [id])
+  detalles DetalleOrdenCompra[]
+  compras  Compra[]
+
+  @@map("ordenes_compra")
+}
+
+model DetalleOrdenCompra {
+  id           String  @id @default(cuid())
+  ordenId      String
+  productoId   String
+  cantidad     Decimal @db.Decimal(12, 4)
+  cantRecibida Decimal @default(0) @db.Decimal(12, 4)
+  costo        Decimal @db.Decimal(12, 4)
+  subtotal     Decimal @db.Decimal(12, 2)
+
+  orden    OrdenCompra @relation(fields: [ordenId],    references: [id], onDelete: Cascade)
+  producto Producto    @relation(fields: [productoId], references: [id])
+
+  @@map("detalles_orden_compra")
+}
+
+model Compra {
+  id                String     @id @default(cuid())
+  numero            String     @unique // COMP-00001
+  suplidorId        String
+  ordenCompraId     String?
+  noFacturaSuplidor String? // Número de factura del suplidor
+  ncf                  String? // NCF del comprobante fiscal (B01, E31, etc.)
+  tipoNcfCompra        String? // Tipo: B01, B02, B14, B15, E31
+  ncfCodigoSeguridad   String? // Código de seguridad (solo E31 electrónico)
+  fechaFactura      DateTime
+  fechaVencimiento  DateTime?
+  subtotal          Decimal    @db.Decimal(12, 2)
+  itbis             Decimal    @default(0) @db.Decimal(12, 2)
+  total             Decimal    @db.Decimal(12, 2)
+  estadoPago        EstadoPago @default(PENDIENTE)
+  notas             String?    @db.Text
+  usuarioId         String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  suplidor        Contacto         @relation("ComprasSuplidor", fields: [suplidorId], references: [id])
+  ordenCompra     OrdenCompra?     @relation(fields: [ordenCompraId], references: [id])
+  usuario         Usuario          @relation(fields: [usuarioId], references: [id])
+  detalles        DetalleCompra[]
+  pagos           PagoCompra[]
+  cuentasPorPagar CuentaPorPagar[]
+
+  @@index([suplidorId, createdAt])
+  @@map("compras")
+}
+
+model DetalleCompra {
+  id            String   @id @default(cuid())
+  compraId      String
+  productoId    String
+  cantidad      Decimal  @db.Decimal(12, 4)
+  costo         Decimal  @db.Decimal(12, 4)
+  costoAnterior Decimal? @db.Decimal(12, 4) // para alerta de cambio de precio
+  subtotal      Decimal  @db.Decimal(12, 2)
+  itbis         Decimal  @default(0) @db.Decimal(12, 2)
+
+  compra   Compra   @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  producto Producto @relation(fields: [productoId], references: [id])
+
+  @@map("detalles_compra")
+}
+
+model PagoCompra {
+  id         String   @id @default(cuid())
+  compraId   String
+  monto      Decimal  @db.Decimal(12, 2)
+  fecha      DateTime @default(now())
+  metodo     String // "CHEQUE", "TRANSFERENCIA", "EFECTIVO"
+  referencia String?
+  adjunto    String? // URL/path del documento
+  notas      String?
+  cuentaId   String? // banco usado para el pago
+
+  compra Compra          @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  cuenta CuentaBancaria? @relation(fields: [cuentaId], references: [id])
+
+  @@map("pagos_compra")
+}
+
+// ============================================================
+// VENTAS / COTIZACIONES / CONDUCES
+// ============================================================
+
+model Venta {
+  id               String           @id @default(cuid())
+  numero           String           @unique // COT-00001, OV-00001, CDC-00001, FAC-00001
+  tipo             EstadoVenta      @default(COTIZACION)
+  clienteId        String
+  direccionId      String?
+  vendedorId       String?
+  creadorId        String
+  // Referencias entre documentos del mismo flujo
+  cotizacionId     String? // si viene de cotización
+  ordenVentaId     String? // si viene de orden de venta
+  conduceId        String? // si viene de conduce
+  // Datos fiscales
+  ncf              String? // Número de Comprobante Fiscal
+  tipoNcf          TipoComprobante?
+  // Fechas
+  fechaEmision     DateTime         @default(now())
+  fechaVencimiento DateTime?
+  fechaEntrega     DateTime?
+  // Crédito
+  credito          TipoCredito      @default(CONTADO)
+  diasCredito      Int?
+  // Montos
+  subtotal         Decimal          @default(0) @db.Decimal(12, 2)
+  descuento        Decimal          @default(0) @db.Decimal(12, 2)
+  itbis            Decimal          @default(0) @db.Decimal(12, 2)
+  total            Decimal          @default(0) @db.Decimal(12, 2)
+  // Estado
+  estadoPago       EstadoPago       @default(PENDIENTE)
+  turnoId          String?          // turno de caja en que se realizó la venta (PDV)
+  notas            String?          @db.Text
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  cliente          Contacto           @relation(fields: [clienteId], references: [id])
+  direccion        DireccionEntrega?  @relation(fields: [direccionId], references: [id])
+  vendedor         Usuario?           @relation("VentaVendedor", fields: [vendedorId], references: [id])
+  creador          Usuario            @relation("VentaCreador", fields: [creadorId], references: [id])
+  turno            TurnoCaja?         @relation(fields: [turnoId], references: [id])
+  detalles         DetalleVenta[]
+  conduces         Conduce[]
+  cuentasPorCobrar CuentaPorCobrar[]
+  pagosRecibidos   PagoVenta[]
+  notasCredito     NotaCredito[]
+
+  @@index([clienteId, createdAt])
+  @@index([tipo, createdAt])
+  @@map("ventas")
+}
+
+model DetalleVenta {
+  id          String  @id @default(cuid())
+  ventaId     String
+  productoId  String
+  descripcion String? // descripción en el momento de la venta
+  unidad      String? // unidad de venta efectiva (PIE, LB, UND…) — puede diferir de producto.unidadMedida si es fraccionado
+  cantidad    Decimal @db.Decimal(12, 4)
+  precio      Decimal @db.Decimal(12, 4) // precio base SIN ITBIS (precioFinal / 1.18)
+  precioFinal Decimal @db.Decimal(12, 4) // precio ingresado por el usuario (ITBIS incluido o exento)
+  exentoItbis Boolean @default(false)    // true = producto exento de ITBIS
+  descuento   Decimal @default(0) @db.Decimal(5, 2) // %
+  itbis       Decimal @default(0) @db.Decimal(12, 2)
+  subtotal    Decimal @db.Decimal(12, 2) // base sin ITBIS
+  orden       Int     @default(0) // para ordenar ítems en conduce
+
+  venta    Venta    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  producto Producto @relation(fields: [productoId], references: [id])
+
+  @@map("detalles_venta")
+}
+
+// Conduce físico impreso (formato CDC/OUT/XXXXX, impresora matricial)
+model Conduce {
+  id             String   @id @default(cuid())
+  numero         String   @unique // CDC/OUT/00001 o CDC/IN/00001
+  ventaId        String
+  tipo           String   @default("OUT") // OUT o IN (devolución)
+  fechaEmision   DateTime @default(now())
+  // Firmas (3 líneas en el formato físico)
+  firmaEntregado String? // nombre quien entrega
+  firmaRecibido  String? // nombre quien recibe
+  firmaChofer    String? // nombre del chofer
+  observaciones   String?  @db.Text
+  impreso         Boolean  @default(false)
+  // Confirmación de recepción — obligatoria antes de facturar
+  clienteRecibio    Boolean  @default(false)
+  fechaRecepcion    DateTime?
+  // Detalle por ítem: [{productoId, nombre, unidad, cantEnviada, cantRecibida, devuelto, nota}]
+  detallesRecepcion Json?
+  createdAt         DateTime @default(now())
+
+  venta Venta @relation(fields: [ventaId], references: [id])
+
+  @@map("conduces")
+}
+
+model PagoVenta {
+  id         String   @id @default(cuid())
+  ventaId    String
+  monto      Decimal  @db.Decimal(12, 2)
+  fecha      DateTime @default(now())
+  metodo     String // "EFECTIVO", "CHEQUE", "TRANSFERENCIA", "TARJETA"
+  referencia String?
+  notas      String?
+  cuentaId   String?
+
+  venta  Venta           @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  cuenta CuentaBancaria? @relation(fields: [cuentaId], references: [id])
+
+  @@map("pagos_venta")
+}
+
+// ============================================================
+// CUENTAS POR COBRAR (CxC)
+// ============================================================
+
+model CuentaPorCobrar {
+  id               String     @id @default(cuid())
+  ventaId          String
+  clienteId        String
+  monto            Decimal    @db.Decimal(12, 2)
+  montoPagado      Decimal    @default(0) @db.Decimal(12, 2)
+  saldo            Decimal    @db.Decimal(12, 2)
+  fechaEmision     DateTime
+  fechaVencimiento DateTime
+  estado           EstadoPago @default(PENDIENTE)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  venta   Venta    @relation(fields: [ventaId], references: [id])
+  cliente Contacto @relation(fields: [clienteId], references: [id])
+
+  @@index([clienteId, estado])
+  @@index([fechaVencimiento])
+  @@map("cuentas_por_cobrar")
+}
+
+// ============================================================
+// CUENTAS POR PAGAR (CxP)
+// ============================================================
+
+model CuentaPorPagar {
+  id               String     @id @default(cuid())
+  compraId         String
+  suplidorId       String
+  monto            Decimal    @db.Decimal(12, 2)
+  montoPagado      Decimal    @default(0) @db.Decimal(12, 2)
+  saldo            Decimal    @db.Decimal(12, 2)
+  fechaEmision     DateTime
+  fechaVencimiento DateTime
+  estado           EstadoPago @default(PENDIENTE)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  compra   Compra   @relation(fields: [compraId], references: [id])
+  suplidor Contacto @relation(fields: [suplidorId], references: [id])
+
+  @@index([suplidorId, estado])
+  @@index([fechaVencimiento])
+  @@map("cuentas_por_pagar")
+}
+
+// ============================================================
+// CONTABILIDAD / BANCOS
+// ============================================================
+
+model CuentaBancaria {
+  id        String             @id @default(cuid())
+  banco     String // "Banco Popular", "BHD León"
+  nombre    String // "Cuenta Corriente Principal"
+  numero    String // Últimos 4 dígitos o número completo
+  tipo      TipoCuentaBancaria @default(CORRIENTE)
+  saldo     Decimal            @default(0) @db.Decimal(12, 2)
+  activa    Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  transacciones TransaccionBancaria[]
+  pagosCompra   PagoCompra[]
+  pagosVenta    PagoVenta[]
+
+  @@map("cuentas_bancarias")
+}
+
+model TransaccionBancaria {
+  id           String                  @id @default(cuid())
+  cuentaId     String
+  tipo         TipoTransaccionBancaria
+  monto        Decimal                 @db.Decimal(12, 2)
+  saldoAntes   Decimal                 @db.Decimal(12, 2)
+  saldoDespues Decimal                 @db.Decimal(12, 2)
+  descripcion  String
+  referencia   String?
+  fecha        DateTime                @default(now())
+  adjunto      String?
+  notas        String?
+  createdAt    DateTime                @default(now())
+
+  cuenta CuentaBancaria @relation(fields: [cuentaId], references: [id])
+
+  @@index([cuentaId, fecha])
+  @@map("transacciones_bancarias")
+}
+
+// ============================================================
+// GASTOS
+// ============================================================
+
+model CategoriaGasto {
+  id          String    @id @default(cuid())
+  nombre      String    @unique
+  tipo        TipoGasto @default(VARIABLE)
+  descripcion String?
+  activa      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  gastos Gasto[]
+
+  @@map("categorias_gasto")
+}
+
+model Gasto {
+  id          String   @id @default(cuid())
+  numero      String   @unique // GAS-00001
+  categoriaId String
+  descripcion String
+  monto       Decimal  @db.Decimal(12, 2)
+  itbis       Decimal  @default(0) @db.Decimal(12, 2) // ITBIS incluido en el gasto (acreditable si hay NCF)
+  fecha       DateTime @default(now())
+  metodo      String? // "EFECTIVO", "CHEQUE", "TRANSFERENCIA"
+  cuentaId    String?
+  adjunto     String? // URL/path factura o recibo
+  notas       String?  @db.Text
+  usuarioId   String
+  createdAt   DateTime @default(now())
+
+  categoria CategoriaGasto @relation(fields: [categoriaId], references: [id])
+  usuario   Usuario        @relation(fields: [usuarioId], references: [id])
+
+  @@index([fecha])
+  @@map("gastos")
+}
+
+// ============================================================
+// NÓMINAS
+// ============================================================
+
+model Nomina {
+  id              String        @id @default(cuid())
+  numero          String        @unique // NOM-2024-01-1Q
+  periodo         PeriodoNomina
+  mes             Int // 1-12
+  anio            Int
+  fechaPago       DateTime?
+  totalBruto      Decimal       @default(0) @db.Decimal(12, 2)
+  totalDescuentos Decimal       @default(0) @db.Decimal(12, 2)
+  totalNeto       Decimal       @default(0) @db.Decimal(12, 2)
+  estado          String        @default("BORRADOR") // "BORRADOR", "PROCESADA", "PAGADA"
+  notas           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  empleados NominaEmpleado[]
+
+  @@unique([periodo, mes, anio])
+  @@map("nominas")
+}
+
+model NominaEmpleado {
+  id              String  @id @default(cuid())
+  nominaId        String
+  empleadoId      String
+  salarioBase     Decimal @db.Decimal(12, 2)
+  // Devengados
+  horasExtra      Decimal @default(0) @db.Decimal(5, 2)
+  montoHorasExtra Decimal @default(0) @db.Decimal(12, 2)
+  bono            Decimal @default(0) @db.Decimal(12, 2)
+  sam             Decimal @default(0) @db.Decimal(12, 2) // Subsidio alimentación
+  otrosIngresos   Decimal @default(0) @db.Decimal(12, 2)
+  totalBruto      Decimal @db.Decimal(12, 2)
+  // Descuentos TSS (República Dominicana)
+  afpEmpleado     Decimal @default(0) @db.Decimal(12, 2) // 2.87%
+  sfsEmpleado     Decimal @default(0) @db.Decimal(12, 2) // 3.04%
+  afpEmpleador    Decimal @default(0) @db.Decimal(12, 2) // 7.10%
+  sfsEmpleador    Decimal @default(0) @db.Decimal(12, 2) // 7.09%
+  prestamos       Decimal @default(0) @db.Decimal(12, 2) // Préstamos descontados
+  san             Decimal @default(0) @db.Decimal(12, 2) // SAN fijo quincenal
+  isr             Decimal @default(0) @db.Decimal(12, 2) // Impuesto sobre la renta
+  otrosDescuentos Decimal @default(0) @db.Decimal(12, 2)
+  totalDescuentos Decimal @db.Decimal(12, 2)
+  totalNeto       Decimal @db.Decimal(12, 2)
+  notas           String?
+
+  nomina   Nomina   @relation(fields: [nominaId], references: [id], onDelete: Cascade)
+  empleado Empleado @relation(fields: [empleadoId], references: [id])
+
+  @@unique([nominaId, empleadoId])
+  @@map("nomina_empleados")
+}
+
+// ============================================================
+// CONFIGURACIÓN GENERAL
+// ============================================================
+
+model Configuracion {
+  id          String   @id @default(cuid())
+  clave       String   @unique
+  valor       String   @db.Text
+  descripcion String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("configuracion")
+}
+
+// ============================================================
+// IMPUESTOS — PAGOS MANUALES MENSUALES
+// ============================================================
+
+// Registro mensual de los impuestos fijos / variables que la empresa paga:
+// ISR, Anticipo ISR, Infotep, TSS.  Un registro por tipo/mes/año.
+model PagoImpuesto {
+  id          String    @id @default(cuid())
+  tipo        String    // "ISR" | "ANTICIPO_ISR" | "INFOTEP" | "TSS"
+  mes         Int       // 1-12
+  anio        Int       // año fiscal
+  monto       Decimal   @default(0) @db.Decimal(12, 2)
+  pagado      Boolean   @default(false)
+  fechaPago   DateTime?
+  referencia  String?   // número de comprobante / recibo de pago
+  notas       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([tipo, mes, anio])
+  @@index([mes, anio])
+  @@map("pagos_impuesto")
+}
+
+// Secuencias para numeración de documentos
+model SecuenciaDocumento {
+  id        String   @id @default(cuid())
+  tipo      String   @unique // "COTIZACION", "ORDEN_VENTA", "CONDUCE", "FACTURA", etc.
+  prefijo   String
+  siguiente Int      @default(1)
+  digitos   Int      @default(5)
+  updatedAt DateTime @updatedAt
+
+  @@map("secuencias_documento")
+}
+
+// ─── PDV / CAJA ───────────────────────────────────────────────────────────────
+
+// Turno de caja: apertura → ventas → cierre con arqueo
+model TurnoCaja {
+  id             String         @id @default(cuid())
+  numero         Int            // número correlativo (asignado en la acción)
+  usuarioId      String
+  fechaApertura  DateTime       @default(now())
+  fechaCierre    DateTime?
+  montoApertura  Decimal        @db.Decimal(12, 2)  // efectivo inicial en caja
+  montoCierre    Decimal?       @db.Decimal(12, 2)  // conteo físico al cerrar
+  montoEsperado  Decimal?       @db.Decimal(12, 2)  // calculado al cerrar
+  diferencia     Decimal?       @db.Decimal(12, 2)  // montoCierre - montoEsperado
+  estado         EstadoTurno    @default(ABIERTO)
+  notas          String?
+
+  usuario        Usuario         @relation(fields: [usuarioId], references: [id])
+  movimientos    MovimientoCaja[]
+  ventas         Venta[]
+  notasCredito   NotaCredito[]
+
+  @@map("turnos_caja")
+}
+
+// Entradas/salidas de efectivo fuera de ventas
+model MovimientoCaja {
+  id        String    @id @default(cuid())
+  turnoId   String
+  tipo      String    // "ENTRADA" | "SALIDA"
+  // Subtipo para clasificar el movimiento:
+  // "GASTO" | "COMPRA_MERCANCIA" | "PRESTAMO" | "COBRO_CXC" | null (genérico)
+  subTipo   String?
+  concepto  String
+  monto     Decimal   @db.Decimal(12, 2)
+  fecha     DateTime  @default(now())
+  notas     String?
+  // Forma de pago — aplica a COBRO_CXC principalmente
+  // "EFECTIVO" | "TARJETA" | "TRANSFERENCIA" | "CHEQUE"
+  metodo    String?
+
+  // Solo para PRESTAMO: ID del empleado al que se le prestó
+  empleadoId        String?
+
+  // Solo para COBRO_CXC: ID de la CxC que se está pagando
+  cxcId             String?
+  // Confirmación del admin (solo COBRO_CXC)
+  confirmado        Boolean   @default(false)
+  confirmadoPor     String?   // usuarioId del admin que confirmó
+  fechaConfirmacion DateTime?
+
+  turno     TurnoCaja @relation(fields: [turnoId], references: [id], onDelete: Cascade)
+
+  @@map("movimientos_caja")
+}
+
+// ============================================================
+// NOTAS DE CRÉDITO
+// ============================================================
+
+model NotaCredito {
+  id         String   @id @default(cuid())
+  numero     String   @unique        // NC-00001
+  ventaId    String                  // factura original que origina el crédito
+  clienteId  String
+  turnoId    String?                 // turno de caja en que se emitió
+  usuarioId  String
+  motivo     String                  // razón de la devolución
+  // Detalles: [{productoId, nombre, unidad, cantidad, precioUnitario, subtotal}]
+  detalles   Json?
+  monto      Decimal  @db.Decimal(12, 2)  // total del crédito
+  estado     String   @default("PENDIENTE") // "PENDIENTE" | "APLICADA"
+  notas      String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  venta    Venta    @relation(fields: [ventaId],   references: [id])
+  cliente  Contacto @relation(fields: [clienteId], references: [id])
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id])
+  turno    TurnoCaja? @relation(fields: [turnoId],  references: [id])
+
+  @@index([clienteId])
+  @@map("notas_credito")
+}

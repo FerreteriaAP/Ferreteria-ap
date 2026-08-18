@@ -1,26 +1,250 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ─── Fuentes ──────────────────────────────────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ══════════════════════════════════════════════════════════════════════════════
+   SISTEMA DE TEMAS — se controla con data-ap-theme="<id>" en <html>
+   Cada tema define sus variables CSS. El layout SSR aplica el atributo
+   leyendo TEMA_ACTIVO de la tabla configuracion.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── DARK OPS (default) ─────────────────────────────────────────────────── */
+:root,
+[data-ap-theme="dark-ops"] {
+  color-scheme: dark;
+
+  --background:        #111923;
+  --foreground:        #F5F7FA;
+  --muted-foreground:  #8A9BB0;
+  --border:            #29333D;
+  --card:              #1A2330;
+  --panel:             #151C24;
+  --input:             #1A2330;
+  --ring:              #F47717;
+  --primary:           #F47717;
+  --primary-foreground:#FFFFFF;
+  --secondary:         #1E2A38;
+  --secondary-foreground: #F5F7FA;
+  --accent:            #F47717;
+  --accent-foreground: #FFFFFF;
+  --destructive:       #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --popover:           #151C24;
+  --popover-foreground:#F5F7FA;
+  --muted:             #1A2330;
+
+  /* Extras usados en componentes personalizados */
+  --accent-hex:        #F47717;
+  --header-bg-hex:     #0D1520;
+  --card-bg-hex:       #1A2330;
+  --card-border-hex:   #29333D;
+  --status-bar-bg:     #151C24;
+  --success:           #22C55E;
+  --warning:           #F59E0B;
+  --warning-foreground:#FFFFFF;
+  --danger:            #EF4444;
+  --sidebar-bg:        #0D1520;
+  --sidebar-border:    #1E2A38;
+  --sidebar-item-hover:#1A2330;
+  --sidebar-active-bg: rgba(244,119,23,0.15);
+  --sidebar-active-border: #F47717;
+}
+
+/* ── GRIS CLARO ─────────────────────────────────────────────────────────── */
+[data-ap-theme="gris-claro"] {
+  color-scheme: light;
+
+  --background:        #F1F3F5;
+  --foreground:        #171C21;
+  --muted-foreground:  #6B7785;
+  --border:            #D4D9DE;
+  --card:              #FFFFFF;
+  --panel:             #F5F6F7;
+  --input:             #FFFFFF;
+  --ring:              #F47717;
+  --primary:           #F47717;
+  --primary-foreground:#FFFFFF;
+  --secondary:         #E8EAED;
+  --secondary-foreground: #171C21;
+  --accent:            #F47717;
+  --accent-foreground: #FFFFFF;
+  --destructive:       #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --popover:           #FFFFFF;
+  --popover-foreground:#171C21;
+  --muted:             #E8EAED;
+
+  --accent-hex:        #F47717;
+  --header-bg-hex:     #E8EAED;
+  --card-bg-hex:       #FFFFFF;
+  --card-border-hex:   #D4D9DE;
+  --status-bar-bg:     #F5F6F7;
+  --success:           #16A34A;
+  --warning:           #D97706;
+  --warning-foreground:#FFFFFF;
+  --danger:            #DC2626;
+  --sidebar-bg:        #E8EAED;
+  --sidebar-border:    #D4D9DE;
+  --sidebar-item-hover:#DDDFE2;
+  --sidebar-active-bg: rgba(244,119,23,0.10);
+  --sidebar-active-border: #F47717;
+}
+
+/* ── AZUL METAL ─────────────────────────────────────────────────────────── */
+[data-ap-theme="azul-metal"] {
+  color-scheme: light;
+
+  --background:        #F2F4F6;
+  --foreground:        #17212B;
+  --muted-foreground:  #607080;
+  --border:            #D7DEE5;
+  --card:              #FFFFFF;
+  --panel:             #F7F8FA;
+  --input:             #FFFFFF;
+  --ring:              #075E9E;
+  --primary:           #075E9E;
+  --primary-foreground:#FFFFFF;
+  --secondary:         #E4E9EE;
+  --secondary-foreground: #17212B;
+  --accent:            #075E9E;
+  --accent-foreground: #FFFFFF;
+  --destructive:       #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --popover:           #FFFFFF;
+  --popover-foreground:#17212B;
+  --muted:             #E4E9EE;
+
+  --accent-hex:        #075E9E;
+  --header-bg-hex:     #EAF0F6;
+  --card-bg-hex:       #FFFFFF;
+  --card-border-hex:   #D7DEE5;
+  --status-bar-bg:     #F7F8FA;
+  --success:           #16A34A;
+  --warning:           #D97706;
+  --warning-foreground:#FFFFFF;
+  --danger:            #DC2626;
+  --sidebar-bg:        #EAF0F6;
+  --sidebar-border:    #D7DEE5;
+  --sidebar-item-hover:#DDE4EC;
+  --sidebar-active-bg: rgba(7,94,158,0.10);
+  --sidebar-active-border: #075E9E;
+}
+
+/* ── DARK MULTI ─────────────────────────────────────────────────────────── */
+[data-ap-theme="dark-multicolor"] {
+  color-scheme: dark;
+
+  --background:        #111C2A;
+  --foreground:        #F5F7FA;
+  --muted-foreground:  #7A8FA8;
+  --border:            #26384C;
+  --card:              #162236;
+  --panel:             #0F1724;
+  --input:             #162236;
+  --ring:              #FF6A16;
+  --primary:           #FF6A16;
+  --primary-foreground:#FFFFFF;
+  --secondary:         #1C2E42;
+  --secondary-foreground: #F5F7FA;
+  --accent:            #FF6A16;
+  --accent-foreground: #FFFFFF;
+  --destructive:       #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --popover:           #0F1724;
+  --popover-foreground:#F5F7FA;
+  --muted:             #162236;
+
+  --accent-hex:        #FF6A16;
+  --header-bg-hex:     #091220;
+  --card-bg-hex:       #162236;
+  --card-border-hex:   #26384C;
+  --status-bar-bg:     #0F1724;
+  --success:           #22C55E;
+  --warning:           #F59E0B;
+  --warning-foreground:#FFFFFF;
+  --danger:            #EF4444;
+  --sidebar-bg:        #091220;
+  --sidebar-border:    #1C2E42;
+  --sidebar-item-hover:#162236;
+  --sidebar-active-bg: rgba(255,106,22,0.15);
+  --sidebar-active-border: #FF6A16;
+
+  /* Colores multicolor por módulo (tarjetas del dashboard) */
+  [data-module="Contactos"]    { --icon-color: #38BDF8; }
+  [data-module="Ventas"]       { --icon-color: #22C55E; }
+  [data-module="Punto de Venta"] { --icon-color: #A78BFA; }
+  [data-module="Compras"]      { --icon-color: #FB923C; }
+  [data-module="Caja"]         { --icon-color: #FACC15; }
+  [data-module="Inventario"]   { --icon-color: #34D399; }
+  [data-module="Contabilidad"] { --icon-color: #60A5FA; }
+  [data-module="Gastos"]       { --icon-color: #F87171; }
+  [data-module="Nóminas"]      { --icon-color: #E879F9; }
+  [data-module="Empleados"]    { --icon-color: #FCD34D; }
+  [data-module="Alertas"]      { --icon-color: #FB923C; }
+  [data-module="Configuración"]{ --icon-color: #94A3B8; }
+}
+
+/* ── CARBON ─────────────────────────────────────────────────────────────── */
+[data-ap-theme="carbon"] {
+  color-scheme: dark;
+
+  --background:        #131A1E;
+  --foreground:        #E0F5F2;
+  --muted-foreground:  #6B8A88;
+  --border:            #1E2C2E;
+  --card:              #182023;
+  --panel:             #121A1C;
+  --input:             #182023;
+  --ring:              #2DD4BF;
+  --primary:           #2DD4BF;
+  --primary-foreground:#0D1C1A;
+  --secondary:         #1B2628;
+  --secondary-foreground: #E0F5F2;
+  --accent:            #2DD4BF;
+  --accent-foreground: #0D1C1A;
+  --destructive:       #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --popover:           #121A1C;
+  --popover-foreground:#E0F5F2;
+  --muted:             #182023;
+
+  --accent-hex:        #2DD4BF;
+  --header-bg-hex:     #0D1416;
+  --card-bg-hex:       #182023;
+  --card-border-hex:   #1E2C2E;
+  --status-bar-bg:     #121A1C;
+  --success:           #22C55E;
+  --warning:           #F59E0B;
+  --warning-foreground:#FFFFFF;
+  --danger:            #EF4444;
+  --sidebar-bg:        #0D1416;
+  --sidebar-border:    #1B2628;
+  --sidebar-item-hover:#182023;
+  --sidebar-active-bg: rgba(45,212,191,0.12);
+  --sidebar-active-border: #2DD4BF;
+}
+
+/* ─── Base global ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Scrollbar fina temática */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }

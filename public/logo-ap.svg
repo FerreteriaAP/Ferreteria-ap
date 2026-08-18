@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Fondo naranja -->
+  <rect width="200" height="200" rx="40" fill="#F28C28"/>
+
+  <!-- Llave inglesa + martillo cruzados (símbolo de ferretería) -->
+  <!-- Llave inglesa -->
+  <g transform="rotate(-35, 100, 100)">
+    <path d="M72 68 Q60 56 62 44 Q68 30 82 28 Q92 26 100 34 L90 44 L86 40 Q78 36 72 44 Q66 52 72 60 L108 96 Q116 104 112 114 Q106 128 92 130 Q80 132 72 124 L82 114 L86 118 Q94 124 102 116 Q108 108 102 100 L66 64 Z"
+      fill="white" opacity="0.95"/>
+    <!-- Cabeza de la llave -->
+    <ellipse cx="78" cy="46" rx="14" ry="10" fill="white" opacity="0.95" transform="rotate(-35, 78, 46)"/>
+  </g>
+
+  <!-- Martillo -->
+  <g transform="rotate(40, 100, 100)">
+    <!-- Mango -->
+    <rect x="95" y="70" width="10" height="60" rx="4" fill="white" opacity="0.9"/>
+    <!-- Cabeza -->
+    <rect x="78" y="56" width="44" height="22" rx="6" fill="white" opacity="0.9"/>
+    <!-- Cara golpeadora -->
+    <rect x="110" y="56" width="12" height="22" rx="4" fill="white" opacity="0.75"/>
+  </g>
+
+  <!-- Letras AP centradas -->
+  <text x="100" y="175" text-anchor="middle" font-family="Manrope, Arial, sans-serif"
+    font-weight="800" font-size="28" fill="white" opacity="0.92" letter-spacing="4">AP</text>
+</svg>

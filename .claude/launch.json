@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ferreteria-ap",
+      "runtimeExecutable": "/Users/isaiabreu/.volta/bin/node",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev", "--turbopack"],
+      "port": 3000,
+    "autoPort": false
+    }
+  ]
+}
