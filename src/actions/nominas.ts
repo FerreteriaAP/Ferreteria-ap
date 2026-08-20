@@ -57,6 +57,7 @@ export async function getNomina(id: string) {
  select: {
  nombre: true, apellido: true, cargo: true, cedula: true,
  valorHoraExtra: true, descuentoSan: true,
+ exentoAfp: true, exentoSfs: true,
  },
  },
  },
@@ -113,11 +114,21 @@ export async function crearNomina(data: {
  const quincena = data.periodo === "PRIMERA_QUINCENA" ? "1Q" : "2Q";
  const numero = `NOM-${data.anio}-${numeroMes}-${quincena}`;
 
- // Rango de fechas de la quincena para buscar préstamos en caja
- const fechaDesde = data.periodo === "PRIMERA_QUINCENA" ? new Date(data.anio, data.mes - 1, 1, 0, 0, 0, 0)
- : new Date(data.anio, data.mes - 1, 16, 0, 0, 0, 0);
- const fechaHasta = data.periodo === "PRIMERA_QUINCENA" ? new Date(data.anio, data.mes - 1, 15, 23, 59, 59, 999)
- : new Date(data.anio, data.mes, 0, 23, 59, 59, 999); // último día del mes
+ // Rango de fechas de la quincena para buscar préstamos en caja.
+ // Los préstamos se guardan con @default(now()) en UTC.
+ // La RD opera en UTC-4 → medianoche RD = 04:00 UTC mismo día.
+ // Usamos Date.UTC con el offset para no perder préstamos hechos
+ // entre las 8pm y la medianoche hora dominicana.
+ const mi = data.mes - 1; // mes en base-0
+ const y  = data.anio;
+ // inicio de día en hora dominicana → 04:00 UTC
+ const drStart = (d: number) => new Date(Date.UTC(y, mi, d, 4, 0, 0, 0));
+ // fin de día en hora dominicana → 03:59:59.999 UTC del día siguiente
+ const drEnd   = (d: number) => new Date(Date.UTC(y, mi, d + 1, 3, 59, 59, 999));
+ const lastDay = new Date(y, mi + 1, 0).getDate(); // último día del mes
+
+ const fechaDesde = data.periodo === "PRIMERA_QUINCENA" ? drStart(1) : drStart(16);
+ const fechaHasta = data.periodo === "PRIMERA_QUINCENA" ? drEnd(15)  : drEnd(lastDay);
 
  const empleados = await prisma.empleado.findMany({
  where: { estado: "ACTIVO" },
@@ -153,16 +164,19 @@ export async function crearNomina(data: {
  const bono = 0;
  const totalBruto = salarioQuincenal + montoHorasExtra + bono;
 
- // Descuentos TSS sobre salario quincenal
- const afpEmp = +(salarioQuincenal * AFP_EMP).toFixed(2);
- const sfsEmp = +(salarioQuincenal * SFS_EMP).toFixed(2);
- const afpEr = +(salarioQuincenal * AFP_ER).toFixed(2);
- const sfsEr = +(salarioQuincenal * SFS_ER).toFixed(2);
+ // Descuentos TSS — respeta exenciones individuales del empleado
+ const afpEmp = e.exentoAfp ? 0 : +(salarioQuincenal * AFP_EMP).toFixed(2);
+ const sfsEmp = e.exentoSfs ? 0 : +(salarioQuincenal * SFS_EMP).toFixed(2);
+ const afpEr  = e.exentoAfp ? 0 : +(salarioQuincenal * AFP_ER).toFixed(2);
+ const sfsEr  = e.exentoSfs ? 0 : +(salarioQuincenal * SFS_ER).toFixed(2);
 
  // Préstamos tomados en caja durante esta quincena
  const prestamos = prestamosPorEmpleado.get(e.id) ?? 0;
 
- const totalDesc = afpEmp + sfsEmp + prestamos + san;
+ // Otros descuentos fijos configurados en el perfil del empleado
+ const otrosDescuentos = Number(e.otrosDescuentosFijos);
+
+ const totalDesc = afpEmp + sfsEmp + prestamos + san + otrosDescuentos;
  const totalNeto = totalBruto - totalDesc;
 
  return {
@@ -171,7 +185,7 @@ export async function crearNomina(data: {
  horasExtra: 0,
  montoHorasExtra: 0,
  bono: 0,
- sam: 0, // SAM no se usa
+ sam: 0,
  totalBruto,
  afpEmpleado: afpEmp,
  sfsEmpleado: sfsEmp,
@@ -179,7 +193,7 @@ export async function crearNomina(data: {
  sfsEmpleador: sfsEr,
  prestamos,
  san,
- otrosDescuentos: 0,
+ otrosDescuentos,
  totalDescuentos: totalDesc,
  totalNeto,
  };
@@ -306,11 +320,15 @@ export async function recalcularPrestamosNomina(nominaId: string) {
  if (!nomina) return { error: "Nómina no encontrada" };
  if (nomina.estado === "PAGADA") return { error: "No se puede modificar una nómina pagada" };
 
- // Rango de fechas de la quincena
- const fechaDesde = nomina.periodo === "PRIMERA_QUINCENA" ? new Date(nomina.anio, nomina.mes - 1, 1, 0, 0, 0, 0)
- : new Date(nomina.anio, nomina.mes - 1, 16, 0, 0, 0, 0);
- const fechaHasta = nomina.periodo === "PRIMERA_QUINCENA" ? new Date(nomina.anio, nomina.mes - 1, 15, 23, 59, 59, 999)
- : new Date(nomina.anio, nomina.mes, 0, 23, 59, 59, 999);
+ // Rango de fechas — mismo ajuste UTC-4 que en crearNomina
+ const mi2 = nomina.mes - 1;
+ const y2  = nomina.anio;
+ const drStart2 = (d: number) => new Date(Date.UTC(y2, mi2, d, 4, 0, 0, 0));
+ const drEnd2   = (d: number) => new Date(Date.UTC(y2, mi2, d + 1, 3, 59, 59, 999));
+ const lastDay2 = new Date(y2, mi2 + 1, 0).getDate();
+
+ const fechaDesde = nomina.periodo === "PRIMERA_QUINCENA" ? drStart2(1)  : drStart2(16);
+ const fechaHasta = nomina.periodo === "PRIMERA_QUINCENA" ? drEnd2(15)   : drEnd2(lastDay2);
 
  // Obtener todos los préstamos del período
  const movimientos = await prisma.movimientoCaja.findMany({

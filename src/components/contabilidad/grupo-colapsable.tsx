@@ -32,9 +32,10 @@ export function GrupoColapsable({
  const [open, setOpen] = useState(defaultOpen);
 
  return (
- <div className={cn(
- "rounded-lg border bg-card overflow-hidden transition-shadow",
- open && "shadow-sm" )}> {/* Header clicable */}
+ <div
+ className={cn("rounded-lg border overflow-hidden transition-shadow", open && "shadow-sm")}
+ style={{ backgroundColor: "color-mix(in srgb, var(--card) 55%, transparent)" }}
+ > {/* Header clicable */}
  <button
  type="button" onClick={() => setOpen((o) => !o)}
  className={cn(

@@ -16,7 +16,7 @@ const ROLES = [
  { value: "CAJA", label: "Caja" },
 ];
 
-export function UsuarioForm() {
+export function UsuarioForm({ onSuccess }: { onSuccess?: () => void } = {}) {
  const router = useRouter();
  const [loading, setLoading] = useState(false);
  const [error, setError] = useState<string | null>(null);
@@ -41,6 +41,7 @@ export function UsuarioForm() {
  (e.target as HTMLFormElement).reset();
  setRol("VENDEDOR");
  router.refresh();
+ onSuccess?.();
  };
 
  return (

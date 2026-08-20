@@ -87,44 +87,65 @@ export function TemaSelector({ temaActual }: { temaActual: string }) {
  }
 
  return (
- <div className="space-y-4"> <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"> {TEMAS.map((t) => {
- const activo = seleccionado === t.id;
- return (
- <button
- key={t.id}
- onClick={() => handleSeleccionar(t.id)}
- disabled={pending}
- className="group relative rounded-xl p-0 overflow-hidden text-left transition-all duration-150 focus:outline-none" style={{
- border: `2px solid ${activo ? t.accent : t.border}`,
- boxShadow: activo ? `0 0 0 1px ${t.accent}40, 0 4px 16px rgba(0,0,0,0.4)` : "none",
- opacity: pending && !activo ? 0.6 : 1,
- }}
- title={t.nombre}
- > {/* Miniatura del tema */}
- <div style={{ backgroundColor: t.bg, padding: "12px 10px 10px" }}> {/* Header mini */}
- <div
- className="rounded-md mb-2 flex items-center gap-1.5 px-2 py-1" style={{ backgroundColor: t.panel }}
- > <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: t.accent, opacity: 0.9 }} /> <div className="h-1.5 rounded-full flex-1" style={{ backgroundColor: t.text, opacity: 0.25 }} /> </div> {/* Cards mini */}
- <div className="grid grid-cols-3 gap-1"> {[...Array(6)].map((_, i) => (
- <div
- key={i}
- className="rounded aspect-square flex items-center justify-center" style={{ backgroundColor: t.panel, border: `1px solid ${t.border}` }}
- > <div
- className="w-2 h-2 rounded-sm" style={{ backgroundColor: t.accent, opacity: i === 0 ? 1 : 0.4 }}
- /> </div> ))}
- </div> </div> {/* Info */}
- <div
- className="px-3 py-2" style={{ backgroundColor: t.panel, borderTop: `1px solid ${t.border}` }}
- > <div className="flex items-center justify-between"> <p className="text-xs font-semibold" style={{ color: t.text }}>{t.nombre}</p> {activo && !pending && (
- <CheckCircle2 size={13} style={{ color: t.accent }} /> )}
- {activo && pending && (
- <Loader2 size={13} className="animate-spin" style={{ color: t.accent }} /> )}
- </div> <p className="text-[10px] mt-0.5" style={{ color: t.text, opacity: 0.5 }}>{t.desc}</p> </div> </button> );
- })}
- </div> {errorMsg && (
- <p className="text-sm text-destructive">{errorMsg}</p> )}
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+        {TEMAS.map((t) => {
+          const activo = seleccionado === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => handleSeleccionar(t.id)}
+              disabled={pending}
+              className="group relative rounded-xl overflow-hidden text-left transition-all duration-150 focus:outline-none"
+              style={{
+                aspectRatio: "1",
+                border: `2px solid ${activo ? t.accent : t.border}`,
+                boxShadow: activo ? `0 0 0 1px ${t.accent}40, 0 4px 16px rgba(0,0,0,0.4)` : "none",
+                opacity: pending && !activo ? 0.6 : 1,
+                display: "flex",
+                flexDirection: "column",
+              }}
+              title={t.nombre}
+            >
+              {/* Miniatura — ocupa todo el espacio disponible */}
+              <div style={{ flex: 1, backgroundColor: t.bg, padding: "8px 8px 6px" }}>
+                {/* Header mini */}
+                <div className="rounded mb-1.5 flex items-center gap-1 px-1.5 py-0.5" style={{ backgroundColor: t.panel }}>
+                  <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: t.accent, opacity: 0.9 }} />
+                  <div className="h-1 rounded-full flex-1" style={{ backgroundColor: t.text, opacity: 0.2 }} />
+                </div>
+                {/* Cards mini */}
+                <div className="grid grid-cols-3 gap-0.5">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded aspect-square flex items-center justify-center"
+                      style={{ backgroundColor: t.panel, border: `1px solid ${t.border}` }}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: t.accent, opacity: i === 0 ? 1 : 0.35 }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
 
- <p className="text-xs" style={{ color: "var(--muted-foreground)" }}> El tema se aplica a <strong>todos los usuarios</strong> del sistema de forma inmediata.
- Los 5 temas pueden personalizarse con los diseños de Manus.
- </p> </div> );
+              {/* Info strip — fijo en el fondo */}
+              <div className="px-2 py-1.5 shrink-0" style={{ backgroundColor: t.panel, borderTop: `1px solid ${t.border}` }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-semibold leading-tight" style={{ color: t.text }}>{t.nombre}</p>
+                  {activo && !pending && <CheckCircle2 size={11} style={{ color: t.accent }} />}
+                  {activo && pending  && <Loader2 size={11} className="animate-spin" style={{ color: t.accent }} />}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {errorMsg && <p className="text-sm text-destructive">{errorMsg}</p>}
+
+      <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+        El tema se aplica a <strong>todos los usuarios</strong> del sistema de forma inmediata.
+      </p>
+    </div>
+  );
 }

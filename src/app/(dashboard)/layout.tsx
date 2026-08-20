@@ -46,6 +46,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const { alertas, cajaAbierta } = await getHeaderData();
 
+  // Tema activo para el selector rápido en el header
+  const temaActual = await prisma.configuracion
+    .findUnique({ where: { clave: "TEMA_ACTIVO" } })
+    .then(r => r?.valor ?? "dark-ops")
+    .catch(() => "dark-ops");
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--background)" }}>
       <AppHeader
@@ -55,6 +61,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         initials={initials}
         alertas={alertas}
         cajaAbierta={cajaAbierta}
+        temaActual={temaActual}
+        mostrarTema={user.rol !== "ADMINISTRADOR"}
       />
       <main className="flex-1 p-6" style={{ backgroundColor: "var(--background)" }}>
         {children}

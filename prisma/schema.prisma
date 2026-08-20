@@ -208,8 +208,11 @@ model Empleado {
   bancoCuenta     String?
   tipoCuenta      String?
   // Nómina — valores fijos quincenal
-  valorHoraExtra  Decimal        @default(0) @db.Decimal(12, 2) // RD$ por hora extra
-  descuentoSan    Decimal        @default(0) @db.Decimal(12, 2) // SAN fijo quincenal
+  valorHoraExtra       Decimal  @default(0) @db.Decimal(12, 2) // RD$ por hora extra
+  descuentoSan         Decimal  @default(0) @db.Decimal(12, 2) // SAN fijo quincenal
+  otrosDescuentosFijos Decimal  @default(0) @db.Decimal(12, 2) // Otros descuentos fijos (ropa, adelanto fijo, etc.)
+  exentoAfp            Boolean  @default(false) // true = no se le cobra AFP
+  exentoSfs            Boolean  @default(false) // true = no se le cobra SFS
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 

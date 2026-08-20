@@ -101,7 +101,6 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
               <TableHead className="text-right">Salario base</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Ingreso</TableHead>
-              <TableHead className="w-20">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -123,14 +122,6 @@ export default async function EmpleadosPage({ searchParams }: PageProps) {
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {new Date(e.fechaIngreso).toLocaleDateString("es-DO")}
-                </TableCell>
-                <TableCell>
-                  <Link
-                    href={`/empleados/${e.id}`}
-                    className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-                  >
-                    Ver
-                  </Link>
                 </TableCell>
               </TableRow>
             ))}

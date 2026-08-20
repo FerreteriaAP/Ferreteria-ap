@@ -110,12 +110,30 @@ export function EmpresaForm({ datos, cuentas: cuentasIniciales }: Props) {
  </div> );
 
  return (
- <form onSubmit={handleGuardar} className="space-y-6"> <Section title="Identificación"> <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"> <div className="space-y-1"> <label className={LABEL}>Nombre comercial *</label> <input value={form.EMPRESA_NOMBRE} onChange={set("EMPRESA_NOMBRE")} placeholder="Ferretería AP" className={INPUT} required /> </div> <div className="space-y-1"> <label className={LABEL}>Nombre legal (razón social)</label> <input value={form.EMPRESA_NOMBRE_LEGAL} onChange={set("EMPRESA_NOMBRE_LEGAL")} placeholder="AP Ferretería, SRL" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>RNC</label> <input value={form.EMPRESA_RNC} onChange={set("EMPRESA_RNC")} placeholder="1-31-12345-6" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Lema / Slogan (opcional)</label> <input value={form.EMPRESA_LEMA} onChange={set("EMPRESA_LEMA")} placeholder="Tu ferretería de confianza" className={INPUT} /> </div> </div> </Section> <Section title="Contacto"> <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"> <div className="space-y-1"> <label className={LABEL}>Teléfono principal</label> <input value={form.EMPRESA_TELEFONO} onChange={set("EMPRESA_TELEFONO")} placeholder="(809) 555-0000" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Teléfono alternativo</label> <input value={form.EMPRESA_TELEFONO_ALT} onChange={set("EMPRESA_TELEFONO_ALT")} placeholder="(829) 555-0000" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Correo electrónico</label> <input type="email" value={form.EMPRESA_EMAIL} onChange={set("EMPRESA_EMAIL")} placeholder="info@ferreteria.com" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Sitio web</label> <input value={form.EMPRESA_WEB} onChange={set("EMPRESA_WEB")} placeholder="www.ferreteriaap.com" className={INPUT} /> </div> </div> </Section> <Section title="Ubicación"> <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"> <div className="sm:col-span-2 space-y-1"> <label className={LABEL}>Dirección</label> <input value={form.EMPRESA_DIRECCION} onChange={set("EMPRESA_DIRECCION")} placeholder="Calle Principal #123, Sector…" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Ciudad</label> <input value={form.EMPRESA_CIUDAD} onChange={set("EMPRESA_CIUDAD")} placeholder="Santo Domingo" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>País</label> <input value={form.EMPRESA_PAIS} onChange={set("EMPRESA_PAIS")} placeholder="República Dominicana" className={INPUT} /> </div> </div> </Section> {/* Guardar datos empresa */}
- <div className="flex items-center gap-3"> <button type="submit" disabled={isPending}
- className="px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"> {isPending ? "Guardando…" : "Guardar datos de empresa"}
- </button> {saved && <span className="text-sm text-green-600 dark:text-green-400 font-medium"> Guardado</span>}
- {error && <span className="text-sm text-destructive">{error}</span>}
- </div> {/* Cuentas bancarias */}
+ <form onSubmit={handleGuardar} className="space-y-6"> <Section title="Identificación"> <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"> <div className="space-y-1"> <label className={LABEL}>Nombre comercial *</label> <input value={form.EMPRESA_NOMBRE} onChange={set("EMPRESA_NOMBRE")} placeholder="Ferretería AP" className={INPUT} required /> </div> <div className="space-y-1"> <label className={LABEL}>Nombre legal (razón social)</label> <input value={form.EMPRESA_NOMBRE_LEGAL} onChange={set("EMPRESA_NOMBRE_LEGAL")} placeholder="AP Ferretería, SRL" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>RNC</label> <input value={form.EMPRESA_RNC} onChange={set("EMPRESA_RNC")} placeholder="1-31-12345-6" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Lema / Slogan (opcional)</label> <input value={form.EMPRESA_LEMA} onChange={set("EMPRESA_LEMA")} placeholder="Tu ferretería de confianza" className={INPUT} /> </div> </div> </Section> <Section title="Contacto"> <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"> <div className="space-y-1"> <label className={LABEL}>Teléfono principal</label> <input value={form.EMPRESA_TELEFONO} onChange={set("EMPRESA_TELEFONO")} placeholder="(809) 555-0000" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Teléfono alternativo</label> <input value={form.EMPRESA_TELEFONO_ALT} onChange={set("EMPRESA_TELEFONO_ALT")} placeholder="(829) 555-0000" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Correo electrónico</label> <input type="email" value={form.EMPRESA_EMAIL} onChange={set("EMPRESA_EMAIL")} placeholder="info@ferreteria.com" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Sitio web</label> <input value={form.EMPRESA_WEB} onChange={set("EMPRESA_WEB")} placeholder="www.ferreteriaap.com" className={INPUT} /> </div> </div> </Section> <Section title="Ubicación"> <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"> <div className="sm:col-span-2 space-y-1"> <label className={LABEL}>Dirección</label> <input value={form.EMPRESA_DIRECCION} onChange={set("EMPRESA_DIRECCION")} placeholder="Calle Principal #123, Sector…" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>Ciudad</label> <input value={form.EMPRESA_CIUDAD} onChange={set("EMPRESA_CIUDAD")} placeholder="Santo Domingo" className={INPUT} /> </div> <div className="space-y-1"> <label className={LABEL}>País</label> <input value={form.EMPRESA_PAIS} onChange={set("EMPRESA_PAIS")} placeholder="República Dominicana" className={INPUT} /> </div> </div> </Section>
+
+      {/* Delimitador + Guardar */}
+      <div>
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={isPending}
+            className="px-5 py-2 rounded-lg border text-sm font-semibold transition-colors disabled:opacity-50 hover:bg-accent"
+            style={{
+              color: "var(--accent-hex)",
+              borderColor: "var(--accent-hex)",
+            }}
+          >
+            {isPending ? "Guardando…" : "Guardar datos de empresa"}
+          </button>
+          {saved && (
+            <span className="text-sm font-medium" style={{ color: "#16a34a" }}>
+              ✓ Guardado
+            </span>
+          )}
+          {error && <span className="text-sm text-destructive">{error}</span>}
+        </div>
+      </div> {/* Cuentas bancarias */}
  <div className="space-y-3 pt-2"> <div className="flex items-center justify-between border-b pb-2"> <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider"> Cuentas bancarias
  </p> {!showCuentaForm && !editandoCuenta && (
  <button type="button" onClick={() => setShowCuentaForm(true)}

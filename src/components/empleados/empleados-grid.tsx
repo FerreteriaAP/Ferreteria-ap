@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type Empleado = {
   id: string;
@@ -43,9 +41,10 @@ export function EmpleadosGrid({ empleados }: { empleados: Empleado[] }) {
   return (
     <div className="grid gap-3 px-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))" }}>
       {empleados.map((e) => (
-        <div
+        <Link
           key={e.id}
-          className="rounded-xl p-4 flex flex-col gap-3 transition-shadow hover:shadow-md"
+          href={`/empleados/${e.id}`}
+          className="rounded-xl p-4 flex flex-col gap-3 transition-all hover:shadow-md hover:brightness-105"
           style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
         >
           {/* Header con avatar */}
@@ -60,13 +59,9 @@ export function EmpleadosGrid({ empleados }: { empleados: Empleado[] }) {
               {iniciales(e.nombre, e.apellido)}
             </div>
             <div className="flex-1 min-w-0">
-              <Link
-                href={`/empleados/${e.id}`}
-                className="font-semibold text-sm leading-tight hover:underline block truncate"
-                style={{ color: "var(--foreground)" }}
-              >
+              <p className="font-semibold text-sm leading-tight truncate" style={{ color: "var(--foreground)" }}>
                 {e.nombre} {e.apellido}
-              </Link>
+              </p>
               <span className="text-[11px] font-mono mt-0.5 block" style={{ color: "var(--muted-foreground)" }}>
                 {e.cedula}
               </span>
@@ -102,16 +97,7 @@ export function EmpleadosGrid({ empleados }: { empleados: Empleado[] }) {
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="pt-1" style={{ borderTop: "1px solid var(--border)" }}>
-            <Link
-              href={`/empleados/${e.id}`}
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full text-xs h-7")}
-            >
-              Ver perfil
-            </Link>
-          </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

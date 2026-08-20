@@ -64,8 +64,7 @@ export default async function MovimientosPage({ params }: Props) {
 
  return (
  <div className="max-w-3xl mx-auto px-4 py-6 space-y-5"> {/* Encabezado */}
- <div className="flex items-start justify-between gap-3 flex-wrap"> <div className="space-y-1"> <Link href="/caja" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">  Volver a Caja
- </Link> <h1 className="text-xl font-bold">Movimientos — Turno #{turno.numero}</h1> <p className="text-sm text-muted-foreground"> Cajero: {turno.usuario.nombre} {turno.usuario.apellido}
+ <div className="flex items-start justify-between gap-3 flex-wrap"> <div className="space-y-1"> <Link href="/caja" className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-1.5 rounded-full transition-all hover:brightness-110" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 18%, transparent)", color: "var(--accent-hex)", border: "1px solid color-mix(in oklch, var(--accent-hex) 40%, transparent)" }}>← Volver a Caja</Link> <h1 className="text-xl font-bold">Movimientos — Turno #{turno.numero}</h1> <p className="text-sm text-muted-foreground"> Cajero: {turno.usuario.nombre} {turno.usuario.apellido}
  </p> </div> </div> {/* Resumen por tipo */}
  {Object.keys(grupos).length > 0 && (
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3"> {Object.entries(grupos).map(([key, g]) => (

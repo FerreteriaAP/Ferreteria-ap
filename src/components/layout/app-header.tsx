@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { Bell, ChevronDown, LogOut, User } from "lucide-react";
 import { DateWidget } from "./date-widget";
+import { TemaQuickBtn } from "./tema-quick-btn";
 
 interface AppHeaderProps {
   name:         string;
@@ -13,9 +14,11 @@ interface AppHeaderProps {
   initials:     string;
   alertas?:     number;
   cajaAbierta?: boolean;
+  temaActual?:  string;
+  mostrarTema?: boolean;
 }
 
-export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta = false }: AppHeaderProps) {
+export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta = false, temaActual = "dark-ops", mostrarTema = false }: AppHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +108,8 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
             </span>
           )}
         </Link>
+
+        {mostrarTema && <TemaQuickBtn temaActual={temaActual} />}
 
         <div className="h-6 w-px" style={{ backgroundColor: "var(--border)" }} />
 

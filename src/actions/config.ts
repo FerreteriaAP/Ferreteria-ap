@@ -9,10 +9,8 @@ const TEMAS_VALIDOS = ["dark-ops", "gris-claro", "azul-metal", "dark-multicolor"
 export async function setTemaActivo(tema: string): Promise<{ ok: boolean; error?: string }> {
  try {
  const session = await auth();
- const rol = (session?.user as { rol?: string })?.rol;
-
- if (rol !== "ADMINISTRADOR") {
- return { ok: false, error: "Solo el administrador puede cambiar el tema" };
+ if (!session?.user) {
+ return { ok: false, error: "No autorizado" };
  }
 
  if (!TEMAS_VALIDOS.includes(tema)) {

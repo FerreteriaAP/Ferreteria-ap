@@ -323,7 +323,7 @@ export async function registrarPago(compraId: string, data: PagoInput) {
 export async function getSuplidores() {
  return prisma.contacto.findMany({
  where: { tipo: { in: ["SUPLIDOR", "AMBOS"] }, activo: true },
- select: { id: true, nombre: true, rnc: true },
+ select: { id: true, nombre: true, rnc: true, credito: true },
  orderBy: { nombre: "asc" },
  });
 }

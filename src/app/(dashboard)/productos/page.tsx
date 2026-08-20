@@ -2,10 +2,10 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getProductos, getCategorias } from "@/actions/productos";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ProductosGrid } from "@/components/productos/productos-grid";
+import { ProductosTableBody } from "@/components/productos/productos-table";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 
@@ -50,14 +50,14 @@ export default async function ProductosPage({ searchParams }: PageProps) {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/productos/nuevo" className={buttonVariants()}>
+            + Nuevo producto
+          </Link>
           <ViewToggle
             vista={vista}
             listaHref={`/productos?q=${busqueda}${categoriaId ? `&categoria=${categoriaId}` : ""}${stockBajo ? "&stockBajo=1" : ""}`}
             gridHref={`/productos?q=${busqueda}${categoriaId ? `&categoria=${categoriaId}` : ""}${stockBajo ? "&stockBajo=1" : ""}&vista=grid`}
           />
-          <Link href="/productos/nuevo" className={buttonVariants()}>
-            + Nuevo producto
-          </Link>
         </div>
       </div>
 
@@ -118,61 +118,9 @@ export default async function ProductosPage({ searchParams }: PageProps) {
               <TableHead className="text-right">Costo</TableHead>
               <TableHead className="text-right">Precio</TableHead>
               <TableHead className="text-center">Estado</TableHead>
-              <TableHead className="w-20">Acciones</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {productos.map((p) => {
-              const stockBajoProducto =
-                Number(p.stockMinimo) > 0 &&
-                Number(p.stockActual) <= Number(p.stockMinimo);
-              return (
-                <TableRow key={p.id} className={!p.activo ? "opacity-50" : undefined}>
-                  <TableCell className="font-mono text-xs">{p.codigo}</TableCell>
-                  <TableCell className="font-medium">
-                    <Link href={`/productos/${p.id}`} className="hover:underline">
-                      {p.nombre}
-                    </Link>
-                    {p.esFraccionable && (
-                      <Badge variant="outline" className="ml-2 text-xs">Fraccionable</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="text-xs font-mono">
-                      {p.categoria.codigo}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <span className={cn("font-medium", stockBajoProducto && "text-destructive")}>
-                      {Number(p.stockActual).toLocaleString("es-DO")}
-                    </span>
-                    {" "}
-                    <span className="text-xs text-muted-foreground">{p.unidadMedida}</span>
-                  </TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground">
-                    {Number(p.stockMinimo).toLocaleString("es-DO")}
-                  </TableCell>
-                  <TableCell className="text-right text-sm">{formatDOP(p.costoUltimo)}</TableCell>
-                  <TableCell className="text-right font-medium">{formatDOP(p.precioVenta)}</TableCell>
-                  <TableCell className="text-center">
-                    {stockBajoProducto ? (
-                      <Badge variant="destructive" className="text-xs">Bajo</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-xs">OK</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/productos/${p.id}/editar`}
-                      className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-                    >
-                      Editar
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
+          <ProductosTableBody productos={productos} />
         </Table>
       )}
 

@@ -62,6 +62,9 @@ function getCategoryColor(codigo: string, nombre: string): string {
   return "var(--foreground)";
 }
 
+// Fondo uniforme para todos los cards — gris oscuro parejo, un poco más claro que el fondo de la página
+const CARD_BG = "color-mix(in oklch, var(--foreground) 9%, var(--card))";
+
 // Color del stock
 function getStockColor(stockActual: number, stockMinimo: number): string {
   if (stockActual <= 0) return "#dc2626";
@@ -222,7 +225,17 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
   };
 
   const continuar = () => {
-    startTransition(async () => { await clearVendedorActivo(); });
+    startTransition(async () => {
+      await clearVendedorActivo();
+      // Resetear para nueva venta
+      setCarrito([]);
+      setCliente({ ...consumidorFinal, rnc: null, tipoComprobante: "B02", telefono: null, direcciones: [] });
+      setTipoNcf("B02");
+      setDireccionId(undefined);
+      setNotas("");
+      setError(null);
+      setEnviado(null);
+    });
   };
 
   // Pantalla de confirmación
@@ -321,16 +334,16 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                 return (
                   <div
                     key={p.id}
-                    className="rounded-xl border overflow-hidden group hover:border-primary/40 transition-colors"
-                    style={{ backgroundColor: "var(--card)" }}
+                    className="rounded-xl overflow-hidden group transition-all"
+                    style={{ backgroundColor: CARD_BG, border: "1px solid var(--border)" }}
                   >
                     {/* Botón principal */}
                     <button
                       onClick={() => agregarProducto(p)}
-                      className="w-full p-2.5 text-left hover:bg-primary/5 transition-colors"
+                      className="w-full p-2.5 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                     >
                       <p
-                        className="text-xs font-semibold leading-tight line-clamp-2 min-h-[2rem]"
+                        className="text-xs font-bold leading-tight line-clamp-2 min-h-[2rem]"
                         style={{ color: nameColor }}
                       >
                         {p.nombre}
@@ -349,7 +362,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                     {p.esFraccionable && p.factorFraccion && p.unidadFraccion && (
                       <button
                         onClick={() => agregarProducto(p, true)}
-                        className="w-full border-t px-2.5 py-1.5 text-[10px] text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors text-left"
+                        className="w-full border-t px-2.5 py-1.5 text-[10px] text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left"
                       >
                         Por {p.unidadFraccion} · {fmt(p.precioVenta / Number(p.factorFraccion))}
                       </button>
@@ -388,7 +401,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                 </button>
 
                 {showClienteSearch && (
-                  <div className="absolute left-0 top-full mt-1 w-80 bg-popover border rounded-xl shadow-2xl z-50 p-3 space-y-2">
+                  <div className="absolute left-0 top-full mt-1 w-80 border rounded-xl shadow-2xl z-50 p-3 space-y-2" style={{ backgroundColor: "var(--card-bg-hex, var(--card))", borderColor: "var(--card-border-hex, var(--border))" }}>
                     <button
                       onClick={() => seleccionarCliente({ ...consumidorFinal, rnc: null, tipoComprobante: "B02", telefono: null, direcciones: [] })}
                       className="w-full text-left px-2.5 py-2 rounded-lg text-sm hover:bg-accent transition-colors font-medium"

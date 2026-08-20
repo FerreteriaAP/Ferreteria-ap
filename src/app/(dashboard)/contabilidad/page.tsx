@@ -1,107 +1,117 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import type { LucideProps } from "lucide-react";
+import {
+  HandCoins, TrendingDown, BarChart3,
+  Receipt, ScrollText, Calculator,
+} from "lucide-react";
 
 async function getBadges() {
- const hoy = new Date();
- const [cxcVencidas, cxpVencidas] = await Promise.all([
- prisma.cuentaPorCobrar.count({
- where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
- }),
- prisma.cuentaPorPagar.count({
- where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
- }).catch(() => 0),
- ]);
- return { cxcVencidas, cxpVencidas: Number(cxpVencidas) };
+  const hoy = new Date();
+  const [cxcVencidas, cxpVencidas] = await Promise.all([
+    prisma.cuentaPorCobrar.count({
+      where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
+    }),
+    prisma.cuentaPorPagar.count({
+      where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
+    }).catch(() => 0),
+  ]);
+  return { cxcVencidas, cxpVencidas: Number(cxpVencidas) };
+}
+
+function ModuleCard({ label, sub, href, Icon, color, badge = 0 }: {
+  label: string; sub: string; href: string;
+  Icon: React.ComponentType<LucideProps>; color: string; badge?: number;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group relative flex flex-col items-center justify-between pt-7 pb-0 px-3
+        rounded-2xl transition-all duration-150 cursor-pointer select-none overflow-hidden w-full"
+      style={{
+        backgroundColor: "var(--card-bg-hex)",
+        border: "1px solid var(--card-border-hex)",
+        minHeight: 160,
+      }}
+    >
+      {/* Badge */}
+      {badge > 0 && (
+        <span className="absolute top-2.5 right-2.5 min-w-[18px] h-[18px] px-1 rounded-full
+          flex items-center justify-center text-[10px] font-bold"
+          style={{ backgroundColor: "var(--warning)", color: "var(--warning-foreground)" }}>
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
+
+      {/* Ícono */}
+      <div className="flex items-center justify-center mb-2">
+        <Icon size={38} strokeWidth={1.5} style={{ color }} />
+      </div>
+
+      {/* Texto */}
+      <div className="text-center mb-4 space-y-0.5">
+        <p className="font-semibold leading-tight" style={{ color: "var(--foreground)", fontSize: 13 }}>
+          {label}
+        </p>
+        <p className="text-[10px] text-muted-foreground leading-tight">{sub}</p>
+      </div>
+
+      {/* Barrita de color */}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full transition-all duration-150"
+        style={{ width: 32, height: 3, backgroundColor: color, opacity: 0.8 }}
+      />
+
+      {/* Hover overlay */}
+      <div
+        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
+        style={{
+          backgroundColor: `color-mix(in oklch, ${color} 6%, transparent)`,
+          border: `1px solid color-mix(in oklch, ${color} 30%, transparent)`,
+        }}
+      />
+    </Link>
+  );
 }
 
 export default async function ContabilidadPage() {
- const [b, session] = await Promise.all([getBadges(), auth()]);
- const rol = (session?.user as { rol?: string })?.rol ?? "";
+  const [b, session] = await Promise.all([getBadges(), auth()]);
+  const rol = (session?.user as { rol?: string })?.rol ?? "";
+  const ocultarAnaliticas = rol === "ASISTENTE_ADMINISTRATIVO";
 
- // ASISTENTE no ve Analíticas en este launcher
- const ocultarAnaliticas = rol === "ASISTENTE_ADMINISTRATIVO";
+  const modulos = [
+    { label: "Cuentas por Cobrar", sub: "CxC",             href: "/contabilidad/cxc",       Icon: HandCoins,   color: "#3b82f6", badge: b.cxcVencidas },
+    { label: "Cuentas por Pagar",  sub: "CxP",             href: "/contabilidad/cxp",       Icon: TrendingDown,color: "#ef4444", badge: b.cxpVencidas },
+    { label: "Analíticas",         sub: "Ventas y márgenes",href: "/contabilidad/analiticas",Icon: BarChart3,   color: "#8b5cf6", badge: 0              },
+    { label: "Gastos",             sub: "Por categoría",   href: "/contabilidad/gastos",    Icon: Receipt,     color: "#f43f5e", badge: 0              },
+    { label: "Reportes",           sub: "Informes",        href: "/contabilidad/reportes",  Icon: ScrollText,  color: "#64748b", badge: 0              },
+    { label: "Impuestos",          sub: "ITBIS / DGII",    href: "/contabilidad/impuestos", Icon: Calculator,  color: "#f97316", badge: 0              },
+  ].filter(m => !(ocultarAnaliticas && m.href === "/contabilidad/analiticas"));
 
- const modulos = [
- {
- label: "Cuentas por Cobrar",
- sub: "CxC",
- href: "/contabilidad/cxc",
- grad: ["#3b82f6", "#2563eb"],
- badge: b.cxcVencidas,
- icon: (
- <svg viewBox="0 0 40 40" fill="none" className="w-[52%] h-[52%]"> {/* documento con flecha entrante */}
- <rect x="8" y="5" width="18" height="25" rx="2.5" stroke="white" strokeWidth="2.3"/> <path d="M13 12h8M13 17h8M13 22h5" stroke="white" strokeWidth="2" strokeLinecap="round"/> <path d="M30 18v14M30 32l-4-4M30 32l4-4" stroke="white" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"/> </svg> ),
- },
- {
- label: "Cuentas por Pagar",
- sub: "CxP",
- href: "/contabilidad/cxp",
- grad: ["#ef4444", "#dc2626"],
- badge: b.cxpVencidas,
- icon: (
- <svg viewBox="0 0 40 40" fill="none" className="w-[52%] h-[52%]"> {/* documento con flecha saliente */}
- <rect x="8" y="5" width="18" height="25" rx="2.5" stroke="white" strokeWidth="2.3"/> <path d="M13 12h8M13 17h8M13 22h5" stroke="white" strokeWidth="2" strokeLinecap="round"/> <path d="M30 32V18M30 18l-4 4M30 18l4 4" stroke="white" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"/> </svg> ),
- },
- {
- label: "Analíticas",
- sub: "Ventas y márgenes",
- href: "/contabilidad/analiticas",
- grad: ["#8b5cf6", "#7c3aed"],
- badge: 0,
- icon: (
- <svg viewBox="0 0 40 40" fill="none" className="w-[52%] h-[52%]"> <path d="M6 32L14 18l8 6 8-14 6 4" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/> <path d="M6 32h28" stroke="white" strokeWidth="2" strokeLinecap="round"/> <circle cx="14" cy="18" r="2.5" fill="white"/> <circle cx="22" cy="24" r="2.5" fill="white"/> <circle cx="30" cy="10" r="2.5" fill="white"/> </svg> ),
- },
- {
- label: "Gastos",
- sub: "Por categoría",
- href: "/contabilidad/gastos",
- grad: ["#f43f5e", "#e11d48"],
- badge: 0,
- icon: (
- <svg viewBox="0 0 40 40" fill="none" className="w-[52%] h-[52%]"> {/* pastel / torta */}
- <path d="M20 8a14 14 0 110 28A14 14 0 0120 8z" stroke="white" strokeWidth="2.3"/> <path d="M20 8v14h14" stroke="white" strokeWidth="2.3" strokeLinecap="round"/> <path d="M20 22L8.5 29.5" stroke="white" strokeWidth="2" strokeLinecap="round"/> </svg> ),
- },
- {
- label: "Reportes",
- sub: "Informes generales",
- href: "/contabilidad/reportes",
- grad: ["#64748b", "#475569"],
- badge: 0,
- icon: (
- <svg viewBox="0 0 40 40" fill="none" className="w-[52%] h-[52%]"> <rect x="9" y="4" width="22" height="32" rx="2.5" stroke="white" strokeWidth="2.3"/> <path d="M14 13h12M14 19h12M14 25h8" stroke="white" strokeWidth="2" strokeLinecap="round"/> <path d="M14 31h5" stroke="white" strokeWidth="2" strokeLinecap="round"/> </svg> ),
- },
- {
- label: "Impuestos",
- sub: "ITBIS / DGII",
- href: "/contabilidad/impuestos",
- grad: ["#f97316", "#ea580c"],
- badge: 0,
- icon: (
- <svg viewBox="0 0 40 40" fill="none" className="w-[52%] h-[52%]"> <rect x="7" y="5" width="26" height="30" rx="2.5" stroke="white" strokeWidth="2.3"/> <path d="M12 13h16M12 19h16M12 25h10" stroke="white" strokeWidth="2" strokeLinecap="round"/> <path d="M24 23l4 4-4 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/> </svg> ),
- },
- ];
+  return (
+    <div className="max-w-3xl mx-auto space-y-6 py-4">
+      {/* Encabezado */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Contabilidad</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Selecciona un módulo</p>
+      </div>
 
- return (
- <div className="max-w-3xl mx-auto space-y-8 py-4"> {/* Encabezado */}
- <div> <h1 className="text-2xl font-bold tracking-tight">Contabilidad</h1> <p className="text-sm text-muted-foreground mt-0.5">Selecciona un módulo</p> </div> {/* Lanzador */}
- <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-x-6 gap-y-8"> {modulos.filter(m => !(ocultarAnaliticas && m.href === "/contabilidad/analiticas")).map((m) => (
- <Link
- key={m.href}
- href={m.href}
- className="flex flex-col items-center gap-2.5 group" > <div className="relative"> <div
- className="w-[90px] h-[90px] rounded-[24px] flex items-center justify-center shadow-md
- transition-all duration-150
- group-hover:scale-110 group-hover:shadow-xl group-active:scale-95" style={{ background: `linear-gradient(145deg, ${m.grad[0]}, ${m.grad[1]})` }}
- > {m.icon}
- </div> {m.badge > 0 && (
- <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5
- bg-red-500 text-white text-[10px] font-bold rounded-full
- flex items-center justify-center ring-2 ring-background"> {m.badge > 99 ? "99+" : m.badge}
- </span> )}
- </div> <div className="text-center max-w-[80px]"> <p className="text-[11.5px] font-medium leading-tight text-foreground/75
- group-hover:text-foreground transition-colors line-clamp-2"> {m.label}
- </p> <p className="text-[10px] text-muted-foreground/60 leading-tight mt-0.5 line-clamp-1"> {m.sub}
- </p> </div> </Link> ))}
- </div> </div> );
+      {/* Panel */}
+      <div className="rounded-2xl p-6" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-[3px] h-5 rounded-full" style={{ backgroundColor: "var(--accent-hex)" }} />
+          <h2 className="font-bold tracking-widest text-[13px]" style={{ letterSpacing: "0.14em" }}>
+            MÓDULOS
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {modulos.map(m => (
+            <ModuleCard key={m.href} {...m} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

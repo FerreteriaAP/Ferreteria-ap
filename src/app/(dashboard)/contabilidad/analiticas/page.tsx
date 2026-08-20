@@ -106,13 +106,24 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  const maxVentas = Math.max(...mesesPL.map((m) => m.ventas), 1);
  const etiquetaPeriodo = mes ? `${MESES_COMPLETOS[mes]} ${año}` : `Año ${año}`;
 
+ const CARD_BG   = "color-mix(in srgb, var(--card) 55%, transparent)";
+ const HEADER_BG = "color-mix(in oklch, var(--foreground) 4%, var(--card))";
+
  return (
- <div className="space-y-6"> {/* Encabezado */}
- <div> <div className="flex items-center gap-2"> <Link href="/contabilidad" className="text-muted-foreground hover:text-foreground transition-colors" title="Volver a Contabilidad"> <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><path d="M12 5l-5 5 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg> </Link> <h1 className="text-2xl font-bold">Resumen Financiero</h1> </div> <p className="text-sm text-muted-foreground mt-0.5"> {etiquetaPeriodo}
- {totalFacturas > 0 && (
- <> · {totalFacturas} factura{totalFacturas !== 1 ? "s" : ""}</> )}
- </p> </div> {/* Filtros */}
- <form method="GET"> <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/20 px-4 py-3"> <span className="text-xs text-muted-foreground font-medium shrink-0">Período:</span> <select
+ <div className="space-y-6">
+ {/* Encabezado */}
+ <div className="space-y-1">
+ <Link href="/contabilidad"
+ className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1 rounded-full transition-all hover:brightness-110"
+ style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 18%, transparent)", color: "var(--accent-hex)", border: "1px solid color-mix(in oklch, var(--accent-hex) 40%, transparent)" }}>
+ ← Contabilidad
+ </Link>
+ <h1 className="text-2xl font-bold mt-1">Resumen Financiero</h1>
+ <p className="text-sm text-muted-foreground">
+ {etiquetaPeriodo}{totalFacturas > 0 && <> · {totalFacturas} factura{totalFacturas !== 1 ? "s" : ""}</>}
+ </p>
+ </div> {/* Filtros */}
+ <form method="GET"> <div className="flex flex-wrap items-center gap-2 rounded-xl border px-4 py-3" style={{ backgroundColor: CARD_BG }}> <span className="text-xs text-muted-foreground font-medium shrink-0">Período:</span> <select
  name="año" defaultValue={String(año)}
  className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring min-w-[72px]" > {añosDisp.map((a) => (
  <option key={a} value={String(a)}>{a}</option> ))}
@@ -127,10 +138,10 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  href="/contabilidad/analiticas" className="h-8 px-3 inline-flex items-center rounded-md border text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors shrink-0" > Limpiar
  </a> )}
  {mes != null && (
- <span className="ml-auto text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium shrink-0"> {MESES_COMPLETOS[mes]} {año}
+ <span className="ml-auto text-xs px-2.5 py-1 rounded-full font-medium shrink-0" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 15%, transparent)", color: "var(--accent-hex)" }}> {MESES_COMPLETOS[mes]} {año}
  </span> )}
  </div> </form> {/* Estado de resultados (P&L) */}
- <div className="rounded-lg border bg-card overflow-hidden"> <div className="px-5 py-3 bg-muted/30 border-b"> <h2 className="font-semibold text-sm">Estado de resultados — {etiquetaPeriodo}</h2> </div> <div className="p-5 space-y-0 divide-y"> {/* Ventas */}
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Estado de resultados — {etiquetaPeriodo}</h2> </div> <div className="p-5 space-y-0 divide-y"> {/* Ventas */}
  <div className="flex items-center justify-between py-3"> <div> <p className="font-semibold text-sm">Ventas netas</p> <p className="text-xs text-muted-foreground">Subtotal facturado (sin ITBIS)</p> </div> <div className="text-right"> <p className="font-bold text-lg font-mono">{fmt(plVentas, 2)}</p> {varVentas !== null && <Chip v={varVentas} />}
  </div> </div> {/* COGS */}
  <div className="flex items-center justify-between py-3"> <div> <p className="font-medium text-sm text-muted-foreground">− Costo de lo vendido (COGS)</p> <p className="text-xs text-muted-foreground">Costo promedio × cantidad vendida por línea</p> </div> <p className="font-mono text-sm font-medium text-muted-foreground"> ({fmt(plCogs, 2)})
@@ -150,10 +161,10 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </span> </div> <p className="text-[10px] text-muted-foreground mt-1.5"> {plVentas > 0
  ? <>De cada <strong>RD$100</strong> vendido quedan <strong className={colorMargen(margenPromMensual)}>{fmt(margenPromMensual, 1)}</strong> de ganancia neta</> : "Sin ventas en el período"}
  </p> </div> {/* Ganancia neta */}
- <div className="flex items-center justify-between py-4 bg-primary/5 -mx-5 px-5"> <div> <p className="font-bold">Ganancia neta</p> <p className="text-xs text-muted-foreground">Ganancia bruta − gastos operativos</p> </div> <div className="text-right"> <p className={cn("font-bold text-2xl font-mono", plGananciaNeta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaNeta, 2)}
+ <div className="flex items-center justify-between py-4 -mx-5 px-5" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 3%, var(--card))" }}> <div> <p className="font-bold">Ganancia neta</p> <p className="text-xs text-muted-foreground">Ganancia bruta − gastos operativos</p> </div> <div className="text-right"> <p className={cn("font-bold text-2xl font-mono", plGananciaNeta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaNeta, 2)}
  </p> <p className="text-xs text-muted-foreground">{pct(plMargenNeto)} de margen neto</p> </div> </div> </div> </div> {/* Tabla mensual (solo vista anual) */}
  {!mes && (
- <div className="rounded-lg border bg-card overflow-hidden"> <div className="px-5 py-3 bg-muted/30 border-b"> <h2 className="font-semibold text-sm">Desglose mensual {año}</h2> </div> <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Mes</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ventas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">G. Bruta</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Margen%</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Gastos</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">G. Neta</th> <th className="w-28 px-4 py-2.5" /> </tr> </thead> <tbody className="divide-y"> {mesesPL.map((m) => {
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Desglose mensual {año}</h2> </div> <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Mes</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ventas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">G. Bruta</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Margen%</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Gastos</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">G. Neta</th> <th className="w-28 px-4 py-2.5" /> </tr> </thead> <tbody className="divide-y"> {mesesPL.map((m) => {
  const isCurrent = m.mes === now.getMonth() + 1 && año === now.getFullYear();
  const tieneData = m.ventas > 0 || m.gastos > 0;
  return (
@@ -161,13 +172,15 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  key={m.mes}
  className={cn(
  "transition-colors",
- isCurrent ? "bg-primary/5" : tieneData ? "hover:bg-muted/20" : "opacity-40" )}
+ isCurrent ? "" : tieneData ? "hover:bg-muted/20" : "opacity-40" )}
+ style={isCurrent ? { backgroundColor: "color-mix(in oklch, var(--accent-hex) 3%, var(--card))" } : undefined}
  > <td className="px-4 py-2.5"> <a
  href={`/contabilidad/analiticas?año=${año}&mes=${m.mes}`}
- className={cn("font-medium hover:underline", isCurrent && "text-primary")}
+ className="font-medium hover:underline"
+ style={isCurrent ? { color: "var(--accent-hex)" } : undefined}
  > {MESES_COMPLETOS[m.mes]}
  </a> {isCurrent && (
- <span className="ml-2 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium"> Actual
+ <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 15%, transparent)", color: "var(--accent-hex)" }}> Actual
  </span> )}
  </td> <td className="px-4 py-2.5 text-right font-mono text-xs"> {tieneData ? fmt(m.ventas) : <span className="text-muted-foreground">—</span>}
  </td> <td className="px-4 py-2.5 text-right font-mono text-xs text-muted-foreground"> {m.cogs > 0 ? `(${fmt(m.cogs)})` : "—"}
@@ -177,7 +190,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </td> <td className="px-4 py-2.5 text-right font-mono text-xs text-muted-foreground"> {m.gastos > 0 ? `(${fmt(m.gastos)})` : "—"}
  </td> <td className={cn("px-4 py-2.5 text-right font-mono text-xs font-bold",
  m.gananciaNeta > 0 ? "text-green-700 dark:text-green-400" : m.gananciaNeta < 0 ? "text-destructive" : "text-muted-foreground")}> {tieneData ? fmt(m.gananciaNeta) : "—"}
- </td> <td className="px-4 py-2.5"> <Barra value={m.ventas} max={maxVentas} color="bg-primary/40" /> </td> </tr> );
+ </td> <td className="px-4 py-2.5"> <Barra value={m.ventas} max={maxVentas} color="bg-orange-500/40" /> </td> </tr> );
  })}
  </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td className="px-4 py-3 font-bold">Total {año}</td> <td className="px-4 py-3 text-right font-mono font-bold text-sm">{fmt(plVentas)}</td> <td className="px-4 py-3 text-right font-mono text-sm text-muted-foreground">({fmt(plCogs)})</td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-sm",
  plGananciaBruta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaBruta)}
@@ -187,7 +200,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </td> <td /> </tr> </tfoot> </table> </div> </div> )}
 
  {/* Ganancia por categoría */}
- <div className="rounded-lg border bg-card overflow-hidden"> <div className="px-5 py-3 bg-muted/30 border-b flex items-center justify-between"> <h2 className="font-semibold text-sm"> Ganancia por categoría — {etiquetaPeriodo}
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b flex items-center justify-between" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm"> Ganancia por categoría — {etiquetaPeriodo}
  </h2> <p className="text-xs text-muted-foreground">{porCategoria.length} categorías</p> </div> {porCategoria.length === 0 ? (
  <p className="text-sm text-muted-foreground py-10 text-center"> Sin ventas en el período seleccionado
  </p> ) : (
@@ -209,13 +222,13 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </div> {/* 
  VENTAS POR CLIENTE 
  */}
- <div className="rounded-lg border bg-card overflow-hidden"> <div className="px-5 py-3 bg-muted/30 border-b flex items-center justify-between"> <h2 className="font-semibold text-sm">Top 10 clientes — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground">Por volumen de ventas</p> </div> {porCliente.length === 0 ? (
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b flex items-center justify-between" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Top 10 clientes — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground">Por volumen de ventas</p> </div> {porCliente.length === 0 ? (
  <p className="text-sm text-muted-foreground py-10 text-center">Sin ventas en el período</p> ) : (
  <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">#</th> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Cliente</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Facturas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ventas netas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ganancia</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Margen</th> <th className="w-28 px-4 py-2.5" /> </tr> </thead> <tbody className="divide-y"> {porCliente.map((c, idx) => (
  <tr key={c.clienteId} className="hover:bg-muted/20 transition-colors"> <td className="px-5 py-3 text-xs text-muted-foreground font-mono"> {String(idx + 1).padStart(2, "0")}
  </td> <td className="px-4 py-3"> <Link
  href={`/contabilidad/cxc/estado/${c.clienteId}`}
- className="font-medium text-sm hover:underline text-primary" > {c.nombre}
+ className="font-medium text-sm hover:underline" style={{ color: "var(--accent-hex)" }} > {c.nombre}
  </Link> {c.rnc && (
  <p className="text-[10px] text-muted-foreground mt-0.5">RNC: {c.rnc}</p> )}
  </td> <td className="px-4 py-3 text-right text-xs text-muted-foreground"> {c.facturas}
@@ -227,7 +240,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </td> <td className="px-4 py-3"> <Barra
  value={c.ventas}
  max={Math.max(...porCliente.map((x) => x.ventas), 1)}
- color="bg-primary/50" /> </td> </tr> ))}
+ color="bg-orange-500/50" /> </td> </tr> ))}
  </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={3} className="px-5 py-3 font-bold text-sm">Total</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(porCliente.reduce((s, c) => s + c.ventas, 0), 2)}
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(porCliente.reduce((s, c) => s + c.cogs, 0), 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-xs",
@@ -237,7 +250,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </div> {/* 
  TOP 10 PRODUCTOS 
  */}
- <div className="rounded-lg border bg-card overflow-hidden"> <div className="px-5 py-3 bg-muted/30 border-b flex items-center justify-between"> <h2 className="font-semibold text-sm">Top 10 productos — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground">Por volumen de ventas</p> </div> {topProductos.length === 0 ? (
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b flex items-center justify-between" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Top 10 productos — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground">Por volumen de ventas</p> </div> {topProductos.length === 0 ? (
  <p className="text-sm text-muted-foreground py-10 text-center">Sin ventas en el período</p> ) : (
  <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">#</th> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Producto</th> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Cantidad</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ventas netas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ganancia</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Margen</th> </tr> </thead> <tbody className="divide-y"> {topProductos.map((p, idx) => (
  <tr key={p.productoId} className="hover:bg-muted/20 transition-colors"> <td className="px-5 py-3 text-xs text-muted-foreground font-mono"> {String(idx + 1).padStart(2, "0")}
@@ -258,7 +271,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </div> {/* 
  MÉTODOS DE PAGO 
  */}
- <div className="rounded-lg border bg-card overflow-hidden"> <div className="px-5 py-3 bg-muted/30 border-b"> <h2 className="font-semibold text-sm">Fondos recibidos — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground mt-0.5"> Pagos registrados en facturas · comisión tarjeta: {pagos.comisionPct}%
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Fondos recibidos — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground mt-0.5"> Pagos registrados en facturas · comisión tarjeta: {pagos.comisionPct}%
  </p> </div> {pagos.porMetodo.length === 0 ? (
  <p className="text-sm text-muted-foreground py-10 text-center">Sin pagos registrados en el período</p> ) : (
  <div className="p-5 space-y-4"> {/* Barras por método */}
@@ -281,7 +294,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  /> <p className="text-[10px] text-muted-foreground mt-0.5"> {pagos.total > 0 ? pct((m.monto / pagos.total) * 100) : "0%"} del total
  </p> </div> ))}
  </div> {/* Resumen */}
- <div className="pt-4 border-t grid grid-cols-1 sm:grid-cols-3 gap-3"> <div className="rounded-md bg-muted/30 p-3"> <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Total cobrado</p> <p className="text-lg font-bold font-mono mt-1">{fmt(pagos.total, 2)}</p> </div> {pagos.totalComisiones > 0 && (
+ <div className="pt-4 border-t grid grid-cols-1 sm:grid-cols-3 gap-3"> <div className="rounded-xl border p-3 space-y-1" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 2%, var(--card))", borderColor: "color-mix(in oklch, var(--accent-hex) 12%, var(--border))" }}> <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Total cobrado</p> <p className="text-lg font-bold font-mono" style={{ color: "var(--accent-hex)" }}>{fmt(pagos.total, 2)}</p> </div> {pagos.totalComisiones > 0 && (
  <div className="rounded-md bg-destructive/5 border border-destructive/20 p-3"> <p className="text-xs text-destructive font-medium uppercase tracking-wide">Comisiones tarjeta</p> <p className="text-lg font-bold font-mono mt-1 text-destructive">−{fmt(pagos.totalComisiones, 2)}</p> <p className="text-[10px] text-muted-foreground mt-0.5">{pagos.comisionPct}% sobre pagos c/tarjeta</p> </div> )}
  <div className="rounded-md bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3"> <p className="text-xs text-green-700 dark:text-green-400 font-medium uppercase tracking-wide">Neto en caja</p> <p className="text-lg font-bold font-mono mt-1 text-green-700 dark:text-green-400"> {fmt(pagos.totalNeto, 2)}
  </p> </div> </div> {pagos.totalComisiones === 0 && (

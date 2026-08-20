@@ -16,18 +16,11 @@
     fill="#EC6E00">AP</text>
 
   <!-- ── Wordmark ── -->
-  <!-- F naranja -->
   <text
     x="208" y="146"
     font-family="'Arial Black','Arial Bold',Impact,sans-serif"
     font-weight="900"
-    font-size="86"
-    fill="#EC6E00">F</text>
-  <!-- ERRETERÍA carbón -->
-  <text
-    x="263" y="146"
-    font-family="'Arial Black','Arial Bold',Impact,sans-serif"
-    font-weight="900"
-    font-size="86"
-    fill="#1C1C1C">ERRETERÍA</text>
+    font-size="86">
+    <tspan fill="#EC6E00">F</tspan><tspan fill="#1C1C1C">ERRETERÍA</tspan>
+  </text>
 </svg>

@@ -1,12 +1,11 @@
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { TemaSelector } from "@/components/configuracion/tema-selector";
 import { EmpresaForm } from "@/components/configuracion/empresa-form";
+import { UsuariosPanel } from "@/components/configuracion/usuarios-panel";
 import { getEmpresaConfig, getCuentasBancarias } from "@/actions/empresa";
-import { Palette, Building2 } from "lucide-react";
+import { getUsuarios } from "@/actions/usuarios";
+import { Palette, Building2, Users } from "lucide-react";
 
 async function getConfig() {
  const [empleados, contactos, productos, usuarios, temaConfig] = await Promise.all([
@@ -30,10 +29,11 @@ export default async function ConfiguracionPage() {
  const rol = (session?.user as { rol?: string })?.rol ?? "";
  const esAdmin = rol === "ADMINISTRADOR";
 
- const [stats, datosEmpresa, cuentasBancarias] = await Promise.all([
+ const [stats, datosEmpresa, cuentasBancarias, usuarios] = await Promise.all([
  getConfig(),
  getEmpresaConfig(),
  getCuentasBancarias(),
+ getUsuarios(),
  ]);
 
  return (
@@ -89,17 +89,23 @@ export default async function ConfiguracionPage() {
  key={s.label}
  className="rounded-xl p-4 text-center" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
  > <p className="text-2xl font-bold" style={{ color: "var(--primary)" }}>{s.value}</p> <p className="text-xs mt-1" style={{ color: "var(--muted-foreground)" }}>{s.label}</p> </div> ))}
- </div> </div> {/* Gestión de usuarios */}
+ </div> </div> {/* Gestión de usuarios inline */}
  {esAdmin && (
- <div
- className="rounded-2xl p-6" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
- > <div className="flex items-center justify-between mb-3"> <h2 className="font-semibold text-sm" style={{ color: "var(--foreground)" }}> Gestión de usuarios
- </h2> <Link
- href="/usuarios" className={buttonVariants({ variant: "outline", size: "sm" })}
- > Ver usuarios
- </Link> </div> <p className="text-sm mb-3" style={{ color: "var(--muted-foreground)" }}> Administra los accesos al sistema: crea, edita y desactiva cuentas de usuario.
- </p> <Link href="/usuarios/nuevo" className={buttonVariants({ size: "sm" })}> + Nuevo usuario
- </Link> </div> )}
+ <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}>
+   <div className="px-6 py-4 border-b flex items-center gap-3" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}>
+     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 12%, transparent)" }}>
+       <Users size={16} style={{ color: "var(--accent-hex)" }} />
+     </div>
+     <div>
+       <h2 className="font-semibold text-sm" style={{ color: "var(--foreground)" }}>Gestión de usuarios</h2>
+       <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>{usuarios.length} usuario{usuarios.length !== 1 ? "s" : ""} registrado{usuarios.length !== 1 ? "s" : ""}</p>
+     </div>
+   </div>
+   <div className="p-6">
+     <UsuariosPanel usuarios={usuarios} />
+   </div>
+ </div>
+ )}
 
  {/* Parámetros nómina */}
  <div

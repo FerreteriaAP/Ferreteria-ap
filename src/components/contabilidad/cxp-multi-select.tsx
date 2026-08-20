@@ -107,8 +107,8 @@ function ModalPlanillaPago({ compras, grupos, onClose, onOk }: ModalProps) {
  return (
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"> <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto"> <div className="flex items-center justify-between px-5 py-4 border-b"> <h2 className="font-bold text-base"> Planilla de pago CxP</h2> <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button> </div> <div className="px-5 py-4 space-y-4"> {/* Lista de compras a pagar */}
  <div className="border rounded-lg overflow-hidden"> <table className="w-full text-sm"> <thead> <tr className="bg-muted text-muted-foreground text-xs uppercase tracking-wide"> <th className="px-3 py-2 text-left">Compra</th> <th className="px-3 py-2 text-left">Suplidor</th> <th className="px-3 py-2 text-right">Monto</th> </tr> </thead> <tbody> {compras.map((c, i) => (
- <tr key={c.id} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}> <td className="px-3 py-2 font-mono text-xs font-medium text-primary">{c.numero}</td> <td className="px-3 py-2 text-xs">{getSuplidor(c.compraId)}</td> <td className="px-3 py-2 text-right tabular-nums font-medium text-sm">{fmt(c.saldo)}</td> </tr> ))}
- <tr className="bg-muted/40 border-t font-bold"> <td className="px-3 py-2 text-xs" colSpan={2}>Total a pagar</td> <td className="px-3 py-2 text-right tabular-nums text-base text-primary">{fmt(total)}</td> </tr> </tbody> </table> </div> {/* Forma de pago */}
+ <tr key={c.id} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}> <td className="px-3 py-2 font-mono text-xs font-medium" style={{ color: "var(--accent-hex)" }}>{c.numero}</td> <td className="px-3 py-2 text-xs">{getSuplidor(c.compraId)}</td> <td className="px-3 py-2 text-right tabular-nums font-medium text-sm">{fmt(c.saldo)}</td> </tr> ))}
+ <tr className="bg-muted/40 border-t font-bold"> <td className="px-3 py-2 text-xs" colSpan={2}>Total a pagar</td> <td className="px-3 py-2 text-right tabular-nums text-base" style={{ color: "var(--accent-hex)" }}>{fmt(total)}</td> </tr> </tbody> </table> </div> {/* Forma de pago */}
  <div> <label className="text-xs font-medium text-muted-foreground block mb-1.5">Forma de pago</label> <div className="grid grid-cols-2 gap-2"> {METODOS.map(m => (
  <button
  key={m.value}
@@ -223,7 +223,8 @@ export function CxPMultiSelect({ grupos }: Props) {
  className="w-4 h-4 cursor-pointer shrink-0" /> )}
  <Link
  href={`/compras/${c.compraId}?from=cxp`}
- className="font-mono text-xs font-medium hover:underline text-primary" > {c.numero}
+ className="font-mono text-xs font-medium hover:underline"
+ style={{ color: "var(--accent-hex)" }} > {c.numero}
  </Link> <Badge variant={agingVariant(c.diasVencida)} className="text-[10px]"> {agingLabel(c.diasVencida)}
  </Badge> {c.estado === "PAGADO" && (
  <Badge variant="outline" className="text-[10px] text-green-700 border-green-300"> Pagado
@@ -238,7 +239,7 @@ export function CxPMultiSelect({ grupos }: Props) {
  </div> {/* Barra flotante de selección */}
  {seleccionadas.size > 0 && (
  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40"> <div className="flex items-center gap-3 bg-background border shadow-xl rounded-2xl px-5 py-3"> <span className="text-sm font-medium"> {seleccionadas.size} compra{seleccionadas.size !== 1 ? "s" : ""} seleccionada{seleccionadas.size !== 1 ? "s" : ""}
- </span> <span className="text-sm font-bold text-primary tabular-nums"> {fmt(comprasSeleccionadas.reduce((s, c) => s + c.saldo, 0))}
+ </span> <span className="text-sm font-bold tabular-nums" style={{ color: "var(--accent-hex)" }}> {fmt(comprasSeleccionadas.reduce((s, c) => s + c.saldo, 0))}
  </span> <button
  onClick={() => setShowModal(true)}
  className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors" > Planilla de pago
