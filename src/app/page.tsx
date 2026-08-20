@@ -1,4 +1,4 @@
-// Ferretería AP — redirige al login
+// Ferretería AP v2 — redirige al login
 import { redirect } from "next/navigation";
 
 export default function Home() {
