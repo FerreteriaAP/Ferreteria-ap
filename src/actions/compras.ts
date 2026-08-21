@@ -116,6 +116,18 @@ export async function crearCompra(data: CompraInput) {
 
  const { suplidorId, noFacturaSuplidor, ncf, tipoNcfCompra, ncfCodigoSeguridad, fechaFactura, fechaVencimiento, notas, detalles, ajustesPrecio } = parsed.data;
 
+ // Validar unicidad del NCF (comprobante fiscal único por compra)
+ if (ncf) {
+ const existente = await prisma.compra.findFirst({
+ where: { ncf },
+ select: { numero: true, fechaFactura: true, suplidor: { select: { nombre: true } } },
+ });
+ if (existente) {
+ const fecha = new Date(existente.fechaFactura).toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric" });
+ return { error: { ncf: [`El NCF "${ncf}" ya está registrado en ${existente.numero} (${existente.suplidor.nombre} — ${fecha}). Los comprobantes fiscales son únicos.`] } };
+ }
+ }
+
  // Calcular totales
  const subtotal = detalles.reduce((s, d) => s + d.cantidad * d.costo, 0);
  const totalItbis = detalles.reduce((s, d) => s + d.itbis, 0);

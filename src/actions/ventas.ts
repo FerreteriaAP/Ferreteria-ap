@@ -518,6 +518,18 @@ export async function facturarVenta(ventaId: string, data: {
  if (venta.tipo !== "CONDUCE" && venta.tipo !== "ORDEN_VENTA") {
  return { error: "Solo se puede facturar desde Conduce u Orden de Venta" };
  }
+
+ // Validar unicidad del NCF (comprobante fiscal único por factura)
+ if (data.ncf) {
+ const existente = await prisma.venta.findFirst({
+ where: { ncf: data.ncf },
+ select: { numero: true, createdAt: true, cliente: { select: { nombre: true } } },
+ });
+ if (existente) {
+ const fecha = new Date(existente.createdAt).toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric" });
+ return { error: `El NCF "${data.ncf}" ya está registrado en ${existente.numero} (${existente.cliente?.nombre ?? "sin cliente"} — ${fecha}). Los comprobantes fiscales son únicos.` };
+ }
+ }
  // Bloquear facturación hasta que TODOS los conduces estén confirmados por el cliente
  if (venta.tipo === "CONDUCE") {
  const totalConduces = venta.conduces.length;
