@@ -182,12 +182,13 @@ export async function buscarProductosVenta(q: string) {
  nombre: true,
  unidadMedida: true,
  precioVenta: true,
- costoUltimo: true, // necesario para calcular precio Kolmen
+ costoUltimo: true, // necesario para calcular precio Kolmen y alertas de margen
  stockActual: true,
  esFraccionable: true,
  unidadFraccion: true,
  factorFraccion: true,
  exentoItbis: true,
+ categoria: { select: { codigo: true } }, // necesario para alertas de margen
  },
  orderBy: { nombre: "asc" },
  take: 12,
@@ -199,6 +200,7 @@ export async function buscarProductosVenta(q: string) {
  costoUltimo: p.costoUltimo != null ? Number(p.costoUltimo) : null,
  stockActual: Number(p.stockActual),
  factorFraccion: p.factorFraccion != null ? Number(p.factorFraccion) : null,
+ categoriaCode: p.categoria?.codigo ?? "",
  }));
 }
 

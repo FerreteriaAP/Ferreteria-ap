@@ -11,6 +11,7 @@ const PRODUCTO_SELECT = {
   precioVenta: true, unidadMedida: true,
   esFraccionable: true, unidadFraccion: true, factorFraccion: true,
   exentoItbis: true, stockActual: true, stockMinimo: true,
+  costoUltimo: true,
   categoria: { select: { nombre: true, codigo: true } },
 } as const;
 

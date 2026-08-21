@@ -18,10 +18,11 @@ export default async function PDVPage() {
 
   const productos = topProductos.map(p => ({
     ...p,
-    precioVenta:   Number(p.precioVenta),
+    precioVenta:    Number(p.precioVenta),
     factorFraccion: p.factorFraccion ? Number(p.factorFraccion) : null,
-    stockActual:   Number(p.stockActual),
-    stockMinimo:   Number(p.stockMinimo),
+    stockActual:    Number(p.stockActual),
+    stockMinimo:    Number(p.stockMinimo),
+    costoUltimo:    Number(p.costoUltimo),
   }));
 
   const hora = turno

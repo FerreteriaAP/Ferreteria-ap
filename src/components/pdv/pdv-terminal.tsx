@@ -21,6 +21,7 @@ interface Producto {
   esFraccionable: boolean; unidadFraccion: string | null;
   factorFraccion: number | null; exentoItbis: boolean;
   stockActual: number; stockMinimo: number;
+  costoUltimo: number;
   categoria: { nombre: string; codigo: string };
 }
 
@@ -32,6 +33,29 @@ interface Cliente {
 
 interface ItemCarrito extends LineaPDV {
   key: string;
+  costoUltimo: number;
+  categoriaCode: string;
+}
+
+// ─── MARGEN ───────────────────────────────────────────────────────────────────
+
+// Categorías con umbral de 15% (CTC solo alerta en negativo)
+const CATS_UMBRAL_15 = ["FT", "ET", "PL"];
+
+/** Calcula % margen sobre costo. precioFinal viene CON ITBIS (o sin si exento). */
+function calcMargen(precioFinal: number, costoUltimo: number, exentoItbis: boolean): number {
+  if (costoUltimo <= 0) return 0;
+  const costoRef = exentoItbis ? costoUltimo : costoUltimo * 1.18;
+  return ((precioFinal - costoRef) / costoRef) * 100;
+}
+
+/** Retorna el nivel de alerta para un item del carrito. */
+function nivelAlerta(item: ItemCarrito): "negativo" | "bajo" | null {
+  const margen = calcMargen(item.precioFinal, item.costoUltimo, item.exentoItbis);
+  if (margen < 0) return "negativo";
+  const cat = item.categoriaCode.toUpperCase();
+  if (CATS_UMBRAL_15.some(c => cat.startsWith(c)) && margen < 15) return "bajo";
+  return null;
 }
 
 // Helpers
@@ -127,6 +151,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
         factorFraccion: p.factorFraccion ? Number(p.factorFraccion) : null,
         stockActual:    Number(p.stockActual),
         stockMinimo:    Number(p.stockMinimo),
+        costoUltimo:    Number(p.costoUltimo),
       })));
       setBuscando(false);
     }, 180);
@@ -172,6 +197,8 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
       key: uid(), productoId: p.id, nombre: p.nombre, codigo: p.codigo,
       unidad, cantidad: 0, precioFinal, precio, exentoItbis: p.exentoItbis,
       itbis, subtotal,
+      costoUltimo: p.costoUltimo,
+      categoriaCode: p.categoria.codigo,
     }]);
   }, [carrito]);
 
@@ -217,8 +244,25 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
     const lineas = carrito.filter(i => i.cantidad > 0);
     if (!lineas.length) { setError("Ingresa la cantidad de cada producto antes de enviar"); return; }
 
+    // Advertencia de margen para el cajero antes de enviar
+    const itemsNegativos = lineas.filter(i => nivelAlerta(i) === "negativo");
+    if (itemsNegativos.length > 0) {
+      const nombres = itemsNegativos.map(i => i.nombre).join(", ");
+      const confirmar = window.confirm(
+        `⚠ MARGEN NEGATIVO\n\nLos siguientes productos se están vendiendo por debajo del costo:\n\n${nombres}\n\n¿Deseas continuar?`
+      );
+      if (!confirmar) return;
+    }
+
     startTransition(async () => {
-      const res = await crearVentaPendiente({ clienteId: cliente.id, turnoId, tipoNcf, lineas, direccionId, notas: notas.trim() || undefined });
+      // Anotar en notas si hay márgenes bajos (para que el admin lo vea)
+      const itemsBajos = lineas.filter(i => nivelAlerta(i) !== null);
+      const notaAlerta = itemsBajos.length > 0
+        ? `[ALERTA MARGEN: ${itemsBajos.map(i => `${i.codigo}(${calcMargen(i.precioFinal, i.costoUltimo, i.exentoItbis).toFixed(1)}%)`).join(", ")}]`
+        : undefined;
+      const notaFinal = [notas.trim(), notaAlerta].filter(Boolean).join(" | ") || undefined;
+
+      const res = await crearVentaPendiente({ clienteId: cliente.id, turnoId, tipoNcf, lineas, direccionId, notas: notaFinal });
       if ("error" in res && res.error) { setError(res.error); return; }
       setEnviado(res.numero ?? null);
     });
@@ -502,10 +546,23 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                   </tr>
                 </thead>
                 <tbody>
-                  {carrito.map(item => (
+                  {carrito.map(item => {
+                    const alerta = nivelAlerta(item);
+                    const margenPct = calcMargen(item.precioFinal, item.costoUltimo, item.exentoItbis);
+                    return (
                     <tr key={item.key} className="border-b hover:bg-muted/20 transition-colors" style={{ borderColor: "color-mix(in oklch, var(--border) 35%, transparent)" }}>
                       <td className="px-3 py-2">
-                        <p className="font-medium text-xs leading-tight">{item.nombre}</p>
+                        <div className="flex items-center gap-1.5">
+                          {alerta === "negativo" && (
+                            <span title={`Margen negativo (${margenPct.toFixed(1)}%)`}
+                              className="shrink-0 w-2 h-2 rounded-full bg-red-500" />
+                          )}
+                          {alerta === "bajo" && (
+                            <span title={`Margen bajo: ${margenPct.toFixed(1)}% (mínimo 15%)`}
+                              className="shrink-0 w-2 h-2 rounded-full bg-amber-400" />
+                          )}
+                          <p className="font-medium text-xs leading-tight">{item.nombre}</p>
+                        </div>
                         <p className="text-[10px] text-muted-foreground">{item.codigo} · {item.unidad}{item.exentoItbis ? " · exento" : ""}</p>
                       </td>
                       <td className="px-1 py-2">
@@ -541,7 +598,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                         >×</button>
                       </td>
                     </tr>
-                  ))}
+                  );})}
                 </tbody>
               </table>
             )}

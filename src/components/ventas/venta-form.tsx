@@ -22,7 +22,7 @@ type ProductoSugerido = {
   id: string; codigo: string; nombre: string; unidadMedida: string;
   precioVenta: unknown; costoUltimo: number | null; stockActual: unknown;
   esFraccionable: boolean; unidadFraccion: string | null; factorFraccion: unknown;
-  exentoItbis: boolean;
+  exentoItbis: boolean; categoriaCode: string;
 };
 
 interface DetalleRow {
@@ -31,7 +31,7 @@ interface DetalleRow {
   cantidad: number; precio: number; precioCompleto: number;
   descuento: number; itbis: number; exentoItbis: boolean;
   stockActual: number; esFraccionable: boolean; factorFraccion: number | null;
-  modoFraccionar: boolean;
+  modoFraccionar: boolean; costoUltimo: number | null; categoriaCode: string;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -49,6 +49,25 @@ function calcItbisLinea(precioFinal: number, cantidad: number, descuento: number
 }
 
 const fmt = (n: number) => n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// ── Alertas de margen ─────────────────────────────────────────────────────────
+
+const CATS_UMBRAL_15 = ["FT", "ET", "PL"];
+
+function calcMargen(precioFinal: number, costoUltimo: number, exentoItbis: boolean): number {
+  if (costoUltimo <= 0) return 0;
+  const costoRef = exentoItbis ? costoUltimo : costoUltimo * 1.18;
+  return ((precioFinal - costoRef) / costoRef) * 100;
+}
+
+function nivelAlertaFila(d: DetalleRow): "negativo" | "bajo" | null {
+  if (!d.costoUltimo || d.costoUltimo <= 0) return null;
+  const margen = calcMargen(d.precio, d.costoUltimo, d.exentoItbis);
+  if (margen < 0) return "negativo";
+  const cat = d.categoriaCode.toUpperCase();
+  if (CATS_UMBRAL_15.some(c => cat.startsWith(c)) && margen < 15) return "bajo";
+  return null;
+}
 
 const CREDITO_LABEL: Record<string, string> = {
   CONTADO: "Contado", DIAS_30: "30 Días", DIAS_45: "45 Días", DIAS_60: "60 Días",
@@ -151,6 +170,7 @@ export function VentaForm({ clientes }: VentaFormProps) {
       itbis: itbisInicial, exentoItbis: esExento,
       stockActual: Number(prod.stockActual), esFraccionable: prod.esFraccionable,
       factorFraccion: factor, modoFraccionar: false,
+      costoUltimo: prod.costoUltimo, categoriaCode: prod.categoriaCode ?? "",
     }]);
     busquedaRef.current?.focus();
   }, [detalles, clienteId, clientes]);
@@ -192,6 +212,20 @@ export function VentaForm({ clientes }: VentaFormProps) {
     if (!clienteId) { setError("Selecciona un cliente"); return; }
     if (detalles.length === 0) { setError("Agrega al menos un producto"); return; }
     if (detalles.some(d => !d.cantidad || d.cantidad <= 0 || !d.precio || d.precio <= 0)) { setError("Revisa cantidades y precios — todos deben ser mayores a cero"); return; }
+
+    // Alerta de margen negativo
+    const negativos = detalles.filter(d => nivelAlertaFila(d) === "negativo");
+    if (negativos.length > 0) {
+      const nombres = negativos.map(d => {
+        const m = calcMargen(d.precio, d.costoUltimo!, d.exentoItbis);
+        return `${d.codigo} (${m.toFixed(1)}%)`;
+      }).join(", ");
+      const ok = window.confirm(
+        `⚠️ MARGEN NEGATIVO\n\n${nombres}\n\n¿Deseas continuar de todas formas?`
+      );
+      if (!ok) return;
+    }
+
     setLoading(true);
     try {
       const result = await crearCotizacion({
@@ -379,12 +413,21 @@ export function VentaForm({ clientes }: VentaFormProps) {
                     const sub = precioBase * d.cantidad * (1 - d.descuento / 100);
                     const cantOrig = d.modoFraccionar && d.factorFraccion ? d.cantidad / d.factorFraccion : d.cantidad;
                     const stockBajo = cantOrig > d.stockActual;
+                    const alerta = nivelAlertaFila(d);
 
                     return (
                       <TableRow key={d.productoId + i} className="hover:bg-muted/10">
                         <TableCell className="font-mono text-xs text-muted-foreground">{d.codigo}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 flex-wrap">
+                            {alerta === "negativo" && (
+                              <span title={`Margen negativo (${calcMargen(d.precio, d.costoUltimo!, d.exentoItbis).toFixed(1)}%)`}
+                                className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: "#dc2626" }} />
+                            )}
+                            {alerta === "bajo" && (
+                              <span title={`Margen bajo (${calcMargen(d.precio, d.costoUltimo!, d.exentoItbis).toFixed(1)}%)`}
+                                className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: "#d97706" }} />
+                            )}
                             <span className="font-medium text-sm">{d.nombre}</span>
                             {stockBajo && <Badge variant="destructive" className="text-[10px]">Stock bajo</Badge>}
                           </div>
