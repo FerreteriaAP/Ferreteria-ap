@@ -1,0 +1,626 @@
+[
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Agroindustrial Ferretera",
+    "rnc": "1-01-54137-7",
+    "email": null,
+    "telefono": "809-564-6060",
+    "direccion": "Expreso John F. Kennedy 15, 10801 . Los Alcarrizos"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Almacenes Unidos",
+    "rnc": "1-01-01383-4",
+    "email": null,
+    "telefono": "+1 809-472-6911",
+    "direccion": "Av. John F. Kennedy, Esq. Av. Churchill"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Arion Dominicana",
+    "rnc": "1-30-30426-2",
+    "email": null,
+    "telefono": "+1 809-338-3747",
+    "direccion": "Aut. DuarteKm.18 Nave 13B"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Axo Dominicana S.A.",
+    "rnc": "1-01-07666-6",
+    "email": "ventas@axodominicanasa.com",
+    "telefono": "+1 809-536-8111",
+    "direccion": "C/ San Juan de la MaguanaNo.25"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Bloques Chaysa SRL",
+    "rnc": "1-30-69963-1",
+    "email": null,
+    "telefono": "+1 809-530-8080",
+    "direccion": "Prol. Feb. No.10"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Botes y Agregados Edwin E Ismael",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-832-2661",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "C&S Industrial",
+    "rnc": "1-31-09714-6",
+    "email": null,
+    "telefono": "+1 809-620-9744",
+    "direccion": "C/ Orlando Martinez Esq. Rogelio Roselle No.69"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Canal Hierro SRL",
+    "rnc": "1-22-02423-9",
+    "email": null,
+    "telefono": "+1 809-564-5000",
+    "direccion": "1ra 28, M V Norte. San Cristóbal, San Cristóbal"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Centro Bomba Comercial SRL",
+    "rnc": null,
+    "email": "luisp30_2@hotmail.com",
+    "telefono": "+1 809-412-0095",
+    "direccion": "Calle Juan Alejandro Ibarra, esq. San Martin, Ensanche La Fe"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Centro Cal",
+    "rnc": null,
+    "email": null,
+    "telefono": null,
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Ceramica Arelis",
+    "rnc": null,
+    "email": "ceraicaarelis@gmail.com",
+    "telefono": "+1 849-269-1129",
+    "direccion": "C/ principal Entrando Por el Banco Popular"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Chino Transmision",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 829-493-9102",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Chiquito Agregado",
+    "rnc": null,
+    "email": null,
+    "telefono": null,
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Comercial Redcow SRL",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-681-6407",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Comercial topline",
+    "rnc": "1-33-05758-1",
+    "email": null,
+    "telefono": "+1 809-681-6407",
+    "direccion": "Av. Duarte No.385"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Corporacion Universal Del Caribe S.R.L",
+    "rnc": "1-31-14936-7",
+    "email": null,
+    "telefono": "+1 809-530-6699",
+    "direccion": "C/ Mexico No.78, Buenos Aires. Herrera"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "DH Dulce Hogar",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 849-627-9999",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Diconex",
+    "rnc": "1-31-02844-6",
+    "email": "ventas@diconex.net",
+    "telefono": "+1 809-482-9641",
+    "direccion": "Av. Romulo Betancourt No. 2078. Local 3c"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Diego Pintura SRL",
+    "rnc": "1-30-70080-1",
+    "email": null,
+    "telefono": "809-518-2555",
+    "direccion": "Avenida México #334, Buenos Aires de Herrera"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Distribuidora Goheve",
+    "rnc": "1-01-68619-7",
+    "email": null,
+    "telefono": null,
+    "direccion": "Calle Olof Palmer No. 4, 10131 . Los Prados"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Domicem",
+    "rnc": "1-01-82935-4",
+    "email": null,
+    "telefono": null,
+    "direccion": "Avenida Abraham Lincoln 295, casi esquina Avenida José Contreras"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Elohim Pintura y Mas",
+    "rnc": null,
+    "email": "elohimprospaint@gmail.com",
+    "telefono": "+1 809-334-1601",
+    "direccion": "Av. Privada esquina Padre Vicente Yabar, local #6, El Millón"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Estacion Bella Norte",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-537-9005",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "FRM Repuestos & Servicios",
+    "rnc": null,
+    "email": "s",
+    "telefono": "+1 809-858-7982",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Ferreteria Cedeño SRL",
+    "rnc": "1-30-76842-2",
+    "email": "Ferreteriacedño@gmail.com",
+    "telefono": "+1 809-537-9368",
+    "direccion": "C/ Rogelio Rosel No. 34, Engombe"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Ferreteria F&M",
+    "rnc": "1-30-08867-5",
+    "email": null,
+    "telefono": "+1 809-522-2986",
+    "direccion": "Carretera Maximo Gómez, salida bani / sombrero ( frente a la parada de la guagua de los campos)"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Ferreteria Ochoa",
+    "rnc": "1-02-00343-2",
+    "email": "Ferreteria8a@gmail.com",
+    "telefono": "+1 809-971-8000",
+    "direccion": "Prol. 27 Feb. No. 100"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Ferreteria Oniel",
+    "rnc": null,
+    "email": null,
+    "telefono": "+800 9518 0407",
+    "direccion": "Calle Rogelio Roselle #91"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Fertilizante Fersan",
+    "rnc": "1-01-00095-3",
+    "email": null,
+    "telefono": "+1 809-227-1717",
+    "direccion": "Avenida John F. Kennedy #60, Esquina Central"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Fesa S.R.L",
+    "rnc": "1-31-98411-8",
+    "email": "administracion@fesa.do",
+    "telefono": "+1 809-530-7676",
+    "direccion": "Calle Juanico Dolores, Esquina D Zona Industrial de Herrera"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Fundicion San Pedro",
+    "rnc": null,
+    "email": "fundicionsanpedro@gmail.com",
+    "telefono": "+1 809-684-7118",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Garcia y Llerandi, SAS.",
+    "rnc": "1-01-00231-1",
+    "email": "ventas@gll.com.do",
+    "telefono": "+1 809-565-0489",
+    "direccion": "Av. San Martin No.249, Ens. La Fe"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Hermanos Pappaterra",
+    "rnc": "1-01-61976-7",
+    "email": null,
+    "telefono": "+1 809-561-6161",
+    "direccion": "Carrt. Vieja, Km 9 1/2 No.100"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "I+D Consultoria de Mercado",
+    "rnc": null,
+    "email": "imasd.cdm@hotmail.com",
+    "telefono": "+1 809-922-8407",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "IF Luperon",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-564-6060",
+    "direccion": "Gregorio Luperón no. 42 esquina Calle 3 Sector Los Restauradores"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Imdoceramica",
+    "rnc": "1-30-15828-2",
+    "email": null,
+    "telefono": "+1 809-372-7955",
+    "direccion": "KM 11.5 Aut. Duarte"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Importadora Bueno y Mas IBM SRL",
+    "rnc": "1-31-32742-7",
+    "email": null,
+    "telefono": null,
+    "direccion": "Avenida Jacobo Majluta No. 30"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Importadora TMCC",
+    "rnc": "402-1302850-5",
+    "email": null,
+    "telefono": "+1 809-623-1688",
+    "direccion": "Av Lic J M Azar 30. Guaricano"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Industrial Dominicana Kitplast",
+    "rnc": null,
+    "email": null,
+    "telefono": null,
+    "direccion": "Calle Paseo del Arroyo"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Industrias Bisono",
+    "rnc": "1-30-01240-7",
+    "email": null,
+    "telefono": "+1 809-531-8330",
+    "direccion": "Avenida Isabel Aguiar esquina Penetración Sur"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Innova Centro",
+    "rnc": "1-01-00583-1",
+    "email": null,
+    "telefono": "+1 809-541-1818",
+    "direccion": "Av. Los Beisbolistas No.57 Manoguayabo"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Inversiones Arias Susana S.R.L",
+    "rnc": "1-30-37518-6",
+    "email": "inversionesariassusana@gmail.com",
+    "telefono": "+1 809-221-8888",
+    "direccion": "Calle Paseo de los Aviadores No.3, Miraflores"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Inversiones Estrella Feliz",
+    "rnc": null,
+    "email": null,
+    "telefono": null,
+    "direccion": "Calle Max Henríquez Ureña #35"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Inversiones Obavenca",
+    "rnc": null,
+    "email": null,
+    "telefono": null,
+    "direccion": "Av Las Palmas 64"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "J. Electric Import SRL",
+    "rnc": "1-01-72549-4",
+    "email": null,
+    "telefono": "+1 809-564-3666",
+    "direccion": "Aut Duarte Km 9 1/2"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Jomsupli Ferroelectric",
+    "rnc": "1-32-25450-3",
+    "email": null,
+    "telefono": "+1 829-546-6632",
+    "direccion": "C/ 9 Esq. 8 Poyecto Mirador Norte"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "LJM Proelectric Srl",
+    "rnc": "1-30-77631-8",
+    "email": "cotizaciones@proelectric.com.do",
+    "telefono": "+1 809-567-7222",
+    "direccion": "Luis Manuel Cáceres (Tunti) #271, Villa Juana"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Lubriservis",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-537-7023",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "M & M World Plastic SRL",
+    "rnc": "1-30-57897-4",
+    "email": null,
+    "telefono": "+1 809-560-0222",
+    "direccion": "C/ H, No. 14 Zona Industrial de Herrera"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Marcha EIRL",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-245-3131",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Martur SRL.",
+    "rnc": "1-30-75592-2",
+    "email": "ventas@martur.do",
+    "telefono": "+1 809-530-7070",
+    "direccion": "C/ Juanico Dolores Esq. Zona Industrial"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Materiales Industriales S.A.S",
+    "rnc": "1-01-14780-6",
+    "email": "info@matisa.com",
+    "telefono": "+1 809-227-6911",
+    "direccion": "Av. San Martín #183, casi esq. Av. Máximo Gómez"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Mega Depot GD",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-533-5000",
+    "direccion": "Kilómetro 22 Autopista Duarte, Nave Envases Vacíos 2 (EV-2), Local 10."
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Mercantil Del Caribe S.A.S",
+    "rnc": "1-01-01124-6",
+    "email": "Ventas@ferreteriamc.com",
+    "telefono": "+1 809-565-5797",
+    "direccion": "Av. John F, Kennedy KM 8 1/2 Gala"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Mercaplas",
+    "rnc": "1-30-45680-1",
+    "email": "info@mercaplasrd.com",
+    "telefono": "809-595-3382",
+    "direccion": "Los Frailes ll"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Metal Glass",
+    "rnc": null,
+    "email": null,
+    "telefono": null,
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Morteros de Europa",
+    "rnc": "1-02-62071-7",
+    "email": "info@morteros.net",
+    "telefono": "+1 809-233-6060",
+    "direccion": "Carret. Janico, Las Charcas"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Mundo Eléctrico R & R",
+    "rnc": "1-01-61420-1",
+    "email": null,
+    "telefono": "+1 809-567-1295",
+    "direccion": "Av. Ortega y Gasset No.49"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Osco Dominicana",
+    "rnc": "1-31-08787-6",
+    "email": null,
+    "telefono": "+1 809-542-1395",
+    "direccion": "Calle Eugenio Deschamps 26"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Petroquimicos automotrices SRL",
+    "rnc": "1-01-51674-7",
+    "email": "servicioalcliente@petroquimicos.com.do",
+    "telefono": "+1 809-561-7076",
+    "direccion": "Aut. Duarte Km 12 1/2"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Plaza Rudo Internacional",
+    "rnc": "1-32-97694-2",
+    "email": null,
+    "telefono": null,
+    "direccion": "Av. Duarte No. 391, Ens. Luperon"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Plaza Santa Cruz SRL",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-227-2222",
+    "direccion": "Av. San Martin No.227"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "ProContratista",
+    "rnc": "1-01-62076-5",
+    "email": null,
+    "telefono": "+1 809-472-4479",
+    "direccion": "Av. Rep. de Colombia No.35, Los Peralejos"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Prolimpiso SRL",
+    "rnc": "1-22-01364-4",
+    "email": null,
+    "telefono": "+1 809-531-0770",
+    "direccion": "Av. John F. Kennedy No.3"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "R. Lopez e Hijos",
+    "rnc": "1-01-64668-1",
+    "email": null,
+    "telefono": "+1 809-531-4833",
+    "direccion": "Prol. 27 Feb. 486"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Ramón Corripio",
+    "rnc": "1-01-01042-8",
+    "email": null,
+    "telefono": "+1 809-567-5537",
+    "direccion": "Av. John F. Kennedy 4, Miraflores"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Renova Center S.R.L",
+    "rnc": "1-32-33397-7",
+    "email": "info@suplax.com.do",
+    "telefono": "8091012143",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Repuesto Fernando de la Cruz",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-560-6515",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Repuestos & Servicios Charles",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 809-531-5544",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Resinas Dominicana, SRL",
+    "rnc": "1-22-01396-2",
+    "email": "info@residom.com",
+    "telefono": "+1 809-372-1998",
+    "direccion": "Aut. Duarte KM 9 1/2 Villa Maria"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Rodfor Team SRL.",
+    "rnc": "1-30-25997-6",
+    "email": "ventas@rodfor.com",
+    "telefono": "+1 809-334-0002",
+    "direccion": "C/ Estancia Nueva No.17, Urb San Geronimo"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Shoping Center Buen Vecino",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 849-446-5250",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Soluciones HM",
+    "rnc": null,
+    "email": null,
+    "telefono": null,
+    "direccion": "Mano Guayabo C/ CibaoNo. 10"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "SteelDepot MC",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 829-497-0100",
+    "direccion": "Calle Reparto José 11-A Marbella, Sector Ureña,"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Super Jimmy",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 829-824-0117",
+    "direccion": null
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Todo Usado Suriel",
+    "rnc": null,
+    "email": null,
+    "telefono": "+1 829-207-4870",
+    "direccion": "C/ Penetracion 15 No.22"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Valiente Fernandez SRL",
+    "rnc": "1-01-63165-1",
+    "email": "ventas@vf.com.do",
+    "telefono": "+1 809-549-5220",
+    "direccion": "Av. Luperon No.89"
+  },
+  {
+    "tipo": "SUPLIDOR",
+    "nombre": "Wurth Dominicana, S.A.",
+    "rnc": "1-01-87499-6",
+    "email": null,
+    "telefono": "+1 809-562-7777",
+    "direccion": "Parque Ind. Duarte Km. 22"
+  }
+]

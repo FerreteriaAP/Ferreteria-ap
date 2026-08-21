@@ -1,0 +1,1262 @@
+[
+  {
+    "tipo": "CLIENTE",
+    "nombre": "A 2 Liquidacion"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Argentina Sicologa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Adalberto Cabral /Bigote/"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Alberto /Caballo/"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Alex Herrero"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Alexandra feliz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Alexis Guzman"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Alfonzo Feliz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Alquimedez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Altagracias Reinozo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ana Mena"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Andre Diloche"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Andre La Roca"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Andrea Almanzar"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Andres de la Rosa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Anety Gusman"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Angel Ciriaco"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Angel Sanchez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Angel Valautre"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Anny Piron"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Antonio Ramos Papo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Antony De La Cruz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Anyolino"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Arelis Perez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ariza Mancebo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Arquimedez Jose"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Asocaoba"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Auto Gala"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Balvuena Maestro"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Banca Real"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Bandejor"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Basilia Jesus"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Benita"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Bermode Daisma"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Biulle Laurant"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Bladimir Rosario"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Bobo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Candida Torres"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carabela"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Cariblu Proyecto"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carlo Beltrez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carlo Martinez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carlo Paulino"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carmela Matos"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carmen Familia"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carmen Lidia"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carmen Rosario"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carolina Garcias"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Centro de Goma"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Centro de Refrigeracion Rover"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Cezar Cabrera"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Chavo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Chicho De La Cruz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Chipa /ORO/"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Climalog"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Colmado Oasis"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Cristian"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Condominio Don Orencio Vl"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Consultora Kolmen SRL"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Cristian Castillo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Cristian Mendez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Cristina Torres"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Cruz Martinez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Daneyi  Lizaldo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Daniel Castillo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Daniel Espinal o Nani"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Daniel Feliz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Danilo De la Cruz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Dario Valautre"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Deco Addict"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Denia Ortiz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Diana Rivera"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Diloche"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Diony tejeda"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Disney Pujols"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Doña Nohema"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Dra Berkis"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Edwin Valerio"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "El Chino"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "El May"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "El Pastor"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Electrosistema Fondeur SRL"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Elena Cabrera"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Elizabeth Cuevas"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Elsa Gomez (Aros)"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Elsa Sosa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Elvin Baez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Emmanuel Perez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Enrrique Lopez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Epedito"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Erasmo Garcias"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ernesto Miguel"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Escuela Hora De Dios /Colegio De Monja/"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Euclidez Pelo Fino"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Eudy De Lo Santo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Eulalio Batista"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Fanny Angela Abreu"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Favio Almonte"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Faviola De La Rosa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Feliz Aybar"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Feliz Javier Maria Torres"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Feliz Pujols"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ferni Aybar"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Flor Nolasco"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Francia De Los Santo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Francis Sanchez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Francisco Duarte"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Francisco Medina Peña"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Francisco Novas"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Francisco Quezada"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Franklin Rodriguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Frauly Arias"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Freddy Nuñez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Genology SRL"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Gina Figueroa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Glenys Parra"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Grecias Crisotomo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Gregoria Alvarez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Grupo Mayer"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Grupo WMR & Asocs."
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Guarionex"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Hidraulica Global AG"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ing Derick Rodriguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ing Efren Mateo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ing Luna"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ing. Mendoza"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Inmobiliaria Mayer"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Irlando Ramos"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ironelis De los Santos"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Isaia Sotos Bocinita"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ivelice Tia De Sandra"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ivonne Jimenez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jacqueline Soto"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jairo Encarnacion"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jesus Gomez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jhonatan Luzon"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jirma Pantaleon"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Joaquin Carrasco"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jonny Pie"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Alcidez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Antonio Toño"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Bello"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose De Paula"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Gerez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Luciano"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Luis Rosario"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Manuel"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Matinez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jose Mendez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Juan F Ramirez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Juan Marte"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Juan Mecanico"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Juan Rodriguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Juancito Feliz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Julio Mora"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Katiuska Sanchez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Keila Medina"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Kenia Frontier"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Kukuto Auto Adornos"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "La Mama De Felo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "La Mella"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Leandel Auto Workshop"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Leonardo Jimenez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Lidia Gomez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Lina Feliz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Lino Familia"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Literal Construcciones"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Lucia Ramirez  ]Mary]  Wandel"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Luis Albañil"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Luis Emelio"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Luis Tejada"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marleida"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Made Auto Import"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maestro Lester"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Malespin Constructora"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Manengo El Plomerito"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Manolo Ciriaco"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Manuel De Jesus"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Manuel Nin"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marcelo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marcelo Martinez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marcelo Rodriguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marcial  Cecilia"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marco Carabela"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marcos Armenteros"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Margo Reyes"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Margot Reyes"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maria Del Pilar"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maria Duran"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maria La Barbie"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maria Magdalena Herrera"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Mariano Encarnacion"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Mariano Encarnacion la belleza"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marileyda Peralta"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maritza Lopez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maritza Peralta"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marleny Reyes"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Marmoleria Italtop"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Martin o Belleza"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maximo Guillermo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Maximo Tapia"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Merkaparts"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Michel"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Microtech"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Miguel Rodriguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Miguelin"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Miguelina Samboy"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ministerio Elim"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Nanny Maid Clear"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Narciso Rondon"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Nelio Duverge"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Nery Abreu"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Nicol Mendoza"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Nicolas Lopez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Noly Torguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Nueva Iglesia De La Cristanisacion Nacional"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Olivo Mercedez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Olivo Sanchez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Papin"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Pastor Josue"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Paulina Berroa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Pedro Gomez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Pedro Olivo Cuello"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Pedro Padilla"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Pelo Fino"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Piedras Eduardo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Pipo Perez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Pollera Diony"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Quintiliano Caceres"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "R. Lopez e Hijos"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rafael Bautista"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ramon Bisono"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rolando Valdez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rafael Ciprian"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rafael Polanco"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rafael Rosario"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rafael Santana"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rafelin Bautista"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ramon Crisotomo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ramon Diaz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ramon Favian"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ramon Garcias"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Raul Cabrera"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ray Perez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ray Romulo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Refricity S.R.L"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Residencial LP8"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ricardo Morfi"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ricardo Moya"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Richart Yulier"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rofran Solar Energy"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rogelio Amigo Ingeniero"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rolando Auto Aires"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Roller Herrera"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ronny Garcias"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rossy Garcias"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ruben Severino"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rusbel Sanchez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Sr. Cabo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Sr. Flete"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Sr. Willian"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Sandra Casado"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Santiago Ferreira"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Santo Martes"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Savier Andres"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Seguridad Paraiso Del Caribe"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Shaldai Import SRL"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Shef  O Duran"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Simon Medina"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Sujeirys Altagracias"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Susano"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Telio Carabela"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Tomas De Leon"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Tomas Moronto"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Tuta Alvarez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Universidad Psicologica Industrial"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Vidal Perez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Vanecio O Alegio"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Vicente Aracena"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Victor Gutierrez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Virgilio La Rosa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Virgilio Ventura"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Vitelio Rapozo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Viviana Payano / Martina"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Welinton Daniel Gonzalez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Wilda Alcantara"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "WRC Centro de Muflers"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Walter Martinez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Wendy Tanques"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Wilian Rodriguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Willian Pichardo"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Willy Otañe"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yadira Diaz"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yadira Escobosa"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yary o Antonio"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yohan Dipre"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yonny Pie"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yonny Rodriguez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yonny Rojas"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Ysabel Matos"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yuderka Hernandez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yudy Tia De Sandra"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yunior Alejandro"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Yunior Shuter"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Zabala Zabala"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Alexis Antonio"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Angel Santana"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Carlos Brama"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Conacivil Construciones"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Fabio Almontes"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Filtrotech"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Francia de los Santos"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Jacinto Batista"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Julio Mendez"
+  },
+  {
+    "tipo": "CLIENTE",
+    "nombre": "Rosa Maldonado"
+  }
+]
