@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ChequeEntregadoBtn, DismissAlertaBtn } from "@/components/cheques/cheque-btn";
 
 async function getAlertas() {
  const hoy = new Date();
@@ -18,6 +19,8 @@ async function getAlertas() {
  nominasBorrador,
  ocAprobadas,
  turnosAbiertos,
+ chequesListos,
+ alertasChequeEntregado,
  ] = await Promise.all([
  // Productos bajo stock mínimo
  prisma.producto.findMany({
@@ -78,6 +81,24 @@ async function getAlertas() {
  select: { id: true, numero: true, usuario: { select: { nombre: true, apellido: true } }, fechaApertura: true },
  orderBy: { fechaApertura: "asc" },
  }),
+
+ // Suplidores con cheque listo
+ prisma.contacto.findMany({
+ where: { chequeListo: true, tipo: { in: ["SUPLIDOR", "AMBOS"] } },
+ select: { id: true, nombre: true, fechaChequeListo: true },
+ orderBy: { fechaChequeListo: "asc" },
+ }),
+
+ // Alertas de cheque entregado no vistas (para admin)
+ prisma.alertaChequePago.findMany({
+ where: { vistoPorAdmin: false },
+ select: {
+ id: true, entregadoAt: true,
+ contacto: { select: { id: true, nombre: true } },
+ entregadoPor: { select: { nombre: true, apellido: true } },
+ },
+ orderBy: { entregadoAt: "desc" },
+ }).catch(() => [] as never[]),
  ]);
 
  return {
@@ -89,6 +110,8 @@ async function getAlertas() {
  nominasBorrador,
  ocAprobadas,
  turnosAbiertos,
+ chequesListos,
+ alertasChequeEntregado,
  };
 }
 
@@ -146,8 +169,19 @@ export default async function AlertasPage() {
  // VENDEDOR solo ve stock bajo
  const soloStock = rol === "VENDEDOR";
 
+ const esAdmin = rol === "ADMINISTRADOR";
+
+ type AlertaCheque = {
+   id: string; entregadoAt: Date;
+   contacto: { id: string; nombre: string };
+   entregadoPor: { nombre: string; apellido: string };
+ };
+ const alertasCheque = a.alertasChequeEntregado as AlertaCheque[];
+ type ChequeRow = { id: string; nombre: string; fechaChequeListo: Date | null };
+ const chequesListos = a.chequesListos as ChequeRow[];
+
  const totalAlertas = soloStock
- ? a.stockBajoItems.length
+ ? a.stockBajoItems.length + a.chequesListos.length
  : a.stockBajoItems.length +
  a.cxcVencidas.length +
  a.cxpVencidas.length +
@@ -155,7 +189,9 @@ export default async function AlertasPage() {
  a.cxpPorVencer.length +
  a.nominasBorrador.length +
  a.ocAprobadas.length +
- a.turnosAbiertos.length;
+ a.turnosAbiertos.length +
+ a.chequesListos.length +
+ a.alertasChequeEntregado.length;
 
  return (
  <div className="max-w-4xl mx-auto space-y-6"> {/* Encabezado */}
@@ -220,5 +256,56 @@ export default async function AlertasPage() {
  className="flex items-center justify-between text-xs hover:bg-muted/50 rounded px-1 py-0.5"> <span className="font-medium">Turno #{t.numero} — {t.usuario.nombre} {t.usuario.apellido}</span> <span className="text-muted-foreground">{fmtFecha(t.fechaApertura)}</span> </Link> ))}
  </div> </AlertCard> )}
 
- </div> </div> );
+ </div>
+
+ {/* ── Pagos Suplidores ── */}
+ {(a.chequesListos.length > 0 || (esAdmin && a.alertasChequeEntregado.length > 0)) && (
+ <div className="space-y-4">
+ {/* Divisor */}
+ <div className="flex items-center gap-3">
+ <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
+ <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-2">
+ Pagos Suplidores
+ </span>
+ <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
+ </div>
+
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+ {/* Cheques listos */}
+ {a.chequesListos.length > 0 && (
+ <AlertCard titulo="💳 Cheques listos para entrega" color="blue" count={a.chequesListos.length}>
+ <div className="space-y-2">
+ {chequesListos.map(s => (
+ <div key={s.id} className="flex items-center justify-between text-xs gap-2">
+ <span className="font-medium truncate">{s.nombre}</span>
+ <ChequeEntregadoBtn contactoId={s.id} nombre={s.nombre} />
+ </div>
+ ))}
+ </div>
+ </AlertCard>
+ )}
+
+ {/* Alertas de cheque entregado — solo admin */}
+ {esAdmin && a.alertasChequeEntregado.length > 0 && (
+ <AlertCard titulo="✅ Cheques entregados" color="amber" count={a.alertasChequeEntregado.length}>
+ <div className="space-y-2">
+ {alertasCheque.map(al => (
+ <div key={al.id} className="flex items-center justify-between text-xs gap-2">
+ <div className="truncate">
+ <span className="font-medium">{al.contacto.nombre}</span>
+ <span className="text-muted-foreground ml-1.5">
+ — {al.entregadoPor.nombre} {al.entregadoPor.apellido}
+ </span>
+ </div>
+ <DismissAlertaBtn alertaId={al.id} />
+ </div>
+ ))}
+ </div>
+ </AlertCard>
+ )}
+ </div>
+ </div>
+ )}
+
+ </div> );
 }

@@ -182,7 +182,8 @@ model Usuario {
   ordenesCompra  OrdenCompra[]  @relation("OrdenesCompraUsuario")
   gastos         Gasto[]
   turnos         TurnoCaja[]
-  notasCredito   NotaCredito[]
+  notasCredito      NotaCredito[]
+  alertasCheque     AlertaChequePago[]
 
   @@map("usuarios")
 }
@@ -247,6 +248,9 @@ model Contacto {
   margenPrecio        Decimal?        @db.Decimal(5, 2) // % sobre (costo+ITBIS), ej. 15.00
   // Saldo a favor — acumulado por notas de crédito
   saldoFavor          Decimal         @default(0) @db.Decimal(12, 2)
+  // Cheques listos para pago (solo suplidores)
+  chequeListo         Boolean         @default(false)
+  fechaChequeListo    DateTime?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -258,6 +262,7 @@ model Contacto {
   cuentasPorCobrar  CuentaPorCobrar[]
   cuentasPorPagar   CuentaPorPagar[]
   notasCredito      NotaCredito[]
+  alertasCheque     AlertaChequePago[]
 
   @@map("contactos")
 }
@@ -932,4 +937,18 @@ model NotaCredito {
 
   @@index([clienteId])
   @@map("notas_credito")
+}
+
+model AlertaChequePago {
+  id            String   @id @default(cuid())
+  contactoId    String
+  entregadoPorId String
+  entregadoAt   DateTime @default(now())
+  vistoPorAdmin Boolean  @default(false)
+
+  contacto      Contacto @relation(fields: [contactoId],     references: [id])
+  entregadoPor  Usuario  @relation(fields: [entregadoPorId], references: [id])
+
+  @@index([vistoPorAdmin])
+  @@map("alertas_cheque_pago")
 }
