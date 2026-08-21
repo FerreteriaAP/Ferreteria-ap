@@ -141,6 +141,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
   const [alertaPrecios, setAlertaPrecios] = useState<AlertaPrecio[]>([]);
   const preciosRef      = useRef<Record<string, { precioVenta: number; porcentajeGanancia: number }>>({});
   const costoOriginalRef = useRef<Record<string, number>>({});
+  const alertaRef = useRef<HTMLDivElement | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -222,13 +223,22 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
     const precios = preciosRef.current[detalle.productoId];
     const pvActual = precios?.precioVenta ?? 0;
     if (Math.abs((nuevoCostoNet - costoAnteriorNet) / costoAnteriorNet) > 0.05) {
-      const ratio = pvActual > 0 ? pvActual / costoAnteriorNet : 1;
-      const sugerido = Math.round(nuevoCostoNet * ratio * 100) / 100;
-      setAlertaPrecios(prev => [...prev.filter(a => a.productoId !== detalle.productoId), {
-        productoId: detalle.productoId, nombre: detalle.nombre,
-        costoAnterior: costoAnteriorNet, nuevoCosto: nuevoCostoNet,   // ambos en NETO
-        precioVentaActual: pvActual, nuevoPrecioVenta: sugerido, aplicar: true,
-      }]);
+      // Precio sugerido basado en el % de ganancia fijo del artículo (no en ratio)
+      const pctGanancia = precios?.porcentajeGanancia ?? 30;
+      const sugerido = Math.round(nuevoCostoNet * (1 + pctGanancia / 100) * 100) / 100;
+      setAlertaPrecios(prev => {
+        const esPrimera = !prev.some(a => a.productoId === detalle.productoId);
+        const siguiente = [...prev.filter(a => a.productoId !== detalle.productoId), {
+          productoId: detalle.productoId, nombre: detalle.nombre,
+          costoAnterior: costoAnteriorNet, nuevoCosto: nuevoCostoNet,   // ambos en NETO
+          precioVentaActual: pvActual, nuevoPrecioVenta: sugerido, aplicar: true,
+        }];
+        // Scroll automático al cuadro de alertas para todos los usuarios
+        if (esPrimera) {
+          setTimeout(() => alertaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+        }
+        return siguiente;
+      });
     } else {
       setAlertaPrecios(prev => prev.filter(a => a.productoId !== detalle.productoId));
     }
@@ -324,7 +334,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
 
         {/* ── Alertas cambio de precio ── */}
         {alertaPrecios.length > 0 && (
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#f97316aa", backgroundColor: "color-mix(in oklch, #f97316 6%, var(--card))" }}>
+          <div ref={alertaRef} className="rounded-xl border overflow-hidden" style={{ borderColor: "#f97316aa", backgroundColor: "color-mix(in oklch, #f97316 6%, var(--card))" }}>
             <div className="px-5 py-3 border-b" style={{ borderColor: "#f9731644", backgroundColor: "color-mix(in oklch, #f97316 10%, var(--card))" }}>
               <div className="flex items-center gap-2">
                 <FileWarning size={14} style={{ color: "#f97316" }} />
@@ -585,8 +595,9 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                             <p className="font-medium text-sm leading-tight">{d.nombre}</p>
                             <p className="text-xs text-muted-foreground">{d.unidad}</p>
                             {cambio5 && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive font-medium mt-0.5 inline-block">
-                                Precio cambió
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold mt-0.5 inline-block"
+                                style={{ backgroundColor: "#f9731422", color: "#f97316", border: "1px solid #f9731455" }}>
+                                ⚠ Precio cambió
                               </span>
                             )}
                           </TableCell>
@@ -625,15 +636,15 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                                 <SelectItem value="18">Excluido (+18%)</SelectItem>
                               </SelectContent>
                             </Select>
-                            <p className="text-[10px] text-muted-foreground text-center mt-0.5">
-                              ITBIS: RD${lineItbis.toFixed(2)}
-                            </p>
+                            {/* ITBIS por unidad (no por línea) */}
+                            {costo > 0 && (
+                              <p className="text-[10px] text-muted-foreground text-center mt-0.5">
+                                x1 = RD${(cant > 0 ? lineItbis / cant : 0).toFixed(4)}
+                              </p>
+                            )}
                           </TableCell>
                           <TableCell className="text-right">
                             <p className="font-medium text-sm font-mono">{fmt(lineTotal)}</p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {sub.toFixed(2)} + {lineItbis.toFixed(2)}
-                            </p>
                           </TableCell>
                           <TableCell>
                             <button type="button" onClick={() => remove(i)}
@@ -657,18 +668,18 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
             {/* Totales */}
             {detalles.length > 0 && (
               <div className="flex justify-end pt-2">
-                <div className="rounded-xl border p-4 space-y-2 w-64" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}>
+                <div className="rounded-xl border p-4 space-y-1.5 min-w-[260px] w-fit" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}>
                   {[
-                    { label: "Subtotal sin ITBIS", val: fmt(subtotal), muted: true },
-                    { label: "ITBIS (18%)", val: fmt(totalItbis), muted: true },
-                  ].map(({ label, val, muted }) => (
-                    <div key={label} className="flex justify-between text-sm">
-                      <span className={muted ? "text-muted-foreground" : "font-bold"}>{label}</span>
+                    { label: "Subtotal (sin ITBIS)", val: fmt(subtotal) },
+                    { label: "ITBIS (18%)", val: fmt(totalItbis) },
+                  ].map(({ label, val }) => (
+                    <div key={label} className="flex items-center justify-between gap-6 text-sm whitespace-nowrap">
+                      <span className="text-muted-foreground">{label}</span>
                       <span className="font-mono">{val}</span>
                     </div>
                   ))}
-                  <div className="border-t pt-2 flex justify-between">
-                    <span className="font-bold">Total</span>
+                  <div className="border-t pt-1.5 flex items-center justify-between gap-6 whitespace-nowrap">
+                    <span className="font-bold text-sm">Total</span>
                     <span className="font-bold font-mono text-base" style={{ color: ACCENT }}>{fmt(total)}</span>
                   </div>
                 </div>
