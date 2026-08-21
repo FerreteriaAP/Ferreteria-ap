@@ -54,9 +54,15 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
   const [savedOk, setSavedOk]   = useState(false);
   const [serverError, setError] = useState<string | null>(null);
 
-  // Costo sin ITBIS e ITBIS monto — UI only, combinan en costoUltimo
-  const [costoNeto, setCostoNeto] = useState<number>(Number(defaultValues.costoUltimo ?? 0));
-  const [itbisMonto, setItbisMonto] = useState<number>(0);
+  // costoUltimo en BD = NETO (sin ITBIS).
+  // La UI muestra los dos campos: "Costo sin ITBIS" y "ITBIS (18%)" — informativos.
+  // Al guardar solo se persiste el neto; el precio de venta se calcula sobre el bruto.
+  const costoNetoInicial = Number(defaultValues.costoUltimo ?? 0);
+  const exentoInicial    = defaultValues.exentoItbis ?? false;
+  const [costoNeto,   setCostoNeto]   = useState<number>(costoNetoInicial);
+  const [itbisMonto,  setItbisMonto]  = useState<number>(
+    exentoInicial ? 0 : parseFloat((costoNetoInicial * 0.18).toFixed(2))
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<FormValues>({
@@ -70,10 +76,13 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
   });
 
   const { errors, isDirty } = form.formState;
-  const costo    = form.watch("costoUltimo")        ?? 0;
+  const costo    = form.watch("costoUltimo")        ?? 0;  // neto
   const ganancia = form.watch("porcentajeGanancia") ?? 30;
   const fraccion = form.watch("esFraccionable");
-  const precioSugerido = costo > 0 ? (costo * (1 + ganancia / 100)).toFixed(2) : null;
+  // Precio sugerido = costo BRUTO (neto + itbis) × (1 + %ganancia)
+  const costoBruto = costoNeto + itbisMonto;
+  const precioSugerido = costoBruto > 0 ? (costoBruto * (1 + ganancia / 100)).toFixed(2) : null;
+  void costo; // costoUltimo se sigue registrando en el form aunque no se use aquí para el sugerido
 
   // Sincroniza precio de venta con el sugerido automáticamente
   function syncPrecioVenta(costoTotal: number, pct: number) {
@@ -241,13 +250,15 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
                       type="number" step="0.01" min="0"
                       value={costoNeto}
                       onChange={e => {
-                        const neto = parseFloat(Number(e.target.value).toFixed(2)) || 0;
+                        const neto  = parseFloat(Number(e.target.value).toFixed(2)) || 0;
                         const itbis = parseFloat((neto * 0.18).toFixed(2));
-                        const total = parseFloat((neto + itbis).toFixed(2));
+                        const bruto = parseFloat((neto + itbis).toFixed(2));
                         setCostoNeto(neto);
                         setItbisMonto(itbis);
-                        form.setValue("costoUltimo", total, { shouldDirty: true });
-                        syncPrecioVenta(total, ganancia);
+                        // costoUltimo siempre se guarda SIN ITBIS (neto)
+                        form.setValue("costoUltimo", neto, { shouldDirty: true });
+                        // Precio de venta se calcula sobre el costo BRUTO
+                        syncPrecioVenta(bruto, ganancia);
                       }}
                     />
                   </div>
@@ -262,10 +273,11 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
                       value={itbisMonto}
                       onChange={e => {
                         const itbis = parseFloat(Number(e.target.value).toFixed(2)) || 0;
-                        const total = parseFloat((costoNeto + itbis).toFixed(2));
+                        const bruto = parseFloat((costoNeto + itbis).toFixed(2));
                         setItbisMonto(itbis);
-                        form.setValue("costoUltimo", total, { shouldDirty: true });
-                        syncPrecioVenta(total, ganancia);
+                        // costoUltimo siempre SIN ITBIS
+                        form.setValue("costoUltimo", costoNeto, { shouldDirty: true });
+                        syncPrecioVenta(bruto, ganancia);
                       }}
                     />
                   </div>

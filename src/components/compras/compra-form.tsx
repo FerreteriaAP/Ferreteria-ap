@@ -141,8 +141,9 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
   const [alertaPrecios, setAlertaPrecios] = useState<AlertaPrecio[]>([]);
   const preciosRef      = useRef<Record<string, { precioVenta: number; porcentajeGanancia: number }>>({});
   const costoOriginalRef = useRef<Record<string, number>>({});
-  const alertaRef = useRef<HTMLDivElement | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alertaRef       = useRef<HTMLDivElement | null>(null);
+  const debounceRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alertaDebRef    = useRef<ReturnType<typeof setTimeout> | null>(null); // debounce para alerta precio
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [nombreInicial, setNombreInicial] = useState("");
@@ -223,19 +224,27 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
     const precios = preciosRef.current[detalle.productoId];
     const pvActual = precios?.precioVenta ?? 0;
     if (Math.abs((nuevoCostoNet - costoAnteriorNet) / costoAnteriorNet) > 0.05) {
-      // Precio sugerido basado en el % de ganancia fijo del artículo (no en ratio)
+      // Precios en BRUTO (costo + ITBIS) para mostrar al usuario
+      const costoAnteriorBruto = Math.round(costoAnteriorNet * (1 + ITBIS_RATE) * 100) / 100;
+      const nuevoCostoBruto    = Math.round(nuevoCostoNet    * (1 + ITBIS_RATE) * 100) / 100;
+      // Precio sugerido = costo bruto × (1 + %ganancia) — mismo criterio que inventario
       const pctGanancia = precios?.porcentajeGanancia ?? 30;
-      const sugerido = Math.round(nuevoCostoNet * (1 + pctGanancia / 100) * 100) / 100;
+      const sugerido = Math.round(nuevoCostoBruto * (1 + pctGanancia / 100) * 100) / 100;
       setAlertaPrecios(prev => {
         const esPrimera = !prev.some(a => a.productoId === detalle.productoId);
         const siguiente = [...prev.filter(a => a.productoId !== detalle.productoId), {
           productoId: detalle.productoId, nombre: detalle.nombre,
-          costoAnterior: costoAnteriorNet, nuevoCosto: nuevoCostoNet,   // ambos en NETO
+          costoAnterior: costoAnteriorBruto, nuevoCosto: nuevoCostoBruto,  // ambos BRUTOS c/ITBIS
           precioVentaActual: pvActual, nuevoPrecioVenta: sugerido, aplicar: true,
         }];
-        // Scroll automático al cuadro de alertas para todos los usuarios
+        // Scroll al cuadro de alertas para todos los usuarios (descuenta la altura del header)
         if (esPrimera) {
-          setTimeout(() => alertaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+          setTimeout(() => {
+            const el = alertaRef.current;
+            if (!el) return;
+            const top = el.getBoundingClientRect().top + window.scrollY - 80;
+            window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+          }, 80);
         }
         return siguiente;
       });
@@ -356,9 +365,9 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                       {[
-                        { label: "Costo anterior", val: `RD$ ${a.costoAnterior.toFixed(2)}` },
-                        { label: "Costo nuevo", val: `RD$ ${a.nuevoCosto.toFixed(2)}` },
-                        { label: "Precio actual", val: `RD$ ${a.precioVentaActual.toFixed(2)}` },
+                        { label: "Costo anterior c/ITBIS", val: `RD$ ${a.costoAnterior.toFixed(2)}` },
+                        { label: "Costo nuevo c/ITBIS",    val: `RD$ ${a.nuevoCosto.toFixed(2)}` },
+                        { label: "Precio venta actual",    val: `RD$ ${a.precioVentaActual.toFixed(2)}` },
                       ].map(({ label, val }) => (
                         <div key={label} className="space-y-0.5">
                           <p className="text-xs text-muted-foreground">{label}</p>
@@ -569,7 +578,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                       <TableHead className="text-xs text-right w-28">Cantidad</TableHead>
                       <TableHead className="text-xs text-right w-40">Costo (RD$)</TableHead>
                       <TableHead className="text-xs text-center w-28">ITBIS en costo</TableHead>
-                      <TableHead className="text-xs text-right w-36">Subtotal</TableHead>
+                      <TableHead className="text-xs text-right w-36">Sub-total s/ITBIS</TableHead>
                       <TableHead className="w-8" />
                     </TableRow>
                   </TableHeader>
@@ -611,7 +620,13 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">RD$</span>
                               <input type="number" step="0.01" min="0"
                                 className="w-full h-8 rounded-lg border bg-background pl-7 pr-2 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40"
-                                {...form.register(`detalles.${i}.costo`, { onChange: e => checkAlertaPrecio(i, Number(e.target.value)) })} />
+                                {...form.register(`detalles.${i}.costo`, {
+                                  onChange: e => {
+                                    const v = Number(e.target.value);
+                                    if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
+                                    alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, v), 850);
+                                  },
+                                })} />
                             </div>
                             {/* Hint sobre si el costo ingresado incluye o excluye ITBIS */}
                             {costo > 0 && (
@@ -627,7 +642,8 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                               value={String(pct)}
                               onValueChange={v => {
                                 form.setValue(`detalles.${i}.itbisPct`, Number(v));
-                                checkAlertaPrecio(i, costo, Number(v));
+                                if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
+                                alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, costo, Number(v)), 850);
                               }}
                             >
                               <SelectTrigger className="h-8 text-center text-xs"><SelectValue /></SelectTrigger>
@@ -639,7 +655,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                             {/* ITBIS por unidad (no por línea) */}
                             {costo > 0 && (
                               <p className="text-[10px] text-muted-foreground text-center mt-0.5">
-                                x1 = RD${(cant > 0 ? lineItbis / cant : 0).toFixed(4)}
+                                x1 = RD${(cant > 0 ? Math.round(lineItbis / cant * 100) / 100 : 0).toFixed(2)}
                               </p>
                             )}
                           </TableCell>
@@ -670,8 +686,8 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
               <div className="flex justify-end pt-2">
                 <div className="rounded-xl border p-4 space-y-1.5 min-w-[260px] w-fit" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}>
                   {[
-                    { label: "Subtotal (sin ITBIS)", val: fmt(subtotal) },
-                    { label: "ITBIS (18%)", val: fmt(totalItbis) },
+                    { label: "Sub-total sin ITBIS", val: fmt(subtotal) },
+                    { label: "ITBIS",               val: fmt(totalItbis) },
                   ].map(({ label, val }) => (
                     <div key={label} className="flex items-center justify-between gap-6 text-sm whitespace-nowrap">
                       <span className="text-muted-foreground">{label}</span>
@@ -679,7 +695,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                     </div>
                   ))}
                   <div className="border-t pt-1.5 flex items-center justify-between gap-6 whitespace-nowrap">
-                    <span className="font-bold text-sm">Total</span>
+                    <span className="font-bold text-sm">Total de la factura</span>
                     <span className="font-bold font-mono text-base" style={{ color: ACCENT }}>{fmt(total)}</span>
                   </div>
                 </div>
