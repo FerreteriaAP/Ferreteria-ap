@@ -118,6 +118,8 @@ export async function getClientes() {
  id: true,
  nombre: true,
  rnc: true,
+ telefono: true,
+ email: true,
  credito: true,
  limiteCredito: true,
  reglaPrecio: true,

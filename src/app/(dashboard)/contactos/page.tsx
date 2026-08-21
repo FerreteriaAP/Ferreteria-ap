@@ -42,23 +42,7 @@ export default async function ContactosPage({ searchParams }: PageProps) {
             Clientes y suplidores — {total} registros
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Filtros tipo — a la derecha */}
-          <div className="flex gap-1.5 flex-wrap">
-            {(["todos", "CLIENTE", "SUPLIDOR", "AMBOS"] as const).map((t) => (
-              <Link
-                key={t}
-                href={`/contactos?tipo=${t}${busqueda ? `&q=${busqueda}` : ""}${vista === "grid" ? "&vista=grid" : ""}`}
-              >
-                <Badge
-                  variant={tipo === t ? "default" : "outline"}
-                  className="cursor-pointer px-3 py-1"
-                >
-                  {t === "todos" ? "Todos" : tipoLabel[t]}
-                </Badge>
-              </Link>
-            ))}
-          </div>
+        <div className="flex items-center gap-3">
           <ViewToggle
             vista={vista}
             listaHref={`/contactos?tipo=${tipo}${busqueda ? `&q=${busqueda}` : ""}`}
@@ -70,8 +54,25 @@ export default async function ContactosPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Buscador */}
-      <ContactoBusqueda tipo={tipo} vista={vista} defaultValue={busqueda} />
+      {/* Buscador + filtros tipo en la misma fila */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <ContactoBusqueda tipo={tipo} vista={vista} defaultValue={busqueda} />
+        <div className="flex gap-1.5 flex-wrap">
+          {(["todos", "CLIENTE", "SUPLIDOR", "AMBOS"] as const).map((t) => (
+            <Link
+              key={t}
+              href={`/contactos?tipo=${t}${busqueda ? `&q=${busqueda}` : ""}${vista === "grid" ? "&vista=grid" : ""}`}
+            >
+              <Badge
+                variant={tipo === t ? "default" : "outline"}
+                className="cursor-pointer px-3 py-1"
+              >
+                {t === "todos" ? "Todos" : tipoLabel[t]}
+              </Badge>
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {/* Contenido */}
       {vista === "grid" ? (

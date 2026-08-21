@@ -218,3 +218,56 @@ export async function restaurarContacto(id: string) {
  revalidatePath("/contactos");
  return { success: true };
 }
+
+// ── Completar datos desde ventas / PDV ────────────────────────────────────────
+
+export async function completarDatosCliente(
+  contactoId: string,
+  datos: {
+    telefono?: string;
+    rnc?: string;
+    email?: string;
+    nuevaDireccion?: {
+      etiqueta: string;
+      direccion: string;
+      sector?: string;
+      ciudad?: string;
+    };
+  }
+) {
+  const update: Record<string, unknown> = {};
+
+  // Solo actualiza si el campo actualmente está vacío en BD
+  const actual = await prisma.contacto.findUnique({
+    where: { id: contactoId },
+    select: { telefono: true, rnc: true, email: true },
+  });
+  if (!actual) return { error: "Cliente no encontrado" };
+
+  if (datos.telefono?.trim() && !actual.telefono) update.telefono = datos.telefono.trim();
+  if (datos.rnc?.trim()      && !actual.rnc)      update.rnc      = datos.rnc.trim();
+  if (datos.email?.trim()    && !actual.email)    update.email    = datos.email.trim();
+
+  if (Object.keys(update).length > 0) {
+    await prisma.contacto.update({ where: { id: contactoId }, data: update });
+  }
+
+  // Nueva dirección — siempre se agrega si se envía
+  if (datos.nuevaDireccion?.direccion?.trim()) {
+    const countDir = await prisma.direccionEntrega.count({ where: { contactoId } });
+    await prisma.direccionEntrega.create({
+      data: {
+        contactoId,
+        etiqueta:    datos.nuevaDireccion.etiqueta?.trim() || "Principal",
+        direccion:   datos.nuevaDireccion.direccion.trim(),
+        sector:      datos.nuevaDireccion.sector?.trim() || null,
+        ciudad:      datos.nuevaDireccion.ciudad?.trim() || "Santo Domingo",
+        esPrincipal: countDir === 0,
+      },
+    });
+  }
+
+  revalidatePath(`/contactos/${contactoId}`);
+  revalidatePath("/ventas/nueva");
+  return { ok: true };
+}

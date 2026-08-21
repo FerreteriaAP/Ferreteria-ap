@@ -7,13 +7,16 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { crearCotizacion, buscarProductosVenta, type VentaInput } from "@/actions/ventas";
+import { completarDatosCliente } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
-import { Search, X, ShoppingCart, AlertCircle, Scissors } from "lucide-react";
+import { Search, X, ShoppingCart, AlertCircle, Scissors, UserPen, Plus, Check } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type Cliente = {
-  id: string; nombre: string; rnc: string | null; credito: string;
+  id: string; nombre: string; rnc: string | null;
+  telefono: string | null; email: string | null;
+  credito: string;
   limiteCredito: unknown; reglaPrecio: string | null; margenPrecio: unknown;
   direcciones: { id: string; etiqueta: string; direccion: string }[];
 };
@@ -130,12 +133,50 @@ export function VentaForm({ clientes }: VentaFormProps) {
   const cliente    = clientes.find(c => c.id === clienteId);
   const direcciones = cliente?.direcciones ?? [];
 
+  // ── Panel completar datos cliente ──
+  const [completarTel,   setCompletarTel]   = useState("");
+  const [completarRnc,   setCompletarRnc]   = useState("");
+  const [completarEmail, setCompletarEmail] = useState("");
+  const [agregarDir,     setAgregarDir]     = useState(false);
+  const [dirEtiqueta,    setDirEtiqueta]    = useState("Principal");
+  const [dirDireccion,   setDirDireccion]   = useState("");
+  const [dirSector,      setDirSector]      = useState("");
+  const [dirCiudad,      setDirCiudad]      = useState("Santo Domingo");
+  const [guardandoDatos, setGuardandoDatos] = useState(false);
+  const [datosGuardados, setDatosGuardados] = useState(false);
+
+  // Datos faltantes del cliente seleccionado
+  const faltaTel   = !!cliente && !cliente.telefono;
+  const faltaRnc   = !!cliente && !cliente.rnc;
+  const faltaEmail = !!cliente && !cliente.email;
+  const sinDirs    = !!cliente && cliente.direcciones.length === 0;
+  const hayFaltantes = faltaTel || faltaRnc || faltaEmail || sinDirs;
+
   useEffect(() => {
     setDireccionId("");
+    setCompletarTel(""); setCompletarRnc(""); setCompletarEmail("");
+    setAgregarDir(false); setDirEtiqueta("Principal"); setDirDireccion(""); setDirSector(""); setDirCiudad("Santo Domingo");
+    setDatosGuardados(false);
     if (cliente?.credito && cliente.credito !== "CONTADO") setCredito(cliente.credito as typeof credito);
     else setCredito("CONTADO");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clienteId]);
+
+  async function guardarDatosCliente() {
+    if (!cliente) return;
+    setGuardandoDatos(true);
+    await completarDatosCliente(cliente.id, {
+      telefono: completarTel || undefined,
+      rnc:      completarRnc || undefined,
+      email:    completarEmail || undefined,
+      nuevaDireccion: agregarDir && dirDireccion.trim() ? {
+        etiqueta: dirEtiqueta, direccion: dirDireccion,
+        sector: dirSector || undefined, ciudad: dirCiudad,
+      } : undefined,
+    });
+    setGuardandoDatos(false);
+    setDatosGuardados(true);
+  }
 
   // Búsqueda
   useEffect(() => {
@@ -282,7 +323,91 @@ export function VentaForm({ clientes }: VentaFormProps) {
             />
           </div>
 
-          {/* Dirección — solo si hay */}
+          {/* ── Panel: completar datos faltantes del cliente ── */}
+          {cliente && hayFaltantes && !datosGuardados && (
+            <div className="sm:col-span-2 rounded-xl border-2 border-dashed overflow-hidden"
+              style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 40%, var(--border))", backgroundColor: "color-mix(in oklch, var(--accent-hex) 4%, var(--card))" }}>
+              <div className="px-4 py-2.5 border-b flex items-center gap-2"
+                style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 20%, var(--border))" }}>
+                <UserPen size={13} style={{ color: "var(--accent-hex)" }} />
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--accent-hex)" }}>
+                  Completar perfil de {cliente.nombre}
+                </span>
+                <span className="text-[11px] text-muted-foreground ml-1">— se guardará en su ficha de contacto</span>
+              </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {faltaTel && (
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Teléfono</label>
+                    <input value={completarTel} onChange={e => setCompletarTel(e.target.value)}
+                      placeholder="809-000-0000" className={INPUT_CLS} />
+                  </div>
+                )}
+                {faltaRnc && (
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">RNC / Cédula</label>
+                    <input value={completarRnc} onChange={e => setCompletarRnc(e.target.value)}
+                      placeholder="1-01-00000-0" className={INPUT_CLS} />
+                  </div>
+                )}
+                {faltaEmail && (
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Email</label>
+                    <input type="email" value={completarEmail} onChange={e => setCompletarEmail(e.target.value)}
+                      placeholder="cliente@email.com" className={INPUT_CLS} />
+                  </div>
+                )}
+                {/* Dirección */}
+                {sinDirs && !agregarDir ? (
+                  <div className="sm:col-span-2">
+                    <button type="button" onClick={() => setAgregarDir(true)}
+                      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border hover:bg-muted/40 transition-colors">
+                      <Plus size={12} /> Agregar dirección de entrega
+                    </button>
+                  </div>
+                ) : agregarDir && (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Etiqueta</label>
+                      <input value={dirEtiqueta} onChange={e => setDirEtiqueta(e.target.value)}
+                        placeholder="Principal / Obra / Sucursal" className={INPUT_CLS} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Dirección *</label>
+                      <input value={dirDireccion} onChange={e => setDirDireccion(e.target.value)}
+                        placeholder="Calle, No., Edificio..." className={INPUT_CLS} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Sector</label>
+                      <input value={dirSector} onChange={e => setDirSector(e.target.value)}
+                        placeholder="Sector / Barrio" className={INPUT_CLS} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Ciudad</label>
+                      <input value={dirCiudad} onChange={e => setDirCiudad(e.target.value)}
+                        placeholder="Santo Domingo" className={INPUT_CLS} />
+                    </div>
+                  </>
+                )}
+                <div className="sm:col-span-2 flex justify-end">
+                  <button type="button" onClick={guardarDatosCliente} disabled={guardandoDatos}
+                    className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                    style={{ backgroundColor: "var(--accent-hex)", color: "#fff" }}>
+                    {guardandoDatos ? "Guardando…" : <><Check size={13} /> Guardar en perfil del cliente</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Confirmación guardado */}
+          {datosGuardados && (
+            <div className="sm:col-span-2 flex items-center gap-2 text-xs text-green-600 dark:text-green-400 px-1">
+              <Check size={13} /> Datos guardados en el perfil de {cliente?.nombre}
+            </div>
+          )}
+
+          {/* Dirección — si ya tiene o recién se agregó */}
           {direcciones.length > 0 && (
             <Field label="Dirección de entrega">
               <Select value={direccionId} onValueChange={v => setDireccionId((v ?? "") as string)}>

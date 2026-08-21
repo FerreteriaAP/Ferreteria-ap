@@ -2,13 +2,13 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getProductos, getCategorias } from "@/actions/productos";
 import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ProductosGrid } from "@/components/productos/productos-grid";
 import { ProductosTableBody } from "@/components/productos/productos-table";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 import { Paginacion } from "@/components/ui/paginacion";
+import { ProductoBusqueda } from "@/components/productos/producto-busqueda";
 
 interface PageProps {
   searchParams: Promise<{
@@ -64,16 +64,12 @@ export default async function ProductosPage({ searchParams }: PageProps) {
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-        <form method="GET" className="flex gap-2 flex-1">
-          <Input
-            name="q"
-            defaultValue={busqueda}
-            placeholder="Buscar por nombre, código, barras..."
-            className="max-w-xs"
-          />
-          {categoriaId && <input type="hidden" name="categoria" value={categoriaId} />}
-          {vista === "grid" && <input type="hidden" name="vista" value="grid" />}
-        </form>
+        <ProductoBusqueda
+          defaultValue={busqueda}
+          categoriaId={categoriaId}
+          stockBajo={stockBajo}
+          vista={vista}
+        />
         <div className="flex gap-2 flex-wrap">
           <Link
             href={`/productos?q=${busqueda}${vistaQS}`}
