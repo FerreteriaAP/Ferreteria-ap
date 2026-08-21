@@ -96,11 +96,11 @@ export function ContactosGrid({ contactos }: { contactos: Contacto[] }) {
               </div>
             </div>
 
-            {/* Info */}
-            <div className="space-y-1.5">
-              {c.rnc && <InfoRow label="RNC">{c.rnc}</InfoRow>}
-              {c.telefono && <InfoRow label="Tel.">{c.telefono}</InfoRow>}
-              {dirPrincipal?.ciudad && <InfoRow label="Ciudad">{dirPrincipal.ciudad}</InfoRow>}
+            {/* Info — siempre las mismas filas para uniformidad */}
+            <div className="flex-1 space-y-1.5">
+              <InfoRow label="RNC">{c.rnc ?? "—"}</InfoRow>
+              <InfoRow label="Tel.">{c.telefono ?? "—"}</InfoRow>
+              <InfoRow label="Ciudad">{dirPrincipal?.ciudad ?? "—"}</InfoRow>
               <InfoRow label="Crédito">{creditoLabel[c.credito] ?? c.credito}</InfoRow>
               <InfoRow label="NCF">
                 <span className="font-mono text-[11px]">{c.tipoComprobante}</span>

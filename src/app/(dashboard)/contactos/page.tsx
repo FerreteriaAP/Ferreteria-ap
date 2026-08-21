@@ -35,14 +35,30 @@ export default async function ContactosPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-5">
       {/* Encabezado */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">Contactos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Clientes y suplidores — {total} registros
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Filtros tipo — a la derecha */}
+          <div className="flex gap-1.5 flex-wrap">
+            {(["todos", "CLIENTE", "SUPLIDOR", "AMBOS"] as const).map((t) => (
+              <Link
+                key={t}
+                href={`/contactos?tipo=${t}${busqueda ? `&q=${busqueda}` : ""}${vista === "grid" ? "&vista=grid" : ""}`}
+              >
+                <Badge
+                  variant={tipo === t ? "default" : "outline"}
+                  className="cursor-pointer px-3 py-1"
+                >
+                  {t === "todos" ? "Todos" : tipoLabel[t]}
+                </Badge>
+              </Link>
+            ))}
+          </div>
           <ViewToggle
             vista={vista}
             listaHref={`/contactos?tipo=${tipo}${busqueda ? `&q=${busqueda}` : ""}`}
@@ -54,25 +70,8 @@ export default async function ContactosPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <ContactoBusqueda tipo={tipo} vista={vista} defaultValue={busqueda} />
-        <div className="flex gap-2 flex-wrap">
-          {(["todos", "CLIENTE", "SUPLIDOR", "AMBOS"] as const).map((t) => (
-            <Link
-              key={t}
-              href={`/contactos?tipo=${t}${busqueda ? `&q=${busqueda}` : ""}${vista === "grid" ? "&vista=grid" : ""}`}
-            >
-              <Badge
-                variant={tipo === t ? "default" : "outline"}
-                className="cursor-pointer px-3 py-1"
-              >
-                {t === "todos" ? "Todos" : tipoLabel[t]}
-              </Badge>
-            </Link>
-          ))}
-        </div>
-      </div>
+      {/* Buscador */}
+      <ContactoBusqueda tipo={tipo} vista={vista} defaultValue={busqueda} />
 
       {/* Contenido */}
       {vista === "grid" ? (
