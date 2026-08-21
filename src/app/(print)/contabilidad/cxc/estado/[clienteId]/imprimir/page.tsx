@@ -12,7 +12,8 @@ const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDig
 const fmtFecha = (d: Date | string) => new Date(d).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 const CREDITO_LABELS: Record<string, string> = {
- CONTADO: "Contado", DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días",
+ CONTADO: "Contado", DIAS_10: "10 días", DIAS_15: "15 días",
+ DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días", DIAS_90: "90 días",
 };
 
 const BUCKETS = ["0-30", "30-60", "60-90", "90+"] as const;

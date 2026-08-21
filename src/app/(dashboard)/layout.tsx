@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import { AppHeader } from "@/components/layout/app-header";
 
 async function getHeaderData() {
@@ -46,11 +47,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const { alertas, cajaAbierta } = await getHeaderData();
 
-  // Tema activo para el selector rápido en el header
-  const temaActual = await prisma.configuracion
-    .findUnique({ where: { clave: "TEMA_ACTIVO" } })
-    .then(r => r?.valor ?? "dark-ops")
-    .catch(() => "dark-ops");
+  // Tema activo — por cookie del usuario (independiente por usuario/navegador)
+  const jar = await cookies();
+  const temaActual = jar.get("ap-tema")?.value ?? "dark-ops";
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--background)" }}>

@@ -54,8 +54,8 @@ export default async function ContactosPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Buscador + filtros tipo en la misma fila */}
-      <div className="flex items-center gap-3 flex-wrap">
+      {/* Buscador + filtros tipo: buscador a la izquierda, tabs a la derecha */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <ContactoBusqueda tipo={tipo} vista={vista} defaultValue={busqueda} />
         <div className="flex gap-1.5 flex-wrap">
           {(["todos", "CLIENTE", "SUPLIDOR", "AMBOS"] as const).map((t) => (

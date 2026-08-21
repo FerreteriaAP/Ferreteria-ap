@@ -35,7 +35,8 @@ const TIPO_STYLE: Record<string, { bg: string; text: string }> = {
 };
 
 const CRED_LABEL: Record<string, string> = {
-  CONTADO: "Contado", DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días",
+  CONTADO: "Contado", DIAS_10: "10 días", DIAS_15: "15 días",
+  DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días", DIAS_90: "90 días",
 };
 
 const PASOS = ["COTIZACION", "ORDEN_VENTA", "CONDUCE", "FACTURADA"];

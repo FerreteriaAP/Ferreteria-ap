@@ -462,7 +462,7 @@ export function CompraForm({ suplidores, categorias }: CompraFormProps) {
                   />
                   {/* Sugerencias dropdown */}
                   {mostrarSug && sugerencias.length > 0 && (
-                    <div className="absolute z-50 top-full left-0 right-0 mt-1 rounded-xl border bg-card shadow-xl max-h-56 overflow-y-auto">
+                    <div className="absolute z-50 top-full left-0 right-0 mt-1 rounded-xl border shadow-xl max-h-56 overflow-y-auto" style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}>
                       {sugerencias.map(s => (
                         <button key={s.id} type="button" onMouseDown={() => agregarProducto(s)}
                           className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted/50 flex items-center justify-between gap-2 border-b last:border-0 transition-colors">

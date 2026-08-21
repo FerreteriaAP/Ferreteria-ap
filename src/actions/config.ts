@@ -1,39 +1,34 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
 
 const TEMAS_VALIDOS = ["dark-ops", "gris-claro", "azul-metal", "dark-multicolor", "carbon"];
+const COOKIE_TEMA = "ap-tema";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 año
 
+/**
+ * Guarda el tema preferido del usuario en una cookie propia (no en DB global).
+ * Cada usuario/navegador tiene su propio tema independiente.
+ */
 export async function setTemaActivo(tema: string): Promise<{ ok: boolean; error?: string }> {
- try {
- const session = await auth();
- if (!session?.user) {
- return { ok: false, error: "No autorizado" };
- }
+  try {
+    const session = await auth();
+    if (!session?.user) return { ok: false, error: "No autorizado" };
 
- if (!TEMAS_VALIDOS.includes(tema)) {
- return { ok: false, error: "Tema no válido" };
- }
+    if (!TEMAS_VALIDOS.includes(tema)) return { ok: false, error: "Tema no válido" };
 
- await prisma.configuracion.upsert({
- where: { clave: "TEMA_ACTIVO" },
- update: { valor: tema },
- create: {
- clave: "TEMA_ACTIVO",
- valor: tema,
- descripcion: "Tema visual del sistema (afecta a todos los usuarios)",
- },
- });
+    const jar = await cookies();
+    jar.set(COOKIE_TEMA, tema, {
+      maxAge:   COOKIE_MAX_AGE,
+      path:     "/",
+      sameSite: "lax",
+      httpOnly: false, // necesario para que el cliente lo lea si aplica
+    });
 
- // Invalida toda la jerarquía de layouts para que el nuevo tema
- // se aplique en el próximo render del servidor
- revalidatePath("/", "layout");
-
- return { ok: true };
- } catch (e) {
- console.error("[setTemaActivo]", e);
- return { ok: false, error: "Error al guardar el tema" };
- }
+    return { ok: true };
+  } catch (e) {
+    console.error("[setTemaActivo]", e);
+    return { ok: false, error: "Error al guardar el tema" };
+  }
 }

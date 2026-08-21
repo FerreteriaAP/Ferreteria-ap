@@ -131,34 +131,47 @@ export function VentaForm({ clientes }: VentaFormProps) {
   const busquedaRef = useRef<HTMLInputElement>(null);
 
   const cliente    = clientes.find(c => c.id === clienteId);
-  const direcciones = cliente?.direcciones ?? [];
+
+  // ── Datos frescos del cliente (verificados desde API en cada selección) ──
+  type DatosFrescos = { id: string; nombre: string; telefono: string | null; rnc: string | null; email: string | null; direcciones: { id: string; etiqueta: string; direccion: string }[] } | null;
+  const [datosFrescos, setDatosFrescos] = useState<DatosFrescos>(null);
+  const direcciones = datosFrescos?.direcciones ?? cliente?.direcciones ?? [];
 
   // ── Panel completar datos cliente ──
   const [completarTel,   setCompletarTel]   = useState("");
   const [completarRnc,   setCompletarRnc]   = useState("");
   const [completarEmail, setCompletarEmail] = useState("");
   const [agregarDir,     setAgregarDir]     = useState(false);
-  const [dirEtiqueta,    setDirEtiqueta]    = useState("Principal");
+  const [dirEtiqueta,    setDirEtiqueta]    = useState("Entrega");
   const [dirDireccion,   setDirDireccion]   = useState("");
   const [dirSector,      setDirSector]      = useState("");
   const [dirCiudad,      setDirCiudad]      = useState("Santo Domingo");
   const [guardandoDatos, setGuardandoDatos] = useState(false);
   const [datosGuardados, setDatosGuardados] = useState(false);
 
-  // Datos faltantes del cliente seleccionado
-  const faltaTel   = !!cliente && !cliente.telefono;
-  const faltaRnc   = !!cliente && !cliente.rnc;
-  const faltaEmail = !!cliente && !cliente.email;
-  const sinDirs    = !!cliente && cliente.direcciones.length === 0;
-  const hayFaltantes = faltaTel || faltaRnc || faltaEmail || sinDirs;
+  // Datos faltantes calculados sobre los datos frescos (siempre actualizados)
+  const datosRef = datosFrescos ?? cliente;
+  const faltaTel   = !!datosRef && !datosRef.telefono;
+  const faltaRnc   = !!datosRef && !datosRef.rnc;
+  const faltaEmail = !!datosRef && !datosRef.email;
+  const hayFaltantes = faltaTel || faltaRnc || faltaEmail;
 
   useEffect(() => {
     setDireccionId("");
+    setDatosFrescos(null);
     setCompletarTel(""); setCompletarRnc(""); setCompletarEmail("");
-    setAgregarDir(false); setDirEtiqueta("Principal"); setDirDireccion(""); setDirSector(""); setDirCiudad("Santo Domingo");
+    setAgregarDir(false); setDirEtiqueta("Entrega"); setDirDireccion(""); setDirSector(""); setDirCiudad("Santo Domingo");
     setDatosGuardados(false);
     if (cliente?.credito && cliente.credito !== "CONTADO") setCredito(cliente.credito as typeof credito);
     else setCredito("CONTADO");
+
+    // Verificar datos actuales desde la API (no los del caché de la página)
+    if (clienteId) {
+      fetch(`/api/contactos/datos?id=${clienteId}`)
+        .then(r => r.json())
+        .then((d: DatosFrescos) => setDatosFrescos(d))
+        .catch(() => {});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clienteId]);
 
@@ -174,8 +187,12 @@ export function VentaForm({ clientes }: VentaFormProps) {
         sector: dirSector || undefined, ciudad: dirCiudad,
       } : undefined,
     });
+    // Refrescar datos tras guardar
+    const updated: DatosFrescos = await fetch(`/api/contactos/datos?id=${cliente.id}`).then(r => r.json()).catch(() => null);
+    setDatosFrescos(updated);
     setGuardandoDatos(false);
     setDatosGuardados(true);
+    setAgregarDir(false); setDirDireccion(""); setDirSector(""); setDirEtiqueta("Entrega"); setDirCiudad("Santo Domingo");
   }
 
   // Búsqueda
@@ -323,19 +340,20 @@ export function VentaForm({ clientes }: VentaFormProps) {
             />
           </div>
 
-          {/* ── Panel: completar datos faltantes del cliente ── */}
-          {cliente && hayFaltantes && !datosGuardados && (
+          {/* ── Panel: completar/agregar datos del cliente ── */}
+          {cliente && !datosGuardados && (
             <div className="sm:col-span-2 rounded-xl border-2 border-dashed overflow-hidden"
               style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 40%, var(--border))", backgroundColor: "color-mix(in oklch, var(--accent-hex) 4%, var(--card))" }}>
               <div className="px-4 py-2.5 border-b flex items-center gap-2"
                 style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 20%, var(--border))" }}>
                 <UserPen size={13} style={{ color: "var(--accent-hex)" }} />
                 <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--accent-hex)" }}>
-                  Completar perfil de {cliente.nombre}
+                  {hayFaltantes ? `Completar perfil — ${cliente.nombre}` : `Agregar dirección — ${cliente.nombre}`}
                 </span>
-                <span className="text-[11px] text-muted-foreground ml-1">— se guardará en su ficha de contacto</span>
+                <span className="text-[11px] text-muted-foreground ml-1">se guarda en la ficha del cliente</span>
               </div>
               <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Datos faltantes */}
                 {faltaTel && (
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Teléfono</label>
@@ -357,20 +375,21 @@ export function VentaForm({ clientes }: VentaFormProps) {
                       placeholder="cliente@email.com" className={INPUT_CLS} />
                   </div>
                 )}
-                {/* Dirección */}
-                {sinDirs && !agregarDir ? (
-                  <div className="sm:col-span-2">
+
+                {/* Dirección — SIEMPRE disponible para agregar */}
+                {!agregarDir ? (
+                  <div className={hayFaltantes ? "" : "sm:col-span-2"}>
                     <button type="button" onClick={() => setAgregarDir(true)}
                       className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border hover:bg-muted/40 transition-colors">
                       <Plus size={12} /> Agregar dirección de entrega
                     </button>
                   </div>
-                ) : agregarDir && (
+                ) : (
                   <>
                     <div className="space-y-1">
                       <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Etiqueta</label>
                       <input value={dirEtiqueta} onChange={e => setDirEtiqueta(e.target.value)}
-                        placeholder="Principal / Obra / Sucursal" className={INPUT_CLS} />
+                        placeholder="Entrega / Obra / Sucursal" className={INPUT_CLS} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Dirección *</label>
@@ -389,13 +408,17 @@ export function VentaForm({ clientes }: VentaFormProps) {
                     </div>
                   </>
                 )}
-                <div className="sm:col-span-2 flex justify-end">
-                  <button type="button" onClick={guardarDatosCliente} disabled={guardandoDatos}
-                    className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                    style={{ backgroundColor: "var(--accent-hex)", color: "#fff" }}>
-                    {guardandoDatos ? "Guardando…" : <><Check size={13} /> Guardar en perfil del cliente</>}
-                  </button>
-                </div>
+
+                {/* Botón guardar — solo si hay algo que guardar */}
+                {(faltaTel && completarTel) || (faltaRnc && completarRnc) || (faltaEmail && completarEmail) || (agregarDir && dirDireccion.trim()) ? (
+                  <div className="sm:col-span-2 flex justify-end">
+                    <button type="button" onClick={guardarDatosCliente} disabled={guardandoDatos}
+                      className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                      style={{ backgroundColor: "var(--accent-hex)", color: "#fff" }}>
+                      {guardandoDatos ? "Guardando…" : <><Check size={13} /> Guardar en perfil</>}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
           )}
