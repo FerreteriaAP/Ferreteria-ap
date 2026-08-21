@@ -52,6 +52,17 @@ type Categoria    = { id: string; codigo: string; nombre: string };
 type ProductoSim  = { id: string; nombre: string; codigo: string; costoUltimo: number; stockActual: number; precioVenta: number; porcentajeGanancia: number };
 type AlertaPrecio = { productoId: string; nombre: string; costoAnterior: number; nuevoCosto: number; precioVentaActual: number; nuevoPrecioVenta: number; aplicar: boolean };
 
+// ── ITBIS helpers ─────────────────────────────────────────────────────────────
+// itbisPct = 0  → el costo ingresado YA incluye ITBIS  → costoNeto = costo / 1.18
+// itbisPct = 18 → el costo ingresado NO incluye ITBIS  → costoNeto = costo
+const ITBIS_RATE = 0.18;
+const costoNetoFn = (costo: number, itbisPct: number) =>
+  itbisPct === 0 ? costo / (1 + ITBIS_RATE) : costo;
+const itbisAmtFn = (costo: number, itbisPct: number, cant: number) =>
+  itbisPct === 0
+    ? cant * costo * (ITBIS_RATE / (1 + ITBIS_RATE))
+    : cant * costo * ITBIS_RATE;
+
 const NuevoProductoSchema = z.object({
   nombre:            z.string().min(2),
   categoriaId:       z.string().min(1),
@@ -114,9 +125,12 @@ const INPUT_CLS = "w-full h-9 rounded-lg border bg-background px-3 text-sm focus
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-interface CompraFormProps { suplidores: Suplidor[]; categorias: Categoria[] }
+interface CompraFormProps { suplidores: Suplidor[]; categorias: Categoria[]; rol?: string }
 
-export function CompraForm({ suplidores, categorias }: CompraFormProps) {
+export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
+  // rol solo se recibe para referencia; todas las funciones de compra están habilitadas
+  // para ADMINISTRADOR y ASISTENTE_ADMINISTRATIVO por igual.
+  void rol;
   const router = useRouter();
   const [serverError, setServerError]   = useState<string | null>(null);
   const [busqueda, setBusqueda]         = useState("");
@@ -162,8 +176,12 @@ export function CompraForm({ suplidores, categorias }: CompraFormProps) {
     if (idx >= 0) { update(idx, { ...detalles[idx], cantidad: detalles[idx].cantidad + 1 }); }
     else {
       preciosRef.current[prod.id] = { precioVenta: Number(prod.precioVenta ?? 0), porcentajeGanancia: Number(prod.porcentajeGanancia ?? 30) };
-      costoOriginalRef.current[prod.id] = Number(prod.costoUltimo);
-      append({ productoId: prod.id, nombre: prod.nombre, codigo: prod.codigo, unidad: prod.unidadMedida, cantidad: 1, costo: Number(prod.costoUltimo), costoAnterior: Number(prod.costoUltimo), itbisPct: 0 });
+      // costoUltimo en DB siempre es SIN ITBIS; para mostrar con itbisPct=0 (precio incluye ITBIS)
+      // pre-llenamos el costo BRUTO (neto × 1.18) para que la división sea consistente.
+      const costoNetoDB = Number(prod.costoUltimo);
+      costoOriginalRef.current[prod.id] = costoNetoDB;           // referencia en neto
+      const costoBruto = Math.round(costoNetoDB * (1 + ITBIS_RATE) * 100) / 100;
+      append({ productoId: prod.id, nombre: prod.nombre, codigo: prod.codigo, unidad: prod.unidadMedida, cantidad: 1, costo: costoBruto, costoAnterior: costoBruto, itbisPct: 0 });
     }
     setBusqueda(""); setSugerencias([]); setMostrarSug(false); setUltimaBusq("");
   }, [detalles, append, update]);
@@ -191,25 +209,44 @@ export function CompraForm({ suplidores, categorias }: CompraFormProps) {
     }, 300);
   };
 
-  // Alerta precio
-  const checkAlertaPrecio = (index: number, nuevoCosto: number) => {
+  // Alerta precio — siempre compara costos NETOS (sin ITBIS)
+  // overridePct permite pasar el nuevo itbisPct antes de que react-hook-form lo actualice
+  const checkAlertaPrecio = (index: number, nuevoCostoBruto: number, overridePct?: number) => {
     const detalle = detalles[index]; if (!detalle) return;
-    // Use the ref (populated at append time) so costoAnterior is never stale/lost
-    const costoAnterior = costoOriginalRef.current[detalle.productoId] ?? detalle.costoAnterior ?? detalle.costo;
+    const itbisPct = overridePct ?? Number(watchedDetalles[index]?.itbisPct ?? 0);
+    // costoOriginalRef siempre guarda el costo NETO (sin ITBIS) de la BD
+    const costoAnteriorNet = costoOriginalRef.current[detalle.productoId] ?? 0;
+    if (costoAnteriorNet <= 0) return;
+    // Convertir el costo ingresado a neto para comparar manzanas con manzanas
+    const nuevoCostoNet = costoNetoFn(nuevoCostoBruto, itbisPct);
     const precios = preciosRef.current[detalle.productoId];
     const pvActual = precios?.precioVenta ?? 0;
-    if (costoAnterior > 0 && Math.abs((nuevoCosto - costoAnterior) / costoAnterior) > 0.05) {
-      const ratio = pvActual > 0 ? pvActual / costoAnterior : 1;
-      const sugerido = Math.round(nuevoCosto * ratio * 100) / 100;
-      setAlertaPrecios(prev => [...prev.filter(a => a.productoId !== detalle.productoId), { productoId: detalle.productoId, nombre: detalle.nombre, costoAnterior, nuevoCosto, precioVentaActual: pvActual, nuevoPrecioVenta: sugerido, aplicar: true }]);
+    if (Math.abs((nuevoCostoNet - costoAnteriorNet) / costoAnteriorNet) > 0.05) {
+      const ratio = pvActual > 0 ? pvActual / costoAnteriorNet : 1;
+      const sugerido = Math.round(nuevoCostoNet * ratio * 100) / 100;
+      setAlertaPrecios(prev => [...prev.filter(a => a.productoId !== detalle.productoId), {
+        productoId: detalle.productoId, nombre: detalle.nombre,
+        costoAnterior: costoAnteriorNet, nuevoCosto: nuevoCostoNet,   // ambos en NETO
+        precioVentaActual: pvActual, nuevoPrecioVenta: sugerido, aplicar: true,
+      }]);
     } else {
       setAlertaPrecios(prev => prev.filter(a => a.productoId !== detalle.productoId));
     }
   };
 
-  // Totales
-  const subtotal   = watchedDetalles.reduce((s, d) => s + (Number(d.cantidad)||0) * (Number(d.costo)||0), 0);
-  const totalItbis = watchedDetalles.reduce((s, d) => { const sub = (Number(d.cantidad)||0) * (Number(d.costo)||0); return s + sub * ((Number(d.itbisPct)||0) / 100); }, 0);
+  // Totales — siempre sobre costos netos (sin ITBIS)
+  const subtotal = watchedDetalles.reduce((s, d) => {
+    const cant = Number(d.cantidad)||0;
+    const costo = Number(d.costo)||0;
+    const pct = Number(d.itbisPct)||0;
+    return s + cant * costoNetoFn(costo, pct);
+  }, 0);
+  const totalItbis = watchedDetalles.reduce((s, d) => {
+    const cant = Number(d.cantidad)||0;
+    const costo = Number(d.costo)||0;
+    const pct = Number(d.itbisPct)||0;
+    return s + itbisAmtFn(costo, pct, cant);
+  }, 0);
   const total = subtotal + totalItbis;
 
   // Submit
@@ -217,7 +254,16 @@ export function CompraForm({ suplidores, categorias }: CompraFormProps) {
     setServerError(null);
     try {
       const ajustesPrecio = alertaPrecios.filter(a => a.aplicar && a.nuevoPrecioVenta > 0).map(a => ({ productoId: a.productoId, nuevoPrecioVenta: a.nuevoPrecioVenta }));
-      const detallesTransformados = values.detalles.map(d => ({ productoId: d.productoId, cantidad: d.cantidad, costo: d.costo, itbis: (d.cantidad * d.costo) * ((d.itbisPct || 0) / 100) }));
+      // Normalizar costos antes de enviar al servidor:
+      // costoNeto = costo ingresado ÷ 1.18 cuando itbisPct=0 (precio incluía ITBIS)
+      // costoNeto = costo ingresado           cuando itbisPct=18 (precio sin ITBIS)
+      // costoUltimo en BD siempre se guarda SIN ITBIS.
+      const detallesTransformados = values.detalles.map(d => {
+        const pct = d.itbisPct ?? 0;
+        const neto = costoNetoFn(d.costo, pct);
+        const itbisTotal = itbisAmtFn(d.costo, pct, d.cantidad);
+        return { productoId: d.productoId, cantidad: d.cantidad, costo: neto, itbis: itbisTotal };
+      });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await crearCompra({ ...values, detalles: detallesTransformados, ajustesPrecio } as any);
       if ("error" in result && result.error) { const errs = result.error as Record<string, string[]>; setServerError(Object.values(errs).flat()[0] ?? "Error al guardar"); return; }
@@ -512,7 +558,7 @@ export function CompraForm({ suplidores, categorias }: CompraFormProps) {
                       <TableHead className="text-xs">Producto</TableHead>
                       <TableHead className="text-xs text-right w-28">Cantidad</TableHead>
                       <TableHead className="text-xs text-right w-40">Costo (RD$)</TableHead>
-                      <TableHead className="text-xs text-center w-24">ITBIS</TableHead>
+                      <TableHead className="text-xs text-center w-28">ITBIS en costo</TableHead>
                       <TableHead className="text-xs text-right w-36">Subtotal</TableHead>
                       <TableHead className="w-8" />
                     </TableRow>
@@ -523,10 +569,14 @@ export function CompraForm({ suplidores, categorias }: CompraFormProps) {
                       const cant   = Number(wd?.cantidad) || 0;
                       const costo  = Number(wd?.costo) || 0;
                       const pct    = Number(wd?.itbisPct) || 0;
-                      const sub    = cant * costo;
-                      const itbisAmt = sub * pct / 100;
-                      const costoAnt = costoOriginalRef.current[d.productoId] ?? d.costoAnterior ?? d.costo;
-                      const cambio5  = costoAnt > 0 && Math.abs((costo - costoAnt) / costoAnt) > 0.05;
+                      // Costo neto (sin ITBIS) e ITBIS de esta línea
+                      const costoNet = costoNetoFn(costo, pct);
+                      const lineItbis = itbisAmtFn(costo, pct, cant);
+                      const sub      = cant * costoNet;       // subtotal neto
+                      const lineTotal = sub + lineItbis;      // total con ITBIS
+                      // Comparación de cambio de precio (neto vs neto)
+                      const costoAntNet = costoOriginalRef.current[d.productoId] ?? 0;
+                      const cambio5 = costoAntNet > 0 && Math.abs((costoNet - costoAntNet) / costoAntNet) > 0.05;
 
                       return (
                         <TableRow key={d.id} className="hover:bg-muted/10">
@@ -552,24 +602,38 @@ export function CompraForm({ suplidores, categorias }: CompraFormProps) {
                                 className="w-full h-8 rounded-lg border bg-background pl-7 pr-2 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40"
                                 {...form.register(`detalles.${i}.costo`, { onChange: e => checkAlertaPrecio(i, Number(e.target.value)) })} />
                             </div>
+                            {/* Hint sobre si el costo ingresado incluye o excluye ITBIS */}
+                            {costo > 0 && (
+                              <p className="text-[10px] text-muted-foreground text-right mt-0.5">
+                                {pct === 0
+                                  ? `Neto ≈ RD$${costoNet.toFixed(2)}`
+                                  : `C/ITBIS ≈ RD$${(costo * 1.18).toFixed(2)}`}
+                              </p>
+                            )}
                           </TableCell>
                           <TableCell>
-                            <Select value={String(pct)} onValueChange={v => form.setValue(`detalles.${i}.itbisPct`, Number(v))}>
+                            <Select
+                              value={String(pct)}
+                              onValueChange={v => {
+                                form.setValue(`detalles.${i}.itbisPct`, Number(v));
+                                checkAlertaPrecio(i, costo, Number(v));
+                              }}
+                            >
                               <SelectTrigger className="h-8 text-center text-xs"><SelectValue /></SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="0">0%</SelectItem>
-                                <SelectItem value="18">18%</SelectItem>
+                                <SelectItem value="0">Incluido (÷1.18)</SelectItem>
+                                <SelectItem value="18">Excluido (+18%)</SelectItem>
                               </SelectContent>
                             </Select>
-                            {itbisAmt > 0 && (
-                              <p className="text-[10px] text-muted-foreground text-center mt-0.5">+RD${itbisAmt.toFixed(2)}</p>
-                            )}
+                            <p className="text-[10px] text-muted-foreground text-center mt-0.5">
+                              ITBIS: RD${lineItbis.toFixed(2)}
+                            </p>
                           </TableCell>
                           <TableCell className="text-right">
-                            <p className="font-medium text-sm font-mono">{fmt(sub + itbisAmt)}</p>
-                            {itbisAmt > 0 && (
-                              <p className="text-[10px] text-muted-foreground">{sub.toFixed(2)} + ITBIS</p>
-                            )}
+                            <p className="font-medium text-sm font-mono">{fmt(lineTotal)}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {sub.toFixed(2)} + {lineItbis.toFixed(2)}
+                            </p>
                           </TableCell>
                           <TableCell>
                             <button type="button" onClick={() => remove(i)}
