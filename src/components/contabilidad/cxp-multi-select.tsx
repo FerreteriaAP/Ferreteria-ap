@@ -17,8 +17,12 @@ interface Compra {
  monto: number;
  saldo: number;
  fechaVencimiento: Date;
+ fechaFactura: Date | null;
+ ncf: string | null;
+ noFacturaSuplidor: string | null;
  estado: string;
  diasVencida: number;
+ diasRestantes: number;
 }
 
 interface Grupo {
@@ -216,22 +220,41 @@ export function CxPMultiSelect({ grupos }: Props) {
  className={cn(
  "flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-4 py-2.5",
  seleccionadas.has(c.id) && "bg-primary/5" )}
- > <div className="flex items-center gap-3"> {c.estado !== "PAGADO" && (
+ > <div className="flex items-center gap-3 min-w-0"> {c.estado !== "PAGADO" && (
  <input
  type="checkbox" checked={seleccionadas.has(c.id)}
  onChange={() => toggle(c.id)}
  className="w-4 h-4 cursor-pointer shrink-0" /> )}
  <Link
  href={`/compras/${c.compraId}?from=cxp`}
- className="font-mono text-xs font-medium hover:underline"
+ className="font-mono text-xs font-medium hover:underline shrink-0"
  style={{ color: "var(--accent-hex)" }} > {c.numero}
- </Link> <Badge variant={agingVariant(c.diasVencida)} className="text-[10px]"> {agingLabel(c.diasVencida)}
+ </Link>
+ {c.noFacturaSuplidor && (
+ <span className="text-[10px] text-muted-foreground">Ref: <span className="font-mono">{c.noFacturaSuplidor}</span></span>
+ )}
+ {c.ncf && <span className="font-mono text-[10px] text-muted-foreground truncate">{c.ncf}</span>}
+ <Badge variant={agingVariant(c.diasVencida)} className="text-[10px] shrink-0"> {agingLabel(c.diasVencida)}
  </Badge> {c.estado === "PAGADO" && (
- <Badge variant="outline" className="text-[10px] text-green-700 border-green-300"> Pagado
+ <Badge variant="outline" className="text-[10px] text-green-700 border-green-300 shrink-0"> Pagado
  </Badge> )}
- </div> <div className="flex items-center gap-6 text-sm"> <span className="text-muted-foreground text-xs"> Vence: {new Date(c.fechaVencimiento).toLocaleDateString("es-DO")}
- </span> <span className={cn("font-mono text-xs", agingColor(c.diasVencida))}> {c.estado === "PAGADO_PARCIAL" && (
- <span className="text-muted-foreground mr-1">Saldo:</span> )}
+ </div>
+ <div className="flex items-center gap-4 text-sm shrink-0">
+ {c.fechaFactura && (
+ <span className="text-muted-foreground text-[10px]">
+ Fac: {new Date(c.fechaFactura).toLocaleDateString("es-DO")}
+ </span>
+ )}
+ <span className="text-muted-foreground text-[10px]">
+ Vence: {new Date(c.fechaVencimiento).toLocaleDateString("es-DO")}
+ {c.diasRestantes > 0
+ ? <span className="ml-1 text-green-600 dark:text-green-400">({c.diasRestantes}d)</span>
+ : c.diasRestantes < 0
+ ? <span className="ml-1 text-destructive">({Math.abs(c.diasRestantes)}d vencida)</span>
+ : <span className="ml-1 text-yellow-600"> (hoy)</span>}
+ </span>
+ <span className={cn("font-mono text-xs font-medium", agingColor(c.diasVencida))}> {c.estado === "PAGADO_PARCIAL" && (
+ <span className="text-muted-foreground mr-1 font-normal text-[10px]">Saldo:</span> )}
  {fmt(c.saldo)}
  </span> </div> </div> ))}
  </GrupoColapsable> );

@@ -146,7 +146,7 @@ export async function getCxCPorCliente(opts: {
  where,
  include: {
  cliente: { select: { id: true, nombre: true, rnc: true } },
- venta: { select: { id: true, numero: true } },
+ venta: { select: { id: true, numero: true, fechaEmision: true, ncf: true } },
  },
  orderBy: { fechaVencimiento: "asc" },
  });
@@ -163,8 +163,11 @@ export async function getCxCPorCliente(opts: {
  monto: number;
  saldo: number;
  fechaVencimiento: Date;
+ fechaEmision: Date | null;
+ ncf: string | null;
  estado: string;
  diasVencida: number;
+ diasRestantes: number;
  }>;
  }>();
 
@@ -184,6 +187,10 @@ export async function getCxCPorCliente(opts: {
  const saldo = Number(c.saldo);
  grupo.totalSaldo += saldo;
  if (dias > 0) grupo.totalVencido += saldo;
+ const hoy = new Date(); hoy.setHours(0,0,0,0);
+ const venc = new Date(c.fechaVencimiento); venc.setHours(0,0,0,0);
+ const diffMs = venc.getTime() - hoy.getTime();
+ const diasRestantes = Math.round(diffMs / 86400000);
  grupo.facturas.push({
  id: c.id,
  ventaId: c.ventaId,
@@ -191,8 +198,11 @@ export async function getCxCPorCliente(opts: {
  monto: Number(c.monto),
  saldo,
  fechaVencimiento: c.fechaVencimiento,
+ fechaEmision: c.venta.fechaEmision ?? null,
+ ncf: c.venta.ncf ?? null,
  estado: c.estado,
  diasVencida: dias,
+ diasRestantes,
  });
  }
 
@@ -225,7 +235,7 @@ export async function getCxPPorSuplidor(opts: {
  where,
  include: {
  suplidor: { select: { id: true, nombre: true, rnc: true } },
- compra: { select: { id: true, numero: true } },
+ compra: { select: { id: true, numero: true, fechaFactura: true, ncf: true, noFacturaSuplidor: true } },
  },
  orderBy: { fechaVencimiento: "asc" },
  });
@@ -241,8 +251,12 @@ export async function getCxPPorSuplidor(opts: {
  monto: number;
  saldo: number;
  fechaVencimiento: Date;
+ fechaFactura: Date | null;
+ ncf: string | null;
+ noFacturaSuplidor: string | null;
  estado: string;
  diasVencida: number;
+ diasRestantes: number;
  }>;
  }>();
 
@@ -262,6 +276,9 @@ export async function getCxPPorSuplidor(opts: {
  const saldo = Number(c.saldo);
  grupo.totalSaldo += saldo;
  if (dias > 0) grupo.totalVencido += saldo;
+ const hoyP = new Date(); hoyP.setHours(0,0,0,0);
+ const vencP = new Date(c.fechaVencimiento); vencP.setHours(0,0,0,0);
+ const diasRestantesP = Math.round((vencP.getTime() - hoyP.getTime()) / 86400000);
  grupo.compras.push({
  id: c.id,
  compraId: c.compraId,
@@ -269,8 +286,12 @@ export async function getCxPPorSuplidor(opts: {
  monto: Number(c.monto),
  saldo,
  fechaVencimiento: c.fechaVencimiento,
+ fechaFactura: c.compra.fechaFactura ?? null,
+ ncf: c.compra.ncf ?? null,
+ noFacturaSuplidor: c.compra.noFacturaSuplidor ?? null,
  estado: c.estado,
  diasVencida: dias,
+ diasRestantes: diasRestantesP,
  });
  }
 

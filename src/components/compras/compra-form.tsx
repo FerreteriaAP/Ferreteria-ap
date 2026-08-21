@@ -223,7 +223,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
     const nuevoCostoNet = costoNetoFn(nuevoCostoBruto, itbisPct);
     const precios = preciosRef.current[detalle.productoId];
     const pvActual = precios?.precioVenta ?? 0;
-    if (Math.abs((nuevoCostoNet - costoAnteriorNet) / costoAnteriorNet) > 0.05) {
+    if (Math.abs(nuevoCostoNet - costoAnteriorNet) > 0.005) {
       // Precios en BRUTO (costo + ITBIS) para mostrar al usuario
       const costoAnteriorBruto = Math.round(costoAnteriorNet * (1 + ITBIS_RATE) * 100) / 100;
       const nuevoCostoBruto    = Math.round(nuevoCostoNet    * (1 + ITBIS_RATE) * 100) / 100;
@@ -365,8 +365,8 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                       {[
-                        { label: "Costo anterior c/ITBIS", val: `RD$ ${a.costoAnterior.toFixed(2)}` },
-                        { label: "Costo nuevo c/ITBIS",    val: `RD$ ${a.nuevoCosto.toFixed(2)}` },
+                        { label: "Costo anterior", val: `RD$ ${a.costoAnterior.toFixed(2)}` },
+                        { label: "Costo nuevo",    val: `RD$ ${a.nuevoCosto.toFixed(2)}` },
                         { label: "Precio venta actual",    val: `RD$ ${a.precioVentaActual.toFixed(2)}` },
                       ].map(({ label, val }) => (
                         <div key={label} className="space-y-0.5">
@@ -578,7 +578,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                       <TableHead className="text-xs text-right w-28">Cantidad</TableHead>
                       <TableHead className="text-xs text-right w-40">Costo (RD$)</TableHead>
                       <TableHead className="text-xs text-center w-28">ITBIS en costo</TableHead>
-                      <TableHead className="text-xs text-right w-36">Sub-total s/ITBIS</TableHead>
+                      <TableHead className="text-xs text-right w-36">Sub-total</TableHead>
                       <TableHead className="w-8" />
                     </TableRow>
                   </TableHeader>
@@ -595,7 +595,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                       const lineTotal = sub + lineItbis;      // total con ITBIS
                       // Comparación de cambio de precio (neto vs neto)
                       const costoAntNet = costoOriginalRef.current[d.productoId] ?? 0;
-                      const cambio5 = costoAntNet > 0 && Math.abs((costoNet - costoAntNet) / costoAntNet) > 0.05;
+                      const cambio5 = costoAntNet > 0 && Math.abs(costoNet - costoAntNet) > 0.005;
 
                       return (
                         <TableRow key={d.id} className="hover:bg-muted/10">
@@ -660,7 +660,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                             )}
                           </TableCell>
                           <TableCell className="text-right">
-                            <p className="font-medium text-sm font-mono">{fmt(lineTotal)}</p>
+                            <p className="font-medium text-sm font-mono">{fmt(sub)}</p>
                           </TableCell>
                           <TableCell>
                             <button type="button" onClick={() => remove(i)}
