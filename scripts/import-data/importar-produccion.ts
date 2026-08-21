@@ -24,11 +24,13 @@ interface Supplier {
   email: string | null;
   telefono: string | null;
   direccion: string | null;
+  credito: string;
 }
 
 interface Client {
   tipo: string;
   nombre: string;
+  credito: string;
 }
 
 interface Product {
@@ -103,18 +105,18 @@ async function importarContactos() {
       try {
         const res = await client.query(
           `INSERT INTO contactos (id, tipo, nombre, rnc, email, telefono, "tipoComprobante", credito, "esEmisorElectronico", "saldoFavor", activo, "createdAt", "updatedAt")
-           VALUES (gen_random_uuid(), 'SUPLIDOR', $1, $2, $3, $4, 'B01', 'CONTADO', false, 0, true, NOW(), NOW())
+           VALUES (gen_random_uuid(), 'SUPLIDOR', $1, $2, $3, $4, 'B01', $5, false, 0, true, NOW(), NOW())
            RETURNING id`,
-          [s.nombre, s.rnc, s.email, s.telefono]
+          [s.nombre, s.rnc, s.email, s.telefono, s.credito]
         );
         contactoId = res.rows[0].id;
       } catch {
         // RNC duplicado → sin RNC
         const res = await client.query(
           `INSERT INTO contactos (id, tipo, nombre, rnc, email, telefono, "tipoComprobante", credito, "esEmisorElectronico", "saldoFavor", activo, "createdAt", "updatedAt")
-           VALUES (gen_random_uuid(), 'SUPLIDOR', $1, NULL, $2, $3, 'B01', 'CONTADO', false, 0, true, NOW(), NOW())
+           VALUES (gen_random_uuid(), 'SUPLIDOR', $1, NULL, $2, $3, 'B01', $4, false, 0, true, NOW(), NOW())
            RETURNING id`,
-          [s.nombre, s.email, s.telefono]
+          [s.nombre, s.email, s.telefono, s.credito]
         );
         contactoId = res.rows[0].id;
       }
@@ -135,8 +137,8 @@ async function importarContactos() {
       try {
         await client.query(
           `INSERT INTO contactos (id, tipo, nombre, "tipoComprobante", credito, "esEmisorElectronico", "saldoFavor", activo, "createdAt", "updatedAt")
-           VALUES (gen_random_uuid(), 'CLIENTE', $1, 'B02', 'CONTADO', false, 0, true, NOW(), NOW())`,
-          [c.nombre]
+           VALUES (gen_random_uuid(), 'CLIENTE', $1, 'B02', $2, false, 0, true, NOW(), NOW())`,
+          [c.nombre, c.credito]
         );
         cliCount++;
       } catch {

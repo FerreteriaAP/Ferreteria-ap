@@ -43,7 +43,7 @@ const FormSchema = z.object({
  email: z.string().optional(),
  telefono: z.string().optional(),
  telefonoAlt: z.string().optional(),
- credito: z.enum(["CONTADO", "DIAS_30", "DIAS_45", "DIAS_60"]),
+ credito: z.enum(["CONTADO", "DIAS_10", "DIAS_15", "DIAS_30", "DIAS_45", "DIAS_60", "DIAS_90"]),
  limiteCredito: z.coerce.number().optional(),
  descuentoFijo: z.coerce.number().min(0).max(100).optional(),
  esEmisorElectronico: z.boolean().default(false),
@@ -127,7 +127,7 @@ export function ContactoForm({ contactoId, defaultValues }: ContactoFormProps) {
  </CardTitle> </CardHeader> <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4"> <div className="space-y-1.5"> <Label>Plazo de crédito</Label> <Select
  value={creditoWatch}
  onValueChange={(v) => form.setValue("credito", v as FormValues["credito"])}
- > <SelectTrigger><SelectValue /></SelectTrigger> <SelectContent> <SelectItem value="CONTADO">Contado</SelectItem> <SelectItem value="DIAS_30">30 días</SelectItem> <SelectItem value="DIAS_45">45 días</SelectItem> <SelectItem value="DIAS_60">60 días</SelectItem> </SelectContent> </Select> </div> {creditoWatch !== "CONTADO" && (
+ > <SelectTrigger><SelectValue /></SelectTrigger> <SelectContent> <SelectItem value="CONTADO">Contado</SelectItem> <SelectItem value="DIAS_10">10 días</SelectItem> <SelectItem value="DIAS_15">15 días</SelectItem> <SelectItem value="DIAS_30">30 días</SelectItem> <SelectItem value="DIAS_45">45 días</SelectItem> <SelectItem value="DIAS_60">60 días</SelectItem> <SelectItem value="DIAS_90">90 días</SelectItem> </SelectContent> </Select> </div> {creditoWatch !== "CONTADO" && (
  <div className="space-y-1.5"> <Label htmlFor="limiteCredito"> {tipoWatch === "SUPLIDOR" ? "Línea de crédito con suplidor (RD$)" : "Límite de crédito (RD$)"}
  </Label> <Input id="limiteCredito" type="number" step="0.01" placeholder="50000.00" {...form.register("limiteCredito")} /> </div> )}
 

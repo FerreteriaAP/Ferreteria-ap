@@ -57,10 +57,13 @@ enum EstadoVenta {
 }
 
 enum TipoCredito {
+  CONTADO
+  DIAS_10
+  DIAS_15
   DIAS_30
   DIAS_45
   DIAS_60
-  CONTADO
+  DIAS_90
 }
 
 enum EstadoPago {

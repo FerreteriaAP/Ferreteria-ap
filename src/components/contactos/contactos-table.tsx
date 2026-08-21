@@ -31,10 +31,8 @@ const tipoLabel: Record<string, string> = {
 };
 
 const creditoLabel: Record<string, string> = {
- CONTADO: "Contado",
- DIAS_30: "30 días",
- DIAS_45: "45 días",
- DIAS_60: "60 días",
+ CONTADO: "Contado", DIAS_10: "10 días", DIAS_15: "15 días",
+ DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días", DIAS_90: "90 días",
 };
 
 export function ContactosTable({ contactos }: { contactos: Contacto[] }) {

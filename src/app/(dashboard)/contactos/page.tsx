@@ -8,6 +8,8 @@ import { ContactosTable } from "@/components/contactos/contactos-table";
 import { ContactosGrid } from "@/components/contactos/contactos-grid";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
+import { Paginacion } from "@/components/ui/paginacion";
+import { ContactoBusqueda } from "@/components/contactos/contacto-busqueda";
 
 interface PageProps {
   searchParams: Promise<{ tipo?: string; q?: string; page?: string; vista?: string }>;
@@ -54,16 +56,7 @@ export default async function ContactosPage({ searchParams }: PageProps) {
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <form className="flex-1" method="GET">
-          <input type="hidden" name="tipo" value={tipo} />
-          {vista === "grid" && <input type="hidden" name="vista" value="grid" />}
-          <Input
-            name="q"
-            defaultValue={busqueda}
-            placeholder="Buscar por nombre, RNC, teléfono..."
-            className="max-w-sm"
-          />
-        </form>
+        <ContactoBusqueda tipo={tipo} vista={vista} defaultValue={busqueda} />
         <div className="flex gap-2 flex-wrap">
           {(["todos", "CLIENTE", "SUPLIDOR", "AMBOS"] as const).map((t) => (
             <Link
@@ -89,19 +82,11 @@ export default async function ContactosPage({ searchParams }: PageProps) {
       )}
 
       {/* Paginación */}
-      {pages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-            <Link
-              key={p}
-              href={`/contactos?tipo=${tipo}&q=${busqueda}&page=${p}${vista === "grid" ? "&vista=grid" : ""}`}
-              className={cn(buttonVariants({ variant: p === page ? "default" : "outline", size: "sm" }))}
-            >
-              {p}
-            </Link>
-          ))}
-        </div>
-      )}
+      <Paginacion
+        page={page}
+        pages={pages}
+        buildHref={(p) => `/contactos?tipo=${tipo}&q=${busqueda}&page=${p}${vista === "grid" ? "&vista=grid" : ""}`}
+      />
     </div>
   );
 }

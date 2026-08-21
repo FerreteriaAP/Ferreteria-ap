@@ -11,7 +11,7 @@ import { ChequeSupllidorBtn } from "@/components/cheques/cheque-btn";
 
 const tipoLabel: Record<string, string> = { CLIENTE: "Cliente", SUPLIDOR: "Suplidor", AMBOS: "Cliente y Suplidor" };
 const tipoVariant: Record<string, "default" | "secondary" | "outline"> = { CLIENTE: "default", SUPLIDOR: "secondary", AMBOS: "outline" };
-const creditoLabel: Record<string, string> = { CONTADO: "Contado", DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días" };
+const creditoLabel: Record<string, string> = { CONTADO: "Contado", DIAS_10: "10 días", DIAS_15: "15 días", DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días", DIAS_90: "90 días" };
 const ncfLabel: Record<string, string> = { B01: "B01 — Crédito Fiscal", B02: "B02 — Consumidor Final", B14: "B14 — Regímenes Especiales", B15: "B15 — Gubernamentales" };
 
 interface PageProps {

@@ -70,7 +70,8 @@ function nivelAlertaFila(d: DetalleRow): "negativo" | "bajo" | null {
 }
 
 const CREDITO_LABEL: Record<string, string> = {
-  CONTADO: "Contado", DIAS_30: "30 Días", DIAS_45: "45 Días", DIAS_60: "60 Días",
+  CONTADO: "Contado", DIAS_10: "10 Días", DIAS_15: "15 Días",
+  DIAS_30: "30 Días", DIAS_45: "45 Días", DIAS_60: "60 Días", DIAS_90: "90 Días",
 };
 
 // ── Subcomponentes ────────────────────────────────────────────────────────────
@@ -114,8 +115,8 @@ export function VentaForm({ clientes }: VentaFormProps) {
   // Encabezado
   const [clienteId,    setClienteId]    = useState("");
   const [direccionId,  setDireccionId]  = useState("");
-  const [credito,      setCredito]      = useState<"CONTADO"|"DIAS_30"|"DIAS_45"|"DIAS_60">("CONTADO");
-  const [fechaEntrega, setFechaEntrega] = useState("");
+  const [credito,      setCredito]      = useState<"CONTADO"|"DIAS_10"|"DIAS_15"|"DIAS_30"|"DIAS_45"|"DIAS_60"|"DIAS_90">("CONTADO");
+  const [fechaEntrega, setFechaEntrega] = useState(() => new Date().toISOString().slice(0, 10));
   const [notas,        setNotas]        = useState("");
 
   // Productos
@@ -302,9 +303,12 @@ export function VentaForm({ clientes }: VentaFormProps) {
               <SelectTrigger className="h-9"><SelectValue>{CREDITO_LABEL[credito] ?? credito}</SelectValue></SelectTrigger>
               <SelectContent style={{ backgroundColor: "var(--card-bg-hex)", borderColor: "var(--card-border-hex)" }}>
                 <SelectItem value="CONTADO">Contado</SelectItem>
+                <SelectItem value="DIAS_10">10 Días</SelectItem>
+                <SelectItem value="DIAS_15">15 Días</SelectItem>
                 <SelectItem value="DIAS_30">30 Días</SelectItem>
                 <SelectItem value="DIAS_45">45 Días</SelectItem>
                 <SelectItem value="DIAS_60">60 Días</SelectItem>
+                <SelectItem value="DIAS_90">90 Días</SelectItem>
               </SelectContent>
             </Select>
           </Field>

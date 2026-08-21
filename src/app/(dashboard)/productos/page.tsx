@@ -8,6 +8,7 @@ import { ProductosGrid } from "@/components/productos/productos-grid";
 import { ProductosTableBody } from "@/components/productos/productos-table";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
+import { Paginacion } from "@/components/ui/paginacion";
 
 interface PageProps {
   searchParams: Promise<{
@@ -125,19 +126,11 @@ export default async function ProductosPage({ searchParams }: PageProps) {
       )}
 
       {/* Paginación */}
-      {pages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-            <Link
-              key={p}
-              href={`/productos?q=${busqueda}&page=${p}${vistaQS}`}
-              className={cn(buttonVariants({ variant: p === page ? "default" : "outline", size: "sm" }))}
-            >
-              {p}
-            </Link>
-          ))}
-        </div>
-      )}
+      <Paginacion
+        page={page}
+        pages={pages}
+        buildHref={(p) => `/productos?q=${busqueda}&page=${p}${vistaQS}`}
+      />
     </div>
   );
 }

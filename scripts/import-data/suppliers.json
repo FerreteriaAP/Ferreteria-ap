@@ -5,7 +5,8 @@
     "rnc": "1-01-54137-7",
     "email": null,
     "telefono": "809-564-6060",
-    "direccion": "Expreso John F. Kennedy 15, 10801 . Los Alcarrizos"
+    "direccion": "Expreso John F. Kennedy 15, 10801 . Los Alcarrizos",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -13,7 +14,8 @@
     "rnc": "1-01-01383-4",
     "email": null,
     "telefono": "+1 809-472-6911",
-    "direccion": "Av. John F. Kennedy, Esq. Av. Churchill"
+    "direccion": "Av. John F. Kennedy, Esq. Av. Churchill",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -21,7 +23,8 @@
     "rnc": "1-30-30426-2",
     "email": null,
     "telefono": "+1 809-338-3747",
-    "direccion": "Aut. DuarteKm.18 Nave 13B"
+    "direccion": "Aut. DuarteKm.18 Nave 13B",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -29,7 +32,8 @@
     "rnc": "1-01-07666-6",
     "email": "ventas@axodominicanasa.com",
     "telefono": "+1 809-536-8111",
-    "direccion": "C/ San Juan de la MaguanaNo.25"
+    "direccion": "C/ San Juan de la MaguanaNo.25",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -37,7 +41,8 @@
     "rnc": "1-30-69963-1",
     "email": null,
     "telefono": "+1 809-530-8080",
-    "direccion": "Prol. Feb. No.10"
+    "direccion": "Prol. Feb. No.10",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -45,7 +50,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-832-2661",
-    "direccion": null
+    "direccion": null,
+    "credito": "DIAS_15"
   },
   {
     "tipo": "SUPLIDOR",
@@ -53,7 +59,8 @@
     "rnc": "1-31-09714-6",
     "email": null,
     "telefono": "+1 809-620-9744",
-    "direccion": "C/ Orlando Martinez Esq. Rogelio Roselle No.69"
+    "direccion": "C/ Orlando Martinez Esq. Rogelio Roselle No.69",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -61,7 +68,8 @@
     "rnc": "1-22-02423-9",
     "email": null,
     "telefono": "+1 809-564-5000",
-    "direccion": "1ra 28, M V Norte. San Cristóbal, San Cristóbal"
+    "direccion": "1ra 28, M V Norte. San Cristóbal, San Cristóbal",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -69,7 +77,8 @@
     "rnc": null,
     "email": "luisp30_2@hotmail.com",
     "telefono": "+1 809-412-0095",
-    "direccion": "Calle Juan Alejandro Ibarra, esq. San Martin, Ensanche La Fe"
+    "direccion": "Calle Juan Alejandro Ibarra, esq. San Martin, Ensanche La Fe",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -77,7 +86,8 @@
     "rnc": null,
     "email": null,
     "telefono": null,
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -85,7 +95,8 @@
     "rnc": null,
     "email": "ceraicaarelis@gmail.com",
     "telefono": "+1 849-269-1129",
-    "direccion": "C/ principal Entrando Por el Banco Popular"
+    "direccion": "C/ principal Entrando Por el Banco Popular",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -93,7 +104,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 829-493-9102",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -101,7 +113,8 @@
     "rnc": null,
     "email": null,
     "telefono": null,
-    "direccion": null
+    "direccion": null,
+    "credito": "DIAS_15"
   },
   {
     "tipo": "SUPLIDOR",
@@ -109,7 +122,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-681-6407",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -117,7 +131,8 @@
     "rnc": "1-33-05758-1",
     "email": null,
     "telefono": "+1 809-681-6407",
-    "direccion": "Av. Duarte No.385"
+    "direccion": "Av. Duarte No.385",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -125,7 +140,8 @@
     "rnc": "1-31-14936-7",
     "email": null,
     "telefono": "+1 809-530-6699",
-    "direccion": "C/ Mexico No.78, Buenos Aires. Herrera"
+    "direccion": "C/ Mexico No.78, Buenos Aires. Herrera",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -133,7 +149,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 849-627-9999",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -141,7 +158,8 @@
     "rnc": "1-31-02844-6",
     "email": "ventas@diconex.net",
     "telefono": "+1 809-482-9641",
-    "direccion": "Av. Romulo Betancourt No. 2078. Local 3c"
+    "direccion": "Av. Romulo Betancourt No. 2078. Local 3c",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -149,7 +167,8 @@
     "rnc": "1-30-70080-1",
     "email": null,
     "telefono": "809-518-2555",
-    "direccion": "Avenida México #334, Buenos Aires de Herrera"
+    "direccion": "Avenida México #334, Buenos Aires de Herrera",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -157,7 +176,8 @@
     "rnc": "1-01-68619-7",
     "email": null,
     "telefono": null,
-    "direccion": "Calle Olof Palmer No. 4, 10131 . Los Prados"
+    "direccion": "Calle Olof Palmer No. 4, 10131 . Los Prados",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -165,7 +185,8 @@
     "rnc": "1-01-82935-4",
     "email": null,
     "telefono": null,
-    "direccion": "Avenida Abraham Lincoln 295, casi esquina Avenida José Contreras"
+    "direccion": "Avenida Abraham Lincoln 295, casi esquina Avenida José Contreras",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -173,7 +194,8 @@
     "rnc": null,
     "email": "elohimprospaint@gmail.com",
     "telefono": "+1 809-334-1601",
-    "direccion": "Av. Privada esquina Padre Vicente Yabar, local #6, El Millón"
+    "direccion": "Av. Privada esquina Padre Vicente Yabar, local #6, El Millón",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -181,7 +203,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-537-9005",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -189,7 +212,8 @@
     "rnc": null,
     "email": "s",
     "telefono": "+1 809-858-7982",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -197,7 +221,8 @@
     "rnc": "1-30-76842-2",
     "email": "Ferreteriacedño@gmail.com",
     "telefono": "+1 809-537-9368",
-    "direccion": "C/ Rogelio Rosel No. 34, Engombe"
+    "direccion": "C/ Rogelio Rosel No. 34, Engombe",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -205,7 +230,8 @@
     "rnc": "1-30-08867-5",
     "email": null,
     "telefono": "+1 809-522-2986",
-    "direccion": "Carretera Maximo Gómez, salida bani / sombrero ( frente a la parada de la guagua de los campos)"
+    "direccion": "Carretera Maximo Gómez, salida bani / sombrero ( frente a la parada de la guagua de los campos)",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -213,7 +239,8 @@
     "rnc": "1-02-00343-2",
     "email": "Ferreteria8a@gmail.com",
     "telefono": "+1 809-971-8000",
-    "direccion": "Prol. 27 Feb. No. 100"
+    "direccion": "Prol. 27 Feb. No. 100",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -221,7 +248,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+800 9518 0407",
-    "direccion": "Calle Rogelio Roselle #91"
+    "direccion": "Calle Rogelio Roselle #91",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -229,7 +257,8 @@
     "rnc": "1-01-00095-3",
     "email": null,
     "telefono": "+1 809-227-1717",
-    "direccion": "Avenida John F. Kennedy #60, Esquina Central"
+    "direccion": "Avenida John F. Kennedy #60, Esquina Central",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -237,7 +266,8 @@
     "rnc": "1-31-98411-8",
     "email": "administracion@fesa.do",
     "telefono": "+1 809-530-7676",
-    "direccion": "Calle Juanico Dolores, Esquina D Zona Industrial de Herrera"
+    "direccion": "Calle Juanico Dolores, Esquina D Zona Industrial de Herrera",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -245,7 +275,8 @@
     "rnc": null,
     "email": "fundicionsanpedro@gmail.com",
     "telefono": "+1 809-684-7118",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -253,7 +284,8 @@
     "rnc": "1-01-00231-1",
     "email": "ventas@gll.com.do",
     "telefono": "+1 809-565-0489",
-    "direccion": "Av. San Martin No.249, Ens. La Fe"
+    "direccion": "Av. San Martin No.249, Ens. La Fe",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -261,7 +293,8 @@
     "rnc": "1-01-61976-7",
     "email": null,
     "telefono": "+1 809-561-6161",
-    "direccion": "Carrt. Vieja, Km 9 1/2 No.100"
+    "direccion": "Carrt. Vieja, Km 9 1/2 No.100",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -269,7 +302,8 @@
     "rnc": null,
     "email": "imasd.cdm@hotmail.com",
     "telefono": "+1 809-922-8407",
-    "direccion": null
+    "direccion": null,
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -277,7 +311,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-564-6060",
-    "direccion": "Gregorio Luperón no. 42 esquina Calle 3 Sector Los Restauradores"
+    "direccion": "Gregorio Luperón no. 42 esquina Calle 3 Sector Los Restauradores",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -285,7 +320,8 @@
     "rnc": "1-30-15828-2",
     "email": null,
     "telefono": "+1 809-372-7955",
-    "direccion": "KM 11.5 Aut. Duarte"
+    "direccion": "KM 11.5 Aut. Duarte",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -293,7 +329,8 @@
     "rnc": "1-31-32742-7",
     "email": null,
     "telefono": null,
-    "direccion": "Avenida Jacobo Majluta No. 30"
+    "direccion": "Avenida Jacobo Majluta No. 30",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -301,7 +338,8 @@
     "rnc": "402-1302850-5",
     "email": null,
     "telefono": "+1 809-623-1688",
-    "direccion": "Av Lic J M Azar 30. Guaricano"
+    "direccion": "Av Lic J M Azar 30. Guaricano",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -309,7 +347,8 @@
     "rnc": null,
     "email": null,
     "telefono": null,
-    "direccion": "Calle Paseo del Arroyo"
+    "direccion": "Calle Paseo del Arroyo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -317,7 +356,8 @@
     "rnc": "1-30-01240-7",
     "email": null,
     "telefono": "+1 809-531-8330",
-    "direccion": "Avenida Isabel Aguiar esquina Penetración Sur"
+    "direccion": "Avenida Isabel Aguiar esquina Penetración Sur",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "SUPLIDOR",
@@ -325,7 +365,8 @@
     "rnc": "1-01-00583-1",
     "email": null,
     "telefono": "+1 809-541-1818",
-    "direccion": "Av. Los Beisbolistas No.57 Manoguayabo"
+    "direccion": "Av. Los Beisbolistas No.57 Manoguayabo",
+    "credito": "DIAS_45"
   },
   {
     "tipo": "SUPLIDOR",
@@ -333,7 +374,8 @@
     "rnc": "1-30-37518-6",
     "email": "inversionesariassusana@gmail.com",
     "telefono": "+1 809-221-8888",
-    "direccion": "Calle Paseo de los Aviadores No.3, Miraflores"
+    "direccion": "Calle Paseo de los Aviadores No.3, Miraflores",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -341,7 +383,8 @@
     "rnc": null,
     "email": null,
     "telefono": null,
-    "direccion": "Calle Max Henríquez Ureña #35"
+    "direccion": "Calle Max Henríquez Ureña #35",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -349,7 +392,8 @@
     "rnc": null,
     "email": null,
     "telefono": null,
-    "direccion": "Av Las Palmas 64"
+    "direccion": "Av Las Palmas 64",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "SUPLIDOR",
@@ -357,7 +401,8 @@
     "rnc": "1-01-72549-4",
     "email": null,
     "telefono": "+1 809-564-3666",
-    "direccion": "Aut Duarte Km 9 1/2"
+    "direccion": "Aut Duarte Km 9 1/2",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -365,7 +410,8 @@
     "rnc": "1-32-25450-3",
     "email": null,
     "telefono": "+1 829-546-6632",
-    "direccion": "C/ 9 Esq. 8 Poyecto Mirador Norte"
+    "direccion": "C/ 9 Esq. 8 Poyecto Mirador Norte",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -373,7 +419,8 @@
     "rnc": "1-30-77631-8",
     "email": "cotizaciones@proelectric.com.do",
     "telefono": "+1 809-567-7222",
-    "direccion": "Luis Manuel Cáceres (Tunti) #271, Villa Juana"
+    "direccion": "Luis Manuel Cáceres (Tunti) #271, Villa Juana",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -381,7 +428,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-537-7023",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -389,7 +437,8 @@
     "rnc": "1-30-57897-4",
     "email": null,
     "telefono": "+1 809-560-0222",
-    "direccion": "C/ H, No. 14 Zona Industrial de Herrera"
+    "direccion": "C/ H, No. 14 Zona Industrial de Herrera",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -397,7 +446,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-245-3131",
-    "direccion": null
+    "direccion": null,
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -405,7 +455,8 @@
     "rnc": "1-30-75592-2",
     "email": "ventas@martur.do",
     "telefono": "+1 809-530-7070",
-    "direccion": "C/ Juanico Dolores Esq. Zona Industrial"
+    "direccion": "C/ Juanico Dolores Esq. Zona Industrial",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -413,7 +464,8 @@
     "rnc": "1-01-14780-6",
     "email": "info@matisa.com",
     "telefono": "+1 809-227-6911",
-    "direccion": "Av. San Martín #183, casi esq. Av. Máximo Gómez"
+    "direccion": "Av. San Martín #183, casi esq. Av. Máximo Gómez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -421,7 +473,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-533-5000",
-    "direccion": "Kilómetro 22 Autopista Duarte, Nave Envases Vacíos 2 (EV-2), Local 10."
+    "direccion": "Kilómetro 22 Autopista Duarte, Nave Envases Vacíos 2 (EV-2), Local 10.",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -429,7 +482,8 @@
     "rnc": "1-01-01124-6",
     "email": "Ventas@ferreteriamc.com",
     "telefono": "+1 809-565-5797",
-    "direccion": "Av. John F, Kennedy KM 8 1/2 Gala"
+    "direccion": "Av. John F, Kennedy KM 8 1/2 Gala",
+    "credito": "DIAS_90"
   },
   {
     "tipo": "SUPLIDOR",
@@ -437,7 +491,8 @@
     "rnc": "1-30-45680-1",
     "email": "info@mercaplasrd.com",
     "telefono": "809-595-3382",
-    "direccion": "Los Frailes ll"
+    "direccion": "Los Frailes ll",
+    "credito": "DIAS_45"
   },
   {
     "tipo": "SUPLIDOR",
@@ -445,7 +500,8 @@
     "rnc": null,
     "email": null,
     "telefono": null,
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -453,7 +509,8 @@
     "rnc": "1-02-62071-7",
     "email": "info@morteros.net",
     "telefono": "+1 809-233-6060",
-    "direccion": "Carret. Janico, Las Charcas"
+    "direccion": "Carret. Janico, Las Charcas",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "SUPLIDOR",
@@ -461,7 +518,8 @@
     "rnc": "1-01-61420-1",
     "email": null,
     "telefono": "+1 809-567-1295",
-    "direccion": "Av. Ortega y Gasset No.49"
+    "direccion": "Av. Ortega y Gasset No.49",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -469,7 +527,8 @@
     "rnc": "1-31-08787-6",
     "email": null,
     "telefono": "+1 809-542-1395",
-    "direccion": "Calle Eugenio Deschamps 26"
+    "direccion": "Calle Eugenio Deschamps 26",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "SUPLIDOR",
@@ -477,7 +536,8 @@
     "rnc": "1-01-51674-7",
     "email": "servicioalcliente@petroquimicos.com.do",
     "telefono": "+1 809-561-7076",
-    "direccion": "Aut. Duarte Km 12 1/2"
+    "direccion": "Aut. Duarte Km 12 1/2",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "SUPLIDOR",
@@ -485,7 +545,8 @@
     "rnc": "1-32-97694-2",
     "email": null,
     "telefono": null,
-    "direccion": "Av. Duarte No. 391, Ens. Luperon"
+    "direccion": "Av. Duarte No. 391, Ens. Luperon",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -493,7 +554,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-227-2222",
-    "direccion": "Av. San Martin No.227"
+    "direccion": "Av. San Martin No.227",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -501,7 +563,8 @@
     "rnc": "1-01-62076-5",
     "email": null,
     "telefono": "+1 809-472-4479",
-    "direccion": "Av. Rep. de Colombia No.35, Los Peralejos"
+    "direccion": "Av. Rep. de Colombia No.35, Los Peralejos",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "SUPLIDOR",
@@ -509,7 +572,8 @@
     "rnc": "1-22-01364-4",
     "email": null,
     "telefono": "+1 809-531-0770",
-    "direccion": "Av. John F. Kennedy No.3"
+    "direccion": "Av. John F. Kennedy No.3",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -517,7 +581,8 @@
     "rnc": "1-01-64668-1",
     "email": null,
     "telefono": "+1 809-531-4833",
-    "direccion": "Prol. 27 Feb. 486"
+    "direccion": "Prol. 27 Feb. 486",
+    "credito": "DIAS_90"
   },
   {
     "tipo": "SUPLIDOR",
@@ -525,7 +590,8 @@
     "rnc": "1-01-01042-8",
     "email": null,
     "telefono": "+1 809-567-5537",
-    "direccion": "Av. John F. Kennedy 4, Miraflores"
+    "direccion": "Av. John F. Kennedy 4, Miraflores",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "SUPLIDOR",
@@ -533,7 +599,8 @@
     "rnc": "1-32-33397-7",
     "email": "info@suplax.com.do",
     "telefono": "8091012143",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -541,7 +608,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-560-6515",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -549,7 +617,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 809-531-5544",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -557,7 +626,8 @@
     "rnc": "1-22-01396-2",
     "email": "info@residom.com",
     "telefono": "+1 809-372-1998",
-    "direccion": "Aut. Duarte KM 9 1/2 Villa Maria"
+    "direccion": "Aut. Duarte KM 9 1/2 Villa Maria",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "SUPLIDOR",
@@ -565,7 +635,8 @@
     "rnc": "1-30-25997-6",
     "email": "ventas@rodfor.com",
     "telefono": "+1 809-334-0002",
-    "direccion": "C/ Estancia Nueva No.17, Urb San Geronimo"
+    "direccion": "C/ Estancia Nueva No.17, Urb San Geronimo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -573,7 +644,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 849-446-5250",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -581,7 +653,8 @@
     "rnc": null,
     "email": null,
     "telefono": null,
-    "direccion": "Mano Guayabo C/ CibaoNo. 10"
+    "direccion": "Mano Guayabo C/ CibaoNo. 10",
+    "credito": "DIAS_90"
   },
   {
     "tipo": "SUPLIDOR",
@@ -589,7 +662,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 829-497-0100",
-    "direccion": "Calle Reparto José 11-A Marbella, Sector Ureña,"
+    "direccion": "Calle Reparto José 11-A Marbella, Sector Ureña,",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -597,7 +671,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 829-824-0117",
-    "direccion": null
+    "direccion": null,
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -605,7 +680,8 @@
     "rnc": null,
     "email": null,
     "telefono": "+1 829-207-4870",
-    "direccion": "C/ Penetracion 15 No.22"
+    "direccion": "C/ Penetracion 15 No.22",
+    "credito": "CONTADO"
   },
   {
     "tipo": "SUPLIDOR",
@@ -613,7 +689,8 @@
     "rnc": "1-01-63165-1",
     "email": "ventas@vf.com.do",
     "telefono": "+1 809-549-5220",
-    "direccion": "Av. Luperon No.89"
+    "direccion": "Av. Luperon No.89",
+    "credito": "DIAS_45"
   },
   {
     "tipo": "SUPLIDOR",
@@ -621,6 +698,7 @@
     "rnc": "1-01-87499-6",
     "email": null,
     "telefono": "+1 809-562-7777",
-    "direccion": "Parque Ind. Duarte Km. 22"
+    "direccion": "Parque Ind. Duarte Km. 22",
+    "credito": "DIAS_60"
   }
 ]

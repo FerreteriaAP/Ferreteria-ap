@@ -1,1262 +1,1577 @@
 [
   {
     "tipo": "CLIENTE",
-    "nombre": "A 2 Liquidacion"
+    "nombre": "A 2 Liquidacion",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Argentina Sicologa"
+    "nombre": "Argentina Sicologa",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Adalberto Cabral /Bigote/"
+    "nombre": "Adalberto Cabral /Bigote/",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Alberto /Caballo/"
+    "nombre": "Alberto /Caballo/",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Alex Herrero"
+    "nombre": "Alex Herrero",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Alexandra feliz"
+    "nombre": "Alexandra feliz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Alexis Guzman"
+    "nombre": "Alexis Guzman",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Alfonzo Feliz"
+    "nombre": "Alfonzo Feliz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Alquimedez"
+    "nombre": "Alquimedez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Altagracias Reinozo"
+    "nombre": "Altagracias Reinozo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ana Mena"
+    "nombre": "Ana Mena",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Andre Diloche"
+    "nombre": "Andre Diloche",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Andre La Roca"
+    "nombre": "Andre La Roca",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Andrea Almanzar"
+    "nombre": "Andrea Almanzar",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Andres de la Rosa"
+    "nombre": "Andres de la Rosa",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Anety Gusman"
+    "nombre": "Anety Gusman",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Angel Ciriaco"
+    "nombre": "Angel Ciriaco",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Angel Sanchez"
+    "nombre": "Angel Sanchez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Angel Valautre"
+    "nombre": "Angel Valautre",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Anny Piron"
+    "nombre": "Anny Piron",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Antonio Ramos Papo"
+    "nombre": "Antonio Ramos Papo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Antony De La Cruz"
+    "nombre": "Antony De La Cruz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Anyolino"
+    "nombre": "Anyolino",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Arelis Perez"
+    "nombre": "Arelis Perez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ariza Mancebo"
+    "nombre": "Ariza Mancebo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Arquimedez Jose"
+    "nombre": "Arquimedez Jose",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Asocaoba"
+    "nombre": "Asocaoba",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Auto Gala"
+    "nombre": "Auto Gala",
+    "credito": "DIAS_10"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Balvuena Maestro"
+    "nombre": "Balvuena Maestro",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Banca Real"
+    "nombre": "Banca Real",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Bandejor"
+    "nombre": "Bandejor",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Basilia Jesus"
+    "nombre": "Basilia Jesus",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Benita"
+    "nombre": "Benita",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Bermode Daisma"
+    "nombre": "Bermode Daisma",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Biulle Laurant"
+    "nombre": "Biulle Laurant",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Bladimir Rosario"
+    "nombre": "Bladimir Rosario",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Bobo"
+    "nombre": "Bobo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Candida Torres"
+    "nombre": "Candida Torres",
+    "credito": "DIAS_15"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carabela"
+    "nombre": "Carabela",
+    "credito": "DIAS_90"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Cariblu Proyecto"
+    "nombre": "Cariblu Proyecto",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carlo Beltrez"
+    "nombre": "Carlo Beltrez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carlo Martinez"
+    "nombre": "Carlo Martinez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carlo Paulino"
+    "nombre": "Carlo Paulino",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carmela Matos"
+    "nombre": "Carmela Matos",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carmen Familia"
+    "nombre": "Carmen Familia",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carmen Lidia"
+    "nombre": "Carmen Lidia",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carmen Rosario"
+    "nombre": "Carmen Rosario",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carolina Garcias"
+    "nombre": "Carolina Garcias",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Centro de Goma"
+    "nombre": "Centro de Goma",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Centro de Refrigeracion Rover"
+    "nombre": "Centro de Refrigeracion Rover",
+    "credito": "DIAS_15"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Cezar Cabrera"
+    "nombre": "Cezar Cabrera",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Chavo"
+    "nombre": "Chavo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Chicho De La Cruz"
+    "nombre": "Chicho De La Cruz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Chipa /ORO/"
+    "nombre": "Chipa /ORO/",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Climalog"
+    "nombre": "Climalog",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Colmado Oasis"
+    "nombre": "Colmado Oasis",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Cristian"
+    "nombre": "Cristian",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Condominio Don Orencio Vl"
+    "nombre": "Condominio Don Orencio Vl",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Consultora Kolmen SRL"
+    "nombre": "Consultora Kolmen SRL",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Cristian Castillo"
+    "nombre": "Cristian Castillo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Cristian Mendez"
+    "nombre": "Cristian Mendez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Cristina Torres"
+    "nombre": "Cristina Torres",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Cruz Martinez"
+    "nombre": "Cruz Martinez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Daneyi  Lizaldo"
+    "nombre": "Daneyi  Lizaldo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Daniel Castillo"
+    "nombre": "Daniel Castillo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Daniel Espinal o Nani"
+    "nombre": "Daniel Espinal o Nani",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Daniel Feliz"
+    "nombre": "Daniel Feliz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Danilo De la Cruz"
+    "nombre": "Danilo De la Cruz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Dario Valautre"
+    "nombre": "Dario Valautre",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Deco Addict"
+    "nombre": "Deco Addict",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Denia Ortiz"
+    "nombre": "Denia Ortiz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Diana Rivera"
+    "nombre": "Diana Rivera",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Diloche"
+    "nombre": "Diloche",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Diony tejeda"
+    "nombre": "Diony tejeda",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Disney Pujols"
+    "nombre": "Disney Pujols",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Doña Nohema"
+    "nombre": "Doña Nohema",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Dra Berkis"
+    "nombre": "Dra Berkis",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Edwin Valerio"
+    "nombre": "Edwin Valerio",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "El Chino"
+    "nombre": "El Chino",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "El May"
+    "nombre": "El May",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "El Pastor"
+    "nombre": "El Pastor",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Electrosistema Fondeur SRL"
+    "nombre": "Electrosistema Fondeur SRL",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Elena Cabrera"
+    "nombre": "Elena Cabrera",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Elizabeth Cuevas"
+    "nombre": "Elizabeth Cuevas",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Elsa Gomez (Aros)"
+    "nombre": "Elsa Gomez (Aros)",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Elsa Sosa"
+    "nombre": "Elsa Sosa",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Elvin Baez"
+    "nombre": "Elvin Baez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Emmanuel Perez"
+    "nombre": "Emmanuel Perez",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Enrrique Lopez"
+    "nombre": "Enrrique Lopez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Epedito"
+    "nombre": "Epedito",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Erasmo Garcias"
+    "nombre": "Erasmo Garcias",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ernesto Miguel"
+    "nombre": "Ernesto Miguel",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Escuela Hora De Dios /Colegio De Monja/"
+    "nombre": "Escuela Hora De Dios /Colegio De Monja/",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Euclidez Pelo Fino"
+    "nombre": "Euclidez Pelo Fino",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Eudy De Lo Santo"
+    "nombre": "Eudy De Lo Santo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Eulalio Batista"
+    "nombre": "Eulalio Batista",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Fanny Angela Abreu"
+    "nombre": "Fanny Angela Abreu",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Favio Almonte"
+    "nombre": "Favio Almonte",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Faviola De La Rosa"
+    "nombre": "Faviola De La Rosa",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Feliz Aybar"
+    "nombre": "Feliz Aybar",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Feliz Javier Maria Torres"
+    "nombre": "Feliz Javier Maria Torres",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Feliz Pujols"
+    "nombre": "Feliz Pujols",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ferni Aybar"
+    "nombre": "Ferni Aybar",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Flor Nolasco"
+    "nombre": "Flor Nolasco",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Francia De Los Santo"
+    "nombre": "Francia De Los Santo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Francis Sanchez"
+    "nombre": "Francis Sanchez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Francisco Duarte"
+    "nombre": "Francisco Duarte",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Francisco Medina Peña"
+    "nombre": "Francisco Medina Peña",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Francisco Novas"
+    "nombre": "Francisco Novas",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Francisco Quezada"
+    "nombre": "Francisco Quezada",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Franklin Rodriguez"
+    "nombre": "Franklin Rodriguez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Frauly Arias"
+    "nombre": "Frauly Arias",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Freddy Nuñez"
+    "nombre": "Freddy Nuñez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Genology SRL"
+    "nombre": "Genology SRL",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Gina Figueroa"
+    "nombre": "Gina Figueroa",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Glenys Parra"
+    "nombre": "Glenys Parra",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Grecias Crisotomo"
+    "nombre": "Grecias Crisotomo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Gregoria Alvarez"
+    "nombre": "Gregoria Alvarez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Grupo Mayer"
+    "nombre": "Grupo Mayer",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Grupo WMR & Asocs."
+    "nombre": "Grupo WMR & Asocs.",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Guarionex"
+    "nombre": "Guarionex",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Hidraulica Global AG"
+    "nombre": "Hidraulica Global AG",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ing Derick Rodriguez"
+    "nombre": "Ing Derick Rodriguez",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ing Efren Mateo"
+    "nombre": "Ing Efren Mateo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ing Luna"
+    "nombre": "Ing Luna",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ing. Mendoza"
+    "nombre": "Ing. Mendoza",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Inmobiliaria Mayer"
+    "nombre": "Inmobiliaria Mayer",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Irlando Ramos"
+    "nombre": "Irlando Ramos",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ironelis De los Santos"
+    "nombre": "Ironelis De los Santos",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Isaia Sotos Bocinita"
+    "nombre": "Isaia Sotos Bocinita",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ivelice Tia De Sandra"
+    "nombre": "Ivelice Tia De Sandra",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ivonne Jimenez"
+    "nombre": "Ivonne Jimenez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jacqueline Soto"
+    "nombre": "Jacqueline Soto",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jairo Encarnacion"
+    "nombre": "Jairo Encarnacion",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jesus Gomez"
+    "nombre": "Jesus Gomez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jhonatan Luzon"
+    "nombre": "Jhonatan Luzon",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jirma Pantaleon"
+    "nombre": "Jirma Pantaleon",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Joaquin Carrasco"
+    "nombre": "Joaquin Carrasco",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jonny Pie"
+    "nombre": "Jonny Pie",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Alcidez"
+    "nombre": "Jose Alcidez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Antonio Toño"
+    "nombre": "Jose Antonio Toño",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Bello"
+    "nombre": "Jose Bello",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose De Paula"
+    "nombre": "Jose De Paula",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Gerez"
+    "nombre": "Jose Gerez",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Luciano"
+    "nombre": "Jose Luciano",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Luis Rosario"
+    "nombre": "Jose Luis Rosario",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Manuel"
+    "nombre": "Jose Manuel",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Matinez"
+    "nombre": "Jose Matinez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jose Mendez"
+    "nombre": "Jose Mendez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Juan F Ramirez"
+    "nombre": "Juan F Ramirez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Juan Marte"
+    "nombre": "Juan Marte",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Juan Mecanico"
+    "nombre": "Juan Mecanico",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Juan Rodriguez"
+    "nombre": "Juan Rodriguez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Juancito Feliz"
+    "nombre": "Juancito Feliz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Julio Mora"
+    "nombre": "Julio Mora",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Katiuska Sanchez"
+    "nombre": "Katiuska Sanchez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Keila Medina"
+    "nombre": "Keila Medina",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Kenia Frontier"
+    "nombre": "Kenia Frontier",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Kukuto Auto Adornos"
+    "nombre": "Kukuto Auto Adornos",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "La Mama De Felo"
+    "nombre": "La Mama De Felo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "La Mella"
+    "nombre": "La Mella",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Leandel Auto Workshop"
+    "nombre": "Leandel Auto Workshop",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Leonardo Jimenez"
+    "nombre": "Leonardo Jimenez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Lidia Gomez"
+    "nombre": "Lidia Gomez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Lina Feliz"
+    "nombre": "Lina Feliz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Lino Familia"
+    "nombre": "Lino Familia",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Literal Construcciones"
+    "nombre": "Literal Construcciones",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Lucia Ramirez  ]Mary]  Wandel"
+    "nombre": "Lucia Ramirez  ]Mary]  Wandel",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Luis Albañil"
+    "nombre": "Luis Albañil",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Luis Emelio"
+    "nombre": "Luis Emelio",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Luis Tejada"
+    "nombre": "Luis Tejada",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marleida"
+    "nombre": "Marleida",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Made Auto Import"
+    "nombre": "Made Auto Import",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maestro Lester"
+    "nombre": "Maestro Lester",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Malespin Constructora"
+    "nombre": "Malespin Constructora",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Manengo El Plomerito"
+    "nombre": "Manengo El Plomerito",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Manolo Ciriaco"
+    "nombre": "Manolo Ciriaco",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Manuel De Jesus"
+    "nombre": "Manuel De Jesus",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Manuel Nin"
+    "nombre": "Manuel Nin",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marcelo"
+    "nombre": "Marcelo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marcelo Martinez"
+    "nombre": "Marcelo Martinez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marcelo Rodriguez"
+    "nombre": "Marcelo Rodriguez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marcial  Cecilia"
+    "nombre": "Marcial  Cecilia",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marco Carabela"
+    "nombre": "Marco Carabela",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marcos Armenteros"
+    "nombre": "Marcos Armenteros",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Margo Reyes"
+    "nombre": "Margo Reyes",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Margot Reyes"
+    "nombre": "Margot Reyes",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maria Del Pilar"
+    "nombre": "Maria Del Pilar",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maria Duran"
+    "nombre": "Maria Duran",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maria La Barbie"
+    "nombre": "Maria La Barbie",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maria Magdalena Herrera"
+    "nombre": "Maria Magdalena Herrera",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Mariano Encarnacion"
+    "nombre": "Mariano Encarnacion",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Mariano Encarnacion la belleza"
+    "nombre": "Mariano Encarnacion la belleza",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marileyda Peralta"
+    "nombre": "Marileyda Peralta",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maritza Lopez"
+    "nombre": "Maritza Lopez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maritza Peralta"
+    "nombre": "Maritza Peralta",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marleny Reyes"
+    "nombre": "Marleny Reyes",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Marmoleria Italtop"
+    "nombre": "Marmoleria Italtop",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Martin o Belleza"
+    "nombre": "Martin o Belleza",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maximo Guillermo"
+    "nombre": "Maximo Guillermo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Maximo Tapia"
+    "nombre": "Maximo Tapia",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Merkaparts"
+    "nombre": "Merkaparts",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Michel"
+    "nombre": "Michel",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Microtech"
+    "nombre": "Microtech",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Miguel Rodriguez"
+    "nombre": "Miguel Rodriguez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Miguelin"
+    "nombre": "Miguelin",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Miguelina Samboy"
+    "nombre": "Miguelina Samboy",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ministerio Elim"
+    "nombre": "Ministerio Elim",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Nanny Maid Clear"
+    "nombre": "Nanny Maid Clear",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Narciso Rondon"
+    "nombre": "Narciso Rondon",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Nelio Duverge"
+    "nombre": "Nelio Duverge",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Nery Abreu"
+    "nombre": "Nery Abreu",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Nicol Mendoza"
+    "nombre": "Nicol Mendoza",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Nicolas Lopez"
+    "nombre": "Nicolas Lopez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Noly Torguez"
+    "nombre": "Noly Torguez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Nueva Iglesia De La Cristanisacion Nacional"
+    "nombre": "Nueva Iglesia De La Cristanisacion Nacional",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Olivo Mercedez"
+    "nombre": "Olivo Mercedez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Olivo Sanchez"
+    "nombre": "Olivo Sanchez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Papin"
+    "nombre": "Papin",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Pastor Josue"
+    "nombre": "Pastor Josue",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Paulina Berroa"
+    "nombre": "Paulina Berroa",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Pedro Gomez"
+    "nombre": "Pedro Gomez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Pedro Olivo Cuello"
+    "nombre": "Pedro Olivo Cuello",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Pedro Padilla"
+    "nombre": "Pedro Padilla",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Pelo Fino"
+    "nombre": "Pelo Fino",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Piedras Eduardo"
+    "nombre": "Piedras Eduardo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Pipo Perez"
+    "nombre": "Pipo Perez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Pollera Diony"
+    "nombre": "Pollera Diony",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Quintiliano Caceres"
+    "nombre": "Quintiliano Caceres",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "R. Lopez e Hijos"
+    "nombre": "R. Lopez e Hijos",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rafael Bautista"
+    "nombre": "Rafael Bautista",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ramon Bisono"
+    "nombre": "Ramon Bisono",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rolando Valdez"
+    "nombre": "Rolando Valdez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rafael Ciprian"
+    "nombre": "Rafael Ciprian",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rafael Polanco"
+    "nombre": "Rafael Polanco",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rafael Rosario"
+    "nombre": "Rafael Rosario",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rafael Santana"
+    "nombre": "Rafael Santana",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rafelin Bautista"
+    "nombre": "Rafelin Bautista",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ramon Crisotomo"
+    "nombre": "Ramon Crisotomo",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ramon Diaz"
+    "nombre": "Ramon Diaz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ramon Favian"
+    "nombre": "Ramon Favian",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ramon Garcias"
+    "nombre": "Ramon Garcias",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Raul Cabrera"
+    "nombre": "Raul Cabrera",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ray Perez"
+    "nombre": "Ray Perez",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ray Romulo"
+    "nombre": "Ray Romulo",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Refricity S.R.L"
+    "nombre": "Refricity S.R.L",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Residencial LP8"
+    "nombre": "Residencial LP8",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ricardo Morfi"
+    "nombre": "Ricardo Morfi",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ricardo Moya"
+    "nombre": "Ricardo Moya",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Richart Yulier"
+    "nombre": "Richart Yulier",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rofran Solar Energy"
+    "nombre": "Rofran Solar Energy",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rogelio Amigo Ingeniero"
+    "nombre": "Rogelio Amigo Ingeniero",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rolando Auto Aires"
+    "nombre": "Rolando Auto Aires",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Roller Herrera"
+    "nombre": "Roller Herrera",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ronny Garcias"
+    "nombre": "Ronny Garcias",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rossy Garcias"
+    "nombre": "Rossy Garcias",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ruben Severino"
+    "nombre": "Ruben Severino",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rusbel Sanchez"
+    "nombre": "Rusbel Sanchez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Sr. Cabo"
+    "nombre": "Sr. Cabo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Sr. Flete"
+    "nombre": "Sr. Flete",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Sr. Willian"
+    "nombre": "Sr. Willian",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Sandra Casado"
+    "nombre": "Sandra Casado",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Santiago Ferreira"
+    "nombre": "Santiago Ferreira",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Santo Martes"
+    "nombre": "Santo Martes",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Savier Andres"
+    "nombre": "Savier Andres",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Seguridad Paraiso Del Caribe"
+    "nombre": "Seguridad Paraiso Del Caribe",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Shaldai Import SRL"
+    "nombre": "Shaldai Import SRL",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Shef  O Duran"
+    "nombre": "Shef  O Duran",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Simon Medina"
+    "nombre": "Simon Medina",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Sujeirys Altagracias"
+    "nombre": "Sujeirys Altagracias",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Susano"
+    "nombre": "Susano",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Telio Carabela"
+    "nombre": "Telio Carabela",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Tomas De Leon"
+    "nombre": "Tomas De Leon",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Tomas Moronto"
+    "nombre": "Tomas Moronto",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Tuta Alvarez"
+    "nombre": "Tuta Alvarez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Universidad Psicologica Industrial"
+    "nombre": "Universidad Psicologica Industrial",
+    "credito": "DIAS_60"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Vidal Perez"
+    "nombre": "Vidal Perez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Vanecio O Alegio"
+    "nombre": "Vanecio O Alegio",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Vicente Aracena"
+    "nombre": "Vicente Aracena",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Victor Gutierrez"
+    "nombre": "Victor Gutierrez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Virgilio La Rosa"
+    "nombre": "Virgilio La Rosa",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Virgilio Ventura"
+    "nombre": "Virgilio Ventura",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Vitelio Rapozo"
+    "nombre": "Vitelio Rapozo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Viviana Payano / Martina"
+    "nombre": "Viviana Payano / Martina",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Welinton Daniel Gonzalez"
+    "nombre": "Welinton Daniel Gonzalez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Wilda Alcantara"
+    "nombre": "Wilda Alcantara",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "WRC Centro de Muflers"
+    "nombre": "WRC Centro de Muflers",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Walter Martinez"
+    "nombre": "Walter Martinez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Wendy Tanques"
+    "nombre": "Wendy Tanques",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Wilian Rodriguez"
+    "nombre": "Wilian Rodriguez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Willian Pichardo"
+    "nombre": "Willian Pichardo",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Willy Otañe"
+    "nombre": "Willy Otañe",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yadira Diaz"
+    "nombre": "Yadira Diaz",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yadira Escobosa"
+    "nombre": "Yadira Escobosa",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yary o Antonio"
+    "nombre": "Yary o Antonio",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yohan Dipre"
+    "nombre": "Yohan Dipre",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yonny Pie"
+    "nombre": "Yonny Pie",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yonny Rodriguez"
+    "nombre": "Yonny Rodriguez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yonny Rojas"
+    "nombre": "Yonny Rojas",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Ysabel Matos"
+    "nombre": "Ysabel Matos",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yuderka Hernandez"
+    "nombre": "Yuderka Hernandez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yudy Tia De Sandra"
+    "nombre": "Yudy Tia De Sandra",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yunior Alejandro"
+    "nombre": "Yunior Alejandro",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Yunior Shuter"
+    "nombre": "Yunior Shuter",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Zabala Zabala"
+    "nombre": "Zabala Zabala",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Alexis Antonio"
+    "nombre": "Alexis Antonio",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Angel Santana"
+    "nombre": "Angel Santana",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Carlos Brama"
+    "nombre": "Carlos Brama",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Conacivil Construciones"
+    "nombre": "Conacivil Construciones",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Fabio Almontes"
+    "nombre": "Fabio Almontes",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Filtrotech"
+    "nombre": "Filtrotech",
+    "credito": "DIAS_30"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Francia de los Santos"
+    "nombre": "Francia de los Santos",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Jacinto Batista"
+    "nombre": "Jacinto Batista",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Julio Mendez"
+    "nombre": "Julio Mendez",
+    "credito": "CONTADO"
   },
   {
     "tipo": "CLIENTE",
-    "nombre": "Rosa Maldonado"
+    "nombre": "Rosa Maldonado",
+    "credito": "CONTADO"
   }
 ]

@@ -271,38 +271,35 @@ export default async function AlertasPage() {
  </div>
 
  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
- {/* Cheques listos */}
- {a.chequesListos.length > 0 && (
- <AlertCard titulo="💳 Cheques listos para entrega" color="blue" count={a.chequesListos.length}>
- <div className="space-y-2">
+ {/* Un card por suplidor con cheque listo */}
  {chequesListos.map(s => (
- <div key={s.id} className="flex items-center justify-between text-xs gap-2">
- <span className="font-medium truncate">{s.nombre}</span>
+ <AlertCard key={s.id} titulo={`💳 ${s.nombre}`} color="blue" count={1}>
+ <div className="flex items-center justify-between text-xs gap-2">
+ <div>
+ <span className="font-medium">Cheque listo para entregar</span>
+ {s.fechaChequeListo && (
+ <p className="text-muted-foreground text-[11px] mt-0.5">{fmtFecha(s.fechaChequeListo)}</p>
+ )}
+ </div>
  <ChequeEntregadoBtn contactoId={s.id} nombre={s.nombre} />
  </div>
- ))}
- </div>
  </AlertCard>
- )}
+ ))}
 
- {/* Alertas de cheque entregado — solo admin */}
- {esAdmin && a.alertasChequeEntregado.length > 0 && (
- <AlertCard titulo="✅ Cheques entregados" color="amber" count={a.alertasChequeEntregado.length}>
- <div className="space-y-2">
- {alertasCheque.map(al => (
- <div key={al.id} className="flex items-center justify-between text-xs gap-2">
- <div className="truncate">
- <span className="font-medium">{al.contacto.nombre}</span>
- <span className="text-muted-foreground ml-1.5">
- — {al.entregadoPor.nombre} {al.entregadoPor.apellido}
- </span>
+ {/* Un card por alerta de cheque entregado — solo admin */}
+ {esAdmin && alertasCheque.map(al => (
+ <AlertCard key={al.id} titulo={`✅ ${al.contacto.nombre}`} color="amber" count={1}>
+ <div className="flex items-center justify-between text-xs gap-2">
+ <div>
+ <span className="font-medium">Cheque entregado</span>
+ <p className="text-muted-foreground text-[11px] mt-0.5">
+ Por: {al.entregadoPor.nombre} {al.entregadoPor.apellido} — {fmtFecha(al.entregadoAt)}
+ </p>
  </div>
  <DismissAlertaBtn alertaId={al.id} />
  </div>
- ))}
- </div>
  </AlertCard>
- )}
+ ))}
  </div>
  </div>
  )}

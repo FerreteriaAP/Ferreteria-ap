@@ -30,10 +30,8 @@ const tipoStyle: Record<string, React.CSSProperties> = {
 };
 
 const creditoLabel: Record<string, string> = {
-  CONTADO: "Contado",
-  DIAS_30: "30 días",
-  DIAS_45: "45 días",
-  DIAS_60: "60 días",
+  CONTADO: "Contado", DIAS_10: "10 días", DIAS_15: "15 días",
+  DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días", DIAS_90: "90 días",
 };
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -71,7 +69,7 @@ export function ContactosGrid({ contactos }: { contactos: Contacto[] }) {
             key={c.id}
             href={`/contactos/${c.id}`}
             className={cn(
-              "group rounded-xl p-4 flex flex-col gap-3 transition-all duration-150 cursor-pointer",
+              "group rounded-xl p-4 flex flex-col gap-3 transition-all duration-150 cursor-pointer h-full",
               "hover:shadow-md hover:-translate-y-px",
               !c.activo && "opacity-55"
             )}

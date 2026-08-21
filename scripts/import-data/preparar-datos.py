@@ -46,6 +46,19 @@ def limpiar_float(valor):
         return None
     return float(valor)
 
+def map_credito(valor):
+    """Mapea texto de crédito del Excel al enum TipoCredito."""
+    if valor is None or (isinstance(valor, float) and math.isnan(valor)):
+        return "CONTADO"
+    s = str(valor).strip().lower()
+    if "10" in s: return "DIAS_10"
+    if "15" in s: return "DIAS_15"
+    if "30" in s: return "DIAS_30"
+    if "45" in s: return "DIAS_45"
+    if "60" in s: return "DIAS_60"
+    if "90" in s: return "DIAS_90"
+    return "CONTADO"
+
 # ─── SUPLIDORES ───────────────────────────────────────────────────────────────
 
 df_sup = pd.read_excel(f"{DESKTOP}/Contactos Ferreteria AP.xlsx", sheet_name="SUPLIDOR")
@@ -59,6 +72,7 @@ for _, row in df_sup.iterrows():
     email = limpiar_str(row.get("Correo electrónico"))
     telefono = limpiar_str(row.get("Teléfono"))
     direccion = limpiar_str(row.get("Direccion"))
+    credito = map_credito(row.get("Credito (Dias)"))
 
     suppliers.append({
         "tipo": "SUPLIDOR",
@@ -67,6 +81,7 @@ for _, row in df_sup.iterrows():
         "email": email,
         "telefono": telefono,
         "direccion": direccion,
+        "credito": credito,
     })
 
 print(f"✓ Suplidores: {len(suppliers)}")
@@ -79,12 +94,14 @@ clients = []
 seen_names = set()
 for _, row in df_cli.iterrows():
     nombre = limpiar_str(row.get("Nombre"))
+    credito = map_credito(row.get("credito "))
     if not nombre or nombre in seen_names:
         continue
     seen_names.add(nombre)
     clients.append({
         "tipo": "CLIENTE",
         "nombre": nombre,
+        "credito": credito,
     })
 
 print(f"✓ Clientes: {len(clients)}")

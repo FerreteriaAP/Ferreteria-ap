@@ -46,7 +46,7 @@ type Suplidor     = { id: string; nombre: string; rnc: string | null; credito: s
 
 // Map TipoCredito enum → days
 const DIAS_CREDITO: Record<string, number> = {
-  DIAS_30: 30, DIAS_45: 45, DIAS_60: 60, CONTADO: 0,
+  CONTADO: 0, DIAS_10: 10, DIAS_15: 15, DIAS_30: 30, DIAS_45: 45, DIAS_60: 60, DIAS_90: 90,
 };
 type Categoria    = { id: string; codigo: string; nombre: string };
 type ProductoSim  = { id: string; nombre: string; codigo: string; costoUltimo: number; stockActual: number; precioVenta: number; porcentajeGanancia: number };
