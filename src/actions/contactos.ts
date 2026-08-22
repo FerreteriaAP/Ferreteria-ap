@@ -27,7 +27,7 @@ const ContactoSchema = z.object({
  email: z.string().email("Email inválido").optional().or(z.literal("")),
  telefono: z.string().optional(),
  telefonoAlt: z.string().optional(),
- credito: z.enum(["CONTADO", "DIAS_30", "DIAS_45", "DIAS_60"]).default("CONTADO"),
+ credito: z.enum(["CONTADO", "DIAS_10", "DIAS_15", "DIAS_30", "DIAS_45", "DIAS_60", "DIAS_90"]).default("CONTADO"),
  limiteCredito: z.coerce.number().optional(),
  descuentoFijo: z.coerce.number().min(0).max(100).optional(),
  esEmisorElectronico: z.boolean().default(false),

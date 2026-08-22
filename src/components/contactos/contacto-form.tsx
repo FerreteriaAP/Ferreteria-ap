@@ -20,6 +20,11 @@ function toTitleCase(str: string): string {
 const CARD_BG = "color-mix(in srgb, var(--card) 55%, transparent)";
 const ACCENT  = "var(--accent-hex)";
 
+const CREDITO_LABEL: Record<string, string> = {
+  CONTADO: "Contado", DIAS_10: "10 días", DIAS_15: "15 días",
+  DIAS_30: "30 días", DIAS_45: "45 días", DIAS_60: "60 días", DIAS_90: "90 días",
+};
+
 // ── Subcomponentes ────────────────────────────────────────────────────────────
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -215,7 +220,7 @@ export function ContactoForm({ contactoId, defaultValues }: ContactoFormProps) {
 
           <Field label="Plazo de crédito">
             <Select value={credito} onValueChange={v => form.setValue("credito", v as FormValues["credito"])}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9"><SelectValue>{CREDITO_LABEL[credito] ?? credito}</SelectValue></SelectTrigger>
               <SelectContent>
                 <SelectItem value="CONTADO">Contado</SelectItem>
                 <SelectItem value="DIAS_10">10 días</SelectItem>
