@@ -40,7 +40,7 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
   const data = await getEstadoCuenta(clienteId, incluirPagadas);
   if (!data) notFound();
 
-  const { cliente, facturas, totales, generadoEn } = data;
+  const { cliente, facturas, totales, generadoEn, notasCredito } = data;
 
   return (
     <div className="space-y-5">
@@ -137,6 +137,33 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
         </div>
       </div>
 
+      {/* Notas de crédito disponibles */}
+      {notasCredito.length > 0 && (
+        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.06)" }}>
+          <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.1)" }}>
+            <span className="text-sm font-bold" style={{ color: "#a855f7" }}>Notas de crédito disponibles</span>
+            <span className="text-xs font-mono font-bold" style={{ color: "#a855f7" }}>
+              Saldo a favor: {fmt(cliente.saldoFavor ?? 0)}
+            </span>
+          </div>
+          <div className="divide-y" style={{ borderColor: "rgba(168,85,247,0.2)" }}>
+            {notasCredito.map(nc => (
+              <div key={nc.id} className="px-4 py-2.5 flex items-center justify-between gap-3">
+                <div>
+                  <span className="font-mono text-sm font-bold" style={{ color: "#a855f7" }}>{nc.numero}</span>
+                  <span className="text-xs text-muted-foreground ml-3">Origen: {nc.ventaNumero}</span>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xs">{nc.motivo}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-xs text-muted-foreground">Monto original: {fmt(nc.monto)}</p>
+                  <p className="text-sm font-bold font-mono" style={{ color: "#a855f7" }}>Disponible: {fmt(nc.montoRestante)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Tabla */}
       {facturas.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground border rounded-xl"
@@ -176,6 +203,11 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                           {f.tipoNcf && <span className="mr-1">{f.tipoNcf}</span>}{f.ncf}
                         </span>
                       )}
+                      {f.pagosNc.map((p, i) => (
+                        <span key={i} className="text-[10px] font-semibold block" style={{ color: "#a855f7" }}>
+                          {p.referencia ? `Pagado con ${p.referencia}` : "Pagado con NC"} (−{fmt(p.monto)})
+                        </span>
+                      ))}
                     </td>
                     <td className="px-3 py-3 text-right font-mono text-xs">{fmt(f.monto)}</td>
                     {BUCKETS.map(b => (
@@ -191,7 +223,11 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                       {fmt(f.saldo)}
                     </td>
                     <td className="px-4 py-3">
-                      {f.vencida ? (
+                      {f.estado === "PAGADO" && f.totalPagadoConNc > 0 ? (
+                        <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ color: "#a855f7", backgroundColor: "rgba(168,85,247,0.12)" }}>
+                          {f.pagosNc[0]?.referencia ? f.pagosNc[0].referencia : "Pagado NC"}
+                        </span>
+                      ) : f.vencida ? (
                         <span className="inline-flex items-center text-[11px] font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">Vencida</span>
                       ) : (
                         <span className="inline-flex items-center text-[11px] font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">Vigente</span>

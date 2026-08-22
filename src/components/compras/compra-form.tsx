@@ -27,6 +27,7 @@ const DetalleSchema = z.object({
   costo:      z.coerce.number().min(0),
   costoAnterior: z.coerce.number().optional(),
   itbisPct:   z.coerce.number().default(0),
+  descuento:  z.coerce.number().min(0).max(100).default(0),
 });
 
 const FormSchema = z.object({
@@ -183,7 +184,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
       const costoNetoDB = Number(prod.costoUltimo);
       costoOriginalRef.current[prod.id] = costoNetoDB;           // referencia en neto
       const costoBruto = Math.round(costoNetoDB * (1 + ITBIS_RATE) * 100) / 100;
-      append({ productoId: prod.id, nombre: prod.nombre, codigo: prod.codigo, unidad: prod.unidadMedida, cantidad: 1, costo: costoBruto, costoAnterior: costoBruto, itbisPct: 0 });
+      append({ productoId: prod.id, nombre: prod.nombre, codigo: prod.codigo, unidad: prod.unidadMedida, cantidad: 1, costo: costoBruto, costoAnterior: costoBruto, itbisPct: 0, descuento: 0 });
     }
     setBusqueda(""); setSugerencias([]); setMostrarSug(false); setUltimaBusq("");
   }, [detalles, append, update]);
@@ -253,18 +254,22 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
     }
   };
 
-  // Totales — siempre sobre costos netos (sin ITBIS)
+  // Totales — siempre sobre costos netos (sin ITBIS), con descuento aplicado
   const subtotal = watchedDetalles.reduce((s, d) => {
     const cant = Number(d.cantidad)||0;
     const costo = Number(d.costo)||0;
     const pct = Number(d.itbisPct)||0;
-    return s + cant * costoNetoFn(costo, pct);
+    const desc = Number(d.descuento)||0;
+    const netoConDesc = costoNetoFn(costo, pct) * (1 - desc / 100);
+    return s + cant * netoConDesc;
   }, 0);
   const totalItbis = watchedDetalles.reduce((s, d) => {
     const cant = Number(d.cantidad)||0;
     const costo = Number(d.costo)||0;
     const pct = Number(d.itbisPct)||0;
-    return s + itbisAmtFn(costo, pct, cant);
+    const desc = Number(d.descuento)||0;
+    const netoConDesc = costoNetoFn(costo, pct) * (1 - desc / 100);
+    return s + cant * netoConDesc * ITBIS_RATE;
   }, 0);
   const total = subtotal + totalItbis;
 
@@ -279,9 +284,11 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
       // costoUltimo en BD siempre se guarda SIN ITBIS.
       const detallesTransformados = values.detalles.map(d => {
         const pct = d.itbisPct ?? 0;
-        const neto = costoNetoFn(d.costo, pct);
-        const itbisTotal = itbisAmtFn(d.costo, pct, d.cantidad);
-        return { productoId: d.productoId, cantidad: d.cantidad, costo: neto, itbis: itbisTotal };
+        const desc = d.descuento ?? 0;
+        // costoNeto = precio sin ITBIS; con descuento aplicado al neto
+        const netoConDesc = costoNetoFn(d.costo, pct) * (1 - desc / 100);
+        const itbisTotal = d.cantidad * netoConDesc * ITBIS_RATE;
+        return { productoId: d.productoId, cantidad: d.cantidad, costo: netoConDesc, itbis: itbisTotal };
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await crearCompra({ ...values, detalles: detallesTransformados, ajustesPrecio } as any);
@@ -577,6 +584,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                       <TableHead className="text-xs">Producto</TableHead>
                       <TableHead className="text-xs text-right w-28">Cantidad</TableHead>
                       <TableHead className="text-xs text-right w-40">Costo (RD$)</TableHead>
+                      <TableHead className="text-xs text-center w-24">Desc. %</TableHead>
                       <TableHead className="text-xs text-center w-28">ITBIS en costo</TableHead>
                       <TableHead className="text-xs text-right w-36">Sub-total</TableHead>
                       <TableHead className="w-8" />
@@ -588,11 +596,13 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                       const cant   = Number(wd?.cantidad) || 0;
                       const costo  = Number(wd?.costo) || 0;
                       const pct    = Number(wd?.itbisPct) || 0;
-                      // Costo neto (sin ITBIS) e ITBIS de esta línea
+                      const descuento = Number(wd?.descuento) || 0;
+                      // Costo neto (sin ITBIS) con descuento aplicado
                       const costoNet = costoNetoFn(costo, pct);
-                      const lineItbis = itbisAmtFn(costo, pct, cant);
-                      const sub      = cant * costoNet;       // subtotal neto
-                      const lineTotal = sub + lineItbis;      // total con ITBIS
+                      const costoNetConDesc = costoNet * (1 - descuento / 100);
+                      const lineItbis = cant * costoNetConDesc * ITBIS_RATE;
+                      const sub      = cant * costoNetConDesc; // subtotal neto con descuento
+                      const lineTotal = sub + lineItbis;       // total con ITBIS
                       // Comparación de cambio de precio (neto vs neto)
                       const costoAntNet = costoOriginalRef.current[d.productoId] ?? 0;
                       const cambio5 = costoAntNet > 0 && Math.abs(costoNet - costoAntNet) > 0.005;
@@ -631,9 +641,27 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                             {/* Hint sobre si el costo ingresado incluye o excluye ITBIS */}
                             {costo > 0 && (
                               <p className="text-[10px] text-muted-foreground text-right mt-0.5">
-                                {pct === 0
+                                {descuento > 0
+                                  ? <span className="text-orange-600 dark:text-orange-400 font-medium">Con desc: RD${costoNetConDesc.toFixed(2)} neto</span>
+                                  : pct === 0
                                   ? `Neto ≈ RD$${costoNet.toFixed(2)}`
                                   : `C/ITBIS ≈ RD$${(costo * 1.18).toFixed(2)}`}
+                              </p>
+                            )}
+                          </TableCell>
+                          {/* Descuento % */}
+                          <TableCell>
+                            <div className="relative">
+                              <input type="number" step="0.01" min="0" max="100"
+                                className="w-full h-8 rounded-lg border bg-background pl-2 pr-5 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40"
+                                placeholder="0"
+                                onFocus={e => e.target.select()}
+                                {...form.register(`detalles.${i}.descuento`)} />
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">%</span>
+                            </div>
+                            {descuento > 0 && (
+                              <p className="text-[10px] text-center mt-0.5 text-orange-600 dark:text-orange-400 font-medium">
+                                −{descuento}%
                               </p>
                             )}
                           </TableCell>
@@ -655,7 +683,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                             {/* ITBIS por unidad (no por línea) */}
                             {costo > 0 && (
                               <p className="text-[10px] text-muted-foreground text-center mt-0.5">
-                                x1 = RD${(cant > 0 ? Math.round(lineItbis / cant * 100) / 100 : 0).toFixed(2)}
+                                x1 = RD${(costoNetConDesc * ITBIS_RATE).toFixed(2)}
                               </p>
                             )}
                           </TableCell>

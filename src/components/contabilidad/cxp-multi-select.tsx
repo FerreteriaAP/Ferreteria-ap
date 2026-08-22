@@ -240,48 +240,49 @@ export function CxPMultiSelect({ grupos }: Props) {
  className="w-3.5 h-3.5 cursor-pointer" /> <span className="hidden sm:inline">Seleccionar</span> </label> ) : undefined
  }
  > {g.compras.map((c) => (
- <div
- key={c.id}
- className={cn(
- "flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-4 py-2.5",
- seleccionadas.has(c.id) && "bg-primary/5" )}
- > <div className="flex items-center gap-3 min-w-0"> {c.estado !== "PAGADO" && (
- <input
- type="checkbox" checked={seleccionadas.has(c.id)}
- onChange={() => toggle(c.id)}
- className="w-4 h-4 cursor-pointer shrink-0" /> )}
- <Link
- href={`/compras/${c.compraId}?from=cxp`}
- className="font-mono text-xs font-medium hover:underline shrink-0"
- style={{ color: "var(--accent-hex)" }} > {c.numero}
+ <div key={c.id} className={cn(
+ "px-4 py-3.5 flex items-center gap-3 border-b last:border-0",
+ seleccionadas.has(c.id) && "bg-primary/5"
+ )}>
+ {/* Checkbox */}
+ {c.estado !== "PAGADO"
+ ? <input type="checkbox" checked={seleccionadas.has(c.id)} onChange={() => toggle(c.id)} className="w-4 h-4 cursor-pointer shrink-0" />
+ : <div className="w-4 shrink-0" />}
+ {/* Número + Ref + NCF */}
+ <div className="flex-1 min-w-0">
+ <Link href={`/compras/${c.compraId}?from=cxp`}
+ className="font-mono text-sm font-bold hover:underline" style={{ color: "var(--accent-hex)" }}>
+ {c.numero}
  </Link>
- {c.noFacturaSuplidor && (
- <span className="text-[10px] text-muted-foreground">Ref: <span className="font-mono">{c.noFacturaSuplidor}</span></span>
- )}
- {c.ncf && <span className="font-mono text-[10px] text-muted-foreground truncate">{c.ncf}</span>}
- <Badge variant={agingVariant(c.diasVencida)} className="text-[10px] shrink-0"> {agingLabel(c.diasVencida)}
- </Badge> {c.estado === "PAGADO" && (
- <Badge variant="outline" className="text-[10px] text-green-700 border-green-300 shrink-0"> Pagado
- </Badge> )}
+ <div className="flex gap-2 flex-wrap mt-0.5">
+ {c.noFacturaSuplidor && <span className="text-xs text-muted-foreground">Ref: <span className="font-mono">{c.noFacturaSuplidor}</span></span>}
+ {c.ncf && <span className="font-mono text-xs text-muted-foreground">{c.ncf}</span>}
  </div>
- <div className="flex items-center gap-4 text-sm shrink-0">
- {c.fechaFactura && (
- <span className="text-muted-foreground text-[10px]">
- Fac: {new Date(c.fechaFactura).toLocaleDateString("es-DO")}
- </span>
- )}
- <span className="text-muted-foreground text-[10px]">
+ </div>
+ {/* Fechas */}
+ <div className="hidden md:flex flex-col gap-0.5 text-xs text-right shrink-0">
+ {c.fechaFactura && <span className="text-muted-foreground">Fac: {new Date(c.fechaFactura).toLocaleDateString("es-DO")}</span>}
+ <span className={cn(c.diasRestantes < 0 ? "text-destructive font-semibold" : "text-muted-foreground")}>
  Vence: {new Date(c.fechaVencimiento).toLocaleDateString("es-DO")}
- {c.diasRestantes > 0
- ? <span className="ml-1 text-green-600 dark:text-green-400">({c.diasRestantes}d)</span>
- : c.diasRestantes < 0
- ? <span className="ml-1 text-destructive">({Math.abs(c.diasRestantes)}d vencida)</span>
- : <span className="ml-1 text-yellow-600"> (hoy)</span>}
+ {c.diasRestantes < 0
+ ? ` (${Math.abs(c.diasRestantes)}d venc.)`
+ : c.diasRestantes === 0 ? " (hoy)"
+ : ` (${c.diasRestantes}d)`}
  </span>
- <span className={cn("font-mono text-xs font-medium", agingColor(c.diasVencida))}> {c.estado === "PAGADO_PARCIAL" && (
- <span className="text-muted-foreground mr-1 font-normal text-[10px]">Saldo:</span> )}
- {fmt(c.saldo)}
- </span> </div> </div> ))}
+ </div>
+ {/* Badge aging */}
+ <Badge variant={agingVariant(c.diasVencida)} className="text-xs shrink-0">{agingLabel(c.diasVencida)}</Badge>
+ {/* Saldo */}
+ <div className="text-right shrink-0 min-w-[90px]">
+ {c.estado === "PAGADO_PARCIAL" && <p className="text-[10px] text-muted-foreground">Saldo:</p>}
+ <p className={cn("font-mono text-sm font-bold", agingColor(c.diasVencida))}>{fmt(c.saldo)}</p>
+ </div>
+ {/* Estado pagado */}
+ {c.estado === "PAGADO" && (
+ <Badge variant="outline" className="text-xs text-green-700 border-green-300 shrink-0">Pagado</Badge>
+ )}
+ </div>
+ ))}
  </GrupoColapsable> );
  })}
  </div>

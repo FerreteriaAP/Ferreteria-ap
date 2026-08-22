@@ -71,10 +71,10 @@ interface ModalProps {
 }
 
 const METODOS = [
- { value: "EFECTIVO", label: " Efectivo" },
- { value: "TRANSFERENCIA", label: " Transferencia" },
- { value: "CHEQUE", label: " Cheque" },
- { value: "TARJETA", label: " Tarjeta" },
+ { value: "EFECTIVO", label: "Efectivo" },
+ { value: "TRANSFERENCIA", label: "Transferencia" },
+ { value: "CHEQUE", label: "Cheque" },
+ { value: "TARJETA", label: "Tarjeta" },
 ];
 
 function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
@@ -123,7 +123,8 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  className={cn(
  "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
  metodo === m.value
- ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-accent text-muted-foreground hover:text-foreground" )}
+ ? "border-primary bg-primary text-primary-foreground font-semibold"
+ : "border-border hover:bg-accent text-muted-foreground hover:text-foreground" )}
  > {m.label}
  </button> ))}
  </div> </div> {/* Fecha */}
@@ -192,7 +193,27 @@ export function CxCMultiSelect({ grupos }: Props) {
  };
 
  return (
- <> <div className="space-y-3"> {grupos.map((g) => {
+ <>
+ {/* Barra de selección — sticky arriba */}
+ {seleccionadas.size > 0 && (
+ <div className="sticky top-2 z-40 flex justify-center mb-3">
+ <div className="flex items-center gap-3 bg-background border shadow-xl rounded-2xl px-5 py-3">
+ <span className="text-sm font-medium">
+ {seleccionadas.size} factura{seleccionadas.size !== 1 ? "s" : ""} seleccionada{seleccionadas.size !== 1 ? "s" : ""}
+ </span>
+ <span className="text-sm font-bold tabular-nums" style={{ color: "var(--accent-hex)" }}>
+ {fmt(facturasSeleccionadas.reduce((s, f) => s + f.saldo, 0))}
+ </span>
+ <button onClick={() => setShowModal(true)}
+ className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
+ Planilla de pago
+ </button>
+ <button onClick={() => setSeleccionadas(new Set())}
+ className="text-muted-foreground hover:text-foreground text-lg leading-none">×</button>
+ </div>
+ </div>
+ )}
+ <div className="space-y-3"> {grupos.map((g) => {
  const pendientes = g.facturas.filter(f => f.estado !== "PAGADO");
  const idsPendientes = pendientes.map(f => f.id);
  const todasSel = idsPendientes.length > 0 && idsPendientes.every(id => seleccionadas.has(id));
@@ -221,58 +242,50 @@ export function CxCMultiSelect({ grupos }: Props) {
  "h-7 gap-1 text-xs text-muted-foreground hover:text-foreground px-2" )}
  title="Ver estado de cuenta" > <FileText className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Estado</span> </Link> </div> }
  > {g.facturas.map((f) => (
- <div
- key={f.id}
- className={cn(
- "flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-4 py-2.5",
- seleccionadas.has(f.id) && "bg-primary/5" )}
- > <div className="flex items-center gap-3 min-w-0"> {f.estado !== "PAGADO" && (
- <input
- type="checkbox" checked={seleccionadas.has(f.id)}
- onChange={() => toggle(f.id)}
- className="w-4 h-4 cursor-pointer shrink-0" /> )}
- <Link
- href={`/ventas/${f.ventaId}?from=cxc`}
- className="font-mono text-xs font-medium hover:underline shrink-0"
- style={{ color: "var(--accent-hex)" }} > {f.numero}
+ <div key={f.id} className={cn(
+ "px-4 py-3.5 flex items-center gap-3 border-b last:border-0",
+ seleccionadas.has(f.id) && "bg-primary/5"
+ )}>
+ {/* Checkbox */}
+ {f.estado !== "PAGADO"
+ ? <input type="checkbox" checked={seleccionadas.has(f.id)} onChange={() => toggle(f.id)} className="w-4 h-4 cursor-pointer shrink-0" />
+ : <div className="w-4 shrink-0" />}
+ {/* Número + NCF */}
+ <div className="flex-1 min-w-0">
+ <Link href={`/ventas/${f.ventaId}?from=cxc`} className="font-mono text-sm font-bold hover:underline" style={{ color: "var(--accent-hex)" }}>
+ {f.numero}
  </Link>
- {f.ncf && <span className="font-mono text-[10px] text-muted-foreground truncate">{f.ncf}</span>}
- <Badge variant={agingVariant(f.diasVencida)} className="text-[10px] shrink-0"> {agingLabel(f.diasVencida)}
- </Badge> {f.estado === "PAGADO" && (
- <Badge variant="outline" className="text-[10px] text-green-700 border-green-300 shrink-0"> Pagado
- </Badge> )}
+ {f.ncf && <p className="text-xs text-muted-foreground font-mono mt-0.5">{f.ncf}</p>}
  </div>
- <div className="flex items-center gap-4 text-sm shrink-0">
+ {/* Fechas */}
+ <div className="hidden md:flex flex-col gap-0.5 text-xs text-right shrink-0">
  {f.fechaEmision && (
- <span className="text-muted-foreground text-[10px]">
- Fac: {new Date(f.fechaEmision).toLocaleDateString("es-DO")}
- </span>
+ <span className="text-muted-foreground">Fac: {new Date(f.fechaEmision).toLocaleDateString("es-DO")}</span>
  )}
- <span className="text-muted-foreground text-[10px]">
+ <span className={cn(f.diasRestantes < 0 ? "text-destructive font-semibold" : "text-muted-foreground")}>
  Vence: {new Date(f.fechaVencimiento).toLocaleDateString("es-DO")}
- {f.diasRestantes > 0
- ? <span className="ml-1 text-green-600 dark:text-green-400">({f.diasRestantes}d)</span>
- : f.diasRestantes < 0
- ? <span className="ml-1 text-destructive">({Math.abs(f.diasRestantes)}d vencida)</span>
- : <span className="ml-1 text-yellow-600"> (hoy)</span>}
+ {f.diasRestantes < 0
+ ? ` (${Math.abs(f.diasRestantes)}d venc.)`
+ : f.diasRestantes === 0 ? " (hoy)"
+ : ` (${f.diasRestantes}d)`}
  </span>
- <span className={cn("font-mono text-xs font-medium", agingColor(f.diasVencida))}> {f.estado === "PAGADO_PARCIAL" && (
- <span className="text-muted-foreground mr-1 font-normal text-[10px]">Saldo:</span> )}
- {fmt(f.saldo)}
- </span> </div> </div> ))}
+ </div>
+ {/* Badge aging */}
+ <Badge variant={agingVariant(f.diasVencida)} className="text-xs shrink-0">{agingLabel(f.diasVencida)}</Badge>
+ {/* Saldo */}
+ <div className="text-right shrink-0 min-w-[90px]">
+ {f.estado === "PAGADO_PARCIAL" && <p className="text-[10px] text-muted-foreground">Saldo:</p>}
+ <p className={cn("font-mono text-sm font-bold", agingColor(f.diasVencida))}>{fmt(f.saldo)}</p>
+ </div>
+ {/* Estado pagado */}
+ {f.estado === "PAGADO" && (
+ <Badge variant="outline" className="text-xs text-green-700 border-green-300 shrink-0">Pagado</Badge>
+ )}
+ </div>
+ ))}
  </GrupoColapsable> );
  })}
- </div> {/* Barra flotante de selección */}
- {seleccionadas.size > 0 && (
- <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40"> <div className="flex items-center gap-3 bg-background border shadow-xl rounded-2xl px-5 py-3"> <span className="text-sm font-medium"> {seleccionadas.size} factura{seleccionadas.size !== 1 ? "s" : ""} seleccionada{seleccionadas.size !== 1 ? "s" : ""}
- </span> <span className="text-sm font-bold tabular-nums" style={{ color: "var(--accent-hex)" }}> {fmt(facturasSeleccionadas.reduce((s, f) => s + f.saldo, 0))}
- </span> <button
- onClick={() => setShowModal(true)}
- className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors" > Planilla de pago
- </button> <button
- onClick={() => setSeleccionadas(new Set())}
- className="text-muted-foreground hover:text-foreground text-lg leading-none" > ×
- </button> </div> </div> )}
+ </div>
 
  {/* Modal planilla */}
  {showModal && (

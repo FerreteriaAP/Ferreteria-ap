@@ -125,6 +125,25 @@ export async function getNotasCreditoCliente(clienteId: string) {
  });
 }
 
+// NCs pendientes de un cliente (para mostrar en CobroCxC y estado de cuenta)
+
+export async function buscarNCsDelCliente(clienteId: string) {
+ const ncs = await prisma.notaCredito.findMany({
+ where: { clienteId, estado: "PENDIENTE" },
+ orderBy: { createdAt: "asc" },
+ include: { venta: { select: { numero: true } } },
+ });
+ return ncs.map(nc => ({
+ id: nc.id,
+ numero: nc.numero,
+ monto: Number(nc.monto),
+ montoRestante: Number(nc.montoRestante),
+ ventaNumero: nc.venta.numero,
+ motivo: nc.motivo,
+ createdAt: nc.createdAt,
+ }));
+}
+
 // Buscar NC por número para aplicar en cobro (cajero ingresa el código)
 
 export async function buscarNCPorNumero(ncNumero: string, clienteId: string) {

@@ -569,6 +569,7 @@ export async function registrarCobrosMultiplesCxC(input: {
  lineas: CobroCxCLineaInput[];
  metodo: "EFECTIVO" | "TARJETA" | "TRANSFERENCIA" | "CHEQUE";
  notas?: string;
+ ncAplicacion?: { ncId: string; montoAplicar: number };
 }) {
  if (!input.lineas.length) return { error: "Agrega al menos una factura" };
  if (input.lineas.some(l => l.monto <= 0)) return { error: "Todos los montos deben ser mayores a cero" };
@@ -584,7 +585,7 @@ export async function registrarCobrosMultiplesCxC(input: {
  const cxcIds = input.lineas.map(l => l.cxcId);
  const cxcs = await prisma.cuentaPorCobrar.findMany({
  where: { id: { in: cxcIds } },
- include: { cliente: { select: { nombre: true } }, venta: { select: { numero: true } } },
+ include: { cliente: { select: { id: true, nombre: true } }, venta: { select: { id: true, numero: true } } },
  });
  const cxcMap = new Map(cxcs.map(c => [c.id, c]));
 
@@ -597,18 +598,112 @@ export async function registrarCobrosMultiplesCxC(input: {
  }
  }
 
- // Crear un movimiento por cada CxC en una sola transacción
+ // Validar NC si fue indicada
+ let nc: Awaited<ReturnType<typeof prisma.notaCredito.findUnique>> | null = null;
+ if (input.ncAplicacion) {
+ nc = await prisma.notaCredito.findUnique({
+ where: { id: input.ncAplicacion.ncId },
+ include: { venta: { select: { numero: true } } },
+ });
+ if (!nc || nc.estado !== "PENDIENTE") return { error: "Nota de crédito no válida o ya fue aplicada" };
+ if (Number(nc.montoRestante) < input.ncAplicacion.montoAplicar - 0.01) return { error: "Saldo insuficiente en la nota de crédito" };
+ }
+
+ const userId = await getUserId();
  const movimientoIds: string[] = [];
+
  await prisma.$transaction(async (tx) => {
+ // Si hay NC: aplicarla directamente (confirmada inmediatamente, distribuye por orden de líneas)
+ if (nc && input.ncAplicacion) {
+ let ncRestante = input.ncAplicacion.montoAplicar;
+ const ncNumero = nc.numero;
+ const clienteId = nc.clienteId;
+
  for (const linea of input.lineas) {
+ if (ncRestante <= 0.01) break;
  const cxc = cxcMap.get(linea.cxcId)!;
+ const saldoCxC = Number(cxc.saldo);
+ const montoNcEstaLinea = Math.min(ncRestante, saldoCxC);
+ if (montoNcEstaLinea < 0.01) continue;
+
+ // Movimiento NC confirmado inmediatamente
+ await tx.movimientoCaja.create({
+ data: {
+ turnoId: input.turnoId,
+ tipo: "ENTRADA",
+ subTipo: "COBRO_CXC",
+ concepto: `Cobro CxC [NC] – ${cxc.cliente.nombre} / Fact. ${cxc.venta.numero}`,
+ monto: montoNcEstaLinea,
+ metodo: "NC",
+ notas: `Pagado con NC ${ncNumero}`,
+ cxcId: linea.cxcId,
+ confirmado: true,
+ confirmadoPor: userId,
+ fechaConfirmacion: new Date(),
+ },
+ });
+
+ // Actualizar CxC directamente
+ const nuevoPagado = Number(cxc.montoPagado) + montoNcEstaLinea;
+ const nuevoSaldo = Math.max(0, Number(cxc.monto) - nuevoPagado);
+ const nuevoEstado = nuevoSaldo <= 0.01 ? "PAGADO" : "PAGADO_PARCIAL";
+ await tx.cuentaPorCobrar.update({
+ where: { id: linea.cxcId },
+ data: { montoPagado: nuevoPagado, saldo: nuevoSaldo, estado: nuevoEstado },
+ });
+
+ // Registrar en PagoVenta
+ await tx.pagoVenta.create({
+ data: {
+ ventaId: cxc.ventaId,
+ monto: montoNcEstaLinea,
+ metodo: "NC",
+ referencia: `NC ${ncNumero}`,
+ notas: null,
+ },
+ });
+
+ if (nuevoEstado === "PAGADO") {
+ await tx.venta.update({ where: { id: cxc.ventaId }, data: { estadoPago: "PAGADO" } });
+ }
+ ncRestante -= montoNcEstaLinea;
+ }
+
+ // Reducir montoRestante de la NC
+ const ncUsado = input.ncAplicacion.montoAplicar - ncRestante;
+ const nuevoMontoRestante = Math.max(0, Number(nc.montoRestante) - ncUsado);
+ await tx.notaCredito.update({
+ where: { id: nc.id },
+ data: {
+ montoRestante: nuevoMontoRestante,
+ estado: nuevoMontoRestante < 0.01 ? "APLICADA" : "PENDIENTE",
+ },
+ });
+ // Rebajar saldoFavor del cliente
+ await tx.contacto.update({
+ where: { id: clienteId },
+ data: { saldoFavor: { decrement: ncUsado } },
+ });
+ }
+
+ // Crear movimientos pendientes para la parte en efectivo/tarjeta
+ for (const linea of input.lineas) {
+ if (linea.monto <= 0.01) continue;
+ const cxc = cxcMap.get(linea.cxcId)!;
+ // Recalcular saldo real después de la NC (si fue actualizado arriba)
+ const cxcActual = await tx.cuentaPorCobrar.findUnique({ where: { id: linea.cxcId }, select: { saldo: true, estado: true } });
+ if (!cxcActual || cxcActual.estado === "PAGADO") continue;
+ const saldoReal = Number(cxcActual.saldo);
+ const montoEfectivo = Math.min(linea.monto, saldoReal);
+ if (montoEfectivo < 0.01) continue;
+
  const mov = await tx.movimientoCaja.create({
  data: {
  turnoId: input.turnoId,
  tipo: "ENTRADA",
  subTipo: "COBRO_CXC",
  concepto: `Cobro CxC [${metodoLabel[input.metodo]}] – ${cxc.cliente.nombre} / Fact. ${cxc.venta.numero}`,
- monto: linea.monto,
+ monto: montoEfectivo,
  metodo: input.metodo,
  notas: input.notas ?? null,
  cxcId: linea.cxcId,
@@ -882,6 +977,7 @@ export async function buscarCxCPorFactura(q: string) {
  },
  select: {
  id: true,
+ clienteId: true,
  monto: true,
  saldo: true,
  fechaVencimiento: true,

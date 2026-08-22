@@ -577,7 +577,7 @@ export async function getResumenITBIS(opts: { año: number; mes: number }) {
 // sin importar el plazo de crédito del cliente.
 //
 export async function getEstadoCuenta(clienteId: string, incluirPagadas = false) {
- const [cliente, cxcs] = await Promise.all([
+ const [cliente, cxcs, ncsCliente] = await Promise.all([
  prisma.contacto.findUnique({
  where: { id: clienteId },
  select: {
@@ -589,6 +589,7 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
  email: true,
  credito: true,
  limiteCredito: true,
+ saldoFavor: true,
  },
  }),
  prisma.cuentaPorCobrar.findMany({
@@ -597,9 +598,23 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
  ...(incluirPagadas ? {} : { estado: { not: "PAGADO" } }),
  },
  include: {
- venta: { select: { id: true, numero: true, createdAt: true, ncf: true, tipoNcf: true } },
+ venta: {
+ select: {
+ id: true,
+ numero: true,
+ createdAt: true,
+ ncf: true,
+ tipoNcf: true,
+ pagosRecibidos: { select: { metodo: true, monto: true, referencia: true }, where: { metodo: "NC" } },
+ },
+ },
  },
  orderBy: { fechaEmision: "asc" },
+ }),
+ prisma.notaCredito.findMany({
+ where: { clienteId, estado: "PENDIENTE" },
+ orderBy: { createdAt: "asc" },
+ include: { venta: { select: { numero: true } } },
  }),
  ]);
 
@@ -634,6 +649,13 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
 
  const vencida = diasDesdeVto > 0;
 
+ // Pagos con NC registrados en PagoVenta
+ const pagosNc = c.venta.pagosRecibidos.map((p: { monto: unknown; referencia: string | null }) => ({
+ monto: Number(p.monto),
+ referencia: p.referencia ?? null,
+ }));
+ const totalPagadoConNc = pagosNc.reduce((s: number, p: { monto: number }) => s + p.monto, 0);
+
  return {
  id: c.id,
  ventaId: c.ventaId,
@@ -650,15 +672,28 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
  diasDesdeVto,
  bucket,
  vencida,
+ pagosNc,
+ totalPagadoConNc,
  };
  });
 
  // Totales por bucket
  const totBucket = (b: string) => facturas.filter((f) => f.bucket === b).reduce((s, f) => s + f.saldo, 0);
 
+ const notasCredito = ncsCliente.map(nc => ({
+ id: nc.id,
+ numero: nc.numero,
+ monto: Number(nc.monto),
+ montoRestante: Number(nc.montoRestante),
+ ventaNumero: nc.venta.numero,
+ motivo: nc.motivo,
+ createdAt: nc.createdAt,
+ }));
+
  return {
- cliente: { ...cliente, diasCredito },
+ cliente: { ...cliente, diasCredito, saldoFavor: Number(cliente.saldoFavor ?? 0) },
  facturas,
+ notasCredito,
  totales: {
  "0-30": totBucket("0-30"),
  "30-60": totBucket("30-60"),

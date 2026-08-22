@@ -13,7 +13,7 @@ import {
  buscarCxCPorFactura,
 } from "@/actions/caja";
 import { NotaCreditoModal } from "@/components/caja/nota-credito-modal";
-import { buscarNCPorNumero } from "@/actions/nota-credito";
+import { buscarNCPorNumero, buscarNCsDelCliente } from "@/actions/nota-credito";
 import { buscarSuplidores } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 import {
@@ -605,6 +605,7 @@ function PrestamoModal({ turnoId, empleados, onClose, onOk }: {
 
 interface CxCResultado {
  id: string;
+ clienteId: string;
  monto: number;
  saldo: number;
  fechaVencimiento: Date | string;
@@ -641,8 +642,17 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
  const [metodo, setMetodo] = useState<"EFECTIVO" | "TARJETA" | "TRANSFERENCIA" | "CHEQUE">("EFECTIVO");
  const [notas, setNotas] = useState("");
 
+ // NC automática
+ const [ncCandidatas, setNcCandidatas] = useState<NCInfo[]>([]);
+ const [ncSeleccionada, setNcSeleccionada] = useState<NCInfo | null>(null);
+ const [montoNC, setMontoNC] = useState("");
+ const [ncCargando, setNcCargando] = useState(false);
+ const clienteIdRef = useRef<string | null>(null);
+
  const idsEnLista = new Set(lineas.map(l => l.cxcId));
  const totalCobro = lineas.reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
+ const montoNCNum = parseFloat(montoNC) || 0;
+ const totalConNC = Math.max(0, totalCobro - montoNCNum);
 
  const fmtMoney = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
  const fmtFecha = (d: Date | string) => new Date(d).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -659,16 +669,46 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   }, 250);
  };
 
- const agregarCxC = (c: CxCResultado) => {
+ const agregarCxC = async (c: CxCResultado) => {
   if (idsEnLista.has(c.id)) return;
   setLineas(prev => [...prev, { cxcId: c.id, monto: c.saldo.toFixed(2), cxc: c }]);
   setResultados([]);
   setQuery("");
   setError(null);
+  // Auto-detectar NCs del cliente si es el primero en la lista
+  if (!clienteIdRef.current && c.clienteId) {
+   clienteIdRef.current = c.clienteId;
+   setNcCargando(true);
+   const ncs = await buscarNCsDelCliente(c.clienteId);
+   setNcCandidatas(ncs);
+   if (ncs.length > 0) {
+    setNcSeleccionada(ncs[0]);
+    setMontoNC(Math.min(ncs[0].montoRestante, c.saldo).toFixed(2));
+   }
+   setNcCargando(false);
+  }
  };
 
- const quitarLinea = (cxcId: string) => setLineas(prev => prev.filter(l => l.cxcId !== cxcId));
+ const quitarLinea = (cxcId: string) => {
+  setLineas(prev => {
+   const next = prev.filter(l => l.cxcId !== cxcId);
+   if (next.length === 0) {
+    // Limpiar NC si se vacía la lista
+    clienteIdRef.current = null;
+    setNcCandidatas([]);
+    setNcSeleccionada(null);
+    setMontoNC("");
+   }
+   return next;
+  });
+ };
  const setMontoLinea = (cxcId: string, val: string) => setLineas(prev => prev.map(l => l.cxcId === cxcId ? { ...l, monto: val } : l));
+
+ const aplicarNC = (nc: NCInfo) => {
+  setNcSeleccionada(nc);
+  setMontoNC(Math.min(nc.montoRestante, totalCobro).toFixed(2));
+ };
+ const cancelarNC = () => { setNcSeleccionada(null); setMontoNC(""); };
 
  const handleSubmit = (e: FormEvent) => {
   e.preventDefault();
@@ -678,9 +718,28 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
    if (!m || m <= 0) { setError(`Ingresa un monto válido para ${l.cxc.venta.numero}`); return; }
    if (m > l.cxc.saldo) { setError(`El monto de ${l.cxc.venta.numero} supera el saldo (${fmtMoney(l.cxc.saldo)})`); return; }
   }
+  if (ncSeleccionada && montoNCNum > 0) {
+   if (montoNCNum > ncSeleccionada.montoRestante + 0.01) {
+    setError(`El monto NC supera el saldo disponible (${fmtMoney(ncSeleccionada.montoRestante)})`);
+    return;
+   }
+   if (montoNCNum > totalCobro + 0.01) {
+    setError("El monto NC no puede superar el total a cobrar");
+    return;
+   }
+  }
   setError(null);
+  const ncAplicacion = ncSeleccionada && montoNCNum > 0
+   ? { ncId: ncSeleccionada.id, montoAplicar: montoNCNum }
+   : undefined;
   startTransition(async () => {
-   const res = await registrarCobrosMultiplesCxC({ turnoId, lineas: lineas.map(l => ({ cxcId: l.cxcId, monto: parseFloat(l.monto) })), metodo, notas: notas || undefined });
+   const res = await registrarCobrosMultiplesCxC({
+    turnoId,
+    lineas: lineas.map(l => ({ cxcId: l.cxcId, monto: parseFloat(l.monto) })),
+    metodo,
+    notas: notas || undefined,
+    ncAplicacion,
+   });
    if ("error" in res && res.error) { setError(res.error); return; }
    onOk();
   });
@@ -719,6 +778,53 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
       )}
      </div>
     </Field>
+
+    {/* NC automática — sugerencia */}
+    {ncCargando && (
+     <p className="text-xs text-muted-foreground animate-pulse">Verificando notas de crédito…</p>
+    )}
+    {!ncCargando && ncCandidatas.length > 0 && !ncSeleccionada && (
+     <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.06)" }}>
+      <p className="text-xs font-bold" style={{ color: "#a855f7" }}>Notas de crédito disponibles</p>
+      {ncCandidatas.map(nc => (
+       <div key={nc.id} className="flex items-center justify-between gap-2">
+        <div>
+         <span className="text-xs font-mono font-bold" style={{ color: "#a855f7" }}>{nc.numero}</span>
+         <span className="text-xs text-muted-foreground ml-2">Saldo: {fmtMoney(nc.montoRestante)}</span>
+        </div>
+        <button type="button" onClick={() => aplicarNC(nc)}
+         className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ backgroundColor: "#a855f7", color: "#fff" }}>
+         Aplicar
+        </button>
+       </div>
+      ))}
+     </div>
+    )}
+    {!ncCargando && ncSeleccionada && (
+     <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.08)" }}>
+      <div className="flex items-center justify-between">
+       <p className="text-xs font-bold" style={{ color: "#a855f7" }}>NC aplicada: {ncSeleccionada.numero}</p>
+       <button type="button" onClick={cancelarNC} className="text-xs text-muted-foreground hover:text-foreground">Quitar</button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">Saldo disponible: {fmtMoney(ncSeleccionada.montoRestante)}</p>
+      <div className="flex items-center gap-2">
+       <label className="text-xs text-muted-foreground shrink-0">Monto a aplicar</label>
+       <input type="number" min="0.01" step="0.01" max={Math.min(ncSeleccionada.montoRestante, totalCobro)}
+        value={montoNC} onChange={e => setMontoNC(e.target.value)}
+        className="flex-1 h-8 rounded-lg border px-2 text-sm font-mono text-right focus:outline-none focus:ring-2"
+        style={{ borderColor: "#a855f7" }} />
+       <button type="button" onClick={() => setMontoNC(Math.min(ncSeleccionada.montoRestante, totalCobro).toFixed(2))}
+        className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ backgroundColor: "#a855f7", color: "#fff" }}>
+        Máx
+       </button>
+      </div>
+      {montoNCNum > 0 && (
+       <p className="text-xs font-semibold" style={{ color: "#a855f7" }}>
+        Descuento NC: −{fmtMoney(montoNCNum)} → Por cobrar: {fmtMoney(totalConNC)}
+       </p>
+      )}
+     </div>
+    )}
 
     {lineas.length > 0 && (
      <div className="rounded-xl border overflow-hidden">
