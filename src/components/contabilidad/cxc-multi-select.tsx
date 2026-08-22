@@ -245,7 +245,7 @@ export function CxCMultiSelect({ grupos }: Props) {
  > <div className="overflow-x-auto">
  {g.facturas.map((f) => (
  <div key={f.id} className={cn(
- "px-3 py-2 flex items-center gap-2 border-b last:border-0 min-w-[660px]",
+ "px-3 py-2 flex items-center gap-2 border-b last:border-0 min-w-[700px]",
  seleccionadas.has(f.id) && "bg-orange-500/5"
  )}>
  {/* Checkbox — 20px */}
@@ -295,9 +295,9 @@ export function CxCMultiSelect({ grupos }: Props) {
  <div className="w-[92px] shrink-0 flex justify-end">
  <Badge variant={agingVariant(f.diasVencida)} className="text-xs">{agingLabel(f.diasVencida)}</Badge>
  </div>
- {/* Saldo — 92px, derecha */}
- <div className="w-[92px] shrink-0 text-right">
- <p className={cn("font-mono text-sm font-semibold", agingColor(f.diasVencida))}>{fmt(f.saldo)}</p>
+ {/* Saldo — 120px, derecha */}
+ <div className="w-[120px] shrink-0 text-right">
+ <p className={cn("font-mono text-sm font-semibold whitespace-nowrap", agingColor(f.diasVencida))}>{fmt(f.saldo)}</p>
  </div>
  </div>
  ))}
