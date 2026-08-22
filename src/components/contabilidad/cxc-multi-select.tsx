@@ -194,19 +194,19 @@ export function CxCMultiSelect({ grupos }: Props) {
 
  return (
  <>
- {/* Barra de selección — sticky arriba */}
+ {/* Barra de selección — sticky, centrada */}
  {seleccionadas.size > 0 && (
- <div className="sticky top-2 z-40 mb-3">
- <div className="flex items-center gap-2 bg-background border shadow-md rounded-lg px-3 py-1.5 max-w-sm">
+ <div className="sticky top-2 z-40 mb-3 flex justify-center">
+ <div className="flex items-center gap-3 bg-background border shadow-md rounded-xl px-4 py-2">
  <span className="text-xs font-medium text-muted-foreground shrink-0">
- {seleccionadas.size} sel.
+ {seleccionadas.size} factura{seleccionadas.size !== 1 ? "s" : ""}
  </span>
  <span className="text-xs font-bold tabular-nums shrink-0" style={{ color: "var(--accent-hex)" }}>
  {fmt(facturasSeleccionadas.reduce((s, f) => s + f.saldo, 0))}
  </span>
  <button onClick={() => setShowModal(true)}
- className="ml-auto px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0">
- Planilla
+ className="px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0">
+ Pago Facturas
  </button>
  <button onClick={() => setSeleccionadas(new Set())}
  className="text-muted-foreground hover:text-foreground text-base leading-none shrink-0">×</button>
@@ -241,44 +241,66 @@ export function CxCMultiSelect({ grupos }: Props) {
  buttonVariants({ variant: "ghost", size: "sm" }),
  "h-7 gap-1 text-xs text-muted-foreground hover:text-foreground px-2" )}
  title="Ver estado de cuenta" > <FileText className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Estado</span> </Link> </div> }
- > {g.facturas.map((f) => (
+ > <div className="overflow-x-auto">
+ {g.facturas.map((f) => (
  <div key={f.id} className={cn(
- "px-3 py-2 flex items-center gap-2 border-b last:border-0 overflow-hidden",
+ "px-3 py-2 flex items-center gap-2 border-b last:border-0 min-w-[660px]",
  seleccionadas.has(f.id) && "bg-orange-500/5"
  )}>
- {/* Checkbox */}
+ {/* Checkbox — 20px */}
+ <div className="w-5 shrink-0 flex items-center">
  {f.estado !== "PAGADO"
- ? <input type="checkbox" checked={seleccionadas.has(f.id)} onChange={() => toggle(f.id)} className="w-4 h-4 cursor-pointer shrink-0" />
- : <div className="w-4 shrink-0" />}
- {/* Número factura */}
+ ? <input type="checkbox" checked={seleccionadas.has(f.id)} onChange={() => toggle(f.id)} className="w-4 h-4 cursor-pointer" />
+ : null}
+ </div>
+ {/* Número factura — 92px */}
+ <div className="w-[92px] shrink-0">
  <Link href={`/ventas/${f.ventaId}?from=cxc`}
- className="font-mono text-sm font-semibold hover:underline shrink-0 w-[90px]"
+ className="font-mono text-xs font-semibold hover:underline block truncate"
  style={{ color: "var(--accent-hex)" }}>
  {f.numero}
  </Link>
- {/* Fecha */}
- <span className="text-xs text-muted-foreground shrink-0 w-[62px] hidden sm:block">
+ </div>
+ {/* Fecha — 62px */}
+ <div className="w-[62px] shrink-0">
+ <span className="text-xs text-muted-foreground">
  {f.fechaEmision ? new Date(f.fechaEmision).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "—"}
  </span>
- {/* NCF */}
- <span className="font-mono text-xs text-muted-foreground shrink-0 w-[110px] truncate hidden md:block">
+ </div>
+ {/* NCF — 116px */}
+ <div className="w-[116px] shrink-0">
+ <span className="font-mono text-xs text-muted-foreground block truncate">
  {f.ncf ?? "—"}
  </span>
- {/* Días vencer */}
+ </div>
+ {/* Referencia — 84px (CxC no aplica) */}
+ <div className="w-[84px] shrink-0">
+ <span className="text-xs text-muted-foreground">—</span>
+ </div>
+ {/* Spacer */}
+ <div className="flex-1" />
+ {/* Días a vencer — 76px, derecha */}
+ <div className="w-[76px] shrink-0 text-right">
  <span className={cn(
- "text-xs shrink-0 w-[70px] hidden sm:block",
+ "text-xs",
  f.diasRestantes < 0 ? "text-destructive font-semibold" : "text-muted-foreground"
  )}>
  {f.diasRestantes < 0 ? `${Math.abs(f.diasRestantes)}d venc.`
  : f.diasRestantes === 0 ? "hoy"
  : `${f.diasRestantes}d`}
  </span>
- {/* Estado badge */}
- <Badge variant={agingVariant(f.diasVencida)} className="text-xs shrink-0">{agingLabel(f.diasVencida)}</Badge>
- {/* Saldo */}
- <p className={cn("font-mono text-sm font-semibold ml-auto shrink-0", agingColor(f.diasVencida))}>{fmt(f.saldo)}</p>
+ </div>
+ {/* Estado badge — 92px, derecha */}
+ <div className="w-[92px] shrink-0 flex justify-end">
+ <Badge variant={agingVariant(f.diasVencida)} className="text-xs">{agingLabel(f.diasVencida)}</Badge>
+ </div>
+ {/* Saldo — 92px, derecha */}
+ <div className="w-[92px] shrink-0 text-right">
+ <p className={cn("font-mono text-sm font-semibold", agingColor(f.diasVencida))}>{fmt(f.saldo)}</p>
+ </div>
  </div>
  ))}
+ </div>
  </GrupoColapsable> );
  })}
  </div>
