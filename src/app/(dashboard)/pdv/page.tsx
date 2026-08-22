@@ -1,20 +1,51 @@
 import { getConsumidorFinal, getTopProductosPDV } from "@/actions/pdv";
 import { getTurnoActivo } from "@/actions/caja";
+import { getVendedorActivoId, getVendedoresConStats } from "@/actions/vendedor-activo";
 import { PDVTerminal } from "@/components/pdv/pdv-terminal";
+import { BannerVendedor } from "@/components/vendedor/banner-vendedor";
+import { VendedorSelector } from "@/components/vendedor/vendedor-selector";
 import { auth } from "@/lib/auth";
 
 export const metadata = { title: "Punto de Venta — Ferretería AP" };
 
 export default async function PDVPage() {
-  const [session, cf, topProductos, turno] = await Promise.all([
-    auth(),
+  const session = await auth();
+  const rol = (session?.user as { rol?: string } | undefined)?.rol ?? "VENDEDOR";
+  const puedeEditarPrecio = ["ADMINISTRADOR", "ASISTENTE_ADMINISTRATIVO"].includes(rol);
+  const necesitaVendedor  = !["ADMINISTRADOR", "ASISTENTE_ADMINISTRATIVO"].includes(rol);
+
+  const [cf, topProductos, turno, activoId, vendedores] = await Promise.all([
     getConsumidorFinal(),
     getTopProductosPDV(50),
     getTurnoActivo(),
+    necesitaVendedor ? getVendedorActivoId()       : Promise.resolve(null),
+    necesitaVendedor ? getVendedoresConStats()      : Promise.resolve([]),
   ]);
 
-  const rol = (session?.user as { rol?: string } | undefined)?.rol ?? "VENDEDOR";
-  const puedeEditarPrecio = ["ADMINISTRADOR", "ASISTENTE_ADMINISTRATIVO"].includes(rol);
+  // Si es vendedor/caja y no hay operador seleccionado → mostrar picker (fuera del layout PDV)
+  if (necesitaVendedor && !activoId) {
+    return (
+      <VendedorSelector
+        vendedores={vendedores}
+        titulo="¿Quién va a operar el Punto de Venta?"
+        descripcion="Selecciona tu perfil — la sesión dura 8 horas"
+      />
+    );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const vendedorActivo = necesitaVendedor ? (vendedores as any[]).find((v: any) => v.id === activoId) ?? null : null;
+
+  // Si el ID guardado ya no existe → volver al picker
+  if (necesitaVendedor && !vendedorActivo) {
+    return (
+      <VendedorSelector
+        vendedores={vendedores}
+        titulo="¿Quién va a operar el Punto de Venta?"
+        descripcion="Selecciona tu perfil — la sesión dura 8 horas"
+      />
+    );
+  }
 
   const productos = topProductos.map(p => ({
     ...p,
@@ -32,6 +63,13 @@ export default async function PDVPage() {
   return (
     // -m-6 neutraliza el p-6 del layout; h-[calc(100vh-72px)] = viewport menos header
     <div className="-m-6 flex flex-col" style={{ height: "calc(100vh - 72px)" }}>
+
+      {/* Banner vendedor — shrink-0, DENTRO del contenedor para no romper la altura */}
+      {vendedorActivo && (
+        <div className="px-4 pt-2 pb-0 shrink-0">
+          <BannerVendedor vendedor={vendedorActivo} vendedores={vendedores} />
+        </div>
+      )}
 
       {/* Banner turno */}
       {!turno ? (
