@@ -22,7 +22,9 @@ export function AbrirTurnoForm() {
  /> </div> <div className="flex-1"> <label className="text-xs text-muted-foreground font-medium block mb-1">Notas (opcional)</label> <input
  type="text" name="notas" placeholder="Turno apertura..." className="w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" /> </div> <div className="flex items-end"> <button
  type="submit" disabled={isPending}
- className="h-10 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50" > {isPending ? "Abriendo…" : "Abrir turno"}
+ className="h-10 px-6 rounded-full text-sm font-bold text-white disabled:opacity-50 transition-all"
+        style={{ backgroundColor: "var(--accent-hex)", boxShadow: "0 2px 8px color-mix(in oklch, var(--accent-hex) 40%, transparent)" }}
+        > {isPending ? "Abriendo…" : "⚡ Abrir turno"}
  </button> </div> {state?.error && (
  <p className="text-sm text-destructive col-span-full">{state.error}</p> )}
  </form> );
