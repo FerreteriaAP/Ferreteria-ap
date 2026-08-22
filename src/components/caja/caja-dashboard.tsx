@@ -820,20 +820,11 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
    </div>
 
    {/* Nota de crédito */}
-   <div className="flex items-center justify-between gap-3">
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 max-w-xs">
-     <AccionBtn
-      icon={<FileX2 size={24} />} label="Nota de Crédito" desc="Crédito a cliente"
-      color="purple" onClick={() => setModal("nota_credito")}
-     />
-    </div>
-    <a
-     href="/caja/notas-credito"
-     className="text-xs font-medium hover:underline"
-     style={{ color: "var(--accent-hex)" }}
-    >
-     Ver historial de notas de crédito ↗
-    </a>
+   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <AccionBtn
+     icon={<FileX2 size={24} />} label="Nota de Crédito" desc="Crédito a cliente"
+     color="purple" onClick={() => setModal("nota_credito")}
+    />
    </div>
 
    {/* Modales */}

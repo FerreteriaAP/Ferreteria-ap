@@ -114,7 +114,7 @@ export async function buscarFacturasParaNC(q: string) {
  });
 }
 
-// Historial de notas de crédito de un cliente
+// Historial de notas de crédito de un cliente 
 
 export async function getNotasCreditoCliente(clienteId: string) {
  return prisma.notaCredito.findMany({
@@ -122,40 +122,4 @@ export async function getNotasCreditoCliente(clienteId: string) {
  orderBy: { createdAt: "desc" },
  include: { venta: { select: { numero: true } } },
  });
-}
-
-// Listado global de notas de crédito (para la página de caja)
-
-export async function getNotasCredito(opts?: { q?: string; estado?: string; page?: number; pageSize?: number }) {
- const { q, estado, page = 1, pageSize = 50 } = opts ?? {};
- const skip = (page - 1) * pageSize;
-
- const where: Record<string, unknown> = {};
- if (estado && estado !== "TODOS") where.estado = estado;
- if (q?.trim()) {
-  const term = q.trim();
-  where.OR = [
-   { numero: { contains: term, mode: "insensitive" } },
-   { cliente: { nombre: { contains: term, mode: "insensitive" } } },
-   { venta: { numero: { contains: term, mode: "insensitive" } } },
-   { motivo: { contains: term, mode: "insensitive" } },
-  ];
- }
-
- const [items, total] = await Promise.all([
-  prisma.notaCredito.findMany({
-   where,
-   orderBy: { createdAt: "desc" },
-   skip,
-   take: pageSize,
-   include: {
-    cliente: { select: { id: true, nombre: true, rnc: true } },
-    venta: { select: { id: true, numero: true } },
-    usuario: { select: { nombre: true, apellido: true } },
-   },
-  }),
-  prisma.notaCredito.count({ where }),
- ]);
-
- return { items, total, page, pageSize };
 }
