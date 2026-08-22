@@ -267,7 +267,7 @@ export async function procesarPagoCaja(
  ventaId: string,
  pagos: PagoInput[],
  turnoId: string,
- opciones?: { ncf?: string }
+ opciones?: { ncf?: string; ncAplicacion?: { ncId: string; montoAplicar: number } }
 ) {
  const userId = await getUserId();
  if (!userId) return { error: "No autenticado" };
@@ -283,9 +283,10 @@ export async function procesarPagoCaja(
  const totalVenta = Number(venta.total);
  const totalPagado = pagos.filter(p => p.metodo !== "CREDITO").reduce((s, p) => s + p.monto, 0);
  const montoCredito = pagos.find(p => p.metodo === "CREDITO")?.monto ?? 0;
+ const montoNC = opciones?.ncAplicacion?.montoAplicar ?? 0;
 
- if (Math.abs(totalPagado + montoCredito - totalVenta) > 0.01) {
- return { error: `El total pagado (${(totalPagado + montoCredito).toFixed(2)}) no coincide con el total de la venta (${totalVenta.toFixed(2)})` };
+ if (Math.abs(totalPagado + montoCredito + montoNC - totalVenta) > 0.01) {
+ return { error: `El total pagado (${(totalPagado + montoCredito + montoNC).toFixed(2)}) no coincide con el total de la venta (${totalVenta.toFixed(2)})` };
  }
 
  // Determinar estado de pago
@@ -392,6 +393,28 @@ export async function procesarPagoCaja(
  concepto: `Venta ${numFactura}`,
  monto: efectivoPagado,
  },
+ });
+ }
+
+ // 6. Aplicar nota de crédito si se indicó
+ if (opciones?.ncAplicacion && montoNC > 0) {
+ const { ncId, montoAplicar } = opciones.ncAplicacion;
+ const nc = await tx.notaCredito.findUnique({ where: { id: ncId } });
+ if (!nc) throw new Error("NC no encontrada");
+ const restanteActual = Number(nc.montoRestante);
+ if (restanteActual < montoAplicar - 0.01) throw new Error("Saldo insuficiente en la NC");
+ const nuevoRestante = Math.max(0, restanteActual - montoAplicar);
+ await tx.notaCredito.update({
+ where: { id: ncId },
+ data: {
+ montoRestante: nuevoRestante,
+ estado: nuevoRestante < 0.01 ? "APLICADA" : "PENDIENTE",
+ },
+ });
+ // Rebajar saldoFavor del cliente (fue acreditado al crear la NC)
+ await tx.contacto.update({
+ where: { id: venta.clienteId },
+ data: { saldoFavor: { decrement: montoAplicar } },
  });
  }
  });

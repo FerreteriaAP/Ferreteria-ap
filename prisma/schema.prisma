@@ -928,7 +928,8 @@ model NotaCredito {
   motivo     String                  // razón de la devolución
   // Detalles: [{productoId, nombre, unidad, cantidad, precioUnitario, subtotal}]
   detalles   Json?
-  monto      Decimal  @db.Decimal(12, 2)  // total del crédito
+  monto         Decimal  @db.Decimal(12, 2)  // total del crédito
+  montoRestante Decimal  @db.Decimal(12, 2)  // saldo disponible (se reduce con cada aplicación)
   estado     String   @default("PENDIENTE") // "PENDIENTE" | "APLICADA"
   notas      String?  @db.Text
   createdAt  DateTime @default(now())

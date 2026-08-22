@@ -68,6 +68,7 @@ export async function crearNotaCredito(input: CrearNotaCreditoInput) {
  motivo: input.motivo,
  detalles: input.detalles as unknown as Prisma.InputJsonValue,
  monto,
+ montoRestante: monto,
  notas: input.notas ?? null,
  estado: "PENDIENTE",
  },
@@ -114,7 +115,7 @@ export async function buscarFacturasParaNC(q: string) {
  });
 }
 
-// Historial de notas de crédito de un cliente 
+// Historial de notas de crédito de un cliente
 
 export async function getNotasCreditoCliente(clienteId: string) {
  return prisma.notaCredito.findMany({
@@ -123,3 +124,29 @@ export async function getNotasCreditoCliente(clienteId: string) {
  include: { venta: { select: { numero: true } } },
  });
 }
+
+// Buscar NC por número para aplicar en cobro (cajero ingresa el código)
+
+export async function buscarNCPorNumero(ncNumero: string, clienteId: string) {
+ if (!ncNumero.trim()) return null;
+ const nc = await prisma.notaCredito.findFirst({
+ where: {
+ numero: { equals: ncNumero.trim(), mode: "insensitive" },
+ clienteId,
+ estado: "PENDIENTE",
+ },
+ include: { venta: { select: { numero: true } } },
+ });
+ if (!nc) return null;
+ const montoRestante = Number(nc.montoRestante);
+ if (montoRestante <= 0) return null;
+ return {
+ id: nc.id,
+ numero: nc.numero,
+ monto: Number(nc.monto),
+ montoRestante,
+ ventaNumero: nc.venta.numero,
+ motivo: nc.motivo,
+ };
+}
+

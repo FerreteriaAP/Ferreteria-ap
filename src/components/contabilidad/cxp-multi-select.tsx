@@ -70,10 +70,10 @@ interface ModalProps {
 }
 
 const METODOS = [
- { value: "EFECTIVO", label: " Efectivo" },
- { value: "TRANSFERENCIA", label: " Transferencia" },
- { value: "CHEQUE", label: " Cheque" },
- { value: "TARJETA", label: " Tarjeta" },
+ { value: "EFECTIVO", label: "Efectivo" },
+ { value: "TRANSFERENCIA", label: "Transferencia" },
+ { value: "CHEQUE", label: "Cheque" },
+ { value: "TARJETA", label: "Tarjeta" },
 ];
 
 function ModalPlanillaPago({ compras, grupos, onClose, onOk }: ModalProps) {
@@ -120,7 +120,8 @@ function ModalPlanillaPago({ compras, grupos, onClose, onOk }: ModalProps) {
  className={cn(
  "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
  metodo === m.value
- ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-accent text-muted-foreground hover:text-foreground" )}
+ ? "border-primary bg-primary text-primary-foreground font-semibold"
+ : "border-border hover:bg-accent text-muted-foreground hover:text-foreground" )}
  > {m.label}
  </button> ))}
  </div> </div> {/* Fecha */}
@@ -149,7 +150,7 @@ function ModalPlanillaPago({ compras, grupos, onClose, onOk }: ModalProps) {
  "px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium",
  "hover:bg-primary/90 transition-colors",
  isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Registrando…" : " Registrar pagos"}
+ > {isPending ? "Registrando…" : "Registrar pagos"}
  </button> </div> </div> </div> </div> );
 }
 
@@ -189,7 +190,31 @@ export function CxPMultiSelect({ grupos }: Props) {
  };
 
  return (
- <> <div className="space-y-3"> {grupos.map((g) => {
+ <>
+ {/* Barra de selección — sticky arriba, justo debajo de la cabecera */}
+ {seleccionadas.size > 0 && (
+ <div className="sticky top-2 z-40 flex justify-center mb-3">
+ <div className="flex items-center gap-3 bg-background border shadow-xl rounded-2xl px-5 py-3">
+ <span className="text-sm font-medium">
+ {seleccionadas.size} compra{seleccionadas.size !== 1 ? "s" : ""} seleccionada{seleccionadas.size !== 1 ? "s" : ""}
+ </span>
+ <span className="text-sm font-bold tabular-nums" style={{ color: "var(--accent-hex)" }}>
+ {fmt(comprasSeleccionadas.reduce((s, c) => s + c.saldo, 0))}
+ </span>
+ <button
+ onClick={() => setShowModal(true)}
+ className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+ > Planilla de pago
+ </button>
+ <button
+ onClick={() => setSeleccionadas(new Set())}
+ className="text-muted-foreground hover:text-foreground text-lg leading-none"
+ > ×
+ </button>
+ </div>
+ </div>
+ )}
+ <div className="space-y-3"> {grupos.map((g) => {
  const pendientes = g.compras.filter(c => c.estado !== "PAGADO");
  const idsPendientes = pendientes.map(c => c.id);
  const todasSel = idsPendientes.length > 0 && idsPendientes.every(id => seleccionadas.has(id));
@@ -259,17 +284,7 @@ export function CxPMultiSelect({ grupos }: Props) {
  </span> </div> </div> ))}
  </GrupoColapsable> );
  })}
- </div> {/* Barra flotante de selección */}
- {seleccionadas.size > 0 && (
- <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40"> <div className="flex items-center gap-3 bg-background border shadow-xl rounded-2xl px-5 py-3"> <span className="text-sm font-medium"> {seleccionadas.size} compra{seleccionadas.size !== 1 ? "s" : ""} seleccionada{seleccionadas.size !== 1 ? "s" : ""}
- </span> <span className="text-sm font-bold tabular-nums" style={{ color: "var(--accent-hex)" }}> {fmt(comprasSeleccionadas.reduce((s, c) => s + c.saldo, 0))}
- </span> <button
- onClick={() => setShowModal(true)}
- className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors" > Planilla de pago
- </button> <button
- onClick={() => setSeleccionadas(new Set())}
- className="text-muted-foreground hover:text-foreground text-lg leading-none" > ×
- </button> </div> </div> )}
+ </div>
 
  {showModal && (
  <ModalPlanillaPago

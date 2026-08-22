@@ -13,6 +13,7 @@ import {
  buscarCxCPorFactura,
 } from "@/actions/caja";
 import { NotaCreditoModal } from "@/components/caja/nota-credito-modal";
+import { buscarNCPorNumero } from "@/actions/nota-credito";
 import { buscarSuplidores } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 import {
@@ -83,6 +84,8 @@ const BILLETES = [100, 200, 500, 1000, 2000];
 // MODAL — Pago de factura (rediseñado)
 //
 
+type NCInfo = { id: string; numero: string; monto: number; montoRestante: number; ventaNumero: string; motivo: string };
+
 function PagoModal({ factura, turnoId, onClose, onOk }: {
  factura: FacturaPendiente;
  turnoId: string;
@@ -96,12 +99,40 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
   { metodo: "EFECTIVO", monto: "", ref: "" },
  ]);
 
+ // NC
+ const [ncNumero, setNcNumero] = useState("");
+ const [ncInfo, setNcInfo] = useState<NCInfo | null>(null);
+ const [montoNC, setMontoNC] = useState(0);
+ const [ncError, setNcError] = useState<string | null>(null);
+ const [ncBuscando, setNcBuscando] = useState(false);
+ const ncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+ const handleNcNumero = (val: string) => {
+  setNcNumero(val);
+  setNcInfo(null);
+  setNcError(null);
+  setMontoNC(0);
+  if (ncTimerRef.current) clearTimeout(ncTimerRef.current);
+  if (!val.trim()) return;
+  setNcBuscando(true);
+  ncTimerRef.current = setTimeout(async () => {
+   const info = await buscarNCPorNumero(val.trim(), factura.cliente.id);
+   setNcBuscando(false);
+   if (!info) { setNcError("NC no encontrada, ya fue aplicada o no pertenece a este cliente"); return; }
+   setNcInfo(info);
+   setMontoNC(Math.min(info.montoRestante, factura.total));
+  }, 400);
+ };
+
+ const maxMontoNC = ncInfo ? Math.min(ncInfo.montoRestante, factura.total) : 0;
+ const totalRequerido = Math.max(0, factura.total - montoNC);
+
  const totalIngresado = lineasPago.reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
  const otrosIngresados = lineasPago.filter(l => l.metodo !== "EFECTIVO").reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
- const efectivoNecesario = Math.max(0, factura.total - otrosIngresados);
+ const efectivoNecesario = Math.max(0, totalRequerido - otrosIngresados);
  const efectivoIngresado = lineasPago.filter(l => l.metodo === "EFECTIVO").reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
  const cambio = Math.max(0, efectivoIngresado - efectivoNecesario);
- const pendiente = Math.max(0, factura.total - (totalIngresado - cambio));
+ const pendiente = Math.max(0, totalRequerido - (totalIngresado - cambio));
  const listo = pendiente < 0.01;
 
  const agregarLinea = () => setLineasPago(prev => [...prev, { metodo: "TARJETA", monto: "", ref: "" }]);
@@ -122,14 +153,16 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
    }))
    .filter(p => p.monto > 0.001);
 
-  if (!pagos.length) { setError("Ingresa al menos un monto"); return; }
+  if (!pagos.length && montoNC < 0.01) { setError("Ingresa al menos un monto"); return; }
   if (!listo && !lineasPago.some(l => l.metodo === "CREDITO")) {
    setError(`Falta RD$ ${pendiente.toLocaleString("es-DO", { minimumFractionDigits: 2 })} por cobrar`);
    return;
   }
 
+  const ncAplicacion = ncInfo && montoNC > 0 ? { ncId: ncInfo.id, montoAplicar: montoNC } : undefined;
+
   startTransition(async () => {
-   const res = await procesarPagoCaja(factura.id, pagos, turnoId);
+   const res = await procesarPagoCaja(factura.id, pagos, turnoId, { ncAplicacion });
    if ("error" in res && res.error) { setError(res.error); return; }
    onOk();
   });
@@ -222,6 +255,62 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
        )}
       </div>
      )}
+
+     {/* Nota de Crédito */}
+     <div className="rounded-xl border p-3 space-y-2.5" style={{ borderColor: "color-mix(in oklch, #a855f7 20%, var(--border))" }}>
+      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#a855f7" }}>
+       Nota de Crédito (opcional)
+      </p>
+      <div className="flex gap-2 items-center">
+       <input
+        type="text"
+        value={ncNumero}
+        onChange={e => handleNcNumero(e.target.value.toUpperCase())}
+        placeholder="Ej: NC-00001"
+        className="flex-1 h-10 rounded-lg border bg-background px-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"
+       />
+       {ncBuscando && <span className="text-xs text-muted-foreground animate-pulse">buscando…</span>}
+      </div>
+      {ncError && <p className="text-xs text-destructive">{ncError}</p>}
+      {ncInfo && (
+       <div className="rounded-lg p-2.5 space-y-2" style={{ backgroundColor: "color-mix(in oklch, #a855f7 8%, var(--card))", borderLeft: "3px solid #a855f7" }}>
+        <div className="flex justify-between items-start gap-2">
+         <div>
+          <p className="text-xs font-bold font-mono" style={{ color: "#a855f7" }}>{ncInfo.numero}</p>
+          <p className="text-[11px] text-muted-foreground">Factura origen: {ncInfo.ventaNumero}</p>
+          <p className="text-[11px] text-muted-foreground truncate max-w-[200px]">{ncInfo.motivo}</p>
+         </div>
+         <div className="text-right shrink-0">
+          <p className="text-[10px] text-muted-foreground">Disponible</p>
+          <p className="text-sm font-bold" style={{ color: "#a855f7" }}>{fmt(ncInfo.montoRestante)}</p>
+         </div>
+        </div>
+        <div className="flex items-center gap-2">
+         <label className="text-xs text-muted-foreground shrink-0">Aplicar:</label>
+         <input
+          type="number" min="0.01" step="0.01" max={maxMontoNC}
+          value={montoNC || ""}
+          onChange={e => {
+           const v = parseFloat(e.target.value) || 0;
+           setMontoNC(Math.min(v, maxMontoNC));
+          }}
+          onFocus={e => e.target.select()}
+          className="w-32 h-8 rounded-lg border bg-background px-2 text-sm font-mono text-right focus:outline-none focus:ring-2 focus:ring-primary/40"
+         />
+         <button type="button" onClick={() => setMontoNC(maxMontoNC)}
+          className="text-xs px-2 py-1 rounded border transition-colors"
+          style={{ color: "#a855f7", borderColor: "color-mix(in oklch, #a855f7 40%, var(--border))" }}>
+          Máx
+         </button>
+        </div>
+        {montoNC > 0 && (
+         <p className="text-xs font-semibold" style={{ color: "#a855f7" }}>
+          Descuento NC: −{fmt(montoNC)} · Queda a pagar: {fmt(totalRequerido)}
+         </p>
+        )}
+       </div>
+      )}
+     </div>
 
      {/* Líneas de pago */}
      <div className="space-y-2">
@@ -324,7 +413,7 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
          ? "bg-green-600/70 text-white hover:bg-green-600"
          : "bg-muted text-muted-foreground cursor-not-allowed"
        )}>
-       {isPending ? "Procesando…" : `Cobrar ${fmt(factura.total)}`}
+       {isPending ? "Procesando…" : montoNC > 0 ? `Cobrar ${fmt(totalRequerido)} (+NC ${fmt(montoNC)})` : `Cobrar ${fmt(factura.total)}`}
       </button>
      </div>
 
@@ -668,7 +757,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
          className={cn(
           "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
           metodo === m.value
-           ? "border-primary bg-primary/10 text-primary"
+           ? "border-primary bg-primary text-primary-foreground font-semibold"
            : "border-border hover:bg-accent text-muted-foreground hover:text-foreground"
          )}>
          {m.label}
