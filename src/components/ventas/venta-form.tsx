@@ -7,6 +7,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { crearCotizacion, buscarProductosVenta, type VentaInput } from "@/actions/ventas";
+import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import { completarDatosCliente } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 import { Search, X, ShoppingCart, AlertCircle, Scissors, UserPen, Plus, Check } from "lucide-react";
@@ -114,9 +115,9 @@ function Field({ label, children, hint, full }: {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-interface VentaFormProps { clientes: Cliente[] }
+interface VentaFormProps { clientes: Cliente[]; modoVendedor?: boolean }
 
-export function VentaForm({ clientes }: VentaFormProps) {
+export function VentaForm({ clientes, modoVendedor = false }: VentaFormProps) {
   const router = useRouter();
   const [error,   setError]   = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -307,7 +308,12 @@ export function VentaForm({ clientes }: VentaFormProps) {
       } as VentaInput);
       setLoading(false);
       if ("error" in result) { setError(String(result.error) || "Error al guardar la cotización"); return; }
-      router.push(`/ventas/${result.id}`);
+      if (modoVendedor) {
+        await clearVendedorActivo();
+        router.push("/ventas");
+      } else {
+        router.push(`/ventas/${result.id}`);
+      }
     } catch (err) {
       setLoading(false); setError(err instanceof Error ? err.message : "Error inesperado");
     }
