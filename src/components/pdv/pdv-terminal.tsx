@@ -20,7 +20,8 @@ interface Producto {
   id: string; codigo: string; nombre: string;
   precioVenta: number; unidadMedida: string;
   esFraccionable: boolean; unidadFraccion: string | null;
-  factorFraccion: number | null; exentoItbis: boolean;
+  factorFraccion: number | null; precioFraccion: number | null;
+  exentoItbis: boolean;
   stockActual: number; stockMinimo: number;
   costoUltimo: number;
   categoria: { nombre: string; codigo: string };
@@ -150,7 +151,8 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
       setResultados(r.map(p => ({
         ...p,
         precioVenta:    Number(p.precioVenta),
-        factorFraccion: p.factorFraccion ? Number(p.factorFraccion) : null,
+        factorFraccion: p.factorFraccion  ? Number(p.factorFraccion)  : null,
+        precioFraccion: p.precioFraccion  ? Number(p.precioFraccion)  : null,
         stockActual:    Number(p.stockActual),
         stockMinimo:    Number(p.stockMinimo),
         costoUltimo:    Number(p.costoUltimo),
@@ -181,7 +183,10 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
 
     const factor     = Number(p.factorFraccion ?? 1);
     const unidad     = fraccionado && p.unidadFraccion ? p.unidadFraccion : p.unidadMedida;
-    const precioFinal = fraccionado && factor > 0 ? p.precioVenta / factor : p.precioVenta;
+    // Si el producto tiene precio de fracción configurado, usarlo; si no, auto-calcular
+    const precioFinal = fraccionado && factor > 0
+      ? (p.precioFraccion != null ? Number(p.precioFraccion) : p.precioVenta / factor)
+      : p.precioVenta;
 
     const idx = carrito.findIndex(i => i.productoId === p.id && i.unidad === unidad);
     if (idx >= 0) {
@@ -404,7 +409,11 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                         onClick={() => agregarProducto(p, true)}
                         className="w-full border-t px-2.5 py-1.5 text-[10px] text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left"
                       >
-                        Por {p.unidadFraccion} · {fmt(p.precioVenta / Number(p.factorFraccion))}
+                        Por {p.unidadFraccion} · {fmt(
+                          p.precioFraccion != null
+                            ? Number(p.precioFraccion)
+                            : p.precioVenta / Number(p.factorFraccion)
+                        )}
                       </button>
                     )}
                   </div>

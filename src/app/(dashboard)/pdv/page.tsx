@@ -50,7 +50,8 @@ export default async function PDVPage() {
   const productos = topProductos.map(p => ({
     ...p,
     precioVenta:    Number(p.precioVenta),
-    factorFraccion: p.factorFraccion ? Number(p.factorFraccion) : null,
+    factorFraccion: p.factorFraccion  ? Number(p.factorFraccion)  : null,
+    precioFraccion: p.precioFraccion  ? Number(p.precioFraccion)  : null,
     stockActual:    Number(p.stockActual),
     stockMinimo:    Number(p.stockMinimo),
     costoUltimo:    Number(p.costoUltimo),
