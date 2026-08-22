@@ -193,8 +193,8 @@ export function CxPMultiSelect({ grupos }: Props) {
  <>
  {/* Barra de selección — sticky arriba, justo debajo de la cabecera */}
  {seleccionadas.size > 0 && (
- <div className="sticky top-2 z-40 mb-3 flex justify-center">
- <div className="flex items-center gap-3 bg-background border shadow-md rounded-xl px-4 py-2">
+ <div className="sticky top-2 z-40 mb-3">
+ <div className="inline-flex items-center gap-3 bg-background border shadow-md rounded-xl px-4 py-2">
  <span className="text-xs font-medium text-muted-foreground shrink-0">
  {seleccionadas.size} compra{seleccionadas.size !== 1 ? "s" : ""}
  </span>
@@ -203,7 +203,8 @@ export function CxPMultiSelect({ grupos }: Props) {
  </span>
  <button
  onClick={() => setShowModal(true)}
- className="px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0"
+ className="px-3 py-1 rounded-full border text-xs font-semibold transition-colors shrink-0"
+ style={{ borderColor: "#f97316", color: "#f97316" }}
  > Pago Facturas
  </button>
  <button
