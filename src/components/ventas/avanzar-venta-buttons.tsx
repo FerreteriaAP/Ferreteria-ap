@@ -92,19 +92,19 @@ function ConduceConfirmCard({
     <div className="rounded-xl border overflow-hidden"
       style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 30%, var(--border))" }}>
       {/* Header conduce */}
-      <div className="flex items-center justify-between px-4 py-3"
+      <div className="px-4 py-3 space-y-2"
         style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 6%, var(--card))" }}>
-        <div>
+        <div className="flex items-center justify-between gap-2">
           <span className="font-mono font-bold text-sm">{conduce.numero}</span>
-          <span className="ml-2 text-xs px-1.5 py-0.5 rounded border font-medium"
+          <span className="text-xs px-1.5 py-0.5 rounded border font-medium shrink-0"
             style={{ backgroundColor: "color-mix(in oklch, #ca8a04 8%, var(--card))", color: "#ca8a04", borderColor: "color-mix(in oklch, #ca8a04 30%, var(--border))" }}>
-            Pendiente recepción
+            Pendiente
           </span>
         </div>
         <button type="button" onClick={() => setExpandido(v => !v)}
-          className="text-xs font-medium px-2.5 py-1 rounded-lg border transition-colors hover:bg-accent"
+          className="w-full text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-colors hover:bg-accent text-center"
           style={{ color: "var(--accent-hex)", borderColor: "var(--accent-hex)" }}>
-          {expandido ? "Ocultar" : "Confirmar recepción →"}
+          {expandido ? "Ocultar" : "Confirmar recepcion"}
         </button>
       </div>
 
