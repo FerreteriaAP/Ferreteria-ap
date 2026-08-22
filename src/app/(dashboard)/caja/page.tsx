@@ -1,4 +1,5 @@
 import { getTurnoActivo, getFacturasPendientesCaja, getEmpleadosActivos } from "@/actions/caja";
+import { getNotasCredito } from "@/actions/nota-credito";
 import { AbrirTurnoForm } from "@/components/caja/abrir-turno-form";
 import { CajaDashboard } from "@/components/caja/caja-dashboard";
 import Link from "next/link";
@@ -19,9 +20,9 @@ function fmtDate(d: Date | string) {
 export default async function CajaPage() {
   const turnoActivo = await getTurnoActivo();
 
-  const [facturas, empleados] = turnoActivo
-    ? await Promise.all([getFacturasPendientesCaja(), getEmpleadosActivos()])
-    : [[], []];
+  const [facturas, empleados, ncResult] = turnoActivo
+    ? await Promise.all([getFacturasPendientesCaja(), getEmpleadosActivos(), getNotasCredito({ pageSize: 1 })])
+    : [[], [], { total: 0 }];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
@@ -70,7 +71,7 @@ export default async function CajaPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               <StatCard label="Monto apertura" value={fmt(turnoActivo.montoApertura)} />
               <StatCard
                 label="PDV pendientes"
@@ -89,6 +90,13 @@ export default async function CajaPage() {
                 href={`/caja/${turnoActivo.id}/movimientos`}
                 hint="Ver gastos, préstamos y cobros"
               />
+              <StatCardLink
+                label="Notas de crédito"
+                value={String((ncResult as { total: number }).total)}
+                href="/caja/notas-credito"
+                hint="Ver notas de crédito emitidas"
+              />
+
             </div>
           </div>
 
