@@ -1,8 +1,5 @@
-/*
-  Warnings:
+-- AlterTable: agrega montoRestante con DEFAULT 0 para no romper filas existentes
+ALTER TABLE "notas_credito" ADD COLUMN IF NOT EXISTS "montoRestante" DECIMAL(12,2) NOT NULL DEFAULT 0;
 
-  - Added the required column `montoRestante` to the `notas_credito` table without a default value. This is not possible if the table is not empty.
-
-*/
--- AlterTable
-ALTER TABLE "notas_credito" ADD COLUMN     "montoRestante" DECIMAL(12,2) NOT NULL;
+-- Backfill: para NCs ya existentes, montoRestante = monto (crédito completo disponible)
+UPDATE "notas_credito" SET "montoRestante" = "monto" WHERE "montoRestante" = 0 AND "estado" = 'PENDIENTE';

@@ -120,7 +120,7 @@ function ModalPlanillaPago({ compras, grupos, onClose, onOk }: ModalProps) {
  className={cn(
  "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
  metodo === m.value
- ? "border-primary bg-primary text-primary-foreground font-semibold"
+ ? "border-orange-500 bg-orange-500 text-white font-semibold"
  : "border-border hover:bg-accent text-muted-foreground hover:text-foreground" )}
  > {m.label}
  </button> ))}
@@ -193,22 +193,22 @@ export function CxPMultiSelect({ grupos }: Props) {
  <>
  {/* Barra de selección — sticky arriba, justo debajo de la cabecera */}
  {seleccionadas.size > 0 && (
- <div className="sticky top-2 z-40 flex justify-center mb-3">
- <div className="flex items-center gap-3 bg-background border shadow-xl rounded-2xl px-5 py-3">
- <span className="text-sm font-medium">
- {seleccionadas.size} compra{seleccionadas.size !== 1 ? "s" : ""} seleccionada{seleccionadas.size !== 1 ? "s" : ""}
+ <div className="sticky top-2 z-40 mb-3">
+ <div className="flex items-center gap-2 bg-background border shadow-md rounded-lg px-3 py-1.5 max-w-sm">
+ <span className="text-xs font-medium text-muted-foreground shrink-0">
+ {seleccionadas.size} sel.
  </span>
- <span className="text-sm font-bold tabular-nums" style={{ color: "var(--accent-hex)" }}>
+ <span className="text-xs font-bold tabular-nums shrink-0" style={{ color: "var(--accent-hex)" }}>
  {fmt(comprasSeleccionadas.reduce((s, c) => s + c.saldo, 0))}
  </span>
  <button
  onClick={() => setShowModal(true)}
- className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
- > Planilla de pago
+ className="ml-auto px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0"
+ > Planilla
  </button>
  <button
  onClick={() => setSeleccionadas(new Set())}
- className="text-muted-foreground hover:text-foreground text-lg leading-none"
+ className="text-muted-foreground hover:text-foreground text-base leading-none shrink-0"
  > ×
  </button>
  </div>
@@ -241,46 +241,40 @@ export function CxPMultiSelect({ grupos }: Props) {
  }
  > {g.compras.map((c) => (
  <div key={c.id} className={cn(
- "px-4 py-3.5 flex items-center gap-3 border-b last:border-0",
- seleccionadas.has(c.id) && "bg-primary/5"
+ "px-3 py-2 flex items-center gap-2 border-b last:border-0 overflow-hidden",
+ seleccionadas.has(c.id) && "bg-orange-500/5"
  )}>
  {/* Checkbox */}
  {c.estado !== "PAGADO"
  ? <input type="checkbox" checked={seleccionadas.has(c.id)} onChange={() => toggle(c.id)} className="w-4 h-4 cursor-pointer shrink-0" />
  : <div className="w-4 shrink-0" />}
- {/* Número + Ref + NCF */}
- <div className="flex-1 min-w-0">
+ {/* Número */}
  <Link href={`/compras/${c.compraId}?from=cxp`}
- className="font-mono text-sm font-bold hover:underline" style={{ color: "var(--accent-hex)" }}>
+ className="font-mono text-sm font-semibold hover:underline shrink-0 w-[90px]"
+ style={{ color: "var(--accent-hex)" }}>
  {c.numero}
  </Link>
- <div className="flex gap-2 flex-wrap mt-0.5">
- {c.noFacturaSuplidor && <span className="text-xs text-muted-foreground">Ref: <span className="font-mono">{c.noFacturaSuplidor}</span></span>}
- {c.ncf && <span className="font-mono text-xs text-muted-foreground">{c.ncf}</span>}
- </div>
- </div>
- {/* Fechas */}
- <div className="hidden md:flex flex-col gap-0.5 text-xs text-right shrink-0">
- {c.fechaFactura && <span className="text-muted-foreground">Fac: {new Date(c.fechaFactura).toLocaleDateString("es-DO")}</span>}
- <span className={cn(c.diasRestantes < 0 ? "text-destructive font-semibold" : "text-muted-foreground")}>
- Vence: {new Date(c.fechaVencimiento).toLocaleDateString("es-DO")}
- {c.diasRestantes < 0
- ? ` (${Math.abs(c.diasRestantes)}d venc.)`
- : c.diasRestantes === 0 ? " (hoy)"
- : ` (${c.diasRestantes}d)`}
+ {/* Fecha factura */}
+ <span className="text-xs text-muted-foreground shrink-0 w-[62px] hidden sm:block">
+ {c.fechaFactura ? new Date(c.fechaFactura).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "—"}
  </span>
- </div>
+ {/* Ref suplidor / NCF */}
+ <span className="font-mono text-xs text-muted-foreground shrink-0 w-[110px] truncate hidden md:block">
+ {c.noFacturaSuplidor ?? c.ncf ?? "—"}
+ </span>
+ {/* Días vencer */}
+ <span className={cn(
+ "text-xs shrink-0 w-[70px] hidden sm:block",
+ c.diasRestantes < 0 ? "text-destructive font-semibold" : "text-muted-foreground"
+ )}>
+ {c.diasRestantes < 0 ? `${Math.abs(c.diasRestantes)}d venc.`
+ : c.diasRestantes === 0 ? "hoy"
+ : `${c.diasRestantes}d`}
+ </span>
  {/* Badge aging */}
  <Badge variant={agingVariant(c.diasVencida)} className="text-xs shrink-0">{agingLabel(c.diasVencida)}</Badge>
  {/* Saldo */}
- <div className="text-right shrink-0 min-w-[90px]">
- {c.estado === "PAGADO_PARCIAL" && <p className="text-[10px] text-muted-foreground">Saldo:</p>}
- <p className={cn("font-mono text-sm font-bold", agingColor(c.diasVencida))}>{fmt(c.saldo)}</p>
- </div>
- {/* Estado pagado */}
- {c.estado === "PAGADO" && (
- <Badge variant="outline" className="text-xs text-green-700 border-green-300 shrink-0">Pagado</Badge>
- )}
+ <p className={cn("font-mono text-sm font-semibold ml-auto shrink-0", agingColor(c.diasVencida))}>{fmt(c.saldo)}</p>
  </div>
  ))}
  </GrupoColapsable> );

@@ -666,20 +666,41 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                             )}
                           </TableCell>
                           <TableCell>
-                            <Select
-                              value={String(pct)}
-                              onValueChange={v => {
-                                form.setValue(`detalles.${i}.itbisPct`, Number(v));
-                                if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
-                                alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, costo, Number(v)), 850);
-                              }}
-                            >
-                              <SelectTrigger className="h-8 text-center text-xs"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="0">Incluido (÷1.18)</SelectItem>
-                                <SelectItem value="18">Excluido (+18%)</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            {/* Toggle ITBIS — dos botones simples, evita el Radix Select que salta */}
+                            <div className="flex rounded-lg overflow-hidden border text-xs">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  form.setValue(`detalles.${i}.itbisPct`, 0);
+                                  if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
+                                  alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, costo, 0), 850);
+                                }}
+                                className={cn(
+                                  "flex-1 px-2 py-1.5 transition-colors leading-tight",
+                                  pct === 0
+                                    ? "bg-primary text-primary-foreground font-semibold"
+                                    : "hover:bg-muted text-muted-foreground"
+                                )}
+                              >
+                                Incl.
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  form.setValue(`detalles.${i}.itbisPct`, 18);
+                                  if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
+                                  alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, costo, 18), 850);
+                                }}
+                                className={cn(
+                                  "flex-1 px-2 py-1.5 transition-colors leading-tight border-l",
+                                  pct === 18
+                                    ? "bg-primary text-primary-foreground font-semibold"
+                                    : "hover:bg-muted text-muted-foreground"
+                                )}
+                              >
+                                Excl.
+                              </button>
+                            </div>
                             {/* ITBIS por unidad (no por línea) */}
                             {costo > 0 && (
                               <p className="text-[10px] text-muted-foreground text-center mt-0.5">
