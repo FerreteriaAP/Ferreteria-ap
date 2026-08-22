@@ -433,30 +433,12 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
               <div className="px-5 py-4 space-y-2">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {venta.conduces.map((c: any) => (
-                  <div key={c.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                  <div key={c.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0 flex-wrap gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono font-semibold">{c.numero}</span>
                       {c.firmaChofer && (
                         <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Chofer: {c.firmaChofer}</span>
                       )}
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded border font-medium"
-                        style={{
-                          backgroundColor: c.clienteRecibio
-                            ? "color-mix(in oklch, #16a34a 8%, var(--card))"
-                            : "color-mix(in oklch, #ca8a04 8%, var(--card))",
-                          color: c.clienteRecibio ? "#16a34a" : "#ca8a04",
-                          borderColor: c.clienteRecibio
-                            ? "color-mix(in oklch, #16a34a 25%, var(--border))"
-                            : "color-mix(in oklch, #ca8a04 25%, var(--border))",
-                        }}
-                      >
-                        {c.clienteRecibio
-                          ? `Recibido ${c.fechaRecepcion ? new Date(c.fechaRecepcion).toLocaleDateString("es-DO") : ""}`
-                          : "Pendiente recepción"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
                       <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                         {new Date(c.fechaEmision).toLocaleDateString("es-DO")}
                       </span>
@@ -465,6 +447,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                         Imprimir
                       </Link>
                     </div>
+                    <ConduceDespachoBtn ventaId={id} conduceId={c.id} entregado={c.clienteRecibio} variant="card" />
                   </div>
                 ))}
               </div>
@@ -525,6 +508,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                   tipo={venta.tipo}
                   conduceId={conduceId}
                   conduceRecibido={conduceRecibido}
+                  todosConducesEntregados={todosEntregados}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   detalles={venta.detalles.map((d: any) => ({
                     productoId: d.productoId,

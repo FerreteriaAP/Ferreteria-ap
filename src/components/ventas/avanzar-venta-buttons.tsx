@@ -26,6 +26,7 @@ interface Props {
   tipo: string;
   conduceId?: string;
   conduceRecibido: boolean;
+  todosConducesEntregados?: boolean;
   detalles?: DetalleResumen[];
 }
 
@@ -34,8 +35,11 @@ const PILL =
   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none";
 
 export function AvanzarVentaButtons({
-  ventaId, tipo, conduceId, conduceRecibido, detalles = [],
+  ventaId, tipo, conduceId, conduceRecibido, todosConducesEntregados, detalles = [],
 }: Props) {
+  // Para el gate de factura: todos los conduces deben estar confirmados.
+  // Si no se pasa todosConducesEntregados, cae al valor de conduceRecibido (caso legacy sin conduces).
+  const puedeFacturar = todosConducesEntregados ?? conduceRecibido;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
@@ -189,8 +193,8 @@ export function AvanzarVentaButtons({
         </div>
       )}
 
-      {/* CONDUCE — recepción pendiente */}
-      {tipo === "CONDUCE" && !conduceRecibido && conduceId && !mostrarRecepcion && (
+      {/* CONDUCE — recepción pendiente (solo cuando hay exactamente 1 conduce sin confirmar) */}
+      {tipo === "CONDUCE" && !puedeFacturar && !conduceRecibido && conduceId && !mostrarRecepcion && (
         <div
           className="w-full rounded-xl border p-4 space-y-3"
           style={{
@@ -219,7 +223,7 @@ export function AvanzarVentaButtons({
       )}
 
       {/* Formulario recepción por ítem */}
-      {tipo === "CONDUCE" && !conduceRecibido && conduceId && mostrarRecepcion && (
+      {tipo === "CONDUCE" && !puedeFacturar && !conduceRecibido && conduceId && mostrarRecepcion && (
         <div
           className="w-full rounded-xl border p-4 space-y-3"
           style={{
@@ -306,7 +310,7 @@ export function AvanzarVentaButtons({
       )}
 
       {/* Recepción confirmada */}
-      {tipo === "CONDUCE" && conduceRecibido && (
+      {tipo === "CONDUCE" && puedeFacturar && (
         <p
           className="text-xs rounded-lg border px-3 py-2 font-medium"
           style={{
@@ -315,12 +319,12 @@ export function AvanzarVentaButtons({
             color: "#16a34a",
           }}
         >
-          ✓ Recepción confirmada — ya puedes emitir la factura
+          ✓ Todos los conduces confirmados — ya puedes emitir la factura
         </p>
       )}
 
       {/* Emitir Factura (CONDUCE con recepción) */}
-      {tipo === "CONDUCE" && conduceRecibido && !mostrarFactura && (
+      {tipo === "CONDUCE" && puedeFacturar && !mostrarFactura && (
         <button
           onClick={() => setMostrarFactura(true)}
           className={PILL + " w-full justify-center"}
@@ -346,7 +350,7 @@ export function AvanzarVentaButtons({
       )}
 
       {/* Formulario factura */}
-      {((tipo === "CONDUCE" && conduceRecibido) || tipo === "ORDEN_VENTA") && mostrarFactura && (
+      {((tipo === "CONDUCE" && puedeFacturar) || tipo === "ORDEN_VENTA") && mostrarFactura && (
         <div
           className="w-full rounded-xl border p-4 space-y-3 text-sm"
           style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 3%, var(--card))" }}
