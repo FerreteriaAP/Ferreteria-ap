@@ -14,8 +14,8 @@ interface PageProps {
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const METODO_LABEL: Record<string, string> = {
-  EFECTIVO: "💵 Efectivo", TARJETA: "💳 Tarjeta",
-  TRANSFERENCIA: "🏦 Transferencia", CHEQUE: "📄 Cheque",
+  EFECTIVO: "Efectivo", TARJETA: "Tarjeta",
+  TRANSFERENCIA: "Transferencia", CHEQUE: "Cheque",
 };
 
 export default async function CxCContabilidadPage({ searchParams }: PageProps) {
@@ -149,7 +149,7 @@ export default async function CxCContabilidadPage({ searchParams }: PageProps) {
       {/* Lista */}
       {grupos.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
-          <div className="text-4xl mb-3">✅</div>
+          <div className="text-4xl mb-3 text-muted-foreground/30">—</div>
           <p className="font-medium text-lg">Sin cuentas pendientes</p>
           <p className="text-sm mt-1">Todos los clientes están al día</p>
         </div>

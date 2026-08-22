@@ -26,7 +26,7 @@ export function AbrirTurnoForm() {
  type="submit" disabled={isPending}
  className="h-10 px-6 rounded-full text-sm font-bold text-white disabled:opacity-50 transition-all"
         style={{ backgroundColor: "var(--accent-hex)", boxShadow: "0 2px 8px color-mix(in oklch, var(--accent-hex) 40%, transparent)" }}
-        > {isPending ? "Abriendo…" : "⚡ Abrir turno"}
+        > {isPending ? "Abriendo…" : "Abrir turno"}
  </button> </div> {state?.error && (
  <p className="text-sm text-destructive col-span-full">{state.error}</p> )}
  </form> );

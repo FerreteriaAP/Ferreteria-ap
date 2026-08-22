@@ -78,7 +78,7 @@ export default async function NominasPage({ searchParams }: PageProps) {
 
             {nominas.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                <div className="text-4xl mb-2">📋</div>
+                <div className="text-4xl mb-2 text-muted-foreground/30">—</div>
                 <p className="font-medium">Sin nóminas creadas</p>
               </div>
             ) : (

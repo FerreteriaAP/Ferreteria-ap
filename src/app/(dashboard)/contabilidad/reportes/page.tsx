@@ -301,7 +301,7 @@ function EmptyState({ msg }: { msg: string }) {
   return (
     <div className="rounded-xl border py-14 text-center text-muted-foreground"
       style={{ backgroundColor: "color-mix(in srgb, var(--card) 55%, transparent)" }}>
-      <p className="text-3xl mb-2">📋</p>
+      <p className="text-3xl mb-2 text-muted-foreground/30">—</p>
       <p className="font-medium">{msg}</p>
     </div>
   );

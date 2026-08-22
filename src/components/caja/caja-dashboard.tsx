@@ -70,11 +70,11 @@ function fmtTime(d: Date | string) {
 type MetodoPago = "EFECTIVO" | "TARJETA" | "TRANSFERENCIA" | "CHEQUE" | "CREDITO";
 
 const METODOS: { id: MetodoPago; label: string; icon: string }[] = [
- { id: "EFECTIVO", label: "Efectivo", icon: "💵" },
- { id: "TARJETA", label: "Tarjeta", icon: "💳" },
- { id: "TRANSFERENCIA", label: "Transferencia", icon: "🏦" },
- { id: "CHEQUE", label: "Cheque", icon: "📄" },
- { id: "CREDITO", label: "A crédito", icon: "📋" },
+ { id: "EFECTIVO", label: "Efectivo", icon: "" },
+ { id: "TARJETA", label: "Tarjeta", icon: "" },
+ { id: "TRANSFERENCIA", label: "Transferencia", icon: "" },
+ { id: "CHEQUE", label: "Cheque", icon: "" },
+ { id: "CREDITO", label: "A crédito", icon: "" },
 ];
 
 const BILLETES = [100, 200, 500, 1000, 2000];
@@ -195,8 +195,8 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
           <p className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Falta cobrar</p>
           <p className="text-3xl font-black font-mono tabular-nums text-red-600 dark:text-red-400">{fmt(pendiente)}</p>
          </div>
-         <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
-          <span className="text-xl">⚠️</span>
+         <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 font-bold text-lg">
+          !
          </div>
         </>
        ) : cambio > 0.01 ? (
@@ -205,8 +205,8 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
           <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Cambio a devolver</p>
           <p className="text-3xl font-black font-mono tabular-nums text-amber-600 dark:text-amber-400">{fmt(cambio)}</p>
          </div>
-         <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-          <span className="text-xl">💰</span>
+         <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 font-bold text-lg">
+          $
          </div>
         </>
        ) : (
@@ -215,8 +215,8 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
           <p className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Monto exacto</p>
           <p className="text-lg font-bold text-green-600 dark:text-green-400">Listo para cobrar</p>
          </div>
-         <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
-          <span className="text-xl">✅</span>
+         <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 font-bold text-lg">
+          ✓
          </div>
         </>
        )}
@@ -770,7 +770,7 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
 
     {facturas.length === 0 ? (
      <div className="px-5 py-10 text-center text-muted-foreground">
-      <p className="text-3xl mb-2">🧾</p>
+      <p className="text-3xl mb-2 text-muted-foreground/40">—</p>
       <p className="text-sm font-medium">Sin facturas pendientes</p>
       <p className="text-xs mt-1">El PDV enviará las facturas aquí cuando las creen</p>
      </div>

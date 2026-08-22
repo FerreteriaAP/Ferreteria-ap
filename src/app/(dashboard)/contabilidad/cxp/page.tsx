@@ -79,7 +79,7 @@ export default async function CxPContabilidadPage({ searchParams }: PageProps) {
       {/* Lista */}
       {grupos.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
-          <div className="text-4xl mb-3">✅</div>
+          <div className="text-4xl mb-3 text-muted-foreground/30">—</div>
           <p className="font-medium text-lg">Sin cuentas pendientes por pagar</p>
           <p className="text-sm mt-1">Todos los suplidores están pagados</p>
         </div>

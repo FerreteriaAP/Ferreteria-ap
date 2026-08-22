@@ -141,7 +141,7 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
       {facturas.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground border rounded-xl"
           style={{ backgroundColor: CARD_BG }}>
-          <div className="text-3xl mb-2">✅</div>
+          <div className="text-3xl mb-2 text-muted-foreground/30">—</div>
           <p className="font-medium">Sin cuentas pendientes</p>
           <p className="text-sm mt-1">Este cliente está al día</p>
         </div>

@@ -210,7 +210,7 @@ export default async function ImpuestosPage({ searchParams }: PageProps) {
 
         {data.ventas.length === 0 && data.compras.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            <div className="text-4xl mb-3">📋</div>
+            <div className="text-4xl mb-3 text-muted-foreground/30">—</div>
             <p className="font-medium">Sin movimientos de ITBIS en {MESES_COMPLETOS[mes]} {año}</p>
           </div>
         )}

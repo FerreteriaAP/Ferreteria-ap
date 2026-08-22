@@ -273,7 +273,7 @@ export default async function AlertasPage() {
  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
  {/* Un card por suplidor con cheque listo */}
  {chequesListos.map(s => (
- <AlertCard key={s.id} titulo={`💳 ${s.nombre}`} color="blue" count={1}>
+ <AlertCard key={s.id} titulo={s.nombre} color="blue" count={1}>
  <div className="flex items-center justify-between text-xs gap-2">
  <div>
  <span className="font-medium">Cheque listo para entregar</span>
@@ -288,7 +288,7 @@ export default async function AlertasPage() {
 
  {/* Un card por alerta de cheque entregado — solo admin */}
  {esAdmin && alertasCheque.map(al => (
- <AlertCard key={al.id} titulo={`✅ ${al.contacto.nombre}`} color="amber" count={1}>
+ <AlertCard key={al.id} titulo={al.contacto.nombre} color="amber" count={1}>
  <div className="flex items-center justify-between text-xs gap-2">
  <div>
  <span className="font-medium">Cheque entregado</span>
