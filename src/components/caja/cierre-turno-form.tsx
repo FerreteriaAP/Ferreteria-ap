@@ -27,6 +27,7 @@ export function CierreTurnoForm({ turnoId }: { turnoId: string }) {
           step="0.01"
           defaultValue="0"
           required
+          onFocus={e => e.target.select()}
           className="w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-destructive"
         />
       </div>

@@ -18,7 +18,9 @@ export function AbrirTurnoForm() {
 
  return (
  <form action={action} className="flex flex-col sm:flex-row gap-3 max-w-md"> <div className="flex-1"> <label className="text-xs text-muted-foreground font-medium block mb-1">Monto de apertura (RD$)</label> <input
- type="number" name="montoApertura" min="0" step="0.01" defaultValue="0" className="w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required
+ type="number" name="montoApertura" min="0" step="0.01" defaultValue="0"
+ onFocus={e => e.target.select()}
+ className="w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required
  /> </div> <div className="flex-1"> <label className="text-xs text-muted-foreground font-medium block mb-1">Notas (opcional)</label> <input
  type="text" name="notas" placeholder="Turno apertura..." className="w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" /> </div> <div className="flex items-end"> <button
  type="submit" disabled={isPending}
