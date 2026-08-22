@@ -133,8 +133,8 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl">✕</button>
         </div>
 
-        {/* Buscador — FUERA del scroll para que el dropdown no quede cortado */}
-        <div className="px-5 shrink-0">
+        {/* Buscador — FUERA del scroll, z-10 para que el dropdown quede sobre el footer */}
+        <div className="px-5 shrink-0 relative z-10">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
             Factura original
           </label>
@@ -153,7 +153,7 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
               </span>
             )}
             {resultados.length > 0 && (
-              <div className="absolute z-50 top-full mt-1 w-full bg-popover border rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto">
+              <div className="absolute z-50 top-full mt-1 w-full border rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto" style={{ backgroundColor: "var(--card-bg-hex, var(--card))", borderColor: "var(--card-border-hex, var(--border))" }}>
                 {resultados.map(f => (
                   <button
                     key={f.id}
