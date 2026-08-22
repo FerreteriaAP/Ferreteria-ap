@@ -150,10 +150,10 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  onClick={handleSubmit}
  disabled={isPending}
  className={cn(
- "px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium",
- "hover:bg-primary/90 transition-colors",
+ "px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium",
+ "hover:bg-orange-600 transition-colors",
  isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Registrando…" : " Registrar pagos"}
+ > {isPending ? "Registrando…" : "Registrar pagos"}
  </button> </div> </div> </div> </div> );
 }
 
