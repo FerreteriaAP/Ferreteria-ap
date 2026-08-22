@@ -115,9 +115,9 @@ function Field({ label, children, hint, full }: {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-interface VentaFormProps { clientes: Cliente[]; modoVendedor?: boolean }
+interface VentaFormProps { clientes: Cliente[] }
 
-export function VentaForm({ clientes, modoVendedor = false }: VentaFormProps) {
+export function VentaForm({ clientes }: VentaFormProps) {
   const router = useRouter();
   const [error,   setError]   = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -308,12 +308,7 @@ export function VentaForm({ clientes, modoVendedor = false }: VentaFormProps) {
       } as VentaInput);
       setLoading(false);
       if ("error" in result) { setError(String(result.error) || "Error al guardar la cotización"); return; }
-      if (modoVendedor) {
-        await clearVendedorActivo();
-        router.push("/ventas");
-      } else {
-        router.push(`/ventas/${result.id}`);
-      }
+      router.push(`/ventas/${result.id}`);
     } catch (err) {
       setLoading(false); setError(err instanceof Error ? err.message : "Error inesperado");
     }

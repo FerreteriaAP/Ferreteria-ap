@@ -5,7 +5,7 @@ import { getVenta } from "@/actions/ventas";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AvanzarVentaButtons } from "@/components/ventas/avanzar-venta-buttons";
 import { RecalcularKolmenBtn } from "@/components/ventas/recalcular-kolmen-btn";
-import { ConduceDespachoBtn, NuevoConduceBtn } from "@/components/caja/conduce-despacho-btn";
+import { NuevoConduceBtn } from "@/components/caja/conduce-despacho-btn";
 import { BtnEliminarDocumento } from "@/components/shared/btn-eliminar-documento";
 import { eliminarVenta } from "@/actions/ventas";
 
@@ -137,6 +137,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
     cantidad:   Number(d.cantidad),
   }));
 
+  const modoVendedor = ["VENDEDOR", "CAJA"].includes(rolUsuario);
   const est = TIPO_STYLE[venta.tipo] ?? TIPO_STYLE.COTIZACION;
 
   return (
@@ -409,7 +410,12 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                             Imprimir
                           </Link>
                         </div>
-                        <ConduceDespachoBtn ventaId={id} conduceId={c.id} entregado={c.clienteRecibio} variant="card" />
+                        {/* Estado de entrega — solo badge, sin botón (confirmar es por Acciones) */}
+                        {c.clienteRecibio ? (
+                          <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400">Entregado</span>
+                        ) : (
+                          <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">Pendiente</span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -447,7 +453,12 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                         Imprimir
                       </Link>
                     </div>
-                    <ConduceDespachoBtn ventaId={id} conduceId={c.id} entregado={c.clienteRecibio} variant="card" />
+                    {/* Estado de entrega — solo badge, sin botón (confirmar es por Acciones) */}
+                    {c.clienteRecibio ? (
+                      <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400">Entregado</span>
+                    ) : (
+                      <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">Pendiente</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -509,6 +520,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                   conduceId={conduceId}
                   conduceRecibido={conduceRecibido}
                   todosConducesEntregados={todosEntregados}
+                  modoVendedor={modoVendedor}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   conduces={venta.conduces.map((c: any) => ({
                     id:               c.id,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   buscarProductosPDV,
   buscarClientesPDV,
@@ -108,6 +109,7 @@ interface Props {
 // Componente
 
 export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEditarPrecio }: Props) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
@@ -271,14 +273,8 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
   const continuar = () => {
     startTransition(async () => {
       await clearVendedorActivo();
-      // Resetear para nueva venta
-      setCarrito([]);
-      setCliente({ ...consumidorFinal, rnc: null, tipoComprobante: "B02", telefono: null, direcciones: [] });
-      setTipoNcf("B02");
-      setDireccionId(undefined);
-      setNotas("");
-      setError(null);
-      setEnviado(null);
+      // Navegar a /pdv — el server component re-renderiza y muestra el selector de vendedor
+      router.push("/pdv");
     });
   };
 

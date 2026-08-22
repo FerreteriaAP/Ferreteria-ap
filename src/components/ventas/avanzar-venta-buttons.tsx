@@ -13,6 +13,7 @@ import {
   confirmarRecepcionConduce,
   type ItemRecepcion,
 } from "@/actions/ventas";
+import { clearVendedorActivo } from "@/actions/vendedor-activo";
 
 interface DetalleResumen {
   productoId: string;
@@ -40,6 +41,7 @@ interface Props {
   todosConducesEntregados?: boolean;
   conduces?: ConduceResumen[];
   detalles?: DetalleResumen[];
+  modoVendedor?: boolean;
 }
 
 // Estilos de pill reutilizables
@@ -184,7 +186,7 @@ function ConduceConfirmCard({
 // ────────────────────────────────────────────────────────────────────────────
 
 export function AvanzarVentaButtons({
-  ventaId, tipo, conduceId, conduceRecibido, todosConducesEntregados, conduces = [], detalles = [],
+  ventaId, tipo, conduceId, conduceRecibido, todosConducesEntregados, conduces = [], detalles = [], modoVendedor = false,
 }: Props) {
   // Para el gate de factura: todos los conduces deben estar confirmados.
   // Si no hay conduces array, cae al valor de conduceRecibido (caso legacy).
@@ -206,13 +208,20 @@ export function AvanzarVentaButtons({
   const [ncf,              setNcf]               = useState("");
   const [tipoNcf,          setTipoNcf]           = useState("B02");
 
-  const run = async (fn: () => Promise<{ error?: string; ok?: boolean; id?: string; numero?: string }>) => {
+  const run = async (
+    fn: () => Promise<{ error?: string; ok?: boolean; id?: string; numero?: string }>,
+    onSuccess?: () => Promise<void> | void,
+  ) => {
     setLoading(true);
     setError(null);
     const result = await fn();
     setLoading(false);
     if ("error" in result && result.error) { setError(result.error as string); return; }
-    router.refresh();
+    if (onSuccess) {
+      await onSuccess();
+    } else {
+      router.push(`/ventas/${ventaId}`);
+    }
   };
 
   // Conduces pendientes de confirmación
@@ -325,7 +334,7 @@ export function AvanzarVentaButtons({
               key={c.id}
               conduce={c}
               fallbackDetalles={detalles}
-              onConfirmado={() => router.refresh()}
+              onConfirmado={() => router.push(`/ventas/${ventaId}`)}
             />
           ))}
         </div>
@@ -400,7 +409,12 @@ export function AvanzarVentaButtons({
           </div>
           <div className="flex gap-2 pt-1">
             <button
-              onClick={() => run(() => facturarVenta(ventaId, { ncf, tipoNcf }))}
+              onClick={() => run(
+                () => facturarVenta(ventaId, { ncf, tipoNcf }),
+                modoVendedor
+                  ? async () => { await clearVendedorActivo(); router.push("/ventas"); }
+                  : undefined,
+              )}
               disabled={loading}
               className={PILL + " w-full justify-center"}
               style={{
