@@ -316,6 +316,7 @@ model Producto {
   esFraccionable     Boolean  @default(false)
   unidadFraccion     String? // "PIE" cuando el producto es "ROLLO"
   factorFraccion     Decimal? @db.Decimal(10, 4) // cuántas fracciones por unidad
+  precioFraccion     Decimal? @db.Decimal(12, 2) // precio de venta por fracción (opcional, sobrescribe el auto-calculado)
   // Precios
   costoPromedio      Decimal  @default(0) @db.Decimal(12, 4)
   costoUltimo        Decimal  @default(0) @db.Decimal(12, 4)

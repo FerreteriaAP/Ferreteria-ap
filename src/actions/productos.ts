@@ -18,6 +18,7 @@ const ProductoSchema = z.object({
  esFraccionable: z.boolean().default(false),
  unidadFraccion: z.string().optional(),
  factorFraccion: z.coerce.number().positive().optional(),
+ precioFraccion: z.coerce.number().min(0).optional(),
  // Precios
  costoUltimo: z.coerce.number().min(0).default(0),
  porcentajeGanancia: z.coerce.number().min(0).default(30),
@@ -142,6 +143,7 @@ export async function getProductos(params?: {
  stockMinimo: Number(p.stockMinimo),
  stockMaximo: p.stockMaximo != null ? Number(p.stockMaximo) : null,
  factorFraccion: p.factorFraccion != null ? Number(p.factorFraccion) : null,
+ precioFraccion: p.precioFraccion != null ? Number(p.precioFraccion) : null,
  createdAt: p.createdAt.toISOString(),
  updatedAt: p.updatedAt.toISOString(),
  }));
@@ -184,6 +186,7 @@ export async function getProducto(id: string) {
  stockMinimo: Number(p.stockMinimo),
  stockMaximo: p.stockMaximo != null ? Number(p.stockMaximo) : null,
  factorFraccion: p.factorFraccion != null ? Number(p.factorFraccion) : null,
+ precioFraccion: p.precioFraccion != null ? Number(p.precioFraccion) : null,
  createdAt: p.createdAt.toISOString(),
  updatedAt: p.updatedAt.toISOString(),
  movimientos: p.movimientos.map((m) => ({
@@ -217,6 +220,7 @@ export async function getProductoPorCodigo(codigo: string) {
  stockMinimo: Number(p.stockMinimo),
  stockMaximo: p.stockMaximo != null ? Number(p.stockMaximo) : null,
  factorFraccion: p.factorFraccion != null ? Number(p.factorFraccion) : null,
+ precioFraccion: p.precioFraccion != null ? Number(p.precioFraccion) : null,
  createdAt: p.createdAt.toISOString(),
  updatedAt: p.updatedAt.toISOString(),
  };
@@ -295,7 +299,7 @@ export async function crearProducto(data: ProductoInput) {
  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
  const {
- codigoBarras, unidadFraccion, factorFraccion,
+ codigoBarras, unidadFraccion, factorFraccion, precioFraccion,
  precioMayoreo, stockMaximo, costoUltimo, ...rest
  } = parsed.data;
 
@@ -308,6 +312,7 @@ export async function crearProducto(data: ProductoInput) {
  codigoBarras: codigoBarras || null,
  unidadFraccion: unidadFraccion || null,
  factorFraccion: factorFraccion ?? null,
+ precioFraccion: precioFraccion ?? null,
  precioMayoreo: precioMayoreo ?? null,
  stockMaximo: stockMaximo ?? null,
  },
@@ -351,7 +356,7 @@ export async function actualizarProducto(id: string, data: ProductoInput) {
  if (!productoActual) return { error: { _: ["Producto no encontrado"] } };
 
  const {
- codigoBarras, unidadFraccion, factorFraccion,
+ codigoBarras, unidadFraccion, factorFraccion, precioFraccion,
  precioMayoreo, stockMaximo, costoUltimo, stockActual, ...rest
  } = parsed.data;
 
@@ -365,6 +370,7 @@ export async function actualizarProducto(id: string, data: ProductoInput) {
  codigoBarras: codigoBarras || null,
  unidadFraccion: unidadFraccion || null,
  factorFraccion: factorFraccion ?? null,
+ precioFraccion: precioFraccion ?? null,
  precioMayoreo: precioMayoreo ?? null,
  stockMaximo: stockMaximo ?? null,
  },

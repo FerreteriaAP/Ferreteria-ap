@@ -13,6 +13,7 @@ import {
  buscarCxCPorFactura,
 } from "@/actions/caja";
 import { NotaCreditoModal } from "@/components/caja/nota-credito-modal";
+import { buscarSuplidores } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 import {
  TrendingDown,
@@ -382,6 +383,23 @@ function CompraModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () 
  const [concepto, setConcepto] = useState("");
  const [monto, setMonto] = useState("");
  const [notas, setNotas] = useState("");
+ const [sugs, setSugs] = useState<{ id: string; nombre: string; rnc: string | null }[]>([]);
+ const [mostrarSugs, setMostrarSugs] = useState(false);
+ const debRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+ const onConceptoChange = (val: string) => {
+  setConcepto(val);
+  if (debRef.current) clearTimeout(debRef.current);
+  if (val.trim().length < 1) { setSugs([]); setMostrarSugs(false); return; }
+  debRef.current = setTimeout(async () => {
+   const res = await buscarSuplidores(val.trim());
+   setSugs(res); setMostrarSugs(res.length > 0);
+  }, 300);
+ };
+
+ const seleccionar = (nombre: string) => {
+  setConcepto(nombre); setSugs([]); setMostrarSugs(false);
+ };
 
  const handleSubmit = (e: FormEvent) => {
   e.preventDefault();
@@ -398,8 +416,23 @@ function CompraModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () 
   <ModalWrapper title="Compra de mercancía" icon={<ShoppingCart size={18} />} iconColor="#f97316" onClose={onClose}>
    <form onSubmit={handleSubmit} className="space-y-4">
     <Field label="Suplidor / Descripción">
-     <input type="text" required value={concepto} onChange={e => setConcepto(e.target.value)}
-      placeholder="Nombre del suplidor o descripción..." autoFocus className={INPUT_CLS} />
+     <div className="relative">
+      <input type="text" required value={concepto} onChange={e => onConceptoChange(e.target.value)}
+       onBlur={() => setTimeout(() => setMostrarSugs(false), 150)}
+       placeholder="Busca o escribe el nombre del suplidor..." autoFocus className={INPUT_CLS} />
+      {mostrarSugs && (
+       <div className="absolute z-50 top-full mt-1 left-0 right-0 rounded-xl border bg-popover shadow-lg overflow-hidden">
+        {sugs.map(s => (
+         <button key={s.id} type="button" onMouseDown={() => seleccionar(s.nombre)}
+          className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors flex items-center justify-between gap-2">
+          <span className="font-medium">{s.nombre}</span>
+          {s.rnc && <span className="text-xs text-muted-foreground font-mono">{s.rnc}</span>}
+         </button>
+        ))}
+       </div>
+      )}
+     </div>
+     <p className="text-[11px] text-muted-foreground mt-1">Esta compra se registra como pago de contado. Para crédito, usa el módulo de <a href="/compras/nueva" className="underline hover:text-foreground">Compras</a>.</p>
     </Field>
     <Field label="Monto pagado (RD$)">
      <input type="number" required min="0.01" step="0.01" value={monto} onChange={e => setMonto(e.target.value)}

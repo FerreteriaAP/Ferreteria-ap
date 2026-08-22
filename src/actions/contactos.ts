@@ -271,3 +271,22 @@ export async function completarDatosCliente(
   revalidatePath("/ventas/nueva");
   return { ok: true };
 }
+
+// Búsqueda rápida de suplidores para autocompletado (caja, compras, etc.)
+export async function buscarSuplidores(q: string) {
+  if (!q || q.trim().length < 1) return [];
+  const rows = await prisma.contacto.findMany({
+    where: {
+      activo: true,
+      tipo: { in: ["SUPLIDOR", "AMBOS"] },
+      OR: [
+        { nombre: { contains: q.trim(), mode: "insensitive" } },
+        { rnc:    { contains: q.trim(), mode: "insensitive" } },
+      ],
+    },
+    select: { id: true, nombre: true, rnc: true, credito: true },
+    orderBy: { nombre: "asc" },
+    take: 8,
+  });
+  return rows;
+}

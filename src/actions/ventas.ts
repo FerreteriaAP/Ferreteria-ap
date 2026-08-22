@@ -189,6 +189,7 @@ export async function buscarProductosVenta(q: string) {
  esFraccionable: true,
  unidadFraccion: true,
  factorFraccion: true,
+ precioFraccion: true,
  exentoItbis: true,
  categoria: { select: { codigo: true } }, // necesario para alertas de margen
  },
@@ -202,6 +203,7 @@ export async function buscarProductosVenta(q: string) {
  costoUltimo: p.costoUltimo != null ? Number(p.costoUltimo) : null,
  stockActual: Number(p.stockActual),
  factorFraccion: p.factorFraccion != null ? Number(p.factorFraccion) : null,
+ precioFraccion: p.precioFraccion != null ? Number(p.precioFraccion) : null,
  categoriaCode: p.categoria?.codigo ?? "",
  }));
 }

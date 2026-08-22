@@ -33,7 +33,7 @@ export function TopbarUserMenu({ name, email, rol, initials }: Props) {
  <div className="absolute right-0 top-full mt-1.5 w-52 rounded-xl border bg-popover shadow-lg overflow-hidden z-50"> {/* Info */}
  <div className="px-3 py-2.5 border-b bg-muted/30"> <p className="text-xs font-semibold text-foreground truncate">{name}</p> <p className="text-[11px] text-muted-foreground truncate">{email}</p> </div> {/* Acciones */}
  <div className="p-1"> <button
- onClick={() => signOut({ callbackUrl: "/login" })}
+ onClick={async () => { await signOut({ redirect: false }); window.location.href = "/login"; }}
  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors font-medium" > <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"> <path d="M7 17H4a1 1 0 01-1-1V4a1 1 0 011-1h3M13 14l3-3-3-3M16 11H7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/> </svg> Cerrar sesión
  </button> </div> </div> )}
  </div> );

@@ -170,7 +170,7 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
                   Perfil y configuración
                 </Link>
                 <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={async () => { await signOut({ redirect: false }); window.location.href = "/login"; }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={{ color: "var(--destructive)" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "color-mix(in oklch, var(--destructive) 10%, transparent)"; }}

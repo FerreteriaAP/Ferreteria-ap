@@ -18,6 +18,12 @@ export function TemaQuickBtn({ temaActual }: { temaActual: string }) {
   const [pending, startTransition] = useTransition();
   const ref = useRef<HTMLDivElement>(null);
 
+  // Aplica el tema del usuario (cookie) después de que ThemeProvider aplique el tema global de DB
+  useEffect(() => {
+    document.documentElement.setAttribute("data-ap-theme", temaActual);
+    setSelected(temaActual);
+  }, [temaActual]);
+
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {

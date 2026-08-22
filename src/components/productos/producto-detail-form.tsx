@@ -18,6 +18,7 @@ const FormSchema = z.object({
   esFraccionable:    z.boolean().default(false),
   unidadFraccion:    z.string().optional(),
   factorFraccion:    z.coerce.number().positive().optional(),
+  precioFraccion:    z.coerce.number().min(0).optional(),
   exentoItbis:       z.boolean().default(false),
   costoUltimo:       z.coerce.number().min(0).default(0),
   porcentajeGanancia:z.coerce.number().min(0).default(30),
@@ -386,6 +387,10 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
                   <div className="space-y-1">
                     <label className={LABEL}>Factor de conversión</label>
                     <input className={INPUT + " font-mono text-right"} type="number" step="0.0001" placeholder="100" {...form.register("factorFraccion")} />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <label className={LABEL}>Precio de venta por fracción (RD$) <span className="text-muted-foreground font-normal normal-case tracking-normal">— opcional, sobreescribe el auto-calculado</span></label>
+                    <input className={INPUT + " font-mono text-right"} type="number" step="0.01" min="0" placeholder="Auto-calculado si se deja vacío" {...form.register("precioFraccion")} />
                   </div>
                 </div>
               )}
