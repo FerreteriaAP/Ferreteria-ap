@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { auth } from "@/lib/auth";
 import { getProductos, getCategorias } from "@/actions/productos";
 import { buttonVariants } from "@/components/ui/button";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,8 +21,14 @@ interface PageProps {
   }>;
 }
 
+const ROLES_SOLO_LECTURA = ["VENDEDOR", "CAJA"];
+
 export default async function ProductosPage({ searchParams }: PageProps) {
   const params = await searchParams;
+  const session = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rol = ((session?.user) as any)?.rol ?? "";
+  const puedeCrear = !ROLES_SOLO_LECTURA.includes(rol);
   const busqueda = params.q ?? "";
   const categoriaId = params.categoria ?? "";
   const stockBajo = params.stockBajo === "1";
@@ -51,9 +58,11 @@ export default async function ProductosPage({ searchParams }: PageProps) {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/productos/nuevo" className={buttonVariants()}>
-            + Nuevo producto
-          </Link>
+          {puedeCrear && (
+            <Link href="/productos/nuevo" className={buttonVariants()}>
+              + Nuevo producto
+            </Link>
+          )}
           <ViewToggle
             vista={vista}
             listaHref={`/productos?q=${busqueda}${categoriaId ? `&categoria=${categoriaId}` : ""}${stockBajo ? "&stockBajo=1" : ""}`}

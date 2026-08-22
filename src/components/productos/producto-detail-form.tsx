@@ -47,9 +47,10 @@ interface Props {
   productoId:    string;
   categorias:    Categoria[];
   defaultValues: Partial<FormValues>;
+  soloLectura?:  boolean;
 }
 
-export function ProductoDetailForm({ productoId, categorias, defaultValues }: Props) {
+export function ProductoDetailForm({ productoId, categorias, defaultValues, soloLectura = false }: Props) {
   const [tab, setTab]           = useState<TabKey>("general");
   const [isPending, start]      = useTransition();
   const [savedOk, setSavedOk]   = useState(false);
@@ -109,10 +110,23 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4">
+    <form onSubmit={soloLectura ? (e) => e.preventDefault() : form.handleSubmit(onSubmit as any)} className="space-y-4">
+
+      {/* ── Aviso solo lectura ── */}
+      {soloLectura && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-medium"
+          style={{
+            backgroundColor: "color-mix(in oklch, #ca8a04 8%, var(--card))",
+            borderColor: "color-mix(in oklch, #ca8a04 30%, var(--border))",
+            color: "#ca8a04",
+          }}
+        >
+          🔒 Solo lectura — no tienes permiso para modificar productos
+        </div>
+      )}
 
       {/* ── Barra sticky de guardado ── */}
-      <div
+      {!soloLectura && <div
         className={cn(
           "sticky top-0 z-20 flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border transition-all",
           isDirty ? "shadow-md" : "opacity-55",
@@ -156,7 +170,10 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
             {isPending ? "Guardando…" : "Guardar cambios"}
           </button>
         </div>
-      </div>
+      </div>}
+
+      {/* ── Tabs + contenido — fieldset bloquea todos los inputs cuando soloLectura ── */}
+      <fieldset disabled={soloLectura} className="contents">
 
       {/* ── Tabs ── */}
       <div className="flex gap-1 p-1 rounded-xl"
@@ -410,6 +427,7 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues }: Pr
         )}
 
       </div>
+      </fieldset>
     </form>
   );
 }

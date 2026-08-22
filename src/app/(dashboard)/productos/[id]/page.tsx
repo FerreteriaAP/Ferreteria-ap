@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
 import { getProducto, getCategorias } from "@/actions/productos";
 import { Badge } from "@/components/ui/badge";
 import { ProductoDetailForm } from "@/components/productos/producto-detail-form";
 import { cn } from "@/lib/utils";
+
+const ROLES_SOLO_LECTURA = ["VENDEDOR", "CAJA"];
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -11,6 +14,11 @@ interface PageProps {
 
 export default async function ProductoPage({ params }: PageProps) {
   const { id } = await params;
+  const session = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rol = ((session?.user) as any)?.rol ?? "";
+  const soloLectura = ROLES_SOLO_LECTURA.includes(rol);
+
   const [producto, categorias] = await Promise.all([getProducto(id), getCategorias()]);
 
   if (!producto) notFound();
@@ -99,6 +107,7 @@ export default async function ProductoPage({ params }: PageProps) {
         productoId={id}
         categorias={categorias}
         defaultValues={defaultValues}
+        soloLectura={soloLectura}
       />
     </div>
   );

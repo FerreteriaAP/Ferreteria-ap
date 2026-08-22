@@ -1,8 +1,17 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { getCategorias, siguienteCodigoProducto } from "@/actions/productos";
 import { ProductoForm } from "@/components/productos/producto-form";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
+const ROLES_SIN_PERMISO = ["VENDEDOR", "CAJA"];
+
 export default async function NuevoProductoPage() {
+ const session = await auth();
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ const rol = ((session?.user) as any)?.rol ?? "";
+ if (ROLES_SIN_PERMISO.includes(rol)) redirect("/productos");
+
  const [categorias, nextCodigo] = await Promise.all([
  getCategorias(),
  siguienteCodigoProducto(),
