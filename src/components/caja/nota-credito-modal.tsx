@@ -117,9 +117,9 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-background rounded-2xl border shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div className="bg-background rounded-2xl border shadow-2xl w-full max-w-lg flex flex-col" style={{ maxHeight: "90vh" }}>
 
-        {/* Header — igual que los otros modales */}
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 shrink-0">
           <div className="flex items-center gap-2.5">
             <div
@@ -133,54 +133,57 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl">✕</button>
         </div>
 
-        {/* Contenido scrollable */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-5 pb-5 space-y-4">
-
-          {/* Buscador de factura */}
-          <Field label="Factura original">
-            <div className="relative">
-              <input
-                autoFocus
-                type="text"
-                value={query}
-                onChange={e => handleQuery(e.target.value)}
-                placeholder="Número de factura o nombre del cliente…"
-                className={INPUT}
-              />
-              {buscando && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
-                  buscando…
-                </span>
-              )}
-              {resultados.length > 0 && (
-                <div className="absolute z-50 top-full mt-1 w-full bg-popover border rounded-xl shadow-xl overflow-hidden max-h-48 overflow-y-auto">
-                  {resultados.map(f => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => seleccionarFactura(f)}
-                      className="w-full text-left px-3 py-2.5 hover:bg-accent transition-colors border-b last:border-0"
-                    >
-                      <div className="flex justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-mono font-bold" style={{ color: "var(--accent-hex)" }}>{f.numero}</p>
-                          <p className="text-xs">{f.cliente.nombre}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-sm font-mono font-bold">{fmt(Number(f.total))}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {new Date(f.fechaEmision).toLocaleDateString("es-DO")}
-                          </p>
-                        </div>
+        {/* Buscador — FUERA del scroll para que el dropdown no quede cortado */}
+        <div className="px-5 shrink-0">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
+            Factura original
+          </label>
+          <div className="relative">
+            <input
+              autoFocus
+              type="text"
+              value={query}
+              onChange={e => handleQuery(e.target.value)}
+              placeholder="Número de factura o nombre del cliente…"
+              className={INPUT}
+            />
+            {buscando && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
+                buscando…
+              </span>
+            )}
+            {resultados.length > 0 && (
+              <div className="absolute z-50 top-full mt-1 w-full bg-popover border rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto">
+                {resultados.map(f => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => seleccionarFactura(f)}
+                    className="w-full text-left px-3 py-2.5 hover:bg-accent transition-colors border-b last:border-0"
+                  >
+                    <div className="flex justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-mono font-bold" style={{ color: "var(--accent-hex)" }}>{f.numero}</p>
+                        <p className="text-xs font-medium">{f.cliente.nombre}</p>
+                        {f.cliente.rnc && <p className="text-xs text-muted-foreground">{f.cliente.rnc}</p>}
                       </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Field>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-mono font-bold">{fmt(Number(f.total))}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {new Date(f.fechaEmision).toLocaleDateString("es-DO")}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
-          {/* Artículos a devolver */}
+        {/* Contenido scrollable — solo cuando hay factura seleccionada */}
+        <form id="nc-form" onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-5 pt-4 space-y-4">
+
           {factura && items.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -224,9 +227,11 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
             </div>
           )}
 
-          {/* Motivo */}
           {factura && (
-            <Field label="Motivo de la devolución *">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
+                Motivo de la devolución *
+              </label>
               <input
                 value={motivo}
                 onChange={e => setMotivo(e.target.value)}
@@ -234,22 +239,23 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
                 className={INPUT}
                 required
               />
-            </Field>
+            </div>
           )}
 
-          {/* Notas */}
           {factura && (
-            <Field label="Notas (opcional)">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
+                Notas (opcional)
+              </label>
               <input
                 value={notas}
                 onChange={e => setNotas(e.target.value)}
                 placeholder="Observaciones adicionales…"
                 className={INPUT}
               />
-            </Field>
+            </div>
           )}
 
-          {/* Info saldo */}
           {factura && (
             <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 px-3 py-2.5 text-xs text-blue-800 dark:text-blue-300">
               El crédito se sumará al <strong>saldo a favor</strong> de {factura.cliente.nombre}.
@@ -263,43 +269,36 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
             </div>
           )}
 
-          {/* Acciones */}
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending || !factura || totalNC <= 0}
-              className={cn(
-                "flex-1 h-10 rounded-xl text-sm font-bold transition-all",
-                isPending || !factura || totalNC <= 0
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "text-white"
-              )}
-              style={!(isPending || !factura || totalNC <= 0) ? { backgroundColor: "var(--accent-hex)" } : undefined}
-            >
-              {isPending ? "Generando…" : `Generar nota de crédito${totalNC > 0 ? ` (${fmt(totalNC)})` : ""}`}
-            </button>
-          </div>
-
+          {/* Espaciador para que el último campo no quede pegado al footer */}
+          <div className="h-1" />
         </form>
-      </div>
-    </div>
-  );
-}
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
-        {label}
-      </label>
-      {children}
+        {/* Footer con botones — siempre fijo abajo */}
+        <div className="px-5 pb-5 pt-3 shrink-0 flex gap-3 border-t">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            form="nc-form"
+            disabled={isPending || !factura || totalNC <= 0}
+            className={cn(
+              "flex-1 h-10 rounded-xl text-sm font-bold transition-all",
+              isPending || !factura || totalNC <= 0
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : "text-white"
+            )}
+            style={!(isPending || !factura || totalNC <= 0) ? { backgroundColor: "var(--accent-hex)" } : undefined}
+          >
+            {isPending ? "Generando…" : `Generar nota de crédito${totalNC > 0 ? ` (${fmt(totalNC)})` : ""}`}
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 }
