@@ -96,7 +96,7 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
  const [error, setError] = useState<string | null>(null);
 
  const [lineasPago, setLineasPago] = useState<{ metodo: MetodoPago; monto: string; ref: string }[]>([
-  { metodo: "EFECTIVO", monto: "", ref: "" },
+  { metodo: "EFECTIVO", monto: factura.total.toFixed(2), ref: "" },
  ]);
 
  // NC
@@ -333,6 +333,7 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
         <input
          type="number" min="0" step="0.01" value={l.monto}
          onChange={e => updateLinea(i, "monto", e.target.value)}
+         onFocus={e => e.currentTarget.select()}
          placeholder="Monto recibido…" autoFocus={i === 0}
          className="flex-1 h-10 rounded-lg border bg-background px-3 text-sm font-mono text-right focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground/50"
         />
@@ -863,7 +864,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
          className={cn(
           "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
           metodo === m.value
-           ? "border-orange-500 bg-orange-500 text-white font-semibold"
+           ? "border-orange-400 text-orange-500 font-semibold"
            : "border-border hover:bg-accent text-muted-foreground hover:text-foreground"
          )}>
          {m.label}

@@ -209,6 +209,7 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
                         max={i.cantidadMax}
                         value={i.cantidad}
                         onChange={e => setItemCantidad(i.productoId, e.target.value)}
+                        onFocus={e => e.currentTarget.select()}
                         placeholder="0"
                         className="w-20 h-8 rounded-lg border bg-background px-2 text-sm font-mono text-right focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
@@ -292,7 +293,7 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
                 ? "bg-muted text-muted-foreground cursor-not-allowed"
                 : "text-white"
             )}
-            style={!(isPending || !factura || totalNC <= 0) ? { backgroundColor: "var(--accent-hex)" } : undefined}
+            style={!(isPending || !factura || totalNC <= 0) ? { backgroundColor: "#a855f7" } : undefined}
           >
             {isPending ? "Generando…" : `Generar nota de crédito${totalNC > 0 ? ` (${fmt(totalNC)})` : ""}`}
           </button>

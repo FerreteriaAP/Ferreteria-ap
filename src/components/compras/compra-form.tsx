@@ -623,6 +623,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                           <TableCell>
                             <input type="number" step="0.0001" min="0.0001"
                               className="w-full h-8 rounded-lg border bg-background px-2 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40"
+                              onFocus={e => e.target.select()}
                               {...form.register(`detalles.${i}.cantidad`)} />
                           </TableCell>
                           <TableCell>
@@ -630,6 +631,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">RD$</span>
                               <input type="number" step="0.01" min="0"
                                 className="w-full h-8 rounded-lg border bg-background pl-7 pr-2 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40"
+                                onFocus={e => e.target.select()}
                                 {...form.register(`detalles.${i}.costo`, {
                                   onChange: e => {
                                     const v = Number(e.target.value);

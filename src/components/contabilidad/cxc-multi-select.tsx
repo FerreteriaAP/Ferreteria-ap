@@ -123,7 +123,7 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  className={cn(
  "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
  metodo === m.value
- ? "border-orange-500 bg-orange-500 text-white font-semibold"
+ ? "border-orange-400 text-orange-500 font-semibold"
  : "border-border hover:bg-accent text-muted-foreground hover:text-foreground" )}
  > {m.label}
  </button> ))}
