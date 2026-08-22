@@ -96,7 +96,7 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
  const [error, setError] = useState<string | null>(null);
 
  const [lineasPago, setLineasPago] = useState<{ metodo: MetodoPago; monto: string; ref: string }[]>([
-  { metodo: "EFECTIVO", monto: factura.total.toFixed(2), ref: "" },
+  { metodo: "EFECTIVO", monto: "", ref: "" },
  ]);
 
  // NC
