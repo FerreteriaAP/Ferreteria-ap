@@ -115,10 +115,10 @@ function ModalConduceParcial({ ventaId, detalles, onClose, onOk }: ModalParcialP
  type="button" onClick={handleSubmit}
  disabled={isPending}
  className={cn(
- "px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium",
- "hover:bg-primary/90 transition-colors",
+ "px-4 py-2 rounded-lg text-white text-sm font-bold transition-colors",
  isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Creando…" : " Crear conduce"}
+ style={{ backgroundColor: "var(--accent-hex)", boxShadow: "0 2px 8px color-mix(in oklch, var(--accent-hex) 35%, transparent)" }}
+ > {isPending ? "Creando…" : "🚚 Crear conduce"}
  </button> </div> </div> </div> </div> );
 }
 

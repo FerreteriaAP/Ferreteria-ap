@@ -117,7 +117,9 @@ export default async function DashboardPage() {
     ? TODOS_MODULOS
     : TODOS_MODULOS.filter(m => allowed.includes(m.key));
 
-  const totalAlertas = stats.cxcVencidas + stats.cxpVencidas + stats.stockBajo;
+  const verCxC   = ["ADMINISTRADOR", "ASISTENTE_ADMINISTRATIVO"].includes(rol);
+  const verStock = ["ADMINISTRADOR", "ASISTENTE_ADMINISTRATIVO", "VENDEDOR"].includes(rol);
+  const totalAlertas = (verCxC ? stats.cxcVencidas + stats.cxpVencidas : 0) + (verStock ? stats.stockBajo : 0);
 
   return (
     <div className="flex flex-col gap-6 max-w-[960px] mx-auto w-full pt-16">

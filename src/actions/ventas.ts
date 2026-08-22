@@ -104,7 +104,7 @@ export async function getVenta(id: string) {
  include: { producto: { select: { codigo: true, nombre: true, unidadMedida: true } } },
  orderBy: { orden: "asc" },
  },
- conduces: { orderBy: { createdAt: "desc" } },
+ conduces: { orderBy: { createdAt: "asc" } },
  pagosRecibidos: { orderBy: { fecha: "desc" } },
  cuentasPorCobrar: { orderBy: { fechaVencimiento: "asc" } },
  },

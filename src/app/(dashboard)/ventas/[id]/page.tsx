@@ -510,6 +510,13 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                   conduceRecibido={conduceRecibido}
                   todosConducesEntregados={todosEntregados}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  conduces={venta.conduces.map((c: any) => ({
+                    id:               c.id,
+                    numero:           c.numero,
+                    clienteRecibio:   c.clienteRecibio,
+                    detallesRecepcion: c.detallesRecepcion,
+                  }))}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   detalles={venta.detalles.map((d: any) => ({
                     productoId: d.productoId,
                     nombre:     d.descripcion || d.producto.nombre,
