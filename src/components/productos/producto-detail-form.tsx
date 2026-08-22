@@ -112,19 +112,6 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <form onSubmit={soloLectura ? (e) => e.preventDefault() : form.handleSubmit(onSubmit as any)} className="space-y-4">
 
-      {/* ── Aviso solo lectura ── */}
-      {soloLectura && (
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-medium"
-          style={{
-            backgroundColor: "color-mix(in oklch, #ca8a04 8%, var(--card))",
-            borderColor: "color-mix(in oklch, #ca8a04 30%, var(--border))",
-            color: "#ca8a04",
-          }}
-        >
-          🔒 Solo lectura — no tienes permiso para modificar productos
-        </div>
-      )}
-
       {/* ── Barra sticky de guardado ── */}
       {!soloLectura && <div
         className={cn(
@@ -172,9 +159,6 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
         </div>
       </div>}
 
-      {/* ── Tabs + contenido — fieldset bloquea todos los inputs cuando soloLectura ── */}
-      <fieldset disabled={soloLectura} className="contents">
-
       {/* ── Tabs ── */}
       <div className="flex gap-1 p-1 rounded-xl"
         style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 6%, var(--card))" }}>
@@ -196,7 +180,10 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
         ))}
       </div>
 
-      {/* ── Contenido del tab ── */}
+      {/* ── Contenido del tab — fieldset deshabilita inputs en modo solo lectura ── */}
+      <fieldset disabled={soloLectura} className="contents">
+
+      {/* ── Contenido ── */}
       <div className="rounded-xl border p-5 space-y-5 min-h-[260px]"
         style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}>
 
