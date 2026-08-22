@@ -393,8 +393,10 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
                     <input className={INPUT + " font-mono text-right"} type="number" step="0.0001" placeholder="100" {...form.register("factorFraccion")} />
                   </div>
                   <div className="space-y-1 col-span-2">
-                    <label className={LABEL}>Precio de venta por fracción (RD$) <span className="text-muted-foreground font-normal normal-case tracking-normal">— opcional, sobreescribe el auto-calculado</span></label>
-                    <input className={INPUT + " font-mono text-right"} type="number" step="0.01" min="0" placeholder="Auto-calculado si se deja vacío" {...form.register("precioFraccion")} />
+                    <label className={LABEL}>Precio por fracción con ITBIS (RD$) <span className="text-muted-foreground font-normal normal-case tracking-normal">— opcional, sobreescribe el auto-calculado</span></label>
+                    <input className={INPUT + " font-mono text-right"} type="number" step="0.01" min="0" placeholder="Auto-calculado si se deja vacío"
+                      {...form.register("precioFraccion", { setValueAs: v => v === "" || v == null ? undefined : parseFloat(Number(v).toFixed(2)) })} />
+                    <p className="text-[10px] text-muted-foreground">Ingresa el precio final que paga el cliente (ITBIS ya incluido)</p>
                   </div>
                 </div>
               )}

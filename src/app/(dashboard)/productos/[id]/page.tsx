@@ -37,6 +37,7 @@ export default async function ProductoPage({ params }: PageProps) {
     esFraccionable: producto.esFraccionable,
     unidadFraccion: producto.unidadFraccion ?? "",
     factorFraccion: producto.factorFraccion ? Number(producto.factorFraccion) : undefined,
+    precioFraccion: producto.precioFraccion ? Number(producto.precioFraccion) : undefined,
     exentoItbis: producto.exentoItbis ?? false,
     costoUltimo: Number(producto.costoUltimo),
     porcentajeGanancia: Number(producto.porcentajeGanancia),
