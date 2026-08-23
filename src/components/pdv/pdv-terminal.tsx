@@ -313,8 +313,8 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
         <button
           onClick={continuar}
           disabled={isPending}
-          className="mt-1 px-8 py-3 rounded-full text-white text-base font-bold active:scale-95 transition-all shadow-md disabled:opacity-60"
-          style={{ backgroundColor: "#16a34a" }}
+          className="mt-1 px-8 py-3 rounded-lg text-base font-bold active:scale-95 transition-all disabled:opacity-60"
+          style={{ color: "#16a34a", border: "2px solid #16a34a", backgroundColor: "transparent" }}
         >
           {isPending ? "Cargando…" : "Continuar"}
         </button>
