@@ -986,7 +986,7 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
      </div>
     ) : (
      <div className="divide-y">
-      {facturas.map(f => (
+      {[...facturas].reverse().map(f => (
        <div key={f.id} className="px-5 py-4 flex items-start gap-4 hover:bg-muted/20 transition-colors">
         <div className="flex-1 min-w-0">
          <div className="flex items-center gap-2 flex-wrap">
