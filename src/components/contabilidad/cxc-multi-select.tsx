@@ -201,7 +201,7 @@ export function CxCMultiSelect({ grupos }: Props) {
  return (
  <>
  {seleccionadas.size > 0 && pillSlot && createPortal(
- <div className="flex items-center gap-3 bg-background border shadow-md rounded-xl px-4 py-2 w-full">
+ <div className="flex items-center gap-3 bg-background border shadow-md rounded-xl px-4 py-2">
  <span className="text-xs font-medium text-muted-foreground shrink-0">
  {seleccionadas.size} factura{seleccionadas.size !== 1 ? "s" : ""}
  </span>

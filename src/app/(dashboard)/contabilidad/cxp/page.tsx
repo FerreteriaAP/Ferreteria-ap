@@ -76,7 +76,7 @@ export default async function CxPContabilidadPage({ searchParams }: PageProps) {
           {mostrarTodas && <input type="hidden" name="todas" value="1" />}
           <Input name="q" defaultValue={busqueda} placeholder="Buscar suplidor o número de compra..." className="w-[280px]" />
         </form>
-        <div id="cxp-selection-bar" className="flex-1 min-w-0" />
+        <div id="cxp-selection-bar" className="flex-1 flex justify-center" />
       </div>
 
       {/* Lista */}
