@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { TemaSelector } from "@/components/configuracion/tema-selector";
-import { EmpresaForm } from "@/components/configuracion/empresa-form";
+import { EmpresaForm, CuentasBancariasPanel } from "@/components/configuracion/empresa-form";
 import { UsuariosPanel } from "@/components/configuracion/usuarios-panel";
 import { getEmpresaConfig, getCuentasBancarias } from "@/actions/empresa";
 import { getUsuarios } from "@/actions/usuarios";
@@ -56,13 +56,14 @@ export default async function ConfiguracionPage() {
  className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(var(--primary-rgb, 244 119 23) / 0.12)" }}
  > <Building2 size={16} style={{ color: "var(--primary)" }} /> </div> <div> <h2 className="font-semibold text-sm" style={{ color: "var(--foreground)" }}> Datos de la empresa
  </h2> <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}> Información que aparece en facturas, conduces, nóminas y reportes
- </p> </div> </div> <EmpresaForm
- datos={datosEmpresa}
- cuentas={cuentasBancarias.map(c => ({
- ...c,
- saldo: Number(c.saldo),
- }))}
- /> </div> )}
+ </p> </div> </div> <EmpresaForm datos={datosEmpresa} />
+        <div className="border-t mt-6 pt-6">
+          <CuentasBancariasPanel
+            cuentasIniciales={cuentasBancarias.map(c => ({ ...c, saldo: Number(c.saldo) }))}
+          />
+        </div>
+      </div>
+    )}
 
  {/* Info del sistema */}
  <div
