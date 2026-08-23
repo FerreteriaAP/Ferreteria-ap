@@ -57,6 +57,7 @@ interface Props {
  turnoId: string;
  facturas: FacturaPendiente[];
  empleados: Empleado[];
+ consumidorFinalId: string;
 }
 
 // Helpers
@@ -86,9 +87,10 @@ const BILLETES = [100, 200, 500, 1000, 2000];
 
 type NCInfo = { id: string; numero: string; monto: number; montoRestante: number; ventaNumero: string; motivo: string };
 
-function PagoModal({ factura, turnoId, onClose, onOk }: {
+function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
  factura: FacturaPendiente;
  turnoId: string;
+ consumidorFinalId: string;
  onClose: () => void;
  onOk: () => void;
 }) {
@@ -127,6 +129,20 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
  const maxMontoNC = ncInfo ? Math.min(ncInfo.montoRestante, factura.total) : 0;
  const totalRequerido = Math.max(0, factura.total - montoNC);
 
+ // Crédito — solo disponible para clientes registrados (no Consumidor Final)
+ const esConsumidorFinal = factura.cliente.id === consumidorFinalId;
+ const metodosFiltrados = METODOS.filter(m => !(m.id === "CREDITO" && esConsumidorFinal));
+
+ // Fecha vencimiento crédito — default: 30 días desde hoy
+ const hoy = new Date();
+ const defaultVencimiento = new Date(hoy);
+ defaultVencimiento.setDate(defaultVencimiento.getDate() + 30);
+ const [vencimientoCredito, setVencimientoCredito] = useState(
+  defaultVencimiento.toISOString().split("T")[0]
+ );
+
+ const hayCredito = lineasPago.some(l => l.metodo === "CREDITO");
+
  const totalIngresado = lineasPago.reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
  const otrosIngresados = lineasPago.filter(l => l.metodo !== "EFECTIVO").reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
  const efectivoNecesario = Math.max(0, totalRequerido - otrosIngresados);
@@ -137,7 +153,16 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
 
  const agregarLinea = () => setLineasPago(prev => [...prev, { metodo: "TARJETA", monto: "", ref: "" }]);
  const quitarLinea = (i: number) => { if (lineasPago.length === 1) return; setLineasPago(prev => prev.filter((_, idx) => idx !== i)); };
- const updateLinea = (i: number, campo: "metodo" | "monto" | "ref", val: string) => setLineasPago(prev => prev.map((l, idx) => idx === i ? { ...l, [campo]: val } : l));
+ const updateLinea = (i: number, campo: "metodo" | "monto" | "ref", val: string) => {
+  setLineasPago(prev => {
+   const updated = prev.map((l, idx) => idx === i ? { ...l, [campo]: val } : l);
+   // Si se selecciona CREDITO como único método, auto-llenar con totalRequerido
+   if (campo === "metodo" && val === "CREDITO" && prev.length === 1) {
+    return updated.map((l, idx) => idx === i ? { ...l, monto: totalRequerido.toFixed(2) } : l);
+   }
+   return updated;
+  });
+ };
 
  const hayLineaEfectivo  = lineasPago.length === 1 && lineasPago[0].metodo === "EFECTIVO";
  const hayLineaOtro      = lineasPago.length === 1 && lineasPago[0].metodo !== "EFECTIVO" && lineasPago[0].metodo !== "CREDITO";
@@ -163,7 +188,10 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
   const ncAplicacion = ncInfo && montoNC > 0 ? { ncId: ncInfo.id, montoAplicar: montoNC } : undefined;
 
   startTransition(async () => {
-   const res = await procesarPagoCaja(factura.id, pagos, turnoId, { ncAplicacion });
+   const res = await procesarPagoCaja(factura.id, pagos, turnoId, {
+    ncAplicacion,
+    vencimientoCredito: hayCredito ? vencimientoCredito : undefined,
+   });
    if ("error" in res && res.error) { setError(res.error); return; }
    onOk();
   });
@@ -329,7 +357,7 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
          onChange={e => updateLinea(i, "metodo", e.target.value)}
          className="h-10 rounded-lg border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary shrink-0"
         >
-         {METODOS.map(m => <option key={m.id} value={m.id}>{m.icon} {m.label}</option>)}
+         {metodosFiltrados.map(m => <option key={m.id} value={m.id}>{m.icon} {m.label}</option>)}
         </select>
         <input
          type="number" min="0" step="0.01" value={l.monto}
@@ -397,6 +425,24 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
        </div>
       )}
      </div>
+
+     {/* Vencimiento crédito */}
+     {hayCredito && (
+      <div className="rounded-xl border p-3 space-y-2"
+       style={{ backgroundColor: "color-mix(in oklch, #2563eb 6%, var(--card))", borderColor: "color-mix(in oklch, #2563eb 25%, var(--border))" }}>
+       <p className="text-xs font-semibold" style={{ color: "#2563eb" }}>📋 Crédito — fecha de vencimiento</p>
+       <input
+        type="date"
+        value={vencimientoCredito}
+        min={new Date().toISOString().split("T")[0]}
+        onChange={e => setVencimientoCredito(e.target.value)}
+        className="w-full h-9 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+       />
+       <p className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>
+        La factura quedará pendiente en CxC y el cliente podrá pagar en esa fecha o antes.
+       </p>
+      </div>
+     )}
 
      {/* Resumen compacto */}
      <div className="rounded-xl border p-3 space-y-1 text-sm bg-muted/20">
@@ -923,7 +969,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
 
 type ModalType = "pago" | "gasto" | "compra" | "prestamo" | "cobro_cxc" | "nota_credito" | null;
 
-export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }: Props) {
+export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, consumidorFinalId }: Props) {
  const router = useRouter();
  const [isPending, startTransition] = useTransition();
 
@@ -1064,6 +1110,7 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
    {modal === "pago" && facturaSeleccionada && (
     <PagoModal
      factura={facturaSeleccionada} turnoId={turnoId}
+     consumidorFinalId={consumidorFinalId}
      onClose={() => { setModal(null); setFacturaSeleccionada(null); }}
      onOk={handlePagoOk}
     />

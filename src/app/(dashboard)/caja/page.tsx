@@ -1,4 +1,5 @@
 import { getTurnoActivo, getFacturasPendientesCaja, getEmpleadosActivos } from "@/actions/caja";
+import { getConsumidorFinal } from "@/actions/pdv";
 import { AbrirTurnoForm } from "@/components/caja/abrir-turno-form";
 import { CajaDashboard } from "@/components/caja/caja-dashboard";
 import Link from "next/link";
@@ -19,9 +20,9 @@ function fmtDate(d: Date | string) {
 export default async function CajaPage() {
   const turnoActivo = await getTurnoActivo();
 
-  const [facturas, empleados] = turnoActivo
-    ? await Promise.all([getFacturasPendientesCaja(), getEmpleadosActivos()])
-    : [[], []];
+  const [facturas, empleados, consumidorFinal] = turnoActivo
+    ? await Promise.all([getFacturasPendientesCaja(), getEmpleadosActivos(), getConsumidorFinal()])
+    : [[], [], await getConsumidorFinal()];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
@@ -110,6 +111,7 @@ export default async function CajaPage() {
               })),
             }))}
             empleados={empleados}
+            consumidorFinalId={consumidorFinal.id}
           />
         </>
       ) : (

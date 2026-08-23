@@ -267,7 +267,7 @@ export async function procesarPagoCaja(
  ventaId: string,
  pagos: PagoInput[],
  turnoId: string,
- opciones?: { ncf?: string; ncAplicacion?: { ncId: string; montoAplicar: number } }
+ opciones?: { ncf?: string; ncAplicacion?: { ncId: string; montoAplicar: number }; vencimientoCredito?: string }
 ) {
  const userId = await getUserId();
  if (!userId) return { error: "No autenticado" };
@@ -298,15 +298,21 @@ export async function procesarPagoCaja(
  // Número de factura
  const numFactura = await siguienteNumeroFactura();
 
- // Días de crédito según condición
+ // Fecha de vencimiento para crédito
+ // Prioridad: (1) fecha enviada por caja, (2) días en condición de crédito de la venta, (3) 30 días por defecto
  let fechaVencimiento: Date | undefined;
  let diasCredito: number | undefined;
  if (montoCredito > 0) {
- diasCredito = venta.credito === "DIAS_30" ? 30 : venta.credito === "DIAS_45" ? 45 : venta.credito === "DIAS_60" ? 60 : 0;
- if (diasCredito > 0) {
- fechaVencimiento = new Date();
- fechaVencimiento.setDate(fechaVencimiento.getDate() + diasCredito);
+   if (opciones?.vencimientoCredito) {
+     fechaVencimiento = new Date(opciones.vencimientoCredito);
+   } else {
+     diasCredito = venta.credito === "DIAS_10" ? 10 : venta.credito === "DIAS_15" ? 15 : venta.credito === "DIAS_30" ? 30 : venta.credito === "DIAS_45" ? 45 : venta.credito === "DIAS_60" ? 60 : venta.credito === "DIAS_90" ? 90 : 30;
+     fechaVencimiento = new Date();
+     fechaVencimiento.setDate(fechaVencimiento.getDate() + diasCredito);
+   }
  }
+ if (montoCredito > 0 && !venta.clienteId) {
+   return { error: "El cliente debe estar registrado para ventas a crédito" };
  }
 
  try {
@@ -369,12 +375,12 @@ export async function procesarPagoCaja(
  });
  }
 
- // 4. Crear CxC si hay crédito
+ // 4. Crear CxC si hay crédito (fechaVencimiento siempre definida cuando montoCredito > 0)
  if (montoCredito > 0 && fechaVencimiento) {
  await tx.cuentaPorCobrar.create({
  data: {
  ventaId,
- clienteId: venta.clienteId,
+ clienteId: venta.clienteId!,
  monto: montoCredito,
  montoPagado: 0,
  saldo: montoCredito,
