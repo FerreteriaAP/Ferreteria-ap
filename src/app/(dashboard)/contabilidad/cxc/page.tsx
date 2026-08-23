@@ -140,15 +140,15 @@ export default async function CxCContabilidadPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Buscador */}
-      <form method="GET">
-        {mostrarTodas && <input type="hidden" name="todas" value="1" />}
-        <Input name="q" defaultValue={busqueda} placeholder="Buscar cliente o número de factura..." className="max-w-sm" />
-      </form>
-
-      {/* Slot centrado para pill de selección */}
-      <div className="flex justify-center">
-        <div id="cxc-selection-bar" className="w-full max-w-sm" />
+      {/* Buscador + pill de selección (agrupados, gap reducido) */}
+      <div className="space-y-2">
+        <form method="GET">
+          {mostrarTodas && <input type="hidden" name="todas" value="1" />}
+          <Input name="q" defaultValue={busqueda} placeholder="Buscar cliente o número de factura..." className="max-w-sm" />
+        </form>
+        <div className="flex justify-center">
+          <div id="cxc-selection-bar" className="w-full max-w-sm" />
+        </div>
       </div>
 
       {/* Lista */}
