@@ -278,9 +278,8 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
   const continuar = () => {
     startTransition(async () => {
       await clearVendedorActivo();
-      // refresh invalida caché del server component para que lea la cookie borrada
-      router.refresh();
-      router.push("/pdv");
+      // Recarga completa para que el server component re-lea la cookie borrada
+      window.location.href = "/pdv";
     });
   };
 
@@ -312,7 +311,8 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
         <button
           onClick={continuar}
           disabled={isPending}
-          className="mt-1 px-8 py-3 rounded-xl bg-primary text-primary-foreground text-base font-bold hover:bg-primary/90 active:scale-95 transition-all shadow-md disabled:opacity-60"
+          className="mt-1 px-8 py-3 rounded-full text-white text-base font-bold active:scale-95 transition-all shadow-md disabled:opacity-60"
+          style={{ backgroundColor: "#16a34a" }}
         >
           {isPending ? "Cargando…" : "Continuar"}
         </button>

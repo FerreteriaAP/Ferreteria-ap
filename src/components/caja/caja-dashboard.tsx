@@ -906,6 +906,12 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
  const [modal, setModal] = useState<ModalType>(null);
  const [facturaSeleccionada, setFacturaSeleccionada] = useState<FacturaPendiente | null>(null);
 
+ // Sincronizar facturas cuando el servidor devuelve datos nuevos (después de router.refresh)
+ useEffect(() => {
+  if (!modal) setFacturas(initialFacturas);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [initialFacturas]);
+
  // Auto-refresh cada 8 s para recibir nuevas facturas del PDV sin recargar manualmente
  useEffect(() => {
   const id = setInterval(() => {
