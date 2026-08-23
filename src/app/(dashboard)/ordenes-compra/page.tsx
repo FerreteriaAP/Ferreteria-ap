@@ -31,7 +31,9 @@ export default async function OrdenesCompraPage({
  return (
  <div className="space-y-5"> {/* Encabezado */}
  <div className="flex items-center justify-between gap-4"> <div> <h1 className="text-2xl font-bold">Órdenes de compra</h1> <p className="text-sm text-muted-foreground mt-0.5">{total} órdenes registradas</p> </div> <Link
- href="/ordenes-compra/nueva" className={cn(buttonVariants())}
+ href="/ordenes-compra/nueva"
+ className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-orange-500/10"
+ style={{ borderColor: "#f97316", color: "#f97316" }}
  > + Nueva orden
  </Link> </div> {/* Filtros */}
  <form method="get" className="flex flex-wrap gap-2"> <input
