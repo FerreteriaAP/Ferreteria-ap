@@ -138,7 +138,7 @@ export function OcForm({ suplidores }: { suplidores: Suplidor[] }) {
       )}
 
       {/* ─── Datos de la orden ─────────────────────────────────────────── */}
-      <div className="rounded-2xl border p-5 space-y-4" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 3%, var(--card))" }}>
+      <div className="rounded-2xl border p-5 space-y-4" style={{ backgroundColor: "color-mix(in oklch, #f97316 4%, var(--card))", borderColor: "color-mix(in oklch, #f97316 20%, var(--border))" }}>
         <p className="text-sm font-semibold">Datos de la orden</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -182,11 +182,11 @@ export function OcForm({ suplidores }: { suplidores: Suplidor[] }) {
       </div>
 
       {/* ─── Productos a solicitar ─────────────────────────────────────── */}
-      <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 3%, var(--card))" }}>
+      <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "color-mix(in oklch, #f97316 4%, var(--card))", borderColor: "color-mix(in oklch, #f97316 20%, var(--border))" }}>
 
         {/* Header */}
         <div className="px-5 py-3 border-b flex items-center justify-between"
-          style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 5%, var(--card))" }}>
+          style={{ backgroundColor: "color-mix(in oklch, #f97316 7%, var(--card))", borderColor: "color-mix(in oklch, #f97316 20%, var(--border))" }}>
           <p className="text-sm font-semibold">Productos a solicitar</p>
           <span className="text-xs text-muted-foreground">
             {fields.length} ítem{fields.length !== 1 ? "s" : ""}
@@ -374,7 +374,11 @@ export function OcForm({ suplidores }: { suplidores: Suplidor[] }) {
         <button
           type="submit"
           disabled={submitting}
-          className={cn(buttonVariants(), submitting && "opacity-60 pointer-events-none")}
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-lg border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-orange-500/10 disabled:opacity-60",
+            submitting && "pointer-events-none"
+          )}
+          style={{ borderColor: "#f97316", color: "#f97316" }}
         >
           {submitting ? "Guardando..." : "Crear orden de compra"}
         </button>
