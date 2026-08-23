@@ -2,12 +2,13 @@
 
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cerrarTurno } from "@/actions/caja";
 
 export function CierreTurnoForm({ turnoId }: { turnoId: string }) {
   const router = useRouter();
   const [state, action, isPending] = useActionState(cerrarTurno, null);
+  const [montoStr, setMontoStr] = useState("");
 
   useEffect(() => {
     if (state?.ok) router.refresh();
@@ -25,9 +26,10 @@ export function CierreTurnoForm({ turnoId }: { turnoId: string }) {
           name="montoCierre"
           min="0"
           step="0.01"
-          defaultValue="0"
+          value={montoStr}
+          placeholder="0"
           required
-          onFocus={e => e.target.select()}
+          onChange={e => setMontoStr(e.target.value)}
           className="w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-destructive"
         />
       </div>
