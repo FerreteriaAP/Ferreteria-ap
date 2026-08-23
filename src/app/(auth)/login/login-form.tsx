@@ -9,7 +9,6 @@ import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
 const loginSchema = z.object({
  email: z.string().email("Email inválido"),
@@ -61,6 +60,12 @@ export function LoginForm() {
  </div> {error && (
  <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2"> <p className="text-sm text-destructive">{error}</p> </div> )}
 
- <Button type="submit" className="w-full" disabled={loading}> {loading ? "Entrando..." : "Entrar"}
- </Button> </form> </CardContent> </Card> );
+ <button
+ type="submit"
+ disabled={loading}
+ className="w-full h-10 rounded-lg border-2 text-sm font-semibold transition-colors hover:bg-orange-500/10 disabled:opacity-50"
+ style={{ borderColor: "#f97316", color: "#f97316" }}
+ >
+ {loading ? "Entrando..." : "Entrar"}
+ </button> </form> </CardContent> </Card> );
 }
