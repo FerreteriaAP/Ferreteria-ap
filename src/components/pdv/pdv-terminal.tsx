@@ -200,11 +200,13 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
     }
 
     const { precio, subtotal, itbis } = calcLinea(precioFinal, 0, p.exentoItbis);
+    // Costo fraccionado: dividir entre factor para comparar con el precio de la fracción
+    const costoUltimo = fraccionado && factor > 0 ? p.costoUltimo / factor : p.costoUltimo;
     setCarrito(prev => [...prev, {
       key: uid(), productoId: p.id, nombre: p.nombre, codigo: p.codigo,
       unidad, cantidad: 0, precioFinal, precio, exentoItbis: p.exentoItbis,
       itbis, subtotal,
-      costoUltimo: p.costoUltimo,
+      costoUltimo,
       categoriaCode: p.categoria.codigo,
     }]);
   }, [carrito]);
