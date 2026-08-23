@@ -141,7 +141,7 @@ export default async function CxCContabilidadPage({ searchParams }: PageProps) {
       </div>
 
       {/* Buscador + slot para pill de selección */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center gap-3">
         <form method="GET" className="max-w-sm flex-1">
           {mostrarTodas && <input type="hidden" name="todas" value="1" />}
           <Input name="q" defaultValue={busqueda} placeholder="Buscar cliente o número de factura..." />
