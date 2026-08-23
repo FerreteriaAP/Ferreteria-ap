@@ -48,9 +48,10 @@ interface Props {
   categorias:    Categoria[];
   defaultValues: Partial<FormValues>;
   soloLectura?:  boolean;
+  esAdmin?:      boolean;
 }
 
-export function ProductoDetailForm({ productoId, categorias, defaultValues, soloLectura = false }: Props) {
+export function ProductoDetailForm({ productoId, categorias, defaultValues, soloLectura = false, esAdmin = false }: Props) {
   const [tab, setTab]           = useState<TabKey>("general");
   const [isPending, start]      = useTransition();
   const [savedOk, setSavedOk]   = useState(false);
@@ -296,13 +297,22 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
               {/* Columna derecha: % Ganancia + Exento ITBIS */}
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className={LABEL}>Ganancia</label>
+                  <label className={LABEL}>
+                    Ganancia
+                    {!esAdmin && (
+                      <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">
+                        (solo administrador)
+                      </span>
+                    )}
+                  </label>
                   <div className="relative">
                     <input
-                      className={INPUT + " font-mono text-right pr-8"}
+                      className={INPUT + " font-mono text-right pr-8" + (!esAdmin ? " opacity-60 cursor-not-allowed" : "")}
                       type="number" step="0.01" min="0"
+                      readOnly={!esAdmin}
                       {...form.register("porcentajeGanancia", {
                         onChange: e => {
+                          if (!esAdmin) return;
                           const pct = parseFloat(Number(e.target.value).toFixed(2)) || 0;
                           syncPrecioVenta(costoBruto, pct);
                         }

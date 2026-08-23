@@ -109,6 +109,7 @@ export default async function ProductoPage({ params }: PageProps) {
         categorias={categorias}
         defaultValues={defaultValues}
         soloLectura={soloLectura}
+        esAdmin={rol === "ADMINISTRADOR"}
       />
     </div>
   );
