@@ -117,12 +117,7 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
                   </thead>
                   <tbody>
                     {dataCierres.turnos.map((t) => (
-                      <tr key={t.id} className={cn(
-                        "border-b transition-colors",
-                        t.diferencia < 0
-                          ? "bg-red-50/60 dark:bg-red-950/20 hover:bg-red-100/60 dark:hover:bg-red-950/30"
-                          : "hover:bg-muted/20"
-                      )}>
+                      <tr key={t.id} className="border-b hover:bg-muted/20 transition-colors">
                         <td className="px-4 py-3 font-mono font-bold text-sm" style={{ color: "var(--accent-hex)" }}>#{t.numero}</td>
                         <td className="px-4 py-3 text-xs">{t.cajero}</td>
                         <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
