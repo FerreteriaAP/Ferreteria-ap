@@ -132,7 +132,7 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
                         <td className="px-4 py-3 text-right font-mono text-xs">{fmt(t.montoEsperado)}</td>
                         <td className="px-4 py-3 text-right font-mono text-xs">{fmt(t.montoCierre)}</td>
                         <td className={cn("px-4 py-3 text-right font-mono text-xs font-bold",
-                          t.diferencia < 0 ? "text-destructive" : t.diferencia > 0 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
+                          t.diferencia < 0 ? "text-red-600 dark:text-red-400" : t.diferencia > 0 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
                           {t.diferencia >= 0 ? "+" : ""}{fmt(t.diferencia)}
                         </td>
                         <td className="px-4 py-3 text-right font-mono text-xs font-semibold">{fmt(t.totalVentas)}</td>
