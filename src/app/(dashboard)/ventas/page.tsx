@@ -80,12 +80,16 @@ export default async function VentasPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-2">
           <Link
             href="/ventas/despachos"
-            className={cn(buttonVariants({ variant: "outline" }))}
+            className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-yellow-500/10"
             style={{ borderColor: "#ca8a04", color: "#ca8a04" }}
           >
             Despachos PDV
           </Link>
-          <Link href="/ventas/nueva" className={buttonVariants()}>
+          <Link
+            href="/ventas/nueva"
+            className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-orange-500/10"
+            style={{ borderColor: "#f97316", color: "#f97316" }}
+          >
             + Nueva cotización
           </Link>
         </div>
