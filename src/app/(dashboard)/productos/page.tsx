@@ -59,7 +59,11 @@ export default async function ProductosPage({ searchParams }: PageProps) {
         </div>
         <div className="flex items-center gap-3">
           {puedeCrear && (
-            <Link href="/productos/nuevo" className={buttonVariants()}>
+            <Link
+              href="/productos/nuevo"
+              className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-orange-500/10"
+              style={{ borderColor: "#f97316", color: "#f97316" }}
+            >
               + Nuevo producto
             </Link>
           )}
