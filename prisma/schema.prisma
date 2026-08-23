@@ -570,9 +570,10 @@ model DetalleVenta {
   precioFinal Decimal @db.Decimal(12, 4) // precio ingresado por el usuario (ITBIS incluido o exento)
   exentoItbis Boolean @default(false)    // true = producto exento de ITBIS
   descuento   Decimal @default(0) @db.Decimal(5, 2) // %
-  itbis       Decimal @default(0) @db.Decimal(12, 2)
-  subtotal    Decimal @db.Decimal(12, 2) // base sin ITBIS
-  orden       Int     @default(0) // para ordenar ítems en conduce
+  itbis         Decimal  @default(0) @db.Decimal(12, 2)
+  subtotal      Decimal  @db.Decimal(12, 2) // base sin ITBIS
+  costoAlVender Decimal? @db.Decimal(12, 4) // snapshot de costoPromedio en el momento de facturar (para COGS histórico exacto)
+  orden         Int      @default(0) // para ordenar ítems en conduce
 
   venta    Venta    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
   producto Producto @relation(fields: [productoId], references: [id])

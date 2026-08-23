@@ -557,6 +557,18 @@ export async function facturarVenta(ventaId: string, data: {
  },
  });
 
+ // Snapshot costoPromedio de cada producto en costoAlVender para COGS histórico exacto
+ const detallesParaCosto = await tx.detalleVenta.findMany({
+ where: { ventaId },
+ select: { id: true, producto: { select: { costoPromedio: true } } },
+ });
+ for (const dv of detallesParaCosto) {
+ await tx.detalleVenta.update({
+ where: { id: dv.id },
+ data: { costoAlVender: dv.producto.costoPromedio },
+ });
+ }
+
  if (venta.credito !== "CONTADO") {
  const dias = calcularDiasCredito(venta.credito) ?? 30;
  await tx.cuentaPorCobrar.create({

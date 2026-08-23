@@ -142,7 +142,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </span> )}
  </div> </form> {/* Estado de resultados (P&L) */}
  <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Estado de resultados — {etiquetaPeriodo}</h2> </div> <div className="p-5 space-y-0 divide-y"> {/* Ventas */}
- <div className="flex items-center justify-between py-3"> <div> <p className="font-semibold text-sm">Ventas netas</p> <p className="text-xs text-muted-foreground">Subtotal facturado (sin ITBIS)</p> </div> <div className="text-right"> <p className="font-bold text-lg font-mono">{fmt(plVentas, 2)}</p> {varVentas !== null && <Chip v={varVentas} />}
+ <div className="flex items-center justify-between py-3"> <div> <p className="font-semibold text-sm">Ventas netas</p> <p className="text-xs text-muted-foreground">Subtotal facturado sin ITBIS · base del negocio</p> </div> <div className="text-right"> <p className="font-bold text-lg font-mono">{fmt(plVentas, 2)}</p> {varVentas !== null && <Chip v={varVentas} />}
  </div> </div> {/* COGS */}
  <div className="flex items-center justify-between py-3"> <div> <p className="font-medium text-sm text-muted-foreground">− Costo de lo vendido (COGS)</p> <p className="text-xs text-muted-foreground">Costo promedio × cantidad vendida por línea</p> </div> <p className="font-mono text-sm font-medium text-muted-foreground"> ({fmt(plCogs, 2)})
  </p> </div> {/* Ganancia bruta */}

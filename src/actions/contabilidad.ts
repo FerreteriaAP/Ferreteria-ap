@@ -298,28 +298,29 @@ export async function getCxPPorSuplidor(opts: {
  return Array.from(mapa.values()).sort((a, b) => b.totalSaldo - a.totalSaldo);
 }
 
-// ANALÍTICAS — P&L MENSUAL 
+// ANALÍTICAS — P&L MENSUAL
 //
-// Devuelve por mes: ventas (CON ITBIS, total cobrado), costo de lo vendido,
+// Devuelve por mes: ventas netas SIN ITBIS (subtotal — el ITBIS es un pasivo
+// fiscal recaudado para la DGII, no ingreso propio), costo de lo vendido,
 // ganancia bruta, gastos operativos y ganancia neta.
 //
-// Revenue = SUM(dv.subtotal + dv.itbis) — mismo número que ve el usuario en la factura
-// COGS = cantidad × costoPromedio, dividido entre factorFraccion si se vendió
-// en unidad fraccionada (ej. PIE cuando la base es ROLLO).
-// Esto garantiza que si compras a 490 y vendes a 560, el margen
-// sea (560-490)/560 = 12.5% independientemente del ITBIS.
+// Revenue = SUM(dv.subtotal) — base sin ITBIS (lo que realmente le pertenece al negocio)
+// COGS = cantidad × COALESCE(costoAlVender, costoPromedio)
+//        costoAlVender es el snapshot del costo en el momento de facturar (inmutable).
+//        Si no existe (ventas anteriores), se usa costoPromedio actual como fallback.
+//        Si el producto es fraccionado, se divide entre factorFraccion.
 //
 export async function getResumenMensualPL(año: number) {
  type VRow = { mes: number; ventas: string; cogs: string; num: string };
  type GRow = { mes: number; gastos: string };
 
  const [ventaRows, gastoRows] = await Promise.all([
- // Ventas totales (CON ITBIS) + COGS por unidad real
- // Revenue = subtotal + itbis (total cobrado al cliente, misma base que el usuario entiende)
- // COGS = cantidad × costoPromedio (÷ factorFraccion si se vendió en unidad fraccionada)
+ // Ventas netas SIN ITBIS + COGS histórico con snapshot costoAlVender
+ // Revenue = subtotal (sin ITBIS — el ITBIS es recaudación para DGII, no ingreso del negocio)
+ // COGS = cantidad × COALESCE(costoAlVender, costoPromedio); si fraccionado ÷ factorFraccion
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
- SUM(dv.subtotal + dv.itbis)::text AS ventas,
+ SUM(dv.subtotal)::text AS ventas,
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -332,8 +333,9 @@ export async function getResumenMensualPL(año: number) {
  -- Datos viejos (unidad NULL): fraccionado si precioFinal < precioVenta
  (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion" ELSE
- dv.cantidad * p."costoPromedio" END
+ THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS num
  FROM ventas v
@@ -410,6 +412,7 @@ export async function getVentasPorCategoria(opts: {
  precioFinal: true,
  cantidad: true,
  descuento: true,
+ costoAlVender: true,
  producto: {
  select: {
  costoPromedio: true,
@@ -428,7 +431,7 @@ export async function getVentasPorCategoria(opts: {
  const mapa = new Map<string, {
  categoria: string;
  codigo: string;
- ventas: number; // total cobrado (CON ITBIS) = lo que el cliente pagó
+ ventas: number; // subtotal sin ITBIS — ingreso real del negocio
  cogs: number; // costo real de lo vendido
  cantLineas: number;
  }>();
@@ -437,12 +440,14 @@ export async function getVentasPorCategoria(opts: {
  const cat = d.producto.categoria.nombre;
  const key = cat;
 
- // Revenue = subtotal (base) + itbis = total cobrado al cliente
- const ventas = Number(d.subtotal) + Number(d.itbis);
+ // Revenue = subtotal SIN ITBIS (el ITBIS es recaudación para DGII, no ingreso propio)
+ const ventas = Number(d.subtotal);
 
- // COGS: directo usando costoPromedio, ajustado por factorFraccion si se vendió en fracción
+ // COGS: usa costoAlVender (snapshot histórico) o costoPromedio actual como fallback
  const cantidad = Number(d.cantidad);
- const costo = Number(d.producto.costoPromedio);
+ const costo = d.costoAlVender != null
+ ? Number(d.costoAlVender)
+ : Number(d.producto.costoPromedio);
 
  const factor = d.producto.factorFraccion != null ? Number(d.producto.factorFraccion) : 0;
  const precioFinal = Number(d.precioFinal);
@@ -729,7 +734,7 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  c.id AS "clienteId",
  c.nombre,
  c.rnc,
- SUM(dv.subtotal + dv.itbis)::text AS ventas,
+ SUM(dv.subtotal)::text AS ventas,
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -739,8 +744,9 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion" ELSE
- dv.cantidad * p."costoPromedio" END
+ THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS facturas
  FROM ventas v
@@ -748,7 +754,7 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  JOIN productos p ON p.id = dv."productoId" WHERE v.tipo = 'FACTURADA' AND v."createdAt" >= ${inicio}
  AND v."createdAt" <= ${fin}
  GROUP BY c.id, c.nombre, c.rnc
- ORDER BY SUM(dv.subtotal + dv.itbis) DESC
+ ORDER BY SUM(dv.subtotal) DESC
  LIMIT ${limit}
  `;
 
@@ -793,7 +799,7 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  p.codigo,
  p.nombre,
  cat.nombre AS categoria,
- SUM(dv.subtotal + dv.itbis)::text AS ventas,
+ SUM(dv.subtotal)::text AS ventas,
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -803,8 +809,9 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion" ELSE
- dv.cantidad * p."costoPromedio" END
+ THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ END
  )::text AS cogs,
  SUM(dv.cantidad)::text AS cantidad,
  COUNT(DISTINCT v.id)::text AS facturas
@@ -812,7 +819,7 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  JOIN ventas v ON v.id = dv."ventaId" JOIN productos p ON p.id = dv."productoId" JOIN categorias cat ON cat.id = p."categoriaId" WHERE v.tipo = 'FACTURADA' AND v."createdAt" >= ${inicio}
  AND v."createdAt" <= ${fin}
  GROUP BY p.id, p.codigo, p.nombre, cat.nombre
- ORDER BY SUM(dv.subtotal + dv.itbis) DESC
+ ORDER BY SUM(dv.subtotal) DESC
  LIMIT ${limit}
  `;
 
@@ -868,7 +875,10 @@ export async function getResumenPagos(opts: { año: number; mes?: number }) {
 
  const tarjeta = mapa.get("TARJETA") ?? 0;
  const comision = tarjeta * (comisionPct / 100);
- const total = Array.from(mapa.values()).reduce((s, v) => s + v, 0);
+ // Excluir NC (nota de crédito) del total — no es efectivo recibido, es un ajuste contable
+ const total = Array.from(mapa.entries())
+ .filter(([k]) => k !== "NC")
+ .reduce((s, [, v]) => s + v, 0);
 
  const METODOS: Array<{ key: string; label: string; icon: string }> = [
  { key: "EFECTIVO", label: "Efectivo", icon: "" },

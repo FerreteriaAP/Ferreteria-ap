@@ -245,7 +245,7 @@ export async function getFacturasPendientesCaja() {
  where: { tipo: "PDV_PENDIENTE" },
  include: {
  cliente: { select: { id: true, nombre: true, rnc: true, tipoComprobante: true } },
- detalles: { include: { producto: { select: { id: true, codigo: true, nombre: true, stockActual: true } } } },
+ detalles: { include: { producto: { select: { id: true, codigo: true, nombre: true, stockActual: true, costoPromedio: true } } } },
  creador: { select: { nombre: true, apellido: true } },
  },
  orderBy: { createdAt: "asc" },
@@ -339,7 +339,7 @@ export async function procesarPagoCaja(
  });
  }
 
- // 3. Deducir stock por cada línea
+ // 3. Deducir stock por cada línea + snapshot costoAlVender para COGS histórico
  for (const detalle of venta.detalles) {
  const producto = await tx.producto.findUnique({ where: { id: detalle.productoId } });
  if (!producto) continue;
@@ -350,6 +350,12 @@ export async function procesarPagoCaja(
  await tx.producto.update({
  where: { id: detalle.productoId },
  data: { stockActual: stockDespues },
+ });
+
+ // Guardar costoPromedio en el momento de la venta (inmutable para COGS histórico)
+ await tx.detalleVenta.update({
+ where: { id: detalle.id },
+ data: { costoAlVender: producto.costoPromedio },
  });
 
  await tx.movimientoInventario.create({
