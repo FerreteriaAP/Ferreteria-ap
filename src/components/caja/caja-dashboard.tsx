@@ -11,6 +11,7 @@ import {
  registrarCobroEnCaja,
  registrarCobrosMultiplesCxC,
  buscarCxCPorFactura,
+ getFacturasPendientesCaja,
 } from "@/actions/caja";
 import { NotaCreditoModal } from "@/components/caja/nota-credito-modal";
 import { buscarNCPorNumero, buscarNCsDelCliente } from "@/actions/nota-credito";
@@ -906,19 +907,19 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
  const [modal, setModal] = useState<ModalType>(null);
  const [facturaSeleccionada, setFacturaSeleccionada] = useState<FacturaPendiente | null>(null);
 
- // Sincronizar facturas cuando el servidor devuelve datos nuevos (después de router.refresh)
+ // Polling directo: cada 6 s trae facturas frescas del servidor sin depender del RSC
  useEffect(() => {
-  if (!modal) setFacturas(initialFacturas);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [initialFacturas]);
-
- // Auto-refresh cada 8 s para recibir nuevas facturas del PDV sin recargar manualmente
- useEffect(() => {
-  const id = setInterval(() => {
-   if (!modal) router.refresh();
-  }, 8000);
+  const poll = async () => {
+   if (modal) return; // no interrumpir si hay modal abierto
+   try {
+    const frescas = await getFacturasPendientesCaja();
+    setFacturas(frescas as typeof initialFacturas);
+   } catch { /* ignorar errores de red transitorios */ }
+  };
+  const id = setInterval(poll, 6000);
   return () => clearInterval(id);
- }, [modal, router]);
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [modal]);
 
  const abrirPago = (f: FacturaPendiente) => { setFacturaSeleccionada(f); setModal("pago"); };
 
