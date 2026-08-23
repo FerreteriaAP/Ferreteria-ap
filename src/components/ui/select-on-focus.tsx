@@ -7,6 +7,9 @@ import { useEffect } from "react";
  * input[type="number"] al hacer click/tab, para que el 0 (o cualquier
  * valor previo) se sobreescriba directamente al escribir.
  *
+ * Chrome no soporta .select() en type="number", así que se cambia
+ * temporalmente a "text", se selecciona, y se devuelve a "number".
+ *
  * Se excluyen inputs con data-no-select="true".
  */
 export function SelectOnFocus() {
@@ -14,14 +17,22 @@ export function SelectOnFocus() {
     const handle = (e: FocusEvent) => {
       const el = e.target as HTMLInputElement;
       if (
-        el.tagName === "INPUT" &&
-        el.type === "number" &&
-        el.getAttribute("data-no-select") !== "true"
-      ) {
-        // requestAnimationFrame garantiza que el foco ya se aplicó
-        // antes de seleccionar (necesario en algunos browsers)
-        requestAnimationFrame(() => el.select());
-      }
+        el.tagName !== "INPUT" ||
+        el.type !== "number" ||
+        el.getAttribute("data-no-select") === "true"
+      ) return;
+
+      requestAnimationFrame(() => {
+        try {
+          // Truco cross-browser: switch a text → select → switch a number
+          el.type = "text";
+          el.select();
+          el.type = "number";
+        } catch {
+          // Fallback: select directo (funciona en Firefox)
+          el.select();
+        }
+      });
     };
     document.addEventListener("focusin", handle);
     return () => document.removeEventListener("focusin", handle);

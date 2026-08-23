@@ -37,6 +37,7 @@ interface ItemCarrito extends LineaPDV {
   key: string;
   costoUltimo: number;
   categoriaCode: string;
+  cantidadStr: string; // valor como string para el input (vacío = placeholder "0")
 }
 
 // ─── MARGEN ───────────────────────────────────────────────────────────────────
@@ -194,7 +195,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
         if (i !== idx) return item;
         const nuevaCant = item.cantidad + 1;
         const { precio, subtotal, itbis } = calcLinea(item.precioFinal, nuevaCant, item.exentoItbis);
-        return { ...item, cantidad: nuevaCant, precio, subtotal, itbis };
+        return { ...item, cantidad: nuevaCant, cantidadStr: String(nuevaCant), precio, subtotal, itbis };
       }));
       return;
     }
@@ -204,18 +205,19 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
     const costoUltimo = fraccionado && factor > 0 ? p.costoUltimo / factor : p.costoUltimo;
     setCarrito(prev => [...prev, {
       key: uid(), productoId: p.id, nombre: p.nombre, codigo: p.codigo,
-      unidad, cantidad: 0, precioFinal, precio, exentoItbis: p.exentoItbis,
+      unidad, cantidad: 0, cantidadStr: "", precioFinal, precio, exentoItbis: p.exentoItbis,
       itbis, subtotal,
       costoUltimo,
       categoriaCode: p.categoria.codigo,
     }]);
   }, [carrito]);
 
-  const updateCantidad = useCallback((key: string, cantidad: number) => {
+  const updateCantidad = useCallback((key: string, cantidadStr: string) => {
+    const cantidad = parseFloat(cantidadStr) || 0;
     setCarrito(prev => prev.map(item => {
       if (item.key !== key) return item;
       const { precio, subtotal, itbis } = calcLinea(item.precioFinal, cantidad, item.exentoItbis);
-      return { ...item, cantidad, precio, subtotal, itbis };
+      return { ...item, cantidad, cantidadStr, precio, subtotal, itbis };
     }));
   }, []);
 
@@ -575,11 +577,12 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                       </td>
                       <td className="px-1 py-2">
                         <input
-                          type="number" min="0" step="0.001" value={item.cantidad}
-                          onChange={e => updateCantidad(item.key, parseFloat(e.target.value) || 0)}
-                          onFocus={e => e.target.select()}
+                          type="number" min="0" step="0.001"
+                          value={item.cantidadStr}
+                          placeholder="0"
+                          onChange={e => updateCantidad(item.key, e.target.value)}
                           className={cn(
-                            "w-full text-center h-7 rounded border bg-background px-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary",
+                            "w-full text-center h-7 rounded border bg-background px-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60",
                             item.cantidad === 0 && "border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-950/20"
                           )}
                         />
