@@ -72,17 +72,17 @@ export default async function ProductosPage({ searchParams }: PageProps) {
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap">
         <ProductoBusqueda
           defaultValue={busqueda}
           categoriaId={categoriaId}
           stockBajo={stockBajo}
           vista={vista}
         />
-        <div className="flex gap-2 flex-wrap">
+        <div className="ml-auto flex gap-2 flex-wrap justify-end">
           <Link
             href={`/productos?q=${busqueda}${vistaQS}`}
-            className={cn(buttonVariants({ variant: !categoriaId ? "default" : "outline", size: "sm" }))}
+            className={cn(buttonVariants({ variant: !categoriaId && !stockBajo ? "default" : "outline", size: "sm" }))}
           >
             Todas
           </Link>
