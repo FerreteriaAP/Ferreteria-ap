@@ -265,7 +265,6 @@ export async function crearVentaPendiente(input: VentaPDVInput) {
       },
     });
 
-    revalidatePath("/pdv");
     revalidatePath("/caja");
     return { id: venta.id, numero: venta.numero };
   } catch (err) {
