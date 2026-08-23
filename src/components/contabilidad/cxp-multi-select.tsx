@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -160,6 +161,11 @@ export function CxPMultiSelect({ grupos }: Props) {
  const router = useRouter();
  const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
  const [showModal, setShowModal] = useState(false);
+ const [pillSlot, setPillSlot] = useState<Element | null>(null);
+
+ useEffect(() => {
+  setPillSlot(document.getElementById("cxp-selection-bar"));
+ }, []);
 
  const toggle = (id: string) => setSeleccionadas(prev => {
  const next = new Set(prev);
@@ -192,9 +198,8 @@ export function CxPMultiSelect({ grupos }: Props) {
  return (
  <>
  {/* Barra de selección — sticky arriba, justo debajo de la cabecera */}
- {seleccionadas.size > 0 && (
- <div className="sticky top-2 z-40 mb-3">
- <div className="inline-flex items-center gap-3 bg-background border shadow-md rounded-xl px-4 py-2">
+ {seleccionadas.size > 0 && pillSlot && createPortal(
+ <div className="flex items-center gap-3 bg-background border shadow-md rounded-xl px-4 py-2 w-full">
  <span className="text-xs font-medium text-muted-foreground shrink-0">
  {seleccionadas.size} compra{seleccionadas.size !== 1 ? "s" : ""}
  </span>
@@ -203,7 +208,7 @@ export function CxPMultiSelect({ grupos }: Props) {
  </span>
  <button
  onClick={() => setShowModal(true)}
- className="px-3 py-1 rounded-full border text-xs font-semibold transition-colors shrink-0"
+ className="ml-auto px-3 py-1 rounded-full border text-xs font-semibold transition-colors shrink-0"
  style={{ borderColor: "#f97316", color: "#f97316" }}
  > Pago Facturas
  </button>
@@ -212,8 +217,8 @@ export function CxPMultiSelect({ grupos }: Props) {
  className="text-muted-foreground hover:text-foreground text-base leading-none shrink-0"
  > ×
  </button>
- </div>
- </div>
+ </div>,
+ pillSlot
  )}
  <div className="space-y-3"> {grupos.map((g) => {
  const pendientes = g.compras.filter(c => c.estado !== "PAGADO");
