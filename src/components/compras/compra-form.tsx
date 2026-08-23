@@ -217,25 +217,28 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
   const checkAlertaPrecio = (index: number, nuevoCostoBruto: number, overridePct?: number) => {
     const detalle = detalles[index]; if (!detalle) return;
     const itbisPct = overridePct ?? Number(watchedDetalles[index]?.itbisPct ?? 0);
+    const desc = Number(watchedDetalles[index]?.descuento ?? 0);
     // costoOriginalRef siempre guarda el costo NETO (sin ITBIS) de la BD
     const costoAnteriorNet = costoOriginalRef.current[detalle.productoId] ?? 0;
     if (costoAnteriorNet <= 0) return;
     // Convertir el costo ingresado a neto para comparar manzanas con manzanas
     const nuevoCostoNet = costoNetoFn(nuevoCostoBruto, itbisPct);
+    // Aplicar descuento al costo neto para mostrar y calcular precio sugerido
+    const nuevoCostoNetConDesc = nuevoCostoNet * (1 - desc / 100);
     const precios = preciosRef.current[detalle.productoId];
     const pvActual = precios?.precioVenta ?? 0;
     if (Math.abs(nuevoCostoNet - costoAnteriorNet) > 0.005) {
       // Precios en BRUTO (costo + ITBIS) para mostrar al usuario
-      const costoAnteriorBruto = Math.round(costoAnteriorNet * (1 + ITBIS_RATE) * 100) / 100;
-      const nuevoCostoBruto    = Math.round(nuevoCostoNet    * (1 + ITBIS_RATE) * 100) / 100;
-      // Precio sugerido = costo bruto × (1 + %ganancia) — mismo criterio que inventario
+      const costoAnteriorBruto    = Math.round(costoAnteriorNet        * (1 + ITBIS_RATE) * 100) / 100;
+      const nuevoCostoBrutoMostar = Math.round(nuevoCostoNetConDesc    * (1 + ITBIS_RATE) * 100) / 100;
+      // Precio sugerido = costo bruto con desc × (1 + %ganancia) — mismo criterio que inventario
       const pctGanancia = precios?.porcentajeGanancia ?? 30;
-      const sugerido = Math.round(nuevoCostoBruto * (1 + pctGanancia / 100) * 100) / 100;
+      const sugerido = Math.round(nuevoCostoBrutoMostar * (1 + pctGanancia / 100) * 100) / 100;
       setAlertaPrecios(prev => {
         const esPrimera = !prev.some(a => a.productoId === detalle.productoId);
         const siguiente = [...prev.filter(a => a.productoId !== detalle.productoId), {
           productoId: detalle.productoId, nombre: detalle.nombre,
-          costoAnterior: costoAnteriorBruto, nuevoCosto: nuevoCostoBruto,  // ambos BRUTOS c/ITBIS
+          costoAnterior: costoAnteriorBruto, nuevoCosto: nuevoCostoBrutoMostar,  // ambos BRUTOS c/ITBIS y c/desc
           precioVentaActual: pvActual, nuevoPrecioVenta: sugerido, aplicar: true,
         }];
         // Scroll al cuadro de alertas para todos los usuarios (descuenta la altura del header)
@@ -668,41 +671,20 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                             )}
                           </TableCell>
                           <TableCell>
-                            {/* Toggle ITBIS — dos botones simples, evita el Radix Select que salta */}
-                            <div className="flex rounded-lg overflow-hidden border text-xs">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  form.setValue(`detalles.${i}.itbisPct`, 0);
-                                  if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
-                                  alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, costo, 0), 850);
-                                }}
-                                className={cn(
-                                  "flex-1 px-2 py-1.5 transition-colors leading-tight",
-                                  pct === 0
-                                    ? "bg-primary text-primary-foreground font-semibold"
-                                    : "hover:bg-muted text-muted-foreground"
-                                )}
-                              >
-                                Incl.
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  form.setValue(`detalles.${i}.itbisPct`, 18);
-                                  if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
-                                  alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, costo, 18), 850);
-                                }}
-                                className={cn(
-                                  "flex-1 px-2 py-1.5 transition-colors leading-tight border-l",
-                                  pct === 18
-                                    ? "bg-primary text-primary-foreground font-semibold"
-                                    : "hover:bg-muted text-muted-foreground"
-                                )}
-                              >
-                                Excl.
-                              </button>
-                            </div>
+                            {/* Toggle ITBIS — select nativo, evita el Radix Select que salta */}
+                            <select
+                              value={pct === 0 ? "0" : "18"}
+                              onChange={e => {
+                                const v = Number(e.target.value);
+                                form.setValue(`detalles.${i}.itbisPct`, v);
+                                if (alertaDebRef.current) clearTimeout(alertaDebRef.current);
+                                alertaDebRef.current = setTimeout(() => checkAlertaPrecio(i, costo, v), 850);
+                              }}
+                              className="w-full h-8 rounded-lg border bg-background px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
+                            >
+                              <option value="0">Incluido</option>
+                              <option value="18">Excluido</option>
+                            </select>
                             {/* ITBIS por unidad (no por línea) */}
                             {costo > 0 && (
                               <p className="text-[10px] text-muted-foreground text-center mt-0.5">
