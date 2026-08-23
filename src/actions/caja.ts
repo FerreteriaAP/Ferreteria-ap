@@ -345,13 +345,22 @@ export async function procesarPagoCaja(
  });
  }
 
- // 3. Deducir stock por cada línea + snapshot costoAlVender para COGS histórico
+ // 3. Deducir stock por cada línea
  for (const detalle of venta.detalles) {
  const producto = await tx.producto.findUnique({ where: { id: detalle.productoId } });
  if (!producto) continue;
 
+ // Productos fraccionables: la cantidad en detalles_venta está en unidades de
+ // fracción (ej. pies), pero el stock se lleva en unidades enteras (ej. barras).
+ // Convertir igual que lo hace crearConduce.
+ const cantidadDetalle = Number(detalle.cantidad);
+ const cantidadReal =
+ producto.esFraccionable && producto.factorFraccion && Number(producto.factorFraccion) > 0
+ ? cantidadDetalle / Number(producto.factorFraccion)
+ : cantidadDetalle;
+
  const stockAntes = Number(producto.stockActual);
- const stockDespues = stockAntes - Number(detalle.cantidad);
+ const stockDespues = stockAntes - cantidadReal;
 
  await tx.producto.update({
  where: { id: detalle.productoId },
@@ -365,9 +374,10 @@ export async function procesarPagoCaja(
  data: {
  productoId: detalle.productoId,
  tipo: "SALIDA_VENTA",
- cantidad: detalle.cantidad,
+ cantidad: cantidadReal,   // unidades reales del producto
  stockAntes,
  stockDespues,
+ costo: Number(producto.costoPromedio), // snapshot del costo al vender
  referencia: numFactura,
  tipoRef: "VENTA",
  usuarioId: userId,
