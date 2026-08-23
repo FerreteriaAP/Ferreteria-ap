@@ -680,9 +680,17 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   if (timerRef.current) clearTimeout(timerRef.current);
   if (!val.trim()) { setResultados([]); return; }
   setBuscando(true);
+  // Captura los valores actuales para que el closure del timeout los use correctamente
+  const idsActuales = new Set(lineas.map(l => l.cxcId));
+  const clienteLocked = clienteIdRef.current;
   timerRef.current = setTimeout(async () => {
    const r = await buscarCxCPorFactura(val);
-   setResultados(r.filter(c => !idsEnLista.has(c.id)).map(c => ({ ...c, monto: Number(c.monto), saldo: Number(c.saldo) })));
+   setResultados(
+    r
+     .map(c => ({ ...c, monto: Number(c.monto), saldo: Number(c.saldo) }))
+     .filter(c => !idsActuales.has(c.id))                          // excluir ya agregadas
+     .filter(c => !clienteLocked || c.clienteId === clienteLocked) // excluir otros clientes si hay uno bloqueado
+   );
    setBuscando(false);
   }, 250);
  };
