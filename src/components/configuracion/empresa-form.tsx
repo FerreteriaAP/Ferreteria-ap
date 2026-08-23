@@ -106,7 +106,8 @@ function CuentaForm({
           type="button"
           onClick={handleSubmit as unknown as React.MouseEventHandler}
           disabled={isPending}
-          className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="px-4 py-1.5 rounded-lg border-2 text-sm font-semibold transition-colors hover:bg-orange-500/10 disabled:opacity-50"
+          style={{ borderColor: "#f97316", color: "#f97316" }}
         >
           {isPending ? "Guardando…" : "Guardar"}
         </button>

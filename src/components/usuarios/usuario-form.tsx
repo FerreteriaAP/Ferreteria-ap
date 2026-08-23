@@ -55,7 +55,8 @@ export function UsuarioForm({ onSuccess }: { onSuccess?: () => void } = {}) {
  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem> ))}
  </SelectContent> </Select> </div> <button
  type="submit" disabled={loading}
- className={cn(buttonVariants(), "w-full", loading && "opacity-50 pointer-events-none")}
+ className={cn("w-full h-10 rounded-lg border-2 text-sm font-semibold transition-colors hover:bg-orange-500/10 disabled:opacity-50", loading && "pointer-events-none")}
+ style={{ borderColor: "#f97316", color: "#f97316" }}
  > {loading ? "Creando..." : "Crear usuario"}
  </button> </form> );
 }
