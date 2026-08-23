@@ -11,7 +11,6 @@ import {
  registrarCobroEnCaja,
  registrarCobrosMultiplesCxC,
  buscarCxCPorFactura,
- getFacturasPendientesCaja,
 } from "@/actions/caja";
 import { NotaCreditoModal } from "@/components/caja/nota-credito-modal";
 import { buscarNCPorNumero, buscarNCsDelCliente } from "@/actions/nota-credito";
@@ -903,35 +902,33 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
  const router = useRouter();
  const [isPending, startTransition] = useTransition();
 
- const [facturas, setFacturas] = useState(initialFacturas);
+ // IDs removidos optimistamente (pagadas / eliminadas antes del siguiente refresh)
+ const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
  const [modal, setModal] = useState<ModalType>(null);
  const [facturaSeleccionada, setFacturaSeleccionada] = useState<FacturaPendiente | null>(null);
 
- // Polling directo: cada 6 s trae facturas frescas del servidor sin depender del RSC
+ // Facturas visibles = las del servidor menos las ya procesadas localmente
+ const facturas = initialFacturas.filter(f => !removedIds.has(f.id));
+
+ // Auto-refresh cada 7 s para recibir nuevas facturas del PDV
  useEffect(() => {
-  const poll = async () => {
-   if (modal) return; // no interrumpir si hay modal abierto
-   try {
-    const frescas = await getFacturasPendientesCaja();
-    setFacturas(frescas as typeof initialFacturas);
-   } catch { /* ignorar errores de red transitorios */ }
-  };
-  const id = setInterval(poll, 6000);
+  const id = setInterval(() => {
+   if (!modal) router.refresh();
+  }, 7000);
   return () => clearInterval(id);
- // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [modal]);
+ }, [modal, router]);
 
  const abrirPago = (f: FacturaPendiente) => { setFacturaSeleccionada(f); setModal("pago"); };
 
  const handleEliminar = (id: string) => {
   startTransition(async () => {
    const res = await eliminarFacturaPendiente(id);
-   if ("ok" in res && res.ok) setFacturas(prev => prev.filter(f => f.id !== id));
+   if ("ok" in res && res.ok) setRemovedIds(prev => new Set([...prev, id]));
   });
  };
 
  const handlePagoOk = () => {
-  setFacturas(prev => prev.filter(f => f.id !== facturaSeleccionada?.id));
+  if (facturaSeleccionada) setRemovedIds(prev => new Set([...prev, facturaSeleccionada.id]));
   setModal(null); setFacturaSeleccionada(null);
   router.refresh();
  };
