@@ -352,11 +352,8 @@ export async function procesarPagoCaja(
  data: { stockActual: stockDespues },
  });
 
- // Guardar costoPromedio en el momento de la venta (inmutable para COGS histórico)
- await tx.detalleVenta.update({
- where: { id: detalle.id },
- data: { costoAlVender: producto.costoPromedio },
- });
+ // TODO: activar tras migrar servidor (pnpm prisma db push)
+ // costoAlVender snapshot pendiente de columna en servidor
 
  await tx.movimientoInventario.create({
  data: {

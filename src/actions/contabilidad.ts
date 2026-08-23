@@ -315,9 +315,9 @@ export async function getResumenMensualPL(año: number) {
  type GRow = { mes: number; gastos: string };
 
  const [ventaRows, gastoRows] = await Promise.all([
- // Ventas netas SIN ITBIS + COGS histórico con snapshot costoAlVender
+ // Ventas netas SIN ITBIS + COGS con costoPromedio (costoAlVender activar tras migrar servidor)
  // Revenue = subtotal (sin ITBIS — el ITBIS es recaudación para DGII, no ingreso del negocio)
- // COGS = cantidad × COALESCE(costoAlVender, costoPromedio); si fraccionado ÷ factorFraccion
+ // COGS = cantidad × costoPromedio; si fraccionado ÷ factorFraccion
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
  SUM(dv.subtotal)::text AS ventas,
@@ -333,8 +333,8 @@ export async function getResumenMensualPL(año: number) {
  -- Datos viejos (unidad NULL): fraccionado si precioFinal < precioVenta
  (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
- ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
+ ELSE dv.cantidad * p."costoPromedio"
  END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS num
@@ -412,7 +412,6 @@ export async function getVentasPorCategoria(opts: {
  precioFinal: true,
  cantidad: true,
  descuento: true,
- costoAlVender: true,
  producto: {
  select: {
  costoPromedio: true,
@@ -443,11 +442,9 @@ export async function getVentasPorCategoria(opts: {
  // Revenue = subtotal SIN ITBIS (el ITBIS es recaudación para DGII, no ingreso propio)
  const ventas = Number(d.subtotal);
 
- // COGS: usa costoAlVender (snapshot histórico) o costoPromedio actual como fallback
+ // COGS: costoPromedio actual (costoAlVender se activará tras migrar el servidor)
  const cantidad = Number(d.cantidad);
- const costo = d.costoAlVender != null
- ? Number(d.costoAlVender)
- : Number(d.producto.costoPromedio);
+ const costo = Number(d.producto.costoPromedio);
 
  const factor = d.producto.factorFraccion != null ? Number(d.producto.factorFraccion) : 0;
  const precioFinal = Number(d.precioFinal);
@@ -744,8 +741,8 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
- ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
+ ELSE dv.cantidad * p."costoPromedio"
  END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS facturas
@@ -809,8 +806,8 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
- ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
+ ELSE dv.cantidad * p."costoPromedio"
  END
  )::text AS cogs,
  SUM(dv.cantidad)::text AS cantidad,
