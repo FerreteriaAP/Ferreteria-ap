@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef, type ReactNode, type FormEvent } from "react";
+import { useState, useTransition, useRef, useEffect, type ReactNode, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
  procesarPagoCaja,
@@ -905,6 +905,14 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados }:
  const [facturas, setFacturas] = useState(initialFacturas);
  const [modal, setModal] = useState<ModalType>(null);
  const [facturaSeleccionada, setFacturaSeleccionada] = useState<FacturaPendiente | null>(null);
+
+ // Auto-refresh cada 8 s para recibir nuevas facturas del PDV sin recargar manualmente
+ useEffect(() => {
+  const id = setInterval(() => {
+   if (!modal) router.refresh();
+  }, 8000);
+  return () => clearInterval(id);
+ }, [modal, router]);
 
  const abrirPago = (f: FacturaPendiente) => { setFacturaSeleccionada(f); setModal("pago"); };
 

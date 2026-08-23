@@ -278,7 +278,8 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
   const continuar = () => {
     startTransition(async () => {
       await clearVendedorActivo();
-      // Navegar a /pdv — el server component re-renderiza y muestra el selector de vendedor
+      // refresh invalida caché del server component para que lea la cookie borrada
+      router.refresh();
       router.push("/pdv");
     });
   };
