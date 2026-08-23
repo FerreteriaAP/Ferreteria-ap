@@ -304,7 +304,7 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
                       {...form.register("porcentajeGanancia", {
                         onChange: e => {
                           const pct = parseFloat(Number(e.target.value).toFixed(2)) || 0;
-                          syncPrecioVenta(costo, pct);
+                          syncPrecioVenta(costoBruto, pct);
                         }
                       })}
                     />
