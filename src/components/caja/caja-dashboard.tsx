@@ -139,7 +139,8 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
  const quitarLinea = (i: number) => { if (lineasPago.length === 1) return; setLineasPago(prev => prev.filter((_, idx) => idx !== i)); };
  const updateLinea = (i: number, campo: "metodo" | "monto" | "ref", val: string) => setLineasPago(prev => prev.map((l, idx) => idx === i ? { ...l, [campo]: val } : l));
 
- const hayLineaEfectivo = lineasPago.length === 1 && lineasPago[0].metodo === "EFECTIVO";
+ const hayLineaEfectivo  = lineasPago.length === 1 && lineasPago[0].metodo === "EFECTIVO";
+ const hayLineaOtro      = lineasPago.length === 1 && lineasPago[0].metodo !== "EFECTIVO" && lineasPago[0].metodo !== "CREDITO";
  const billetesRelevantes = BILLETES.filter(b => b >= factura.total).slice(0, 5);
 
  const handlePagar = () => {
@@ -353,7 +354,7 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
        </div>
       ))}
 
-      {/* Billetes rápidos */}
+      {/* Billetes rápidos — solo efectivo */}
       {hayLineaEfectivo && (
        <div className="flex gap-1.5 flex-wrap pt-0.5">
         <span className="text-xs text-muted-foreground self-center">Billetes:</span>
@@ -372,6 +373,22 @@ function PagoModal({ factura, turnoId, onClose, onOk }: {
          className={cn(
           "text-xs px-3 py-1.5 rounded-lg border transition-colors",
           parseFloat(lineasPago[0].monto) === factura.total
+           ? "bg-primary text-primary-foreground border-primary"
+           : "hover:bg-accent bg-muted"
+         )}>
+         Exacto
+        </button>
+       </div>
+      )}
+
+      {/* Botón exacto para tarjeta / transferencia / cheque */}
+      {hayLineaOtro && (
+       <div className="flex gap-1.5 flex-wrap pt-0.5 items-center">
+        <span className="text-xs text-muted-foreground self-center">Pago:</span>
+        <button onClick={() => updateLinea(0, "monto", totalRequerido.toFixed(2))}
+         className={cn(
+          "text-xs px-3 py-1.5 rounded-lg border transition-colors",
+          parseFloat(lineasPago[0].monto) === totalRequerido
            ? "bg-primary text-primary-foreground border-primary"
            : "hover:bg-accent bg-muted"
          )}>
