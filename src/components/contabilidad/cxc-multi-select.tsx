@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { GrupoColapsable } from "./grupo-colapsable";
 import { pagarMultiplesCxC, type PagoMasivoCxCItem } from "@/actions/contabilidad";
 import { cn } from "@/lib/utils";
-import { FileText } from "lucide-react";
+import { FileText, Printer, CheckCircle2 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 
 // Tipos 
@@ -69,6 +69,17 @@ const METODOS = [
  { value: "TARJETA", label: "Tarjeta" },
 ];
 
+interface PagoExitoso {
+ cliente: string;
+ rnc: string | null;
+ monto: number;
+ metodo: string;
+ fecha: string;
+ ref: string;
+ facturas: { numero: string; monto: number }[];
+ notas: string;
+}
+
 function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  const [isPending, start] = useTransition();
  const [error, setError] = useState<string | null>(null);
@@ -76,6 +87,7 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  const [referencia, setRef] = useState("");
  const [notas, setNotas] = useState("");
  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
+ const [pagoExitoso, setPagoExitoso] = useState<PagoExitoso | null>(null);
 
  const total = facturas.reduce((s, f) => s + f.saldo, 0);
 
@@ -95,12 +107,74 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  ventaId: f.ventaId,
  monto: f.saldo,
  }));
+ // Capturar el primer cliente (si todas son del mismo grupo)
+ const primerCliente = facturas[0] ? getCliente(facturas[0].ventaId) : "—";
+ const primerGrupo = grupos.find(g => g.facturas.some(f => f.ventaId === facturas[0]?.ventaId));
+ const clienteRnc = primerGrupo?.cliente.rnc ?? null;
+
  start(async () => {
  const res = await pagarMultiplesCxC(pagos, metodo, fecha, referencia || undefined, notas || undefined);
  if ("error" in res && res.error) { setError(res.error); return; }
- onOk();
+ setPagoExitoso({
+  cliente: primerCliente,
+  rnc: clienteRnc,
+  monto: facturas.reduce((s, f) => s + f.saldo, 0),
+  metodo,
+  fecha,
+  ref: referencia,
+  facturas: facturas.map(f => ({ numero: f.numero, monto: f.saldo })),
+  notas,
+ });
  });
  };
+
+ // ── PANTALLA DE ÉXITO ────────────────────────────────────────────────────
+ if (pagoExitoso) {
+  const params = new URLSearchParams({
+   cliente: pagoExitoso.cliente,
+   ...(pagoExitoso.rnc ? { rnc: pagoExitoso.rnc } : {}),
+   monto: pagoExitoso.monto.toFixed(2),
+   metodo: pagoExitoso.metodo,
+   fecha: pagoExitoso.fecha,
+   ...(pagoExitoso.ref ? { ref: pagoExitoso.ref } : {}),
+   facturas: pagoExitoso.facturas.map(f => `${f.numero}:${f.monto.toFixed(2)}`).join(","),
+   ...(pagoExitoso.notas ? { notas: pagoExitoso.notas } : {}),
+  });
+  return (
+   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div className="bg-background rounded-2xl border shadow-2xl w-full max-w-sm p-6 flex flex-col items-center gap-4 text-center">
+     <CheckCircle2 size={48} className="text-green-500" />
+     <div>
+      <p className="text-sm text-muted-foreground">Cobro registrado exitosamente</p>
+      <p className="text-xl font-bold mt-1" style={{ color: "var(--accent-hex)" }}>
+       {`RD$ ${pagoExitoso.monto.toLocaleString("es-DO", { minimumFractionDigits: 2 })}`}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+       {pagoExitoso.facturas.length} factura{pagoExitoso.facturas.length !== 1 ? "s" : ""} · {pagoExitoso.cliente}
+      </p>
+     </div>
+     <div className="flex flex-col gap-2 w-full">
+      <a
+       href={`/comprobante-cxc?${params.toString()}`}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="flex items-center justify-center gap-2 w-full h-10 rounded-xl text-white font-semibold text-sm transition-colors"
+       style={{ backgroundColor: "var(--accent-hex, #f5821f)" }}
+      >
+       <Printer size={16} />
+       Imprimir comprobante
+      </a>
+      <button
+       onClick={() => { onOk(); onClose(); }}
+       className="w-full h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors"
+      >
+       Cerrar
+      </button>
+     </div>
+    </div>
+   </div>
+  );
+ }
 
  return (
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"> <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto"> {/* Header */}

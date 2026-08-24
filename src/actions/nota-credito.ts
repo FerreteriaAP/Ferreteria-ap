@@ -76,9 +76,16 @@ export async function crearNotaCredito(input: CrearNotaCreditoInput) {
  });
  });
 
+ // Obtener el id de la NC recién creada para enlace al imprimible
+ const ncCreada = await prisma.notaCredito.findFirst({
+  where: { numero },
+  select: { id: true },
+  orderBy: { createdAt: "desc" },
+ });
+
  revalidatePath("/caja");
  revalidatePath(`/ventas/${input.ventaId}`);
- return { ok: true, numero };
+ return { ok: true, numero, id: ncCreada?.id ?? null };
 }
 
 // Obtener facturas para nota de crédito (facturadas del turno actual o búsqueda) 

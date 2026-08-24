@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, type FormEvent } from "react";
 import { buscarFacturasParaNC, crearNotaCredito, type NotaCreditoDetalleItem } from "@/actions/nota-credito";
 import { cn } from "@/lib/utils";
-import { FileX2 } from "lucide-react";
+import { FileX2, Printer, CheckCircle2 } from "lucide-react";
 
 const INPUT = "w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
 
@@ -27,9 +27,12 @@ interface Props {
   onOk: (numero: string) => void;
 }
 
+interface NcCreada { numero: string; id: string | null }
+
 export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
   const [isPending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [ncCreada, setNcCreada] = useState<NcCreada | null>(null);
 
   const [query, setQuery] = useState("");
   const [resultados, setResultados] = useState<FacturaResult[]>([]);
@@ -108,9 +111,46 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
     start(async () => {
       const res = await crearNotaCredito({ ventaId: factura.id, turnoId, motivo, detalles, notas: notas || undefined });
       if ("error" in res && res.error) { setError(res.error); return; }
-      onOk((res as { ok: true; numero: string }).numero);
+      const ok = res as { ok: true; numero: string; id: string | null };
+      setNcCreada({ numero: ok.numero, id: ok.id });
     });
   };
+
+  // ── PANTALLA DE ÉXITO ──────────────────────────────────────────────────
+  if (ncCreada) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="bg-background rounded-2xl border shadow-2xl w-full max-w-sm p-6 flex flex-col items-center gap-4 text-center">
+          <CheckCircle2 size={48} className="text-green-500" />
+          <div>
+            <p className="text-sm text-muted-foreground">Nota de crédito generada</p>
+            <p className="text-xl font-bold font-mono mt-1" style={{ color: "#a855f7" }}>{ncCreada.numero}</p>
+            <p className="text-xs text-muted-foreground mt-1">El crédito fue acreditado al saldo del cliente.</p>
+          </div>
+          <div className="flex flex-col gap-2 w-full">
+            {ncCreada.id && (
+              <a
+                href={`/nota-credito/${ncCreada.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full h-10 rounded-xl text-white font-semibold text-sm transition-colors"
+                style={{ backgroundColor: "#a855f7" }}
+              >
+                <Printer size={16} />
+                Imprimir nota de crédito
+              </a>
+            )}
+            <button
+              onClick={() => { onOk(ncCreada.numero); onClose(); }}
+              className="w-full h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

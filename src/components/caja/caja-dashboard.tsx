@@ -1123,9 +1123,9 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
     <NotaCreditoModal
      turnoId={turnoId}
      onClose={() => setModal(null)}
-     onOk={(numero) => {
+     onOk={() => {
       setModal(null);
-      alert(`Nota de crédito ${numero} generada. El saldo a favor fue acreditado al cliente.`);
+      router.refresh();
      }}
     />
    )}
