@@ -342,7 +342,25 @@ export async function getCuentasBancarias() {
  });
 }
 
-// Eliminar compra (admin) 
+// Verificar unicidad de NCF (client-side onBlur check)
+export async function verificarNcfUnico(ncf: string, excluirId?: string): Promise<{ existe: boolean; compra?: { numero: string; fecha: string; suplidor: string } }> {
+ if (!ncf.trim()) return { existe: false };
+ const existente = await prisma.compra.findFirst({
+ where: { ncf: ncf.trim(), ...(excluirId ? { id: { not: excluirId } } : {}) },
+ select: { numero: true, fechaFactura: true, suplidor: { select: { nombre: true } } },
+ });
+ if (!existente) return { existe: false };
+ return {
+ existe: true,
+ compra: {
+ numero: existente.numero,
+ fecha: new Date(existente.fechaFactura).toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric" }),
+ suplidor: existente.suplidor.nombre,
+ },
+ };
+}
+
+// Eliminar compra (admin)
 // Solo si no tiene pagos registrados
 
 export async function eliminarCompra(id: string) {

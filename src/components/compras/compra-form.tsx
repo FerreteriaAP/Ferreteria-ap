@@ -11,7 +11,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { crearCompra, type CompraInput } from "@/actions/compras";
+import { crearCompra, verificarNcfUnico, type CompraInput } from "@/actions/compras";
 import { getProductoPorCodigo, buscarProductosPorKeyword, siguienteCodigoPorCategoria, crearProducto } from "@/actions/productos";
 import { cn } from "@/lib/utils";
 import { Search, RotateCcw, AlertCircle, PackagePlus, X, ShoppingCart, FileWarning } from "lucide-react";
@@ -150,6 +150,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
   const [nombreInicial, setNombreInicial] = useState("");
   const [costoInicial,  setCostoInicial]  = useState(0);
   const [draftDisponible, setDraftDisponible] = useState(false);
+  const [ncfDupError, setNcfDupError] = useState<string | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<FormValues>({ resolver: zodResolver(FormSchema) as any, defaultValues: { suplidorId: "", fechaFactura: hoy, detalles: [] } });
@@ -278,6 +279,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
 
   // Submit
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
+    if (ncfDupError) { setServerError(ncfDupError); return; }
     setServerError(null);
     try {
       const ajustesPrecio = alertaPrecios.filter(a => a.aplicar && a.nuevoPrecioVenta > 0).map(a => ({ productoId: a.productoId, nuevoPrecioVenta: a.nuevoPrecioVenta }));
@@ -418,12 +420,10 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                   form.setValue("suplidorId", v ?? "");
                   const sup = suplidores.find(s => s.id === v);
                   const dias = DIAS_CREDITO[sup?.credito ?? ""] ?? 0;
-                  if (dias > 0) {
-                    const fechaFact = form.getValues("fechaFactura") || hoy;
-                    const d = new Date(fechaFact + "T00:00:00");
-                    d.setDate(d.getDate() + dias);
-                    form.setValue("fechaVencimiento", d.toISOString().split("T")[0]);
-                  }
+                  const fechaFact = form.getValues("fechaFactura") || hoy;
+                  const d = new Date(fechaFact + "T00:00:00");
+                  d.setDate(d.getDate() + dias);
+                  form.setValue("fechaVencimiento", d.toISOString().split("T")[0]);
                 }}
                 items={suplidores.map(s => ({
                   id: s.id,
@@ -467,7 +467,7 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
                 onChange: e => {
                   const sup = suplidores.find(s => s.id === form.getValues("suplidorId"));
                   const dias = DIAS_CREDITO[sup?.credito ?? ""] ?? 0;
-                  if (dias > 0 && e.target.value) {
+                  if (e.target.value) {
                     const d = new Date(e.target.value + "T00:00:00");
                     d.setDate(d.getDate() + dias);
                     form.setValue("fechaVencimiento", d.toISOString().split("T")[0]);
@@ -495,8 +495,21 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
             </Field>
 
             {watchedTipoNcf && watchedTipoNcf !== "none" && (
-              <Field label="Número de NCF" hint={watchedTipoNcf === "E31" ? "NCF electrónico (13 caracteres)" : "NCF físico (13 dígitos)"}>
-                <input className={INPUT_CLS} placeholder={watchedTipoNcf === "E31" ? "E310000000001" : "B010000000001"} {...form.register("ncf")} />
+              <Field label="Número de NCF" hint={watchedTipoNcf === "E31" ? "NCF electrónico (13 caracteres)" : "NCF físico (13 dígitos)"} error={ncfDupError ?? undefined}>
+                <input
+                  className={cn(INPUT_CLS, ncfDupError && "border-destructive focus:ring-destructive")}
+                  placeholder={watchedTipoNcf === "E31" ? "E310000000001" : "B010000000001"}
+                  {...form.register("ncf")}
+                  onBlur={async e => {
+                    const val = e.target.value.trim();
+                    setNcfDupError(null);
+                    if (!val) return;
+                    const res = await verificarNcfUnico(val);
+                    if (res.existe && res.compra) {
+                      setNcfDupError(`NCF ya registrado en ${res.compra.numero} (${res.compra.suplidor} — ${res.compra.fecha})`);
+                    }
+                  }}
+                />
               </Field>
             )}
 
