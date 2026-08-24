@@ -2,9 +2,9 @@ import Link from "next/link";
 import { getVentas } from "@/actions/ventas";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { VentasSearch } from "@/components/ventas/ventas-search";
 
 interface PageProps {
   searchParams: Promise<{ q?: string; tipo?: string; page?: string; sortBy?: string; sortDir?: string }>;
@@ -129,17 +129,14 @@ export default async function VentasPage({ searchParams }: PageProps) {
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <form method="GET" className="flex-1">
-          <input type="hidden" name="tipo"    value={tipo} />
-          <input type="hidden" name="sortBy"  value={sortBy} />
-          <input type="hidden" name="sortDir" value={sortDir} />
-          <Input
-            name="q"
+        <div className="flex-1">
+          <VentasSearch
             defaultValue={busqueda}
-            placeholder="Buscar por número, cliente, NCF..."
-            className="max-w-sm"
+            tipo={tipo}
+            sortBy={sortBy}
+            sortDir={sortDir}
           />
-        </form>
+        </div>
         <div className="flex flex-wrap gap-1">
           {tabs.map((t) => (
             <Link
