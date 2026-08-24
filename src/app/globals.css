@@ -174,7 +174,9 @@
   --sidebar-active-bg: rgba(26,26,26,0.09);
   --sidebar-active-border: #1A1A1A;
 
-  /* Íconos blancos sobre tarjetas negras */
+  --card-fg-hex:       #FFFFFF;
+
+  /* Íconos y texto blancos sobre tarjetas negras */
   [data-module] { --icon-color: #FFFFFF; }
 }
 
