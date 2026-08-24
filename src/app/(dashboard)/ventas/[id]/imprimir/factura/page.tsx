@@ -197,7 +197,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #1a1a1a; background: #ebebeb; }
 
         .wrap { max-width: 820px; margin: 0 auto; padding: 0 16px 40px; }
-        .doc { background: #fff; padding: 32px 40px 28px; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.12); display: flex; flex-direction: column; min-height: 1050px; }
+        .doc { background: #fff; padding: 32px 40px 28px; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
 
         /* Logo */
         .logo-area { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 3.5px solid #f5821f; }
