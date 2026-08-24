@@ -789,10 +789,11 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  codigo: string;
  nombre: string;
  categoria: string;
+ unidad: string;
  ventas: string;       // subtotal sin ITBIS — base para ganancia
  totalFacturado: string; // subtotal + itbis — lo que aparece en facturas
  cogs: string;
- cantidad: string;
+ cantidad: string;     // siempre en unidad base (fraccionadas ÷ factorFraccion)
  facturas: string;
  };
 
@@ -801,6 +802,7 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  p.codigo,
  p.nombre,
  cat.nombre AS categoria,
+ p."unidadMedida" AS unidad,
  SUM(dv.subtotal)::text AS ventas,
  SUM(dv.subtotal + dv.itbis)::text AS "totalFacturado",
  SUM(
@@ -816,12 +818,24 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  ELSE dv.cantidad * p."costoPromedio"
  END
  )::text AS cogs,
- SUM(dv.cantidad)::text AS cantidad,
+ SUM(
+ CASE
+ WHEN p."esFraccionable" = true
+ AND p."factorFraccion" IS NOT NULL
+ AND p."factorFraccion" > 0
+ AND (
+ (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
+ OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
+ )
+ THEN dv.cantidad / p."factorFraccion"
+ ELSE dv.cantidad
+ END
+ )::text AS cantidad,
  COUNT(DISTINCT v.id)::text AS facturas
  FROM detalles_venta dv
  JOIN ventas v ON v.id = dv."ventaId" JOIN productos p ON p.id = dv."productoId" JOIN categorias cat ON cat.id = p."categoriaId" WHERE v.tipo = 'FACTURADA' AND v."createdAt" >= ${inicio}
  AND v."createdAt" <= ${fin}
- GROUP BY p.id, p.codigo, p.nombre, cat.nombre
+ GROUP BY p.id, p.codigo, p.nombre, cat.nombre, p."unidadMedida"
  ORDER BY SUM(dv.subtotal + dv.itbis) DESC
  LIMIT ${limit}
  `;
@@ -835,12 +849,13 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  codigo: r.codigo,
  nombre: r.nombre,
  categoria: r.categoria,
+ unidad: r.unidad,
  ventas,
  totalFacturado,
  cogs,
  ganancia: ventas - cogs,  // ganancia real = subtotal (sin ITBIS) − costo
  margen: ventas > 0 ? ((ventas - cogs) / ventas) * 100 : 0,
- cantidad: Number(r.cantidad),
+ cantidad: Number(r.cantidad), // en unidad base (fraccionadas ya convertidas)
  facturas: Number(r.facturas),
  };
  });
