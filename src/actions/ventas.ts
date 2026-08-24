@@ -561,8 +561,10 @@ export async function facturarVenta(ventaId: string, data: {
  // TODO: activar tras migrar servidor (pnpm prisma db push)
  // Snapshot costoAlVender para COGS histórico exacto — pendiente de columna en servidor
 
- if (venta.credito !== "CONTADO") {
- const dias = calcularDiasCredito(venta.credito) ?? 30;
+ // Crear CxC para TODAS las ventas del módulo (contado = vence hoy, crédito = N días).
+ // PDV/caja gestiona su propia CxC; este bloque es solo para el flujo cotización→factura.
+ {
+ const dias = venta.credito !== "CONTADO" ? (calcularDiasCredito(venta.credito) ?? 30) : 0;
  await tx.cuentaPorCobrar.create({
  data: {
  ventaId: ventaId,
