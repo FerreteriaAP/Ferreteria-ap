@@ -38,13 +38,14 @@ const TEMAS = [
  },
  {
  id: "dark-multicolor",
- nombre: "Dark Multi",
- desc: "Carbón · azul / naranja / dorado",
- bg: "#111C2A",
- panel: "#0F1724",
- accent: "#FF6A16",
- text: "#F5F7FA",
- border: "#26384C",
+ nombre: "Noir",
+ desc: "Gris claro · tarjetas negras",
+ bg: "#E9E9E9",
+ panel: "#F4F4F4",
+ accent: "#1A1A1A",
+ text: "#111111",
+ border: "#D2D2D2",
+ cardBg: "#1A1A1A",
  },
  {
  id: "carbon",
@@ -116,15 +117,19 @@ export function TemaSelector({ temaActual }: { temaActual: string }) {
                 </div>
                 {/* Cards mini */}
                 <div className="grid grid-cols-3 gap-0.5">
-                  {[...Array(6)].map((_, i) => (
+                  {[...Array(6)].map((_, i) => {
+                    const cardColor = (t as typeof t & { cardBg?: string }).cardBg ?? t.panel;
+                    const iconColor = (t as typeof t & { cardBg?: string }).cardBg ? "#FFFFFF" : t.accent;
+                    return (
                     <div
                       key={i}
                       className="rounded aspect-square flex items-center justify-center"
-                      style={{ backgroundColor: t.panel, border: `1px solid ${t.border}` }}
+                      style={{ backgroundColor: cardColor, border: `1px solid ${t.border}` }}
                     >
-                      <div className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: t.accent, opacity: i === 0 ? 1 : 0.35 }} />
+                      <div className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: iconColor, opacity: i === 0 ? 1 : 0.35 }} />
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

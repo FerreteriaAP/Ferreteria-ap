@@ -134,58 +134,48 @@
   --sidebar-active-border: #075E9E;
 }
 
-/* ── DARK MULTI ─────────────────────────────────────────────────────────── */
+/* ── NOIR ────────────────────────────────────────────────────────────────── */
+/* Fondo gris claro · tarjetas de módulo negras · acento negro · sin naranja */
 [data-ap-theme="dark-multicolor"] {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --background:        #111C2A;
-  --foreground:        #F5F7FA;
-  --muted-foreground:  #7A8FA8;
-  --border:            #26384C;
-  --card:              #162236;
-  --panel:             #0F1724;
-  --input:             #162236;
-  --ring:              #FF6A16;
-  --primary:           #FF6A16;
+  --background:        #E9E9E9;
+  --foreground:        #111111;
+  --muted-foreground:  #636363;
+  --border:            #D2D2D2;
+  --card:              #FFFFFF;
+  --panel:             #F4F4F4;
+  --input:             #FFFFFF;
+  --ring:              #1A1A1A;
+  --primary:           #1A1A1A;
   --primary-foreground:#FFFFFF;
-  --secondary:         #1C2E42;
-  --secondary-foreground: #F5F7FA;
-  --accent:            #FF6A16;
+  --secondary:         #E2E2E2;
+  --secondary-foreground: #111111;
+  --accent:            #1A1A1A;
   --accent-foreground: #FFFFFF;
-  --destructive:       #EF4444;
+  --destructive:       #DC2626;
   --destructive-foreground: #FFFFFF;
-  --popover:           #0F1724;
-  --popover-foreground:#F5F7FA;
-  --muted:             #162236;
+  --popover:           #FFFFFF;
+  --popover-foreground:#111111;
+  --muted:             #E2E2E2;
 
-  --accent-hex:        #FF6A16;
-  --header-bg-hex:     #091220;
-  --card-bg-hex:       #162236;
-  --card-border-hex:   #26384C;
-  --status-bar-bg:     #0F1724;
-  --success:           #22C55E;
-  --warning:           #F59E0B;
+  --accent-hex:        #1A1A1A;
+  --header-bg-hex:     #DCDCDC;
+  --card-bg-hex:       #1A1A1A;
+  --card-border-hex:   #1A1A1A;
+  --status-bar-bg:     #F4F4F4;
+  --success:           #16A34A;
+  --warning:           #D97706;
   --warning-foreground:#FFFFFF;
-  --danger:            #EF4444;
-  --sidebar-bg:        #091220;
-  --sidebar-border:    #1C2E42;
-  --sidebar-item-hover:#162236;
-  --sidebar-active-bg: rgba(255,106,22,0.15);
-  --sidebar-active-border: #FF6A16;
+  --danger:            #DC2626;
+  --sidebar-bg:        #DCDCDC;
+  --sidebar-border:    #D2D2D2;
+  --sidebar-item-hover:#D4D4D4;
+  --sidebar-active-bg: rgba(26,26,26,0.09);
+  --sidebar-active-border: #1A1A1A;
 
-  /* Colores multicolor por módulo (tarjetas del dashboard) */
-  [data-module="Contactos"]    { --icon-color: #38BDF8; }
-  [data-module="Ventas"]       { --icon-color: #22C55E; }
-  [data-module="Punto de Venta"] { --icon-color: #A78BFA; }
-  [data-module="Compras"]      { --icon-color: #FB923C; }
-  [data-module="Caja"]         { --icon-color: #FACC15; }
-  [data-module="Inventario"]   { --icon-color: #34D399; }
-  [data-module="Contabilidad"] { --icon-color: #60A5FA; }
-  [data-module="Gastos"]       { --icon-color: #F87171; }
-  [data-module="Nóminas"]      { --icon-color: #E879F9; }
-  [data-module="Empleados"]    { --icon-color: #FCD34D; }
-  [data-module="Alertas"]      { --icon-color: #FB923C; }
-  [data-module="Configuración"]{ --icon-color: #94A3B8; }
+  /* Íconos blancos sobre tarjetas negras */
+  [data-module] { --icon-color: #FFFFFF; }
 }
 
 /* ── CARBON ─────────────────────────────────────────────────────────────── */
