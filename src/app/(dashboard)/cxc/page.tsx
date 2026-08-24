@@ -20,16 +20,14 @@ function diasVencida(fecha: Date): number {
 
 function bucketLabel(days: number): string {
  if (days <= 0) return "Al día";
- if (days <= 30) return "0-30 días";
- if (days <= 60) return "31-60 días";
- if (days <= 90) return "61-90 días";
- return "+90 días";
+ if (days <= 30) return "Vencida 0-30d";
+ if (days <= 60) return "Vencida 31-60d";
+ if (days <= 90) return "Vencida 61-90d";
+ return "Vencida +90d";
 }
 
 function bucketVariant(days: number): "default" | "secondary" | "outline" | "destructive" {
  if (days <= 0) return "outline";
- if (days <= 30) return "secondary";
- if (days <= 60) return "default";
  return "destructive";
 }
 
