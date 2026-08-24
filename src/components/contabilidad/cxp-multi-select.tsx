@@ -43,16 +43,11 @@ const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDig
 
 function agingVariant(dias: number): "default" | "secondary" | "outline" | "destructive" {
  if (dias <= 0) return "outline";
- if (dias <= 30) return "secondary";
- if (dias <= 60) return "default";
  return "destructive";
 }
 function agingLabel(dias: number) {
  if (dias <= 0) return "Al día";
- if (dias <= 30) return `${dias}d · 0-30`;
- if (dias <= 60) return `${dias}d · 31-60`;
- if (dias <= 90) return `${dias}d · 61-90`;
- return `${dias}d · +90`;
+ return "Vencida";
 }
 function agingColor(dias: number) {
  if (dias <= 0) return "text-green-700 dark:text-green-400";
@@ -291,9 +286,8 @@ export function CxPMultiSelect({ grupos }: Props) {
  "text-xs",
  c.diasRestantes < 0 ? "text-destructive font-semibold" : "text-muted-foreground"
  )}>
- {c.diasRestantes < 0 ? `${Math.abs(c.diasRestantes)}d venc.`
- : c.diasRestantes === 0 ? "hoy"
- : `${c.diasRestantes}d`}
+ {c.diasRestantes === 0 ? "hoy"
+ : `${Math.abs(c.diasRestantes)} Días`}
  </span>
  </div>
  {/* Estado badge — 92px, derecha */}
