@@ -48,7 +48,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
             <div>
               <div className="emp-nombre">{EMPRESA.nombre}</div>
               <div className="emp-det">RNC: {EMPRESA.rnc}</div>
-              <div className="emp-det">Tel.: {EMPRESA.tel} (WhatsApp) / {EMPRESA.email}</div>
+              <div className="emp-det">Tel.: {EMPRESA.tel} (Ws) · {EMPRESA.email}</div>
               <div className="emp-det">{EMPRESA.dir}</div>
               <div className="emp-det">{EMPRESA.ciudad}</div>
               <div className="emp-det emp-fecha"><strong>Fecha Emisión:</strong> {fecha}</div>
@@ -154,10 +154,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
                   </div>
                 ))}
               </div>
-              <div className="banco-contacto">
-                <span>📱 WhatsApp/Tel: {EMPRESA.tel}</span>
-                <span>{EMPRESA.email}</span>
-              </div>
+
               {v.notas && (
                 <div className="notas-box"><strong>Notas:</strong> {v.notas}</div>
               )}
@@ -247,7 +244,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         .banco-ref { font-size: 11px; margin-bottom: 7px; color: #333; }
         .banco-item { font-size: 11px; line-height: 1.9; display: flex; gap: 5px; }
         .bico { color: #f5821f; font-weight: 700; }
-        .banco-contacto { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; font-size: 10px; color: #666; }
+
         .notas-box { margin-top: 10px; font-size: 10.5px; color: #555; padding: 7px 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ddd; }
 
         /* Totales */
