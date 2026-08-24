@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { cookies } from "next/headers";
 import { TemaSelector } from "@/components/configuracion/tema-selector";
 import { EmpresaForm, CuentasBancariasPanel } from "@/components/configuracion/empresa-form";
 import { UsuariosPanel } from "@/components/configuracion/usuarios-panel";
@@ -7,7 +8,12 @@ import { getEmpresaConfig, getCuentasBancarias } from "@/actions/empresa";
 import { getUsuarios } from "@/actions/usuarios";
 import { Palette, Building2, Users } from "lucide-react";
 
+const TEMAS_VALIDOS = ["dark-ops", "gris-claro", "azul-metal", "dark-multicolor", "carbon"];
+
 async function getConfig() {
+ const jar = await cookies();
+ const cookieTema = jar.get("ap-tema")?.value;
+
  const [empleados, contactos, productos, usuarios, temaConfig] = await Promise.all([
  prisma.empleado.count(),
  prisma.contacto.count(),
@@ -20,7 +26,10 @@ async function getConfig() {
  contactos,
  productos,
  usuarios,
- temaActual: temaConfig?.valor ?? "dark-ops",
+ // Cookie tiene prioridad (tema por usuario), fallback a DB global
+ temaActual: (cookieTema && TEMAS_VALIDOS.includes(cookieTema))
+   ? cookieTema
+   : (temaConfig?.valor ?? "dark-ops"),
  };
 }
 

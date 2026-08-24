@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
@@ -19,8 +20,15 @@ export const metadata: Metadata = {
   description: "Sistema de gestión Ferretería AP",
 };
 
+const TEMAS_VALIDOS = ["dark-ops", "gris-claro", "azul-metal", "dark-multicolor", "carbon"];
+
 async function getTemaActivo(): Promise<string> {
+  // Prioridad: cookie del usuario (por sesión/navegador) → DB global → default
   try {
+    const jar = await cookies();
+    const cookieTema = jar.get("ap-tema")?.value;
+    if (cookieTema && TEMAS_VALIDOS.includes(cookieTema)) return cookieTema;
+
     const cfg = await prisma.configuracion.findUnique({
       where: { clave: "TEMA_ACTIVO" },
     });
