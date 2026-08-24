@@ -15,16 +15,29 @@ export const EMPRESA = {
   tel:       "+1 829-584-9708",
   cel:       "+1 829-584-9708",   // tiene WhatsApp
   whatsapp:  "18295849708",        // para enlace wa.me
-  email:     "ferreteria.ap@gmail.com", // TODO: confirmar email de negocios
+  email:     "Isai.ferreteria@gmail.com",
   dir:       "Prol. 27 de Febrero No. 452",
   ciudad:    "Santo Domingo, República Dominicana",
 } as const;
 
-/** Cuentas para instrucciones de pago en facturas */
-export const BANCOS = [
-  { banco: "Banco Popular Dominicano", cuenta: "XXX-XXXXXX-X" }, // TODO: número de cuenta real
-  { banco: "Banco BHD León",            cuenta: "" },              // Próximamente
-] as const;
+/**
+ * Cuentas bancarias activas — leídas del módulo de Bancos del sistema.
+ * Usar getBancosEmpresa() en páginas de impresión (Server Components).
+ */
+import { prisma } from "@/lib/prisma";
+
+export async function getBancosEmpresa() {
+  const cuentas = await prisma.cuentaBancaria.findMany({
+    where: { activa: true },
+    select: { banco: true, numero: true, tipo: true },
+    orderBy: { banco: "asc" },
+  });
+  return cuentas.map(c => ({
+    banco: c.banco,
+    cuenta: c.numero,
+    tipo: c.tipo as string,
+  }));
+}
 
 /** Términos de crédito legibles */
 export const CREDITO_LABEL: Record<string, string> = {

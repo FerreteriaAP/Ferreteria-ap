@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
 import { PrintButtons } from "@/components/nominas/print-buttons";
 import { PrintLogo } from "@/components/print/logo";
-import { EMPRESA, BANCOS, CREDITO_LABEL, NCF_LABEL } from "@/lib/empresa";
+import { EMPRESA, getBancosEmpresa, CREDITO_LABEL, NCF_LABEL } from "@/lib/empresa";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -15,7 +15,10 @@ const fmtN = (n: any) => {
 export default async function ImprimirFacturaPage({ params }: PageProps) {
   const { id } = await params;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const v = (await getVenta(id)) as any;
+  const [v, bancos] = await Promise.all([
+    getVenta(id) as Promise<any>,
+    getBancosEmpresa(),
+  ]);
   if (!v || v.tipo !== "FACTURADA") notFound();
 
   const fecha = new Date(v.fechaEmision).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -138,18 +141,18 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
                 Referencia de pago: <strong>{v.numero}</strong>
               </div>
               <div className="banco-lista">
-                {BANCOS.filter(b => b.cuenta).map((b, i) => (
-                  <div key={i} className="banco-item">
-                    <span className="bico">•</span>
-                    <span>{b.banco}: <strong>{b.cuenta}</strong></span>
-                  </div>
-                ))}
-                {BANCOS.some(b => !b.cuenta) && (
+                {bancos.length === 0 && (
                   <div className="banco-item" style={{ color: "#aaa", fontSize: 10 }}>
                     <span className="bico">•</span>
-                    <span>Banco BHD León — Próximamente</span>
+                    <span>Cuentas bancarias no configuradas</span>
                   </div>
                 )}
+                {bancos.map((b, i) => (
+                  <div key={i} className="banco-item">
+                    <span className="bico">•</span>
+                    <span>{b.banco}{b.tipo ? ` (${b.tipo})` : ""}: <strong>{b.cuenta}</strong></span>
+                  </div>
+                ))}
               </div>
               <div className="banco-contacto">
                 <span>📱 WhatsApp/Tel: {EMPRESA.tel}</span>
