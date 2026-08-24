@@ -142,7 +142,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </span> )}
  </div> </form> {/* Estado de resultados (P&L) */}
  <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Estado de resultados — {etiquetaPeriodo}</h2> </div> <div className="p-5 space-y-0 divide-y"> {/* Ventas */}
- <div className="flex items-center justify-between py-3"> <div> <p className="font-semibold text-sm">Ventas netas</p> <p className="text-xs text-muted-foreground">Subtotal facturado sin ITBIS · base del negocio</p> </div> <div className="text-right"> <p className="font-bold text-lg font-mono">{fmt(plVentas, 2)}</p> {varVentas !== null && <Chip v={varVentas} />}
+ <div className="flex items-center justify-between py-3"> <div> <p className="font-semibold text-sm">Ventas totales</p> <p className="text-xs text-muted-foreground">Total facturado al cliente (ITBIS incluido)</p> </div> <div className="text-right"> <p className="font-bold text-lg font-mono">{fmt(plVentas, 2)}</p> {varVentas !== null && <Chip v={varVentas} />}
  </div> </div> {/* COGS */}
  <div className="flex items-center justify-between py-3"> <div> <p className="font-medium text-sm text-muted-foreground">− Costo de lo vendido (COGS)</p> <p className="text-xs text-muted-foreground">Costo promedio × cantidad vendida por línea</p> </div> <p className="font-mono text-sm font-medium text-muted-foreground"> ({fmt(plCogs, 2)})
  </p> </div> {/* Ganancia bruta */}
@@ -234,7 +234,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </td> <td className="px-4 py-3 text-right text-xs text-muted-foreground"> {c.facturas}
  </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium">
  {fmt(c.totalFacturado, 2)}
- <p className="text-[10px] text-muted-foreground font-normal">{fmt(c.ventas, 2)} s/ITBIS</p>
+ <p className="text-[10px] text-muted-foreground font-normal">{fmt(c.ventas, 2)}</p>
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(c.cogs, 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono text-xs font-semibold",
  c.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(c.ganancia, 2)}
@@ -260,7 +260,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> {p.cantidad.toLocaleString("es-DO", { maximumFractionDigits: 2 })} <span className="text-[10px] opacity-60 ml-0.5">{p.unidad}</span>
  </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium">
  {fmt(p.totalFacturado, 2)}
- <p className="text-[10px] text-muted-foreground font-normal">{fmt(p.ventas, 2)} s/ITBIS</p>
+ <p className="text-[10px] text-muted-foreground font-normal">{fmt(p.ventas, 2)}</p>
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(p.cogs, 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono text-xs font-semibold",
  p.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(p.ganancia, 2)}

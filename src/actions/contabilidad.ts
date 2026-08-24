@@ -315,12 +315,12 @@ export async function getResumenMensualPL(año: number) {
  type GRow = { mes: number; gastos: string };
 
  const [ventaRows, gastoRows] = await Promise.all([
- // Ventas netas SIN ITBIS + COGS con costoPromedio (costoAlVender activar tras migrar servidor)
- // Revenue = subtotal (sin ITBIS — el ITBIS es recaudación para DGII, no ingreso del negocio)
+ // Ventas CON ITBIS (total facturado al cliente) + COGS con costoPromedio
+ // Revenue = subtotal + itbis (dinero real recibido del cliente)
  // COGS = cantidad × costoPromedio; si fraccionado ÷ factorFraccion
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
- SUM(dv.subtotal)::text AS ventas,
+ SUM(dv.subtotal + dv.itbis)::text AS ventas,
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -439,8 +439,8 @@ export async function getVentasPorCategoria(opts: {
  const cat = d.producto.categoria.nombre;
  const key = cat;
 
- // Revenue = subtotal SIN ITBIS (el ITBIS es recaudación para DGII, no ingreso propio)
- const ventas = Number(d.subtotal);
+ // Revenue = subtotal + itbis (total facturado al cliente, dinero real recibido)
+ const ventas = Number(d.subtotal) + Number(d.itbis);
 
  // COGS: costoPromedio actual (costoAlVender se activará tras migrar el servidor)
  const cantidad = Number(d.cantidad);
@@ -758,7 +758,7 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  `;
 
  return rows.map((r) => {
- const ventas = Number(r.ventas);
+ const ventas = Number(r.totalFacturado); // con ITBIS — dinero real recibido
  const totalFacturado = Number(r.totalFacturado);
  const cogs = Number(r.cogs);
  return {
