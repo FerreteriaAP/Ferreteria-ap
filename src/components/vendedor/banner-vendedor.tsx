@@ -53,7 +53,7 @@ export function BannerVendedor({
  onClick={() => setOpen((v) => !v)}
  className="text-xs text-primary hover:text-primary/80 font-medium transition-colors flex items-center gap-1" > Cambiar
  <svg viewBox="0 0 16 16" fill="none" className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`}> <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/> </svg> </button> {open && (
- <div className="absolute right-0 top-full mt-1.5 w-48 rounded-xl border bg-popover shadow-lg overflow-hidden z-50"> {otros.length > 0 && (
+ <div className="absolute right-0 top-full mt-1.5 w-48 rounded-xl shadow-xl overflow-hidden z-50" style={{ background: "var(--card, #fff)", border: "1px solid var(--border)" }}> {otros.length > 0 && (
  <> <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"> Cambiar a
  </div> {otros.map((v) => (
  <button
