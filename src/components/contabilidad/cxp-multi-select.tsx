@@ -42,7 +42,7 @@ interface Props {
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 function agingBadgeClass(dias: number): string {
- if (dias <= 0) return "border-green-600 text-green-700 dark:border-green-500 dark:text-green-400";
+ if (dias <= 0) return "";
  return "border-red-500 text-red-500 dark:border-red-400 dark:text-red-400";
 }
 function agingLabel(dias: number) {
