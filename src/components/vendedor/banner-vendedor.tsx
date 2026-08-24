@@ -47,7 +47,7 @@ export function BannerVendedor({
  const iniciales = `${vendedor.nombre[0] ?? ""}${vendedor.apellido[0] ?? ""}`.toUpperCase();
 
  return (
- <div className="flex items-center justify-between rounded-xl border bg-primary/5 border-primary/20 px-4 py-2.5"> <div className="flex items-center gap-2.5"> <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center shrink-0"> <span className="text-[11px] font-bold text-primary-foreground">{iniciales}</span> </div> <div className="text-sm"> <span className="text-muted-foreground">Operando como </span> <span className="font-semibold">{vendedor.nombre} {vendedor.apellido}</span> </div> </div> {/* Botón cambiar */}
+ <div data-print-hide className="flex items-center justify-between rounded-xl border bg-primary/5 border-primary/20 px-4 py-2.5"> <div className="flex items-center gap-2.5"> <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center shrink-0"> <span className="text-[11px] font-bold text-primary-foreground">{iniciales}</span> </div> <div className="text-sm"> <span className="text-muted-foreground">Operando como </span> <span className="font-semibold">{vendedor.nombre} {vendedor.apellido}</span> </div> </div> {/* Botón cambiar */}
  <div className="relative" ref={ref}> <button
  disabled={pending}
  onClick={() => setOpen((v) => !v)}

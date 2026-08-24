@@ -240,3 +240,27 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+/* ── IMPRESIÓN GLOBAL — ocultar toda la chrome del dashboard ─────────────
+   Las páginas de impresión (factura, conduce, nómina, etc.) viven dentro
+   del DashboardLayout. En @media print ocultamos el header, el banner de
+   empleado/vendedor y el padding del <main> para que solo quede el doc. */
+@media print {
+  /* Header de navegación */
+  header,
+  [data-print-hide],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Quitar padding del <main> para que el doc ocupe toda la hoja */
+  main {
+    padding: 0 !important;
+  }
+
+  /* Fondo blanco en body y main para que no salga el color de tema */
+  body,
+  main {
+    background: white !important;
+  }
+}
