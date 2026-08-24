@@ -56,6 +56,43 @@ function calcularDiasCredito(credito: string): number | null {
 
 // Queries 
 
+/** Sugerencias para el buscador de ventas — devuelve números de factura + nombres de cliente */
+export async function getVentasSugerencias(q: string): Promise<{ label: string; sublabel?: string; value: string }[]> {
+ if (!q || q.trim().length < 1) return [];
+ const term = q.trim();
+
+ const [facturas, clientes] = await Promise.all([
+  // Números de factura/documento que empiecen o contengan el término
+  prisma.venta.findMany({
+   where: { numero: { contains: term, mode: "insensitive" } },
+   select: { numero: true, tipo: true, cliente: { select: { nombre: true } } },
+   orderBy: { numero: "desc" },
+   take: 5,
+  }),
+  // Clientes distintos cuyo nombre coincida
+  prisma.venta.findMany({
+   where: { cliente: { nombre: { contains: term, mode: "insensitive" } } },
+   select: { cliente: { select: { nombre: true } } },
+   distinct: ["clienteId"],
+   take: 5,
+  }),
+ ]);
+
+ const sugs: { label: string; sublabel?: string; value: string }[] = [];
+
+ for (const f of facturas) {
+  sugs.push({ label: f.numero, sublabel: f.cliente.nombre, value: f.numero });
+ }
+ for (const c of clientes) {
+  const nombre = c.cliente.nombre;
+  if (!sugs.some(s => s.value === nombre)) {
+   sugs.push({ label: nombre, value: nombre });
+  }
+ }
+
+ return sugs;
+}
+
 export async function getVentas(opts: {
  tipo?: string;
  busqueda?: string;
