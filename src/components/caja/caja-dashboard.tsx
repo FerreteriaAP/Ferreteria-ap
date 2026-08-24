@@ -717,6 +717,22 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
  const totalCobro = lineas.reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
  const montoNCNum = parseFloat(montoNC) || 0;
  const totalConNC = Math.max(0, totalCobro - montoNCNum);
+ const ncCubreTodo = montoNCNum > 0 && totalConNC < 0.01;
+ // Distribución de NC por línea (igual orden que el servidor)
+ const ncPorLinea: Record<string, number> = (() => {
+  const dist: Record<string, number> = {};
+  let restante = montoNCNum;
+  for (const l of lineas) {
+   const saldo = parseFloat(l.monto) || 0;
+   const cubre = Math.min(restante, saldo);
+   dist[l.cxcId] = cubre;
+   restante -= cubre;
+   if (restante <= 0.01) break;
+  }
+  return dist;
+ })();
+ // Saldo restante de la NC tras aplicar
+ const ncSaldoRestante = ncSeleccionada ? Math.max(0, ncSeleccionada.montoRestante - montoNCNum) : 0;
 
  const fmtMoney = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
  const fmtFecha = (d: Date | string) => new Date(d).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -891,9 +907,21 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
        </button>
       </div>
       {montoNCNum > 0 && (
-       <p className="text-xs font-semibold" style={{ color: "#a855f7" }}>
-        Descuento NC: −{fmtMoney(montoNCNum)} → Por cobrar: {fmtMoney(totalConNC)}
-       </p>
+       <div className="space-y-1">
+        <p className="text-xs font-semibold" style={{ color: "#a855f7" }}>
+         Descuento NC: −{fmtMoney(montoNCNum)} → Por cobrar: {fmtMoney(totalConNC)}
+        </p>
+        {ncCubreTodo ? (
+         <p className="text-xs font-bold text-green-600 dark:text-green-400">
+          ✓ La NC cubre el total — no se requiere cobro adicional
+         </p>
+        ) : null}
+        {ncSaldoRestante > 0.01 && (
+         <p className="text-xs text-muted-foreground">
+          Saldo restante de la NC tras aplicar: <strong>{fmtMoney(ncSaldoRestante)}</strong> (queda disponible)
+         </p>
+        )}
+       </div>
       )}
      </div>
     )}
@@ -906,12 +934,22 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
        </span>
        <span className="text-xs font-mono font-bold text-primary">{fmtMoney(totalCobro)}</span>
       </div>
-      {lineas.map(l => (
+      {lineas.map(l => {
+       const ncEstaLinea = ncPorLinea[l.cxcId] ?? 0;
+       const saldo = parseFloat(l.monto) || 0;
+       const efectivo = Math.max(0, saldo - ncEstaLinea);
+       const cubierta = ncEstaLinea >= saldo - 0.01 && ncEstaLinea > 0;
+       return (
        <div key={l.cxcId} className="px-3 py-2.5 border-b last:border-0 flex items-center gap-3">
         <div className="flex-1 min-w-0">
          <p className="text-sm font-mono font-bold truncate" style={{ color: "var(--accent-hex)" }}>{l.cxc.venta.numero}</p>
          <p className="text-xs text-muted-foreground truncate">{l.cxc.cliente.nombre}</p>
          <p className="text-[10px] text-muted-foreground">Saldo: {fmtMoney(l.cxc.saldo)}</p>
+         {ncEstaLinea > 0.01 && (
+          <p className="text-[10px] mt-0.5" style={{ color: "#a855f7" }}>
+           NC cubre: {fmtMoney(ncEstaLinea)}{cubierta ? " — Cubierta" : ` → Efectivo: ${fmtMoney(efectivo)}`}
+          </p>
+         )}
         </div>
         <input type="number" min="0.01" step="0.01" max={l.cxc.saldo} value={l.monto}
          onChange={e => setMontoLinea(l.cxcId, e.target.value)}
@@ -919,15 +957,18 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
         <button type="button" onClick={() => quitarLinea(l.cxcId)}
          className="text-xs text-destructive hover:text-destructive/70 transition-colors px-1">✕</button>
        </div>
-      ))}
+       );
+      })}
       <div className="px-3 py-2.5 bg-primary/5 border-t flex justify-between items-center">
-       <span className="text-sm font-bold">Total a cobrar</span>
-       <span className="text-base font-mono font-bold text-primary">{fmtMoney(totalCobro)}</span>
+       <span className="text-sm font-bold">{ncCubreTodo ? "Total (cubierto por NC)" : montoNCNum > 0 ? "Por cobrar (sin NC)" : "Total a cobrar"}</span>
+       <span className={cn("text-base font-mono font-bold", ncCubreTodo ? "text-green-600 dark:text-green-400" : "text-primary")}>
+        {ncCubreTodo ? fmtMoney(0) : montoNCNum > 0 ? fmtMoney(totalConNC) : fmtMoney(totalCobro)}
+       </span>
       </div>
      </div>
     )}
 
-    {lineas.length > 0 && (
+    {lineas.length > 0 && !ncCubreTodo && (
      <Field label="Forma de pago">
       <div className="grid grid-cols-2 gap-2">
        {METODOS_COBRO_CXC.map(m => (
@@ -955,7 +996,11 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
     {error && <ErrorMsg>{error}</ErrorMsg>}
     <ModalActions
      onClose={onClose}
-     label={lineas.length > 1 ? `Registrar ${lineas.length} cobros (${fmtMoney(totalCobro)})` : "Registrar cobro"}
+     label={ncCubreTodo
+      ? `Aplicar NC — ${fmtMoney(montoNCNum)} (total cubierto)`
+      : lineas.length > 1
+       ? `Registrar ${lineas.length} cobros (${fmtMoney(totalConNC > 0 ? totalConNC : totalCobro)})`
+       : `Registrar cobro${totalConNC > 0 && montoNCNum > 0 ? ` (${fmtMoney(totalConNC)})` : totalCobro > 0 ? ` (${fmtMoney(totalCobro)})` : ""}`}
      isPending={isPending}
     />
    </form>
