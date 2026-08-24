@@ -182,21 +182,21 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </a> {isCurrent && (
  <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 15%, transparent)", color: "var(--accent-hex)" }}> Actual
  </span> )}
- </td> <td className="px-4 py-2.5 text-right font-mono text-xs"> {tieneData ? fmt(m.ventas) : <span className="text-muted-foreground">—</span>}
- </td> <td className="px-4 py-2.5 text-right font-mono text-xs text-muted-foreground"> {m.cogs > 0 ? `(${fmt(m.cogs)})` : "—"}
+ </td> <td className="px-4 py-2.5 text-right font-mono text-xs"> {tieneData ? fmt(m.ventas, 2) : <span className="text-muted-foreground">—</span>}
+ </td> <td className="px-4 py-2.5 text-right font-mono text-xs text-muted-foreground"> {m.cogs > 0 ? `(${fmt(m.cogs, 2)})` : "—"}
  </td> <td className={cn("px-4 py-2.5 text-right font-mono text-xs font-medium",
- m.gananciaBruta > 0 ? "text-green-700 dark:text-green-400" : m.gananciaBruta < 0 ? "text-destructive" : "text-muted-foreground")}> {m.ventas > 0 ? fmt(m.gananciaBruta) : "—"}
+ m.gananciaBruta > 0 ? "text-green-700 dark:text-green-400" : m.gananciaBruta < 0 ? "text-destructive" : "text-muted-foreground")}> {m.ventas > 0 ? fmt(m.gananciaBruta, 2) : "—"}
  </td> <td className={cn("px-4 py-2.5 text-right text-xs font-semibold", colorMargen(m.margenBruto))}> {m.ventas > 0 ? pct(m.margenBruto) : "—"}
- </td> <td className="px-4 py-2.5 text-right font-mono text-xs text-muted-foreground"> {m.gastos > 0 ? `(${fmt(m.gastos)})` : "—"}
+ </td> <td className="px-4 py-2.5 text-right font-mono text-xs text-muted-foreground"> {m.gastos > 0 ? `(${fmt(m.gastos, 2)})` : "—"}
  </td> <td className={cn("px-4 py-2.5 text-right font-mono text-xs font-bold",
- m.gananciaNeta > 0 ? "text-green-700 dark:text-green-400" : m.gananciaNeta < 0 ? "text-destructive" : "text-muted-foreground")}> {tieneData ? fmt(m.gananciaNeta) : "—"}
+ m.gananciaNeta > 0 ? "text-green-700 dark:text-green-400" : m.gananciaNeta < 0 ? "text-destructive" : "text-muted-foreground")}> {tieneData ? fmt(m.gananciaNeta, 2) : "—"}
  </td> <td className="px-4 py-2.5"> <Barra value={m.ventas} max={maxVentas} color="bg-orange-500/40" /> </td> </tr> );
  })}
- </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td className="px-4 py-3 font-bold">Total {año}</td> <td className="px-4 py-3 text-right font-mono font-bold text-sm">{fmt(plVentas)}</td> <td className="px-4 py-3 text-right font-mono text-sm text-muted-foreground">({fmt(plCogs)})</td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-sm",
- plGananciaBruta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaBruta)}
+ </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td className="px-4 py-3 font-bold">Total {año}</td> <td className="px-4 py-3 text-right font-mono font-bold text-sm">{fmt(plVentas, 2)}</td> <td className="px-4 py-3 text-right font-mono text-sm text-muted-foreground">({fmt(plCogs, 2)})</td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-sm",
+ plGananciaBruta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaBruta, 2)}
  </td> <td className={cn("px-4 py-3 text-right font-bold", colorMargen(plMargenBruto))}> {pct(plMargenBruto)}
- </td> <td className="px-4 py-3 text-right font-mono text-sm text-muted-foreground">({fmt(plGastos)})</td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-sm",
- plGananciaNeta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaNeta)}
+ </td> <td className="px-4 py-3 text-right font-mono text-sm text-muted-foreground">({fmt(plGastos, 2)})</td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-sm",
+ plGananciaNeta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaNeta, 2)}
  </td> <td /> </tr> </tfoot> </table> </div> </div> )}
 
  {/* Ganancia por categoría */}
@@ -234,7 +234,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </td> <td className="px-4 py-3 text-right text-xs text-muted-foreground"> {c.facturas}
  </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium">
  {fmt(c.totalFacturado, 2)}
- <p className="text-[10px] text-muted-foreground font-normal">{fmt(c.ventas, 2)}</p>
+ 
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(c.cogs, 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono text-xs font-semibold",
  c.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(c.ganancia, 2)}
@@ -260,7 +260,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> {p.cantidad.toLocaleString("es-DO", { maximumFractionDigits: 2 })} <span className="text-[10px] opacity-60 ml-0.5">{p.unidad}</span>
  </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium">
  {fmt(p.totalFacturado, 2)}
- <p className="text-[10px] text-muted-foreground font-normal">{fmt(p.ventas, 2)}</p>
+ 
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(p.cogs, 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono text-xs font-semibold",
  p.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(p.ganancia, 2)}
