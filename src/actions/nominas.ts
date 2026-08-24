@@ -112,7 +112,7 @@ export async function crearNomina(data: {
 }) {
  const numeroMes = String(data.mes).padStart(2, "0");
  const quincena = data.periodo === "PRIMERA_QUINCENA" ? "1Q" : "2Q";
- const numero = `NOM-${data.anio}-${numeroMes}-${quincena}`;
+ const numero = `NOM/${data.anio}/${numeroMes}/${quincena}`;
 
  // Rango de fechas de la quincena para buscar préstamos en caja.
  // Los préstamos se guardan con @default(now()) en UTC.
