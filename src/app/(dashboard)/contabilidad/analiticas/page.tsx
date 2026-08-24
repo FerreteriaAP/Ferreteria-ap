@@ -232,16 +232,18 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </Link> {c.rnc && (
  <p className="text-[10px] text-muted-foreground mt-0.5">RNC: {c.rnc}</p> )}
  </td> <td className="px-4 py-3 text-right text-xs text-muted-foreground"> {c.facturas}
- </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium"> {fmt(c.ventas, 2)}
+ </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium">
+ {fmt(c.totalFacturado, 2)}
+ <p className="text-[10px] text-muted-foreground font-normal">{fmt(c.ventas, 2)} s/ITBIS</p>
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(c.cogs, 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono text-xs font-semibold",
  c.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(c.ganancia, 2)}
  </td> <td className={cn("px-4 py-3 text-right text-xs font-semibold", colorMargen(c.margen))}> {pct(c.margen)}
  </td> <td className="px-4 py-3"> <Barra
- value={c.ventas}
- max={Math.max(...porCliente.map((x) => x.ventas), 1)}
+ value={c.totalFacturado}
+ max={Math.max(...porCliente.map((x) => x.totalFacturado), 1)}
  color="bg-orange-500/50" /> </td> </tr> ))}
- </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={3} className="px-5 py-3 font-bold text-sm">Total</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(porCliente.reduce((s, c) => s + c.ventas, 0), 2)}
+ </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={3} className="px-5 py-3 font-bold text-sm">Total</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(porCliente.reduce((s, c) => s + c.totalFacturado, 0), 2)}
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(porCliente.reduce((s, c) => s + c.cogs, 0), 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-xs",
  porCliente.reduce((s, c) => s + c.ganancia, 0) >= 0

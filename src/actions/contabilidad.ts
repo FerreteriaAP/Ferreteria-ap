@@ -723,6 +723,7 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  nombre: string;
  rnc: string | null;
  ventas: string;
+ totalFacturado: string;
  cogs: string;
  facturas: string;
  };
@@ -732,6 +733,7 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  c.nombre,
  c.rnc,
  SUM(dv.subtotal)::text AS ventas,
+ SUM(dv.subtotal + dv.itbis)::text AS "totalFacturado",
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -751,18 +753,20 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  JOIN productos p ON p.id = dv."productoId" WHERE v.tipo = 'FACTURADA' AND v."createdAt" >= ${inicio}
  AND v."createdAt" <= ${fin}
  GROUP BY c.id, c.nombre, c.rnc
- ORDER BY SUM(dv.subtotal) DESC
+ ORDER BY SUM(dv.subtotal + dv.itbis) DESC
  LIMIT ${limit}
  `;
 
  return rows.map((r) => {
  const ventas = Number(r.ventas);
+ const totalFacturado = Number(r.totalFacturado);
  const cogs = Number(r.cogs);
  return {
  clienteId: r.clienteId,
  nombre: r.nombre,
  rnc: r.rnc,
  ventas,
+ totalFacturado,
  cogs,
  ganancia: ventas - cogs,
  margen: ventas > 0 ? ((ventas - cogs) / ventas) * 100 : 0,
