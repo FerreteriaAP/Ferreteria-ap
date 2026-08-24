@@ -46,7 +46,6 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
           {/* ENCABEZADO: empresa (izq) | tipo + número (der) */}
           <div className="header-grid">
             <div>
-              <div className="emp-nombre">{EMPRESA.nombre}</div>
               <div className="emp-det">RNC: {EMPRESA.rnc}</div>
               <div className="emp-det">Tel.: {EMPRESA.tel} (Ws) · {EMPRESA.email}</div>
               <div className="emp-det">{EMPRESA.dir}</div>
@@ -132,35 +131,18 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
             </tbody>
           </table>
 
-          {/* PAGO + TOTALES */}
+          {/* TOTALES + NCF (NCF a la izquierda, totales a la derecha) */}
           <div className="bot-grid">
-            {/* Bancos */}
-            <div className="banco-area">
-              <div className="banco-tit">INFORMACIÓN DE PAGO</div>
-              <div className="banco-ref">
-                Referencia de pago: <strong>{v.numero}</strong>
-              </div>
-              <div className="banco-lista">
-                {bancos.length === 0 && (
-                  <div className="banco-item" style={{ color: "#aaa", fontSize: 10 }}>
-                    <span className="bico">•</span>
-                    <span>Cuentas bancarias no configuradas</span>
-                  </div>
-                )}
-                {bancos.map((b, i) => (
-                  <div key={i} className="banco-item">
-                    <span className="bico">•</span>
-                    <span>{b.banco}{b.tipo ? ` (${b.tipo})` : ""}: <strong>{b.cuenta}</strong></span>
-                  </div>
-                ))}
-              </div>
-
-              {v.notas && (
-                <div className="notas-box"><strong>Notas:</strong> {v.notas}</div>
-              )}
+            {/* NCF / Comprobante fiscal — izquierda */}
+            <div className="ncf-box">
+              <div className="ncf-label">COMPROBANTE FISCAL ELECTRÓNICO</div>
+              {v.ncf
+                ? <div className="ncf-value">{v.ncf}</div>
+                : <div className="ncf-placeholder">NCF / QR pendiente de configuración DGII</div>
+              }
             </div>
 
-            {/* Totales */}
+            {/* Totales — derecha */}
             <div className="tot-area">
               <table className="tot-tbl">
                 <tbody>
@@ -178,20 +160,34 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
                   </tr>
                 </tbody>
               </table>
-              {/* Espacio para NCF electrónico y QR */}
-              <div className="ncf-box">
-                <div className="ncf-label">COMPROBANTE FISCAL ELECTRÓNICO</div>
-                {v.ncf
-                  ? <div className="ncf-value">{v.ncf}</div>
-                  : <div className="ncf-placeholder">NCF / QR pendiente de configuración DGII</div>
-                }
-              </div>
             </div>
           </div>
 
-          {/* FOOTER */}
-          <div className="footer-line">
-            Favor emitir sus pagos a nombre de <strong>{EMPRESA.nombre}</strong> · RNC {EMPRESA.rnc} · {EMPRESA.dir}, {EMPRESA.ciudad}
+          {v.notas && (
+            <div className="notas-box"><strong>Notas:</strong> {v.notas}</div>
+          )}
+
+          {/* CUENTAS + FOOTER — al fondo */}
+          <div className="footer-area">
+            <div className="banco-tit">INFORMACIÓN DE PAGO</div>
+            <div className="banco-ref">Referencia de pago: <strong>{v.numero}</strong></div>
+            <div className="banco-lista">
+              {bancos.length === 0 && (
+                <div className="banco-item" style={{ color: "#aaa", fontSize: 10 }}>
+                  <span className="bico">•</span>
+                  <span>Cuentas bancarias no configuradas</span>
+                </div>
+              )}
+              {bancos.map((b, i) => (
+                <div key={i} className="banco-item">
+                  <span className="bico">•</span>
+                  <span>{b.banco}{b.tipo ? ` (${b.tipo})` : ""}: <strong>{b.cuenta}</strong></span>
+                </div>
+              ))}
+            </div>
+            <div className="footer-line">
+              Favor emitir sus pagos a nombre de <strong>{EMPRESA.nombre}</strong> · RNC {EMPRESA.rnc} · {EMPRESA.dir}, {EMPRESA.ciudad}
+            </div>
           </div>
         </div>
       </div>
@@ -201,15 +197,14 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #1a1a1a; background: #ebebeb; }
 
         .wrap { max-width: 820px; margin: 0 auto; padding: 0 16px 40px; }
-        .doc { background: #fff; padding: 32px 40px 28px; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
+        .doc { background: #fff; padding: 32px 40px 28px; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.12); display: flex; flex-direction: column; min-height: 1050px; }
 
         /* Logo */
         .logo-area { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 3.5px solid #f5821f; }
 
         /* Encabezado */
         .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 18px; align-items: start; }
-        .emp-nombre { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-        .emp-det { font-size: 11px; color: #333; line-height: 1.7; }
+        .emp-det { font-size: 10px; color: #444; line-height: 1.7; }
         .emp-fecha { margin-top: 6px; }
 
         .tipo-box { text-align: right; }
@@ -238,16 +233,16 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         .bold { font-weight: 700; }
         .etag { font-size: 9.5px; font-weight: 700; color: #2e7d32; background: #e8f5e9; padding: 1px 7px; border-radius: 20px; border: 1px solid #c8e6c9; }
 
-        /* Parte inferior */
-        .bot-grid { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; margin-bottom: 18px; }
-        .banco-tit { font-size: 8.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 7px; }
-        .banco-ref { font-size: 11px; margin-bottom: 7px; color: #333; }
-        .banco-item { font-size: 11px; line-height: 1.9; display: flex; gap: 5px; }
-        .bico { color: #f5821f; font-weight: 700; }
+        /* Totales + NCF (lado a lado) */
+        .bot-grid { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; margin-bottom: 20px; }
 
-        .notas-box { margin-top: 10px; font-size: 10.5px; color: #555; padding: 7px 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ddd; }
+        /* NCF / Comprobante fiscal — izquierda */
+        .ncf-box { border: 1px dashed #ccc; border-radius: 4px; padding: 10px 12px; min-height: 60px; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+        .ncf-label { font-size: 7.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 4px; }
+        .ncf-value { font-size: 13px; font-weight: 700; font-family: monospace; color: #333; }
+        .ncf-placeholder { font-size: 9px; color: #ccc; font-style: italic; }
 
-        /* Totales */
+        /* Totales — derecha */
         .tot-area { min-width: 260px; }
         .tot-tbl { width: 100%; border-collapse: collapse; }
         .tot-lbl { padding: 6px 14px 6px 12px; font-size: 12px; color: #444; border-bottom: 1px solid #eee; }
@@ -255,14 +250,17 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         .tot-lbl-f { padding: 10px 14px 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 4px 0 0 4px; }
         .tot-val-f { padding: 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 0 4px 4px 0; text-align: right; font-family: 'Courier New', monospace; }
 
-        /* NCF/QR placeholder */
-        .ncf-box { margin-top: 10px; border: 1px dashed #ccc; border-radius: 4px; padding: 8px 10px; min-height: 50px; }
-        .ncf-label { font-size: 7.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 4px; }
-        .ncf-value { font-size: 13px; font-weight: 700; font-family: monospace; color: #333; }
-        .ncf-placeholder { font-size: 9px; color: #ccc; font-style: italic; }
+        .notas-box { margin-bottom: 16px; font-size: 10.5px; color: #555; padding: 7px 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ddd; }
 
-        /* Footer */
-        .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 14px; border-top: 1px solid #e8e8e8; }
+        /* Cuentas + footer — al fondo */
+        .footer-area { margin-top: auto; padding-top: 16px; border-top: 1px solid #e8e8e8; }
+        .banco-tit { font-size: 8.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
+        .banco-ref { font-size: 11px; margin-bottom: 6px; color: #333; }
+        .banco-item { font-size: 11px; line-height: 1.9; display: flex; gap: 5px; }
+        .bico { color: #f5821f; font-weight: 700; }
+
+        /* Footer "Favor emitir..." */
+        .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 10px; margin-top: 10px; border-top: 1px solid #e8e8e8; }
 
         /* Impresión */
         @media print {

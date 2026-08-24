@@ -30,24 +30,24 @@ export function PrintLogo({ width = 280, height = 72, isoOnly = false }: PrintLo
   }
 
   return (
-    <svg width={width} height={height} viewBox="0 0 285 70" xmlns="http://www.w3.org/2000/svg" aria-label="Ferretería AP">
+    <svg width={width} height={height} viewBox="0 0 320 72" overflow="visible" xmlns="http://www.w3.org/2000/svg" aria-label="Ferretería AP">
       {/* Octágono exterior */}
-      <polygon points="21,2 49,2 67,20 67,50 49,68 21,68 3,50 3,20" fill="white" stroke="#000204" strokeWidth="2.5" />
+      <polygon points="21,3 49,3 67,21 67,51 49,69 21,69 3,51 3,21" fill="white" stroke="#000204" strokeWidth="2.5" />
       {/* Octágono interior — borde doble */}
-      <polygon points="22,7 48,7 62,21 62,49 48,63 22,63 8,49 8,21" fill="none" stroke="#000204" strokeWidth="1" />
-      {/* Letras AP — centradas en el octágono (centro: 35, 35) */}
+      <polygon points="22,8 48,8 62,22 62,50 48,64 22,64 8,50 8,22" fill="none" stroke="#000204" strokeWidth="1" />
+      {/* Letras AP — centradas en el octágono */}
       <text
-        x="35" y="35"
+        x="35" y="36"
         dominantBaseline="central" textAnchor="middle"
         fontFamily="'Arial Black', Impact, 'Franklin Gothic Heavy', sans-serif"
-        fontSize="28" fontWeight="900" fill="#f5821f"
+        fontSize="27" fontWeight="900" fill="#f5821f"
       >AP</text>
-      {/* FERRETERÍA — F en naranja, resto negro; font mayor para proporcionar con el isotipo */}
+      {/* FERRETERÍA — F en naranja, resto negro; fuente más grande */}
       <text
-        x="80" y="35"
+        x="82" y="36"
         dominantBaseline="central" textAnchor="start"
         fontFamily="'Arial Black', 'Franklin Gothic Heavy', Impact, sans-serif"
-        fontSize="31" fontWeight="900"
+        fontSize="37" fontWeight="900"
       >
         <tspan fill="#f5821f">F</tspan>
         <tspan fill="#000204">ERRETERÍA</tspan>
