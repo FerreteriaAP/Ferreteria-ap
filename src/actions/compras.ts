@@ -354,7 +354,9 @@ export async function eliminarCompra(id: string) {
  if (compra.pagos.length > 0) {
  return { error: "Esta compra tiene pagos registrados y no puede eliminarse" };
  }
- // detalles y pagos tienen onDelete: Cascade
+ // Eliminar CxP asociadas antes (no tiene Cascade en schema)
+ await prisma.cuentaPorPagar.deleteMany({ where: { compraId: id } });
+ // detalles tienen onDelete: Cascade
  await prisma.compra.delete({ where: { id } });
  revalidatePath("/compras");
  redirect("/compras");
