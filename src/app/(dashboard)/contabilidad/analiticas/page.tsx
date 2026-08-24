@@ -256,13 +256,15 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  <tr key={p.productoId} className="hover:bg-muted/20 transition-colors"> <td className="px-5 py-3 text-xs text-muted-foreground font-mono"> {String(idx + 1).padStart(2, "0")}
  </td> <td className="px-4 py-3"> <p className="font-medium text-sm">{p.nombre}</p> <p className="font-mono text-[10px] text-muted-foreground mt-0.5">{p.codigo}</p> </td> <td className="px-4 py-3 text-xs text-muted-foreground"> {p.categoria}
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> {p.cantidad.toLocaleString("es-DO", { maximumFractionDigits: 2 })}
- </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium"> {fmt(p.ventas, 2)}
+ </td> <td className="px-4 py-3 text-right font-mono text-xs font-medium">
+ {fmt(p.totalFacturado, 2)}
+ <p className="text-[10px] text-muted-foreground font-normal">{fmt(p.ventas, 2)} s/ITBIS</p>
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(p.cogs, 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono text-xs font-semibold",
  p.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(p.ganancia, 2)}
  </td> <td className={cn("px-4 py-3 text-right text-xs font-bold", colorMargen(p.margen))}> {pct(p.margen)}
  </td> </tr> ))}
- </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={4} className="px-5 py-3 font-bold text-sm">Total top 10</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(topProductos.reduce((s, p) => s + p.ventas, 0), 2)}
+ </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={4} className="px-5 py-3 font-bold text-sm">Total top 10</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(topProductos.reduce((s, p) => s + p.totalFacturado, 0), 2)}
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(topProductos.reduce((s, p) => s + p.cogs, 0), 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-xs",
  topProductos.reduce((s, p) => s + p.ganancia, 0) >= 0

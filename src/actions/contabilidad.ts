@@ -785,7 +785,8 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  codigo: string;
  nombre: string;
  categoria: string;
- ventas: string;
+ ventas: string;       // subtotal sin ITBIS — base para ganancia
+ totalFacturado: string; // subtotal + itbis — lo que aparece en facturas
  cogs: string;
  cantidad: string;
  facturas: string;
@@ -797,6 +798,7 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  p.nombre,
  cat.nombre AS categoria,
  SUM(dv.subtotal)::text AS ventas,
+ SUM(dv.subtotal + dv.itbis)::text AS "totalFacturado",
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -816,12 +818,13 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  JOIN ventas v ON v.id = dv."ventaId" JOIN productos p ON p.id = dv."productoId" JOIN categorias cat ON cat.id = p."categoriaId" WHERE v.tipo = 'FACTURADA' AND v."createdAt" >= ${inicio}
  AND v."createdAt" <= ${fin}
  GROUP BY p.id, p.codigo, p.nombre, cat.nombre
- ORDER BY SUM(dv.subtotal) DESC
+ ORDER BY SUM(dv.subtotal + dv.itbis) DESC
  LIMIT ${limit}
  `;
 
  return rows.map((r) => {
- const ventas = Number(r.ventas);
+ const ventas = Number(r.ventas);         // sin ITBIS
+ const totalFacturado = Number(r.totalFacturado); // con ITBIS — para mostrar en UI
  const cogs = Number(r.cogs);
  return {
  productoId: r.productoId,
@@ -829,8 +832,9 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  nombre: r.nombre,
  categoria: r.categoria,
  ventas,
+ totalFacturado,
  cogs,
- ganancia: ventas - cogs,
+ ganancia: ventas - cogs,  // ganancia real = subtotal (sin ITBIS) − costo
  margen: ventas > 0 ? ((ventas - cogs) / ventas) * 100 : 0,
  cantidad: Number(r.cantidad),
  facturas: Number(r.facturas),
