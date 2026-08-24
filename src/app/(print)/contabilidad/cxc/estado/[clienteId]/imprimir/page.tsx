@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getEstadoCuenta } from "@/actions/contabilidad";
 import { PrintCloseButtons } from "@/components/contabilidad/print-close-buttons";
+import { EMPRESA } from "@/lib/empresa";
 
 interface Props {
  params: Promise<{ clienteId: string }>;
@@ -46,8 +47,13 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
  Todo usa inline styles para que Safari no dependa de Tailwind
  */}
  <div style={{ width: "8.5in", minHeight: "11in", margin: "16px auto 40px", background: "#fff", padding: "0.5in 0.45in 0.45in", boxShadow: "0 2px 20px rgba(0,0,0,.12)", fontFamily: "Arial, Helvetica, sans-serif", fontSize: 10, color: "#111", lineHeight: 1.4 }}> {/* Encabezado */}
- <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "2.5px solid #111", paddingBottom: 10, marginBottom: 12 }}> <div> <div style={{ fontSize: 18, fontWeight: 900 }}>Ferretería AP</div> <div style={{ fontSize: 9, color: "#777", marginTop: 3 }}>ventas@ferreteria-ap.com</div> </div> <div style={{ textAlign: "right" }}> <div style={{ fontSize: 14, fontWeight: 900 }}>ESTADO DE CUENTA</div> <div style={{ fontSize: 9, color: "#666", marginTop: 2 }}>Generado: {fmtFecha(generadoEn)}</div> </div> </div> {/* Datos del cliente */}
- <div style={{ background: "#f5f5f5", borderLeft: "3px solid #111", padding: "9px 12px", marginBottom: 12, borderRadius: "0 4px 4px 0" }}> <div style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1.2fr", gap: 16 }}> <div> <div style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", color: "#888" }}>Cliente</div> <div style={{ fontSize: 13, fontWeight: 900, marginTop: 2 }}>{cliente.nombre}</div> {cliente.nombreLegal && cliente.nombreLegal !== cliente.nombre &&
+ <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "3px solid #f5821f", paddingBottom: 10, marginBottom: 12 }}> <div> <div style={{ fontSize: 18, fontWeight: 900 }}>
+                    <span style={{ display: "inline-block", border: "2px solid #000204", padding: "0 3px", fontSize: 15, fontFamily: "'Arial Black', Impact, sans-serif", color: "#f5821f", marginRight: 5 }}>AP</span>
+                    {EMPRESA.nombre}
+                  </div>
+                  <div style={{ fontSize: 9, color: "#777", marginTop: 3 }}>RNC: {EMPRESA.rnc} · {EMPRESA.tel} · {EMPRESA.email}</div>
+                  <div style={{ fontSize: 9, color: "#999", marginTop: 1 }}>{EMPRESA.dir}, {EMPRESA.ciudad}</div> </div> <div style={{ textAlign: "right" }}> <div style={{ fontSize: 14, fontWeight: 900 }}>ESTADO DE CUENTA</div> <div style={{ fontSize: 9, color: "#666", marginTop: 2 }}>Generado: {fmtFecha(generadoEn)}</div> </div> </div> {/* Datos del cliente */}
+ <div style={{ background: "#f5f5f5", borderLeft: "3px solid #f5821f", padding: "9px 12px", marginBottom: 12, borderRadius: "0 4px 4px 0" }}> <div style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1.2fr", gap: 16 }}> <div> <div style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", color: "#888" }}>Cliente</div> <div style={{ fontSize: 13, fontWeight: 900, marginTop: 2 }}>{cliente.nombre}</div> {cliente.nombreLegal && cliente.nombreLegal !== cliente.nombre &&
  <div style={{ fontSize: 10, color: "#555", marginTop: 1 }}>{cliente.nombreLegal}</div>}
  </div> <div> {cliente.rnc && <> <div style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", color: "#888", marginTop: 4 }}>RNC / Cédula</div> <div style={{ fontSize: 10, fontWeight: 600 }}>{cliente.rnc}</div> </>}
  {cliente.telefono && <> <div style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", color: "#888", marginTop: 4 }}>Teléfono</div> <div style={{ fontSize: 10, fontWeight: 600 }}>{cliente.telefono}</div> </>}

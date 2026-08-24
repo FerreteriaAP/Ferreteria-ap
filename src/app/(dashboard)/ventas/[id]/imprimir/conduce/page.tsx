@@ -1,122 +1,258 @@
 import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
 import { PrintButtons } from "@/components/nominas/print-buttons";
+import { EMPRESA } from "@/lib/empresa";
 
 interface PageProps {
- params: Promise<{ id: string }>;
- searchParams: Promise<{ conduceId?: string }>;
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ conduceId?: string }>;
 }
 
 export default async function ImprimirConducePage({ params, searchParams }: PageProps) {
- const { id } = await params;
- const { conduceId } = await searchParams;
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const v = (await getVenta(id)) as any;
- if (!v) notFound();
+  const { id } = await params;
+  const { conduceId } = await searchParams;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const v = (await getVenta(id)) as any;
+  if (!v) notFound();
 
- // Si se pasa conduceId, imprimir ese conduce específico; si no, el primero
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const conduce = conduceId
- ? (v.conduces ?? []).find((c: any) => c.id === conduceId) ?? v.conduces?.[0]
- : v.conduces?.[0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const conduce = conduceId
+    ? (v.conduces ?? []).find((c: any) => c.id === conduceId) ?? v.conduces?.[0]
+    : v.conduces?.[0];
 
- const fecha = new Date(v.fechaEmision).toLocaleDateString("es-DO", { day: "2-digit", month: "long", year: "numeric" });
+  const fecha = new Date(v.fechaEmision ?? new Date()).toLocaleDateString("es-DO", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+  });
 
- // Si el conduce tiene ítems parciales en detallesRecepcion, usarlos; si no, todos los ítems de la factura
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const itemsConduce: any[] | null = conduce?.detallesRecepcion?.length
- ? conduce.detallesRecepcion
- : null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const items: any[] = conduce?.detallesRecepcion?.length
+    ? conduce.detallesRecepcion
+    : v.detalles;
 
- return (
- <> <PrintButtons /> <p className="no-print text-center text-sm text-gray-500 pt-6 pb-2"> Presiona <strong>Ctrl+P</strong> (Windows) o <strong>+P</strong> (Mac) para imprimir
- </p> <div className="doc-wrap"> <div className="doc"> {/* Encabezado */}
- <div className="doc-header"> <div> <div className="company-name">Ferretería AP</div> <div className="company-sub">Sistema de Gestión Comercial</div> </div> <div className="doc-meta"> <div className="doc-tipo">CONDUCE DE ENTREGA</div> <div className="doc-numero">{conduce?.numero ?? v.numero}</div> <div className="doc-fecha">{fecha}</div> </div> </div> {/* Info */}
- <div className="section-grid"> <div className="section-box"> <div className="section-label">ENTREGAR A</div> <div className="section-value-lg">{v.cliente.nombre}</div> {v.cliente.rnc && <div className="section-value">RNC: {v.cliente.rnc}</div>}
- {v.direccion && (
- <> <div className="section-label mt-1">DIRECCIÓN DE ENTREGA</div> <div className="section-value"> <strong>{v.direccion.etiqueta}</strong><br /> {v.direccion.direccion}
- {v.direccion.sector ? `, ${v.direccion.sector}` : ""}
- {v.direccion.ciudad ? `, ${v.direccion.ciudad}` : ""}
- {v.direccion.referencia && (
- <><br /><em>Ref: {v.direccion.referencia}</em></> )}
- </div> </> )}
- {conduce?.firmaRecibido && (
- <> <div className="section-label mt-1">RECIBE</div> <div className="section-value">{conduce.firmaRecibido}</div> </> )}
- </div> <div className="section-box"> <div className="section-label">REFERENCIA OV</div> <div className="section-value">{v.numero}</div> {conduce?.firmaEntregado && (
- <><div className="section-label mt-1">ENTREGADO POR</div> <div className="section-value">{conduce.firmaEntregado}</div></> )}
- {conduce?.firmaChofer && (
- <><div className="section-label mt-1">CHOFER</div> <div className="section-value">{conduce.firmaChofer}</div></> )}
- {(conduce?.observaciones || v.notas) && (
- <><div className="section-label mt-1">OBSERVACIONES</div> <div className="section-value">{conduce?.observaciones || v.notas}</div></> )}
- </div> </div> {/* Productos */}
- <table className="prod-table"> <thead> <tr> <th className="th-left">#</th> <th className="th-left">Código</th> <th className="th-left">Descripción</th> <th className="th-right">Cant.</th> <th className="th-left">Unidad</th> <th className="th-center"></th> </tr> </thead> <tbody> {itemsConduce ? (
- // Conduce parcial — mostrar solo los ítems seleccionados
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- itemsConduce.map((item: any, i: number) => (
- <tr key={item.productoId} className={i % 2 === 0 ? "tr-even" : ""}> <td className="td-num">{i + 1}</td> <td className="td-code">—</td> <td className="td-desc">{item.nombre}</td> <td className="td-num td-bold"> {Number(item.cantEnviada).toLocaleString("es-DO", { maximumFractionDigits: 4 })}
- </td> <td className="td-unit">{item.unidad}</td> <td className="td-check"></td> </tr> ))
- ) : (
- // Conduce completo — todos los ítems de la factura
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- v.detalles.map((d: any, i: number) => (
- <tr key={d.id} className={i % 2 === 0 ? "tr-even" : ""}> <td className="td-num">{i + 1}</td> <td className="td-code">{d.producto.codigo}</td> <td className="td-desc">{d.descripcion || d.producto.nombre}</td> <td className="td-num td-bold"> {Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}
- </td> <td className="td-unit">{d.unidad ?? d.producto.unidadMedida}</td> <td className="td-check"></td> </tr> ))
- )}
- </tbody> </table> {/* Total bultos / resumen */}
- <div className="conduce-footer"> <p className="conduce-items"> Total líneas:{" "}
- <strong>{itemsConduce ? itemsConduce.length : v.detalles.length}</strong> {itemsConduce && (
- <span className="parcial-badge"> (envío parcial)</span> )}
- </p> </div> {/* Firmas */}
- <div className="firmas"> <div className="firma"> <div className="firma-line" /> <div className="firma-label"> Entregado por
- {conduce?.firmaEntregado && <><br /><strong>{conduce.firmaEntregado}</strong></>}
- </div> </div> <div className="firma"> <div className="firma-line" /> <div className="firma-label"> Recibido por
- {conduce?.firmaRecibido && <><br /><strong>{conduce.firmaRecibido}</strong></>}
- </div> </div> <div className="firma"> <div className="firma-line" /> <div className="firma-label"> Chofer
- {conduce?.firmaChofer && <><br /><strong>{conduce.firmaChofer}</strong></>}
- </div> </div> </div> <p className="footer-note"> Al firmar este conduce el cliente confirma haber recibido los productos en perfecto estado
- </p> </div> </div> <style>{` * { box-sizing: border-box; margin: 0; padding: 0; }
- body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11.5px; color: #111; background: #f5f5f5; }
- .doc-wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 32px; }
- .doc { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 28px 32px 24px; margin-top: 16px; box-shadow: 0 1px 8px rgba(0,0,0,.08); }
- .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #111; padding-bottom: 14px; margin-bottom: 16px; }
- .company-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
- .company-sub { font-size: 10px; color: #888; margin-top: 3px; }
- .doc-meta { text-align: right; }
- .doc-tipo { font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
- .doc-numero { font-size: 18px; font-weight: 900; line-height: 1.1; }
- .doc-fecha { font-size: 10px; color: #666; margin-top: 3px; }
- .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
- .section-box { padding: 10px 14px; background: #f8f8f8; border-radius: 5px; border-left: 3px solid #111; }
- .section-label { font-size: 8.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 3px; }
- .section-value-lg { font-size: 14px; font-weight: 700; }
- .section-value { font-size: 11.5px; color: #333; }
- .mt-1 { margin-top: 8px; }
- .prod-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11px; }
- .th-left, .th-right, .th-center { padding: 6px 8px; background: #111; color: #fff; font-weight: 700; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; }
- .th-right { text-align: right; }
- .th-left { text-align: left; }
- .th-center { text-align: center; }
- .tr-even { background: #f9f9f9; }
- .td-num { text-align: right; padding: 5px 8px; font-family: 'Courier New', monospace; }
- .td-code { padding: 5px 8px; font-family: 'Courier New', monospace; font-size: 10.5px; }
- .td-desc { padding: 5px 8px; }
- .td-unit { padding: 5px 8px; color: #555; font-size: 10.5px; }
- .td-check { text-align: center; padding: 5px 8px; font-size: 14px; }
- .td-bold { font-weight: 700; }
- .conduce-footer { display: flex; justify-content: space-between; font-size: 11.5px; color: #555; margin-bottom: 20px; padding: 8px 0; border-top: 1px solid #eee; }
- .conduce-items { font-size: 12px; }
- .parcial-badge { font-size: 10px; color: #7c3aed; background: #ede9fe; border-radius: 3px; padding: 1px 5px; margin-left: 4px; }
- .firmas { display: flex; gap: 32px; padding-top: 20px; border-top: 1px solid #e5e5e5; }
- .firma { flex: 1; }
- .firma-line { border-bottom: 1px solid #aaa; height: 36px; margin-bottom: 5px; }
- .firma-label { font-size: 10px; color: #888; text-align: center; }
- .footer-note { font-size: 10px; color: #999; text-align: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid #eee; }
- @media print {
- body { background: white; }
- .no-print { display: none !important; }
- .doc-wrap { max-width: 100%; padding: 0; }
- .doc { border: none; border-radius: 0; box-shadow: none; margin: 0; padding: 20px 24px; }
- .th-left, .th-right, .th-center { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
- }
- `}</style> </> );
+  const docNumero = conduce?.numero ?? v.numero;
+
+  return (
+    <>
+      <PrintButtons />
+      <p className="no-print" style={{ textAlign: "center", fontSize: 12, color: "#888", padding: "16px 0 6px" }}>
+        Papel: <strong>8&quot; × 5.5&quot;</strong> · Presiona <strong>Ctrl+P</strong> / <strong>⌘+P</strong> para imprimir
+      </p>
+
+      <div className="wrap">
+        <div className="doc">
+
+          {/* ── ENCABEZADO ── */}
+          <div className="hdr">
+            <div className="hdr-empresa">
+              {/* Logo textual — sin fondos de color para matricial */}
+              <div className="logo-text">
+                <span className="logo-ap">AP</span>
+                <span className="logo-ferreteria"> FERRETERÍA AP</span>
+              </div>
+              <div className="emp-info">{EMPRESA.dir} · {EMPRESA.ciudad}</div>
+              <div className="emp-info">Tel: {EMPRESA.tel} · RNC: {EMPRESA.rnc}</div>
+            </div>
+            <div className="hdr-doc">
+              <div className="doc-tipo">CONDUCE DE ENTREGA</div>
+              <div className="doc-num">{docNumero}</div>
+              <div className="doc-fecha">{fecha}</div>
+            </div>
+          </div>
+
+          {/* ── INFO CLIENTE / ENTREGA ── */}
+          <div className="info-grid">
+            <div className="info-block">
+              <div className="info-lbl">ENTREGAR A</div>
+              <div className="info-val-lg">{v.cliente.nombre}</div>
+              {v.cliente.rnc && <div className="info-val">RNC: {v.cliente.rnc}</div>}
+              {v.direccion && (
+                <div className="info-val">
+                  {v.direccion.etiqueta}: {v.direccion.direccion}
+                  {v.direccion.sector ? `, ${v.direccion.sector}` : ""}
+                  {v.direccion.ciudad ? ` – ${v.direccion.ciudad}` : ""}
+                </div>
+              )}
+              {v.direccion?.referencia && (
+                <div className="info-val">Ref: {v.direccion.referencia}</div>
+              )}
+            </div>
+            <div className="info-block">
+              <div className="info-lbl">REF. ORDEN DE VENTA</div>
+              <div className="info-val-lg">{v.numero}</div>
+              {conduce?.firmaEntregado && (
+                <><div className="info-lbl" style={{ marginTop: 5 }}>ENTREGADO POR</div>
+                  <div className="info-val">{conduce.firmaEntregado}</div></>
+              )}
+              {conduce?.firmaChofer && (
+                <><div className="info-lbl" style={{ marginTop: 5 }}>CHOFER</div>
+                  <div className="info-val">{conduce.firmaChofer}</div></>
+              )}
+              {(conduce?.observaciones || v.notas) && (
+                <><div className="info-lbl" style={{ marginTop: 5 }}>OBSERVACIONES</div>
+                  <div className="info-val">{conduce?.observaciones ?? v.notas}</div></>
+              )}
+            </div>
+          </div>
+
+          {/* ── TABLA DE PRODUCTOS ── */}
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th className="th-n">#</th>
+                <th className="th-cod">Código</th>
+                <th className="th-desc">Descripción</th>
+                <th className="th-qty">Cantidad</th>
+                <th className="th-uni">Unidad</th>
+                <th className="th-chk">✓</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {items.map((item: any, i: number) => (
+                <tr key={item.id ?? item.productoId} className={i % 2 === 0 ? "tr-alt" : ""}>
+                  <td className="td-n">{i + 1}</td>
+                  <td className="td-cod">{item.producto?.codigo ?? "—"}</td>
+                  <td className="td-desc">{item.descripcion ?? item.nombre ?? item.producto?.nombre}</td>
+                  <td className="td-qty">
+                    {Number(item.cantEnviada ?? item.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}
+                  </td>
+                  <td className="td-uni">{item.unidad ?? item.producto?.unidadMedida}</td>
+                  <td className="td-chk"></td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={3} className="tf-lines">
+                  Total líneas: <strong>{items.length}</strong>
+                  {conduce?.detallesRecepcion?.length ? " · Envío parcial" : ""}
+                </td>
+                <td colSpan={3}></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          {/* ── FIRMAS ── */}
+          <div className="firmas">
+            <div className="firma">
+              <div className="firma-line"></div>
+              <div className="firma-lbl">
+                Entregado por
+                {conduce?.firmaEntregado && <><br /><strong>{conduce.firmaEntregado}</strong></>}
+              </div>
+            </div>
+            <div className="firma">
+              <div className="firma-line"></div>
+              <div className="firma-lbl">
+                Recibido por (cliente)
+                {conduce?.firmaRecibido && <><br /><strong>{conduce.firmaRecibido}</strong></>}
+              </div>
+            </div>
+            <div className="firma">
+              <div className="firma-line"></div>
+              <div className="firma-lbl">
+                Chofer
+                {conduce?.firmaChofer && <><br /><strong>{conduce.firmaChofer}</strong></>}
+              </div>
+            </div>
+          </div>
+
+          <div className="footer">
+            Al firmar este conduce el cliente confirma haber recibido los productos en perfectas condiciones ·{" "}
+            {docNumero} · {fecha}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #000; background: #e8e8e8; }
+
+        .wrap { max-width: 680px; margin: 0 auto; padding: 0 12px 24px; }
+        .doc {
+          background: #fff;
+          border: 1px solid #999;
+          padding: 14px 18px 12px;
+          margin-top: 10px;
+        }
+
+        /* ── ENCABEZADO ── */
+        .hdr {
+          display: flex; justify-content: space-between; align-items: flex-start;
+          border-bottom: 2px solid #000;
+          padding-bottom: 8px; margin-bottom: 8px;
+        }
+        .logo-text { display: flex; align-items: baseline; gap: 0; margin-bottom: 3px; }
+        .logo-ap {
+          font-size: 15px; font-weight: 900; font-family: 'Arial Black', Impact, sans-serif;
+          border: 2px solid #000; padding: 0 4px; letter-spacing: -0.5px;
+        }
+        .logo-ferreteria {
+          font-size: 13px; font-weight: 900; font-family: 'Arial Black', Impact, sans-serif;
+          letter-spacing: 0.02em; margin-left: 4px;
+        }
+        .emp-info { font-size: 8px; color: #333; line-height: 1.5; }
+        .hdr-doc { text-align: right; }
+        .doc-tipo { font-size: 7.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
+        .doc-num { font-size: 14px; font-weight: 900; line-height: 1.1; }
+        .doc-fecha { font-size: 9px; color: #444; margin-top: 1px; }
+
+        /* ── INFO CLIENTE ── */
+        .info-grid {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+          margin-bottom: 8px;
+          border: 1px solid #000; padding: 7px 9px;
+        }
+        .info-block + .info-block { border-left: 1px solid #bbb; padding-left: 9px; }
+        .info-lbl { font-size: 7px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #777; margin-bottom: 2px; }
+        .info-val-lg { font-size: 11px; font-weight: 700; line-height: 1.3; }
+        .info-val { font-size: 8.5px; color: #333; line-height: 1.5; }
+
+        /* ── TABLA ── */
+        .tbl { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 9px; }
+        .th-n, .th-cod, .th-desc, .th-qty, .th-uni, .th-chk {
+          padding: 4px 5px;
+          border: 1px solid #000;
+          font-weight: 900; font-size: 7.5px; text-transform: uppercase; letter-spacing: 0.04em;
+          background: #eee;
+          text-align: left;
+        }
+        .th-qty, .th-n { text-align: right; }
+        .th-chk { width: 22px; text-align: center; }
+        .th-n { width: 18px; }
+        .th-cod { width: 70px; }
+        .th-uni { width: 52px; }
+        .tr-alt { background: #f5f5f5; }
+        .td-n, .td-cod, .td-desc, .td-qty, .td-uni, .td-chk {
+          padding: 4px 5px; border: 1px solid #ccc; vertical-align: middle;
+        }
+        .td-n { text-align: center; color: #666; font-size: 8px; }
+        .td-cod { font-family: 'Courier New', monospace; font-size: 8.5px; }
+        .td-qty { text-align: right; font-weight: 700; }
+        .td-chk { border: 1px solid #000; }
+        .tf-lines { padding: 4px 5px; font-size: 8px; color: #555; border-top: 1px solid #000; }
+
+        /* ── FIRMAS ── */
+        .firmas { display: flex; gap: 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #000; }
+        .firma { flex: 1; }
+        .firma-line { border-bottom: 1px solid #000; height: 28px; margin-bottom: 3px; }
+        .firma-lbl { font-size: 8px; text-align: center; color: #444; }
+
+        /* ── FOOTER ── */
+        .footer { font-size: 7.5px; color: #999; text-align: center; margin-top: 6px; padding-top: 5px; border-top: 1px solid #ddd; }
+
+        /* ── PRINT ── */
+        @media print {
+          @page { size: 8in 5.5in; margin: 0.28in 0.32in; }
+          body { background: white; }
+          .no-print { display: none !important; }
+          .wrap { max-width: 100%; margin: 0; padding: 0; }
+          .doc { border: none; padding: 0; margin: 0; }
+          .th-n, .th-cod, .th-desc, .th-qty, .th-uni, .th-chk {
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+          }
+        }
+      `}</style>
+    </>
+  );
 }

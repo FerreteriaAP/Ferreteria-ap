@@ -1,127 +1,220 @@
 import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
 import { PrintButtons } from "@/components/nominas/print-buttons";
+import { PrintLogo } from "@/components/print/logo";
+import { EMPRESA, CREDITO_LABEL } from "@/lib/empresa";
 
-interface PageProps {
- params: Promise<{ id: string }>;
-}
+interface PageProps { params: Promise<{ id: string }> }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fmtNum = (n: any) => {
- const [ent, dec] = Number(n).toFixed(2).split(".");
- return ent.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "." + dec;
+const fmtN = (n: any) => {
+  const [ent, dec] = Number(n).toFixed(2).split(".");
+  return ent.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "." + dec;
 };
 
 export default async function ImprimirCotizacionPage({ params }: PageProps) {
- const { id } = await params;
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const v = (await getVenta(id)) as any;
- if (!v) notFound();
+  const { id } = await params;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const v = (await getVenta(id)) as any;
+  if (!v) notFound();
 
- const esCotizacion = v.tipo === "COTIZACION" || v.tipo === "ORDEN_VENTA";
- const titulo = v.tipo === "COTIZACION" ? "COTIZACIÓN" : "ORDEN DE VENTA";
- const fecha = new Date(v.fechaEmision).toLocaleDateString("es-DO", { day: "2-digit", month: "long", year: "numeric" });
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const tieneDescuento = v.detalles.some((d: any) => Number(d.descuento) > 0);
+  const titulo = v.tipo === "ORDEN_VENTA" ? "ORDEN DE VENTA" : "COTIZACIÓN";
+  const fechaEmision = new Date(v.fechaEmision ?? new Date()).toLocaleDateString("es-DO", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+  });
+  const fechaVence = v.fechaVencimiento
+    ? new Date(v.fechaVencimiento).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : null;
+  const fechaEntrega = v.fechaEntrega
+    ? new Date(v.fechaEntrega).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tieneDesc = v.detalles.some((d: any) => Number(d.descuento) > 0);
 
- return (
- <> <PrintButtons /> <p className="no-print text-center text-sm text-gray-500 pt-6 pb-2"> Presiona <strong>Ctrl+P</strong> (Windows) o <strong>+P</strong> (Mac) para imprimir
- </p> <div className="doc-wrap"> <div className="doc"> {/* Encabezado */}
- <div className="doc-header"> <div> <div className="company-name">Ferretería AP</div> <div className="company-sub">Sistema de Gestión Comercial</div> </div> <div className="doc-meta"> <div className="doc-tipo">{titulo}</div> <div className="doc-numero">{v.numero}</div> <div className="doc-fecha">{fecha}</div> </div> </div> {/* Cliente */}
- <div className="section-grid"> <div className="section-box"> <div className="section-label">CLIENTE</div> <div className="section-value-lg">{v.cliente.nombre}</div> {v.cliente.rnc && <div className="section-value">RNC: {v.cliente.rnc}</div>}
- </div> <div className="section-box"> <div className="section-label">CONDICIÓN DE PAGO</div> <div className="section-value"> {v.credito === "CONTADO" ? "Contado" :
- v.credito === "DIAS_30" ? "30 días" :
- v.credito === "DIAS_45" ? "45 días" : "60 días"}
- </div> {v.fechaVencimiento && (
- <><div className="section-label mt-1">VÁLIDA HASTA</div> <div className="section-value"> {new Date(v.fechaVencimiento).toLocaleDateString("es-DO")}
- </div></> )}
- {v.fechaEntrega && (
- <><div className="section-label mt-1">ENTREGA ESTIMADA</div> <div className="section-value"> {new Date(v.fechaEntrega).toLocaleDateString("es-DO")}
- </div></> )}
- </div> </div> {/* Tabla de productos */}
- <table className="prod-table"> <thead> <tr> <th className="th-left">#</th> <th className="th-left">Código</th> <th className="th-left">Descripción</th> <th className="th-right">Cant.</th> <th className="th-right">Precio</th> {tieneDescuento && <th className="th-right">Desc.</th>}
- <th className="th-right">ITBIS</th> <th className="th-right">Subtotal</th> </tr> </thead> <tbody> {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
- {v.detalles.map((d: any, i: number) => (
- <tr key={d.id} className={i % 2 === 0 ? "tr-even" : ""}> <td className="td-num">{i + 1}</td> <td className="td-code">{d.producto.codigo}</td> <td className="td-desc"> {d.descripcion || d.producto.nombre}
- <span className="unit"> / {d.unidad ?? d.producto.unidadMedida}</span> </td> <td className="td-num"> {Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}
- </td> {/* Precio base SIN ITBIS */}
- <td className="td-num">{fmtNum(d.precio)}</td> {tieneDescuento && (
- <td className="td-num"> {Number(d.descuento) > 0 ? `${Number(d.descuento)}%` : "—"}
- </td> )}
- <td className="td-num">{d.exentoItbis ? "—" : fmtNum(d.itbis)}</td> {/* Subtotal = base × qty (sin ITBIS) */}
- <td className="td-num td-bold">{fmtNum(d.subtotal)}</td> </tr> ))}
- </tbody> </table> {/* Totales */}
- <div className="totales"> <div className="total-row"> <span>Subtotal</span> <span>{fmtNum(v.subtotal)}</span> </div> {Number(v.descuento) > 0 && (
- <div className="total-row neg"> <span>Descuento</span> <span>-{fmtNum(v.descuento)}</span> </div> )}
- <div className="total-row"> <span>ITBIS (18%)</span> <span>{fmtNum(v.itbis)}</span> </div> <div className="total-row total-final"> <span>TOTAL RD$</span> <span>{fmtNum(v.total)}</span> </div> </div> {/* Notas */}
- {v.notas && (
- <div className="notas"> <strong>Notas:</strong> {v.notas}
- </div> )}
+  return (
+    <>
+      <PrintButtons />
+      <p className="no-print" style={{ textAlign: "center", fontSize: 13, color: "#666", padding: "20px 0 8px" }}>
+        Presiona <strong>Ctrl+P</strong> (Windows) o <strong>⌘+P</strong> (Mac) para imprimir
+      </p>
 
- {/* Firmas */}
- {!esCotizacion && (
- <div className="firmas"> <div className="firma"> <div className="firma-line" /> <div className="firma-label">Vendedor / Autorizado</div> </div> <div className="firma"> <div className="firma-line" /> <div className="firma-label">Cliente / Recibido conforme</div> </div> </div> )}
+      <div className="wrap">
+        <div className="doc">
 
- {esCotizacion && (
- <p className="footer-note"> Esta cotización es válida por los días indicados · Precios en RD$ · Sujeto a disponibilidad de inventario
- </p> )}
- </div> </div> <style>{` * { box-sizing: border-box; margin: 0; padding: 0; }
- body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11.5px; color: #111; background: #f5f5f5; }
- .doc-wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 32px; }
- .doc { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 28px 32px 24px; margin-top: 16px; box-shadow: 0 1px 8px rgba(0,0,0,.08); }
+          {/* LOGO */}
+          <div className="logo-area">
+            <PrintLogo width={270} height={72} />
+          </div>
 
- /* Encabezado */
- .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #111; padding-bottom: 14px; margin-bottom: 16px; }
- .company-name { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
- .company-sub { font-size: 10px; color: #888; margin-top: 3px; }
- .doc-meta { text-align: right; }
- .doc-tipo { font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
- .doc-numero { font-size: 18px; font-weight: 900; line-height: 1.1; }
- .doc-fecha { font-size: 10px; color: #666; margin-top: 3px; }
+          {/* ENCABEZADO */}
+          <div className="header-grid">
+            <div>
+              <div className="emp-nombre">{EMPRESA.nombre}</div>
+              <div className="emp-det">RNC: {EMPRESA.rnc}</div>
+              <div className="emp-det">Tel.: {EMPRESA.tel} (WhatsApp) · {EMPRESA.email}</div>
+              <div className="emp-det">{EMPRESA.dir}</div>
+              <div className="emp-det">{EMPRESA.ciudad}</div>
+              <div className="emp-det emp-fecha"><strong>Fecha:</strong> {fechaEmision}</div>
+              {fechaVence && <div className="emp-det"><strong>Válida hasta:</strong> {fechaVence}</div>}
+              {fechaEntrega && <div className="emp-det"><strong>Entrega est.:</strong> {fechaEntrega}</div>}
+            </div>
+            <div className="tipo-box">
+              <div className="tipo-titulo">{titulo}</div>
+              <div className="tipo-det"><strong>No.:</strong> {v.numero}</div>
+              <div className="tipo-det"><strong>Condición:</strong> {CREDITO_LABEL[v.credito] ?? v.credito}</div>
+            </div>
+          </div>
 
- /* Secciones info */
- .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
- .section-box { padding: 10px 14px; background: #f8f8f8; border-radius: 5px; border-left: 3px solid #111; }
- .section-label { font-size: 8.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 3px; }
- .section-value-lg { font-size: 14px; font-weight: 700; }
- .section-value { font-size: 11.5px; color: #333; }
- .mt-1 { margin-top: 8px; }
+          {/* CLIENTE */}
+          <div className="cli-box">
+            <div className="cli-grid">
+              <div>
+                {v.cliente.rnc && <div className="cli-row"><span className="cli-lbl">RNC:</span> {v.cliente.rnc}</div>}
+                <div className="cli-row"><span className="cli-lbl">Cliente:</span> <strong>{v.cliente.nombre}</strong></div>
+                {v.cliente.telefono && <div className="cli-row"><span className="cli-lbl">Tel.:</span> {v.cliente.telefono}</div>}
+              </div>
+              <div>
+                <div className="cli-row"><span className="cli-lbl">Referencia:</span> <strong>{v.numero}</strong></div>
+                <div className="cli-row"><span className="cli-lbl">Condición de pago:</span> {CREDITO_LABEL[v.credito] ?? v.credito}</div>
+                {fechaVence && <div className="cli-row"><span className="cli-lbl">Cotización válida hasta:</span> {fechaVence}</div>}
+              </div>
+            </div>
+          </div>
 
- /* Tabla */
- .prod-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11px; }
- .th-left, .th-right { padding: 6px 8px; background: #111; color: #fff; font-weight: 700; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; }
- .th-right { text-align: right; }
- .th-left { text-align: left; }
- .tr-even { background: #f9f9f9; }
- .td-num { text-align: right; padding: 5px 8px; font-family: 'Courier New', monospace; }
- .td-code { padding: 5px 8px; font-family: 'Courier New', monospace; font-size: 10.5px; }
- .td-desc { padding: 5px 8px; }
- .td-bold { font-weight: 700; }
- .unit { color: #888; font-size: 9.5px; }
+          {/* TABLA */}
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th className="th-c">#</th>
+                <th className="th-l">Descripción</th>
+                <th className="th-r">Cantidad</th>
+                <th className="th-r">Precio Unit.</th>
+                {tieneDesc && <th className="th-r">Desc.</th>}
+                <th className="th-r">ITBIS</th>
+                <th className="th-r">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {v.detalles.map((d: any, i: number) => (
+                <tr key={d.id} className={i % 2 === 1 ? "tr-alt" : ""}>
+                  <td className="td-c">{i + 1}</td>
+                  <td className="td-l">
+                    <div className="pnom">{d.descripcion || d.producto.nombre}</div>
+                    <div className="psub">{d.producto.codigo} · {d.unidad ?? d.producto.unidadMedida}</div>
+                  </td>
+                  <td className="td-r">{Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}</td>
+                  <td className="td-r mono">{fmtN(d.precio)}</td>
+                  {tieneDesc && <td className="td-r">{Number(d.descuento) > 0 ? `${d.descuento}%` : "—"}</td>}
+                  <td className="td-r">
+                    {d.exentoItbis
+                      ? <span className="etag">Exento</span>
+                      : <span className="mono">{fmtN(d.itbis)}</span>}
+                  </td>
+                  <td className="td-r mono bold">{fmtN(d.subtotal)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
- /* Totales */
- .totales { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 16px; }
- .total-row { display: flex; justify-content: space-between; gap: 60px; font-size: 12px; padding: 2.5px 0; min-width: 280px; }
- .total-row span:last-child { font-family: 'Courier New', monospace; }
- .neg { color: #c00; }
- .total-final { font-size: 15px; font-weight: 900; border-top: 2px solid #111; padding-top: 6px; margin-top: 4px; }
+          {/* TOTALES + NOTAS */}
+          <div className="bot-grid">
+            <div className="notas-area">
+              {v.notas && (
+                <>
+                  <div className="notas-tit">NOTAS</div>
+                  <div className="notas-val">{v.notas}</div>
+                </>
+              )}
+              <div className="disclaimer">
+                Esta cotización no constituye una factura. Los precios son válidos hasta la fecha indicada.
+              </div>
+            </div>
+            <div className="tot-area">
+              <table className="tot-tbl">
+                <tbody>
+                  <tr>
+                    <td className="tot-lbl">Subtotal (s/ITBIS)</td>
+                    <td className="tot-val">RD$ {fmtN(v.subtotal)}</td>
+                  </tr>
+                  <tr>
+                    <td className="tot-lbl">ITBIS (18%)</td>
+                    <td className="tot-val">RD$ {fmtN(v.itbis)}</td>
+                  </tr>
+                  <tr className="tot-final">
+                    <td className="tot-lbl-f">Total</td>
+                    <td className="tot-val-f">RD$ {fmtN(v.total)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
- /* Notas */
- .notas { font-size: 10.5px; color: #555; margin-bottom: 16px; padding: 8px 12px; background: #f8f8f8; border-radius: 4px; }
+          <div className="footer-line">
+            {EMPRESA.nombre} · RNC {EMPRESA.rnc} · {EMPRESA.tel} · {EMPRESA.email}
+          </div>
+        </div>
+      </div>
 
- /* Firmas */
- .firmas { display: flex; gap: 48px; padding-top: 20px; border-top: 1px solid #e5e5e5; margin-top: 16px; }
- .firma { flex: 1; }
- .firma-line { border-bottom: 1px solid #aaa; height: 32px; margin-bottom: 5px; }
- .firma-label { font-size: 10px; color: #888; text-align: center; }
- .footer-note { font-size: 10px; color: #999; text-align: center; margin-top: 16px; border-top: 1px solid #eee; padding-top: 10px; }
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #1a1a1a; background: #ebebeb; }
+        .wrap { max-width: 820px; margin: 0 auto; padding: 0 16px 40px; }
+        .doc { background: #fff; padding: 32px 40px 28px; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
 
- @media print {
- body { background: white; }
- .no-print { display: none !important; }
- .doc-wrap { max-width: 100%; padding: 0; }
- .doc { border: none; border-radius: 0; box-shadow: none; margin: 0; padding: 20px 24px; }
- .th-left, .th-right { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
- }
- `}</style> </> );
+        .logo-area { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 3.5px solid #f5821f; }
+
+        .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 18px; align-items: start; }
+        .emp-nombre { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .emp-det { font-size: 11px; color: #333; line-height: 1.7; }
+        .emp-fecha { margin-top: 6px; }
+
+        .tipo-box { text-align: right; }
+        .tipo-titulo { font-size: 22px; font-weight: 700; color: #f5821f; line-height: 1.2; margin-bottom: 10px; }
+        .tipo-det { font-size: 11.5px; color: #333; line-height: 1.9; }
+
+        .cli-box { background: #f7f7f7; border-left: 4px solid #f5821f; border-radius: 0 4px 4px 0; padding: 11px 16px; margin-bottom: 18px; }
+        .cli-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .cli-row { font-size: 11.5px; line-height: 1.9; }
+        .cli-lbl { color: #666; font-weight: 600; margin-right: 4px; }
+
+        .tbl { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .th-l, .th-r, .th-c { padding: 7px 9px; background: #000204; color: #fff; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+        .th-l { text-align: left; }
+        .th-r { text-align: right; }
+        .th-c { text-align: center; width: 28px; }
+        .tr-alt { background: #f8f8f8; }
+        .td-l { padding: 7px 9px; border-bottom: 1px solid #f0f0f0; }
+        .td-r { padding: 7px 9px; text-align: right; border-bottom: 1px solid #f0f0f0; }
+        .td-c { padding: 7px 9px; text-align: center; color: #888; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+        .pnom { font-size: 11.5px; font-weight: 500; }
+        .psub { font-size: 9.5px; color: #999; margin-top: 2px; }
+        .mono { font-family: 'Courier New', monospace; }
+        .bold { font-weight: 700; }
+        .etag { font-size: 9.5px; font-weight: 700; color: #2e7d32; background: #e8f5e9; padding: 1px 7px; border-radius: 20px; border: 1px solid #c8e6c9; }
+
+        .bot-grid { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; margin-bottom: 18px; }
+        .notas-tit { font-size: 8.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 5px; }
+        .notas-val { font-size: 11px; color: #333; margin-bottom: 12px; }
+        .disclaimer { font-size: 10px; color: #aaa; font-style: italic; }
+
+        .tot-area { min-width: 260px; }
+        .tot-tbl { width: 100%; border-collapse: collapse; }
+        .tot-lbl { padding: 6px 14px 6px 12px; font-size: 12px; color: #444; border-bottom: 1px solid #eee; }
+        .tot-val { padding: 6px 12px; text-align: right; font-family: 'Courier New', monospace; font-size: 12px; border-bottom: 1px solid #eee; }
+        .tot-lbl-f { padding: 10px 14px 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 4px 0 0 4px; }
+        .tot-val-f { padding: 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 0 4px 4px 0; text-align: right; font-family: 'Courier New', monospace; }
+
+        .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 14px; border-top: 1px solid #e8e8e8; }
+
+        @media print {
+          body { background: white; }
+          .no-print { display: none !important; }
+          .wrap { max-width: 100%; padding: 0; }
+          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 18px 22px; }
+          .th-l, .th-r, .th-c, .tot-lbl-f, .tot-val-f, .logo-area, .cli-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}</style>
+    </>
+  );
 }

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getNomina } from "@/actions/nominas";
 import { PrintButtons } from "@/components/nominas/print-buttons";
+import { EMPRESA } from "@/lib/empresa";
 
 interface PageProps {
  params: Promise<{ id: string; lineaId: string }>;
@@ -49,7 +50,7 @@ export default async function ImprimirLineaPage({ params }: PageProps) {
  return (
  <> <PrintButtons /> <p className="no-print text-center text-sm text-gray-500 pt-6 pb-2"> Presiona <strong>Ctrl + P</strong> (Windows) o <strong> + P</strong> (Mac) para imprimir
  </p> <div className="volantes-container"> <div className="volante"> {/* Encabezado */}
- <div className="slip-header"> <div> <div className="company-name">Ferretería AP</div> <div className="company-sub">Sistema de Gestión de Nómina</div> </div> <div className="slip-meta"> <div className="slip-numero">{nomina.numero}</div> <div className="slip-periodo">{periodo}</div> </div> </div> {/* Empleado */}
+ <div className="slip-header"> <div> <div className="company-name"><span className="ap-badge">AP</span> Ferretería AP</div> <div className="company-sub">RNC: {EMPRESA.rnc} · {EMPRESA.tel}</div> </div> <div className="slip-meta"> <div className="slip-numero">{nomina.numero}</div> <div className="slip-periodo">{periodo}</div> </div> </div> {/* Empleado */}
  <div className="emp-section"> <div className="emp-name">{l.empleado.nombre} {l.empleado.apellido}</div> <div className="emp-details"> <span>Cargo: <strong>{l.empleado.cargo}</strong></span> <span>Cédula: <strong>{l.empleado.cedula}</strong></span> </div> </div> {/* Tablas */}
  <div className="tables-grid"> <div className="tbl-block"> <div className="tbl-title plus">+ DEVENGADOS</div> <table> <tbody> {devengados.map((r) => (
  <tr key={r.label}> <td>{r.label}</td> <td className="num">{fmtNum(r.val)}</td> </tr> ))}
@@ -67,16 +68,17 @@ export default async function ImprimirLineaPage({ params }: PageProps) {
  }
  .slip-header {
  display: flex; justify-content: space-between; align-items: flex-start;
- border-bottom: 2.5px solid #111; padding-bottom: 12px; margin-bottom: 14px;
+ border-bottom: 3px solid #f5821f; padding-bottom: 12px; margin-bottom: 14px;
  }
- .company-name { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
- .company-sub { font-size: 10px; color: #888; margin-top: 3px; }
+ .company-name { font-size: 17px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; gap: 6px; }
+ .ap-badge { display: inline-block; border: 2px solid #000204; padding: 0 3px; font-size: 14px; font-family: 'Arial Black', Impact, sans-serif; color: #f5821f; }
+ .company-sub { font-size: 10px; color: #888; margin-top: 4px; }
  .slip-meta { text-align: right; }
  .slip-numero { font-size: 14px; font-weight: 800; }
  .slip-periodo { font-size: 10px; color: #666; margin-top: 3px; }
  .emp-section {
  margin-bottom: 16px; padding: 10px 14px;
- background: #f8f8f8; border-radius: 5px; border-left: 3px solid #111;
+ background: #f8f8f8; border-radius: 5px; border-left: 3px solid #f5821f;
  }
  .emp-name { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; }
  .emp-details { display: flex; gap: 24px; margin-top: 4px; font-size: 11px; color: #555; }
@@ -95,7 +97,7 @@ export default async function ImprimirLineaPage({ params }: PageProps) {
  tfoot tr.sub-total td { font-weight: 700; font-size: 12px; border-top: 1px solid #ccc; padding-top: 6px; }
  .neto-bar {
  display: flex; justify-content: space-between; align-items: center;
- background: #111; color: #fff; padding: 10px 16px;
+ background: #f5821f; color: #fff; padding: 10px 16px;
  border-radius: 5px; margin-bottom: 16px;
  }
  .neto-bar span:first-child {
