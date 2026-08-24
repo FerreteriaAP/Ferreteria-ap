@@ -42,10 +42,6 @@ interface Props {
 
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-function agingVariant(dias: number): "default" | "secondary" | "outline" | "destructive" {
- if (dias <= 0) return "outline";
- return "destructive";
-}
 function agingLabel(dias: number) {
  if (dias <= 0) return "Al día";
  return "Vencida";
@@ -291,7 +287,15 @@ export function CxCMultiSelect({ grupos }: Props) {
  </div>
  {/* Estado badge — 92px, derecha */}
  <div className="w-[92px] shrink-0 flex justify-end">
- <Badge variant={agingVariant(f.diasVencida)} className="text-xs">{agingLabel(f.diasVencida)}</Badge>
+ <Badge
+  variant="outline"
+  className={cn(
+   "text-xs",
+   f.diasVencida > 0
+    ? "border-red-500 text-red-500 dark:border-red-400 dark:text-red-400"
+    : "border-green-600 text-green-700 dark:border-green-500 dark:text-green-400"
+  )}
+ >{agingLabel(f.diasVencida)}</Badge>
  </div>
  {/* Saldo — 120px, derecha */}
  <div className="w-[120px] shrink-0 text-right">
