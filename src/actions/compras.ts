@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { generarNumero } from "@/lib/numeracion";
 import { type Prisma } from "@/generated/prisma";
 import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import { revalidatePath } from "next/cache";
@@ -40,14 +41,7 @@ export type CompraInput = z.infer<typeof CompraSchema>;
 // Helpers 
 
 async function siguienteNumero(tipo: string): Promise<string> {
- const seq = await prisma.secuenciaDocumento.findUnique({ where: { tipo } });
- if (!seq) return `${tipo}-00001`;
- const num = String(seq.siguiente).padStart(seq.digitos, "0");
- await prisma.secuenciaDocumento.update({
- where: { tipo },
- data: { siguiente: seq.siguiente + 1 },
- });
- return `${seq.prefijo}${num}`;
+  return generarNumero(tipo, "CMP");
 }
 
 // Listar 

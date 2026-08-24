@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { getVendedorActivoId } from "@/actions/vendedor-activo";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { generarNumero } from "@/lib/numeracion";
 
 // Types 
 
@@ -35,15 +36,15 @@ export interface VentaInput {
 
 // tipo values must match secuencias_documento.tipo in the seed:
 // "COTIZACION", "ORDEN_VENTA", "CONDUCE_OUT", "FACTURA"
+// Números con formato PREFIJO/AÑO/NNNN — ver src/lib/numeracion.ts
+const PREFIJOS: Record<string, string> = {
+  FACTURA:      "FAC",
+  CONDUCE_OUT:  "CDC",
+  COTIZACION:   "COT",
+  ORDEN_VENTA:  "OVN",
+};
 async function siguienteNumero(tipo: string): Promise<string> {
- const seq = await prisma.secuenciaDocumento.findUnique({ where: { tipo } });
- if (!seq) return `${tipo}-00001`;
- const num = String(seq.siguiente).padStart(seq.digitos, "0");
- await prisma.secuenciaDocumento.update({
- where: { tipo },
- data: { siguiente: seq.siguiente + 1 },
- });
- return `${seq.prefijo}${num}`;
+  return generarNumero(tipo, PREFIJOS[tipo] ?? tipo);
 }
 
 function calcularDiasCredito(credito: string): number | null {

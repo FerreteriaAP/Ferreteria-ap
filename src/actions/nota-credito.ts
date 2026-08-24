@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 import { auth } from "@/lib/auth";
+import { generarNumero } from "@/lib/numeracion";
 import { revalidatePath } from "next/cache";
 
 async function getUserId() {
@@ -11,13 +12,7 @@ async function getUserId() {
 }
 
 async function siguienteNumeroNC(): Promise<string> {
- const seq = await prisma.secuenciaDocumento.upsert({
- where: { tipo: "NOTA_CREDITO" },
- update: { siguiente: { increment: 1 } },
- create: { tipo: "NOTA_CREDITO", prefijo: "NC", siguiente: 2, digitos: 5 },
- });
- const num = String(seq.siguiente - 1).padStart(seq.digitos, "0");
- return `${seq.prefijo}-${num}`;
+  return generarNumero("NOTA_CREDITO", "NCR");
 }
 
 export interface NotaCreditoDetalleItem {

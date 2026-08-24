@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { generarNumero } from "@/lib/numeracion";
 import { revalidatePath } from "next/cache";
 import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import { redirect } from "next/navigation";
@@ -53,15 +54,12 @@ export type RecepcionInput = z.infer<typeof RecepcionSchema>;
 
 // Helpers 
 
+const PREFIJOS_OC: Record<string, string> = {
+  ORDEN_COMPRA: "ODC",
+  COMPRA:       "CMP",
+};
 async function siguienteNumero(tipo: string): Promise<string> {
- const seq = await prisma.secuenciaDocumento.findUnique({ where: { tipo } });
- if (!seq) return `${tipo}-00001`;
- const num = String(seq.siguiente).padStart(seq.digitos, "0");
- await prisma.secuenciaDocumento.update({
- where: { tipo },
- data: { siguiente: seq.siguiente + 1 },
- });
- return `${seq.prefijo}${num}`;
+  return generarNumero(tipo, PREFIJOS_OC[tipo] ?? tipo);
 }
 
 // Listar 

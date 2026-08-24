@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { generarNumero } from "@/lib/numeracion";
 
 // Helpers 
 
@@ -19,19 +20,7 @@ async function getSession() {
 }
 
 async function siguienteNumeroFactura(): Promise<string> {
- const seq = await prisma.secuenciaDocumento.findUnique({ where: { tipo: "FACTURA" } });
- if (!seq) {
- await prisma.secuenciaDocumento.create({
- data: { tipo: "FACTURA", prefijo: "FAC-", siguiente: 2, digitos: 5 },
- });
- return "FAC-00001";
- }
- const num = String(seq.siguiente).padStart(seq.digitos, "0");
- await prisma.secuenciaDocumento.update({
- where: { tipo: "FACTURA" },
- data: { siguiente: seq.siguiente + 1 },
- });
- return `${seq.prefijo}${num}`;
+  return generarNumero("FACTURA", "FAC");
 }
 
 // Turno abierto (cualquier usuario) 
