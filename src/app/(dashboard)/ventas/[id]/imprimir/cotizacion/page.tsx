@@ -22,12 +22,12 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
   const fechaEmision = new Date(v.fechaEmision ?? new Date()).toLocaleDateString("es-DO", {
     day: "2-digit", month: "2-digit", year: "numeric",
   });
-  const fechaVence = v.fechaVencimiento
-    ? new Date(v.fechaVencimiento).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" })
-    : null;
-  const fechaEntrega = v.fechaEntrega
-    ? new Date(v.fechaEntrega).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" })
-    : null;
+  // Válida hasta: siempre 48 h después de emisión (aunque no esté guardado en DB)
+  const baseDate = new Date(v.fechaEmision ?? new Date());
+  const venceDate = v.fechaVencimiento
+    ? new Date(v.fechaVencimiento)
+    : new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+  const fechaVence = venceDate.toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tieneDesc = v.detalles.some((d: any) => Number(d.descuento) > 0);
 
@@ -56,8 +56,7 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
               <table className="fecha-tbl">
                 <tbody>
                   <tr><td className="fecha-lbl">Fecha:</td><td className="fecha-val">{fechaEmision}</td></tr>
-                  {fechaVence && <tr><td className="fecha-lbl">Válida hasta:</td><td className="fecha-val">{fechaVence}</td></tr>}
-                  {fechaEntrega && <tr><td className="fecha-lbl">Entrega est.:</td><td className="fecha-val">{fechaEntrega}</td></tr>}
+                  <tr><td className="fecha-lbl">Válida hasta:</td><td className="fecha-val">{fechaVence}</td></tr>
                 </tbody>
               </table>
             </div>
@@ -139,7 +138,9 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
                 </>
               )}
               <div className="disclaimer">
-                Esta cotización no constituye una factura. Los precios son válidos hasta la fecha indicada.
+                Esta cotización tiene una vigencia de <strong>48 horas</strong> a partir de su fecha de emisión.
+                Los precios indicados están sujetos a variación sin previo aviso según disponibilidad
+                y condiciones del mercado. No es válida como comprobante fiscal.
               </div>
             </div>
             <div className="tot-area">
@@ -223,19 +224,19 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 12px; border-top: 1px solid #e8e8e8; margin-top: 20px; }
 
         @media print {
-          @page { size: letter; margin: 12mm 15mm 22mm; }
+          @page { size: letter; margin: 12mm 15mm 18mm; }
           body { background: white; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; padding: 0; }
-          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 18px 22px; }
+          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 18px 22px 60px; }
           .th-l, .th-r, .th-c, .tot-lbl-f, .tot-val-f, .logo-area, .cli-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          /* Footer pegado al fondo de la página */
+          /* Footer fijo al fondo de cada página */
           .footer-line {
             position: fixed;
-            bottom: 6mm;
+            bottom: 0;
             left: 0; right: 0;
             border-top: 1px solid #e8e8e8;
-            padding-top: 5px;
+            padding: 5px 22px;
             background: white;
             margin-top: 0;
           }
