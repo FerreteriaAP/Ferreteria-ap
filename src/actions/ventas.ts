@@ -397,6 +397,7 @@ export async function crearCotizacion(input: VentaInput) {
  const venta = await prisma.venta.create({
  data: {
  numero,
+ numeroCotizacion: numero, // se preserva aunque el doc avance a OV/CDC/FAC
  tipo: "COTIZACION",
  clienteId: input.clienteId,
  direccionId: input.direccionId || null,

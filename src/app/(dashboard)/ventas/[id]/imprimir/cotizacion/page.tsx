@@ -63,7 +63,7 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
             </div>
             <div className="tipo-box">
               <div className="tipo-titulo">{titulo}</div>
-              <div className="tipo-det"><strong>No.:</strong> {v.numero}</div>
+              <div className="tipo-det"><strong>No.:</strong> {v.numeroCotizacion ?? v.numero}</div>
               <div className="tipo-det"><strong>Condición:</strong> {CREDITO_LABEL[v.credito] ?? v.credito}</div>
             </div>
           </div>
@@ -86,7 +86,7 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
                 )}
               </div>
               <div>
-                <div className="cli-row"><span className="cli-lbl">Referencia:</span> <strong>{v.numero}</strong></div>
+                <div className="cli-row"><span className="cli-lbl">Referencia:</span> <strong>{v.numeroCotizacion ?? v.numero}</strong></div>
                 <div className="cli-row"><span className="cli-lbl">Condición de pago:</span> {CREDITO_LABEL[v.credito] ?? v.credito}</div>
                 {fechaVence && <div className="cli-row"><span className="cli-lbl">Válida hasta:</span> {fechaVence}</div>}
               </div>

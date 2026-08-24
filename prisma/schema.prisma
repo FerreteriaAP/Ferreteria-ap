@@ -521,6 +521,8 @@ model Venta {
   cotizacionId     String? // si viene de cotización
   ordenVentaId     String? // si viene de orden de venta
   conduceId        String? // si viene de conduce
+  // Número original de cotización — se preserva aunque el documento avance a OV/CDC/FAC
+  numeroCotizacion String?
   // Datos fiscales
   ncf              String? // Número de Comprobante Fiscal
   tipoNcf          TipoComprobante?
