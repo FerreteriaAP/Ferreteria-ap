@@ -61,8 +61,10 @@ export async function getVentas(opts: {
  busqueda?: string;
  page?: number;
  pageSize?: number;
+ sortBy?: string;
+ sortDir?: "asc" | "desc";
 }) {
- const { tipo, busqueda = "", page = 1, pageSize = 25 } = opts;
+ const { tipo, busqueda = "", page = 1, pageSize = 25, sortBy, sortDir = "desc" } = opts;
  const skip = (page - 1) * pageSize;
 
  const where: Prisma.VentaWhereInput = {
@@ -76,12 +78,21 @@ export async function getVentas(opts: {
  } : {}),
  };
 
+ const orderBy: Prisma.VentaOrderByWithRelationInput =
+  sortBy === "numero"   ? { numero:      sortDir } :
+  sortBy === "tipo"     ? { tipo:        sortDir } :
+  sortBy === "cliente"  ? { cliente: { nombre: sortDir } } :
+  sortBy === "credito"  ? { credito:     sortDir } :
+  sortBy === "fecha"    ? { fechaEmision: sortDir } :
+  sortBy === "total"    ? { total:       sortDir } :
+  { createdAt: "desc" };
+
  const [ventas, total] = await Promise.all([
  prisma.venta.findMany({
  where,
  skip,
  take: pageSize,
- orderBy: { createdAt: "desc" },
+ orderBy,
  include: {
  cliente: { select: { nombre: true } },
  _count: { select: { detalles: true } },
