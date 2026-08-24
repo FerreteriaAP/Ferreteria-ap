@@ -145,7 +145,7 @@ export async function getVenta(id: string) {
  return prisma.venta.findUnique({
  where: { id },
  include: {
- cliente: { select: { id: true, nombre: true, rnc: true, limiteCredito: true, reglaPrecio: true, margenPrecio: true } },
+ cliente: { select: { id: true, nombre: true, rnc: true, telefono: true, email: true, limiteCredito: true, reglaPrecio: true, margenPrecio: true } },
  direccion: { select: { etiqueta: true, direccion: true, sector: true, ciudad: true, referencia: true } },
  vendedor: { select: { nombre: true, apellido: true } },
  creador: { select: { nombre: true, apellido: true } },

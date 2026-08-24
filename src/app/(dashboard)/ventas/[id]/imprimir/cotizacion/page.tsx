@@ -49,14 +49,17 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
           {/* ENCABEZADO */}
           <div className="header-grid">
             <div>
-              <div className="emp-nombre">{EMPRESA.nombre}</div>
               <div className="emp-det">RNC: {EMPRESA.rnc}</div>
               <div className="emp-det">Tel.: {EMPRESA.tel} (WhatsApp) · {EMPRESA.email}</div>
               <div className="emp-det">{EMPRESA.dir}</div>
               <div className="emp-det">{EMPRESA.ciudad}</div>
-              <div className="emp-det emp-fecha"><strong>Fecha:</strong> {fechaEmision}</div>
-              {fechaVence && <div className="emp-det"><strong>Válida hasta:</strong> {fechaVence}</div>}
-              {fechaEntrega && <div className="emp-det"><strong>Entrega est.:</strong> {fechaEntrega}</div>}
+              <table className="fecha-tbl">
+                <tbody>
+                  <tr><td className="fecha-lbl">Fecha:</td><td className="fecha-val">{fechaEmision}</td></tr>
+                  {fechaVence && <tr><td className="fecha-lbl">Válida hasta:</td><td className="fecha-val">{fechaVence}</td></tr>}
+                  {fechaEntrega && <tr><td className="fecha-lbl">Entrega est.:</td><td className="fecha-val">{fechaEntrega}</td></tr>}
+                </tbody>
+              </table>
             </div>
             <div className="tipo-box">
               <div className="tipo-titulo">{titulo}</div>
@@ -72,11 +75,20 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
                 {v.cliente.rnc && <div className="cli-row"><span className="cli-lbl">RNC:</span> {v.cliente.rnc}</div>}
                 <div className="cli-row"><span className="cli-lbl">Cliente:</span> <strong>{v.cliente.nombre}</strong></div>
                 {v.cliente.telefono && <div className="cli-row"><span className="cli-lbl">Tel.:</span> {v.cliente.telefono}</div>}
+                {v.cliente.email && <div className="cli-row"><span className="cli-lbl">Email:</span> {v.cliente.email}</div>}
+                {v.direccion && (
+                  <div className="cli-row">
+                    <span className="cli-lbl">Dirección:</span>{" "}
+                    {v.direccion.etiqueta} — {v.direccion.direccion}
+                    {v.direccion.sector ? `, ${v.direccion.sector}` : ""}
+                    {v.direccion.ciudad ? `, ${v.direccion.ciudad}` : ""}
+                  </div>
+                )}
               </div>
               <div>
                 <div className="cli-row"><span className="cli-lbl">Referencia:</span> <strong>{v.numero}</strong></div>
                 <div className="cli-row"><span className="cli-lbl">Condición de pago:</span> {CREDITO_LABEL[v.credito] ?? v.credito}</div>
-                {fechaVence && <div className="cli-row"><span className="cli-lbl">Cotización válida hasta:</span> {fechaVence}</div>}
+                {fechaVence && <div className="cli-row"><span className="cli-lbl">Válida hasta:</span> {fechaVence}</div>}
               </div>
             </div>
           </div>
@@ -165,9 +177,12 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .logo-area { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 3.5px solid #f5821f; }
 
         .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 18px; align-items: start; }
-        .emp-nombre { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-        .emp-det { font-size: 11px; color: #333; line-height: 1.7; }
-        .emp-fecha { margin-top: 6px; }
+        .emp-det { font-size: 10px; color: #444; line-height: 1.7; }
+
+        /* Fechas alineadas en tabla */
+        .fecha-tbl { border-collapse: collapse; margin-top: 6px; }
+        .fecha-lbl { font-size: 10px; color: #666; font-weight: 600; padding-right: 8px; white-space: nowrap; }
+        .fecha-val { font-size: 10px; color: #333; font-weight: 500; }
 
         .tipo-box { text-align: right; }
         .tipo-titulo { font-size: 22px; font-weight: 700; color: #f5821f; line-height: 1.2; margin-bottom: 10px; }
@@ -205,14 +220,25 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .tot-lbl-f { padding: 10px 14px 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 4px 0 0 4px; }
         .tot-val-f { padding: 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 0 4px 4px 0; text-align: right; font-family: 'Courier New', monospace; }
 
-        .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 14px; border-top: 1px solid #e8e8e8; }
+        .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 12px; border-top: 1px solid #e8e8e8; margin-top: 20px; }
 
         @media print {
+          @page { size: letter; margin: 12mm 15mm 22mm; }
           body { background: white; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; padding: 0; }
           .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 18px 22px; }
           .th-l, .th-r, .th-c, .tot-lbl-f, .tot-val-f, .logo-area, .cli-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          /* Footer pegado al fondo de la página */
+          .footer-line {
+            position: fixed;
+            bottom: 6mm;
+            left: 0; right: 0;
+            border-top: 1px solid #e8e8e8;
+            padding-top: 5px;
+            background: white;
+            margin-top: 0;
+          }
         }
       `}</style>
     </>
