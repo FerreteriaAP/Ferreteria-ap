@@ -47,21 +47,24 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
           <div className="header-grid">
             <div>
               <div className="emp-det">RNC: {EMPRESA.rnc}</div>
-              <div className="emp-det">Tel.: {EMPRESA.tel} (Ws) · {EMPRESA.email}</div>
+              <div className="emp-det">Tel.: {EMPRESA.tel} (WhatsApp) · {EMPRESA.email}</div>
               <div className="emp-det">{EMPRESA.dir}</div>
               <div className="emp-det">{EMPRESA.ciudad}</div>
-              <div className="emp-det emp-fecha"><strong>Fecha Emisión:</strong> {fecha}</div>
-              {vence && <div className="emp-det"><strong>Vence:</strong> {vence}</div>}
+              {/* Solo fecha de emisión — más grande y en negrita, sin fecha de vencimiento */}
+              <div className="fecha-emision">
+                <span className="fecha-emision-lbl">Fecha:</span>
+                <span className="fecha-emision-val">{fecha}</span>
+              </div>
             </div>
             <div className="tipo-box">
               <div className="tipo-titulo">{tipoLabel}</div>
               {v.ncf && <div className="tipo-det"><strong>NCF:</strong> {v.ncf}</div>}
               <div className="tipo-det"><strong>No.:</strong> {v.numero}</div>
-              <div className="tipo-det"><strong>Condición:</strong> {CREDITO_LABEL[v.credito] ?? v.credito}</div>
+              {/* Condición removida de aquí — ya está en el cuadro del cliente */}
             </div>
           </div>
 
-          {/* CLIENTE */}
+          {/* CLIENTE — info completa del cliente */}
           <div className="cli-box">
             <div className="cli-grid">
               <div>
@@ -71,6 +74,12 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
                 <div className="cli-row">
                   <span className="cli-lbl">Razón Social:</span> <strong>{v.cliente.nombre}</strong>
                 </div>
+                {v.cliente.telefono && (
+                  <div className="cli-row"><span className="cli-lbl">Tel.:</span> {v.cliente.telefono}</div>
+                )}
+                {v.cliente.email && (
+                  <div className="cli-row"><span className="cli-lbl">Email:</span> {v.cliente.email}</div>
+                )}
                 {v.direccion && (
                   <div className="cli-row">
                     <span className="cli-lbl">Dirección:</span>{" "}
@@ -90,16 +99,17 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* TABLA DE PRODUCTOS */}
+          {/* TABLA — Código · Descripción · Unidad · Cantidad · Precio · ITBIS · Importe */}
           <table className="tbl">
             <thead>
               <tr>
-                <th className="th-c">#</th>
+                <th className="th-cod">Código</th>
                 <th className="th-l">Descripción</th>
+                <th className="th-c">Unidad</th>
                 <th className="th-r">Cantidad</th>
-                <th className="th-r">Precio Unitario</th>
+                <th className="th-r">Precio Unit.</th>
                 {tieneDesc && <th className="th-r">Desc.</th>}
-                <th className="th-r">Impuestos</th>
+                <th className="th-r">ITBIS</th>
                 <th className="th-r">Importe</th>
               </tr>
             </thead>
@@ -107,15 +117,10 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {v.detalles.map((d: any, i: number) => (
                 <tr key={d.id} className={i % 2 === 1 ? "tr-alt" : ""}>
-                  <td className="td-c">{i + 1}</td>
-                  <td className="td-l">
-                    <div className="pnom">{d.descripcion || d.producto.nombre}</div>
-                    <div className="psub">{d.producto.codigo} · {d.unidad ?? d.producto.unidadMedida}</div>
-                  </td>
-                  <td className="td-r">
-                    {Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}
-                    <div className="psub">{d.unidad ?? d.producto.unidadMedida}</div>
-                  </td>
+                  <td className="td-cod">{d.producto.codigo}</td>
+                  <td className="td-l">{d.descripcion || d.producto.nombre}</td>
+                  <td className="td-c">{d.unidad ?? d.producto.unidadMedida}</td>
+                  <td className="td-r">{Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}</td>
                   <td className="td-r mono">{fmtN(d.precio)}</td>
                   {tieneDesc && (
                     <td className="td-r">{Number(d.descuento) > 0 ? `${d.descuento}%` : "—"}</td>
@@ -131,7 +136,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
             </tbody>
           </table>
 
-          {/* TOTALES + NCF (NCF a la izquierda, totales a la derecha) */}
+          {/* TOTALES + NCF */}
           <div className="bot-grid">
             {/* NCF / Comprobante fiscal — izquierda */}
             <div className="ncf-box">
@@ -167,7 +172,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
             <div className="notas-box"><strong>Notas:</strong> {v.notas}</div>
           )}
 
-          {/* CUENTAS + FOOTER — al fondo */}
+          {/* INFORMACIÓN DE PAGO + FOOTER — flujo normal, última página */}
           <div className="footer-area">
             <div className="banco-tit">INFORMACIÓN DE PAGO</div>
             <div className="banco-ref">Referencia de pago: <strong>{v.numero}</strong></div>
@@ -186,9 +191,10 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
               ))}
             </div>
             <div className="footer-line">
-              Favor emitir sus pagos a nombre de <strong>{EMPRESA.nombre}</strong> · RNC {EMPRESA.rnc} · {EMPRESA.dir}, {EMPRESA.ciudad}
+              Favor emitir sus pagos a nombre de <strong>{EMPRESA.nombre}</strong> · RNC {EMPRESA.rnc} · Tel. {EMPRESA.tel} · {EMPRESA.email} · {EMPRESA.dir}, {EMPRESA.ciudad}
             </div>
           </div>
+
         </div>
       </div>
 
@@ -205,7 +211,11 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         /* Encabezado */
         .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 18px; align-items: start; }
         .emp-det { font-size: 10px; color: #444; line-height: 1.7; }
-        .emp-fecha { margin-top: 6px; }
+
+        /* Fecha de emisión — más grande y legible */
+        .fecha-emision { margin-top: 8px; display: flex; align-items: baseline; gap: 6px; }
+        .fecha-emision-lbl { font-size: 11px; color: #666; font-weight: 700; }
+        .fecha-emision-val { font-size: 13px; font-weight: 700; color: #111; }
 
         .tipo-box { text-align: right; }
         .tipo-titulo { font-size: 20px; font-weight: 700; color: #f5821f; line-height: 1.2; margin-bottom: 10px; }
@@ -219,30 +229,27 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
 
         /* Tabla */
         .tbl { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .th-l, .th-r, .th-c { padding: 7px 9px; background: #000204; color: #fff; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+        .th-l, .th-r, .th-c, .th-cod { padding: 6px 7px; background: #000204; color: #fff; font-size: 8.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
         .th-l { text-align: left; }
         .th-r { text-align: right; }
-        .th-c { text-align: center; width: 28px; }
+        .th-c { text-align: center; }
+        .th-cod { text-align: left; width: 72px; }
         .tr-alt { background: #f8f8f8; }
-        .td-l { padding: 7px 9px; border-bottom: 1px solid #f0f0f0; }
-        .td-r { padding: 7px 9px; text-align: right; border-bottom: 1px solid #f0f0f0; }
-        .td-c { padding: 7px 9px; text-align: center; color: #888; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
-        .pnom { font-size: 11.5px; font-weight: 500; }
-        .psub { font-size: 9.5px; color: #999; margin-top: 2px; }
+        .td-l { padding: 5px 7px; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+        .td-r { padding: 5px 7px; text-align: right; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+        .td-c { padding: 5px 7px; text-align: center; color: #555; border-bottom: 1px solid #f0f0f0; font-size: 10.5px; }
+        .td-cod { padding: 5px 7px; border-bottom: 1px solid #f0f0f0; font-size: 9.5px; color: #888; font-family: 'Courier New', monospace; }
         .mono { font-family: 'Courier New', monospace; }
         .bold { font-weight: 700; }
-        .etag { font-size: 9.5px; font-weight: 700; color: #2e7d32; background: #e8f5e9; padding: 1px 7px; border-radius: 20px; border: 1px solid #c8e6c9; }
+        .etag { font-size: 9px; font-weight: 700; color: #2e7d32; background: #e8f5e9; padding: 1px 6px; border-radius: 20px; border: 1px solid #c8e6c9; }
 
-        /* Totales + NCF (lado a lado) */
+        /* Totales + NCF */
         .bot-grid { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; margin-bottom: 20px; }
-
-        /* NCF / Comprobante fiscal — izquierda */
         .ncf-box { border: 1px dashed #ccc; border-radius: 4px; padding: 10px 12px; min-height: 60px; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
         .ncf-label { font-size: 7.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 4px; }
         .ncf-value { font-size: 13px; font-weight: 700; font-family: monospace; color: #333; }
         .ncf-placeholder { font-size: 9px; color: #ccc; font-style: italic; }
 
-        /* Totales — derecha */
         .tot-area { min-width: 260px; }
         .tot-tbl { width: 100%; border-collapse: collapse; }
         .tot-lbl { padding: 6px 14px 6px 12px; font-size: 12px; color: #444; border-bottom: 1px solid #eee; }
@@ -252,23 +259,22 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
 
         .notas-box { margin-bottom: 16px; font-size: 10.5px; color: #555; padding: 7px 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ddd; }
 
-        /* Cuentas + footer — al fondo */
-        .footer-area { margin-top: auto; padding-top: 16px; border-top: 1px solid #e8e8e8; }
+        /* Información de pago + footer — flujo normal, solo última página */
+        .footer-area { padding-top: 16px; border-top: 1px solid #e8e8e8; margin-top: 20px; }
         .banco-tit { font-size: 8.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
         .banco-ref { font-size: 11px; margin-bottom: 6px; color: #333; }
         .banco-item { font-size: 11px; line-height: 1.9; display: flex; gap: 5px; }
         .bico { color: #f5821f; font-weight: 700; }
-
-        /* Footer "Favor emitir..." */
         .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 10px; margin-top: 10px; border-top: 1px solid #e8e8e8; }
 
         /* Impresión */
         @media print {
+          @page { size: letter; margin: 12mm 15mm 15mm; }
           body { background: white; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; padding: 0; }
-          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 18px 22px; }
-          .th-l, .th-r, .th-c,
+          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 16px 20px 20px; }
+          .th-l, .th-r, .th-c, .th-cod,
           .tot-lbl-f, .tot-val-f,
           .logo-area, .cli-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
