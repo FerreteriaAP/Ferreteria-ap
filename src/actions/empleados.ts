@@ -4,12 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 
-// Helper: primera letra de cada palabra en mayúscula 
-
-function cap(s?: string | null): string {
- if (!s) return "";
- return s.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-}
+import { cap, formatCedula } from "@/lib/format";
 
 // Queries 
 
@@ -91,7 +86,7 @@ export async function crearEmpleado(data: {
 }) {
  const empleado = await prisma.empleado.create({
  data: {
- cedula: data.cedula,
+ cedula: formatCedula(data.cedula),
  nombre: cap(data.nombre),
  apellido: cap(data.apellido),
  telefono: data.telefono || null,
@@ -137,13 +132,14 @@ export async function actualizarEmpleado(id: string, data: Partial<{
  bancoCuenta: string;
  tipoCuenta: string;
 }>) {
- const { fechaNacimiento, fechaIngreso, nombre, apellido, ...rest } = data;
+ const { fechaNacimiento, fechaIngreso, nombre, apellido, cedula, ...rest } = data;
  await prisma.empleado.update({
  where: { id },
  data: {
  ...rest,
- ...(nombre ? { nombre: cap(nombre) } : {}),
+ ...(nombre   ? { nombre: cap(nombre) } : {}),
  ...(apellido ? { apellido: cap(apellido) } : {}),
+ ...(cedula   ? { cedula: formatCedula(cedula) } : {}),
  ...(fechaNacimiento ? { fechaNacimiento: new Date(fechaNacimiento) } : {}),
  ...(fechaIngreso ? { fechaIngreso: new Date(fechaIngreso) } : {}),
  },

@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
+import { cap } from "@/lib/format";
 
 // Queries 
 
@@ -62,8 +63,8 @@ export async function crearUsuario(data: {
  data: {
  email: data.email.toLowerCase().trim(),
  password: hash,
- nombre: data.nombre.trim(),
- apellido: data.apellido?.trim() ?? "",
+ nombre: cap(data.nombre),
+ apellido: cap(data.apellido) ?? "",
  rol: data.rol as "ADMINISTRADOR" | "ASISTENTE_ADMINISTRATIVO" | "VENDEDOR" | "CAJA",
  },
  });
@@ -84,8 +85,8 @@ export async function editarUsuario(id: string, data: {
  await prisma.usuario.update({
  where: { id },
  data: {
- nombre: data.nombre.trim(),
- apellido: data.apellido?.trim() ?? "",
+ nombre: cap(data.nombre),
+ apellido: cap(data.apellido) ?? "",
  rol: data.rol as "ADMINISTRADOR" | "ASISTENTE_ADMINISTRATIVO" | "VENDEDOR" | "CAJA",
  activo: data.activo,
  },

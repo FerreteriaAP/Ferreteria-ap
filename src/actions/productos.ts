@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { type Prisma } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { cap } from "@/lib/format";
 
 // Schemas 
 
@@ -307,6 +308,7 @@ export async function crearProducto(data: ProductoInput) {
  const producto = await prisma.producto.create({
  data: {
  ...rest,
+ nombre: cap(rest.nombre),
  costoUltimo,
  costoPromedio: costoUltimo,
  codigoBarras: codigoBarras || null,
@@ -366,6 +368,7 @@ export async function actualizarProducto(id: string, data: ProductoInput) {
  where: { id },
  data: {
  ...rest,
+ nombre: cap(rest.nombre),
  costoUltimo,
  codigoBarras: codigoBarras || null,
  unidadFraccion: unidadFraccion || null,

@@ -38,12 +38,7 @@ const ContactoSchema = z.object({
 
 export type ContactoInput = z.infer<typeof ContactoSchema>;
 
-// Helper: primera letra de cada palabra en mayúscula 
-
-function cap(s?: string | null): string {
- if (!s) return "";
- return s.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-}
+import { cap, formatRnc } from "@/lib/format";
 
 // Listar 
 
@@ -114,7 +109,7 @@ export async function crearContacto(data: ContactoInput) {
  nombre: cap(rest.nombre),
  nombreLegal: rest.nombreLegal ? cap(rest.nombreLegal) : null,
  email: email || null,
- rnc: rnc || null,
+ rnc: formatRnc(rnc) || null,
  limiteCredito: limiteCredito ? limiteCredito : null,
  descuentoFijo: descuentoFijo ? descuentoFijo : null,
  direcciones: {
@@ -157,7 +152,7 @@ export async function actualizarContacto(id: string, data: ContactoInput) {
  nombre: cap(rest.nombre),
  nombreLegal: rest.nombreLegal ? cap(rest.nombreLegal) : null,
  email: email || null,
- rnc: rnc || null,
+ rnc: formatRnc(rnc) || null,
  limiteCredito: limiteCredito ? limiteCredito : null,
  descuentoFijo: descuentoFijo ? descuentoFijo : null,
  },
