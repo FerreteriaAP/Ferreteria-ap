@@ -1,8 +1,27 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
 export function PrintButtons() {
-  return (
-    <div className="no-print fixed top-[130px] right-4 z-50 flex gap-2">
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  // Portal al <body> para escapar cualquier contenedor con scroll/transform
+  // que rompería position:fixed
+  return createPortal(
+    <div
+      className="no-print"
+      style={{
+        position: "fixed",
+        top: 8,
+        right: 16,
+        zIndex: 9999,
+        display: "flex",
+        gap: 8,
+      }}
+    >
       <button
         onClick={() => window.print()}
         className="px-4 py-2 text-sm font-semibold rounded-lg shadow-lg transition-colors"
@@ -17,6 +36,7 @@ export function PrintButtons() {
       >
         Cerrar
       </button>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -326,11 +326,11 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                   <TableRow>
                     <TableHead className="text-xs">Código</TableHead>
                     <TableHead className="text-xs">Producto</TableHead>
-                    <TableHead className="text-xs text-right">Cant.</TableHead>
-                    <TableHead className="text-xs text-right">Precio</TableHead>
-                    <TableHead className="text-xs text-right">Dscto</TableHead>
-                    <TableHead className="text-xs text-right">ITBIS</TableHead>
-                    <TableHead className="text-xs text-right">Subtotal</TableHead>
+                    <TableHead className="text-xs text-right w-16">Cant.</TableHead>
+                    <TableHead className="text-xs text-right min-w-[100px]">Precio</TableHead>
+                    <TableHead className="text-xs text-right w-14">Dscto</TableHead>
+                    <TableHead className="text-xs text-right min-w-[90px]">ITBIS</TableHead>
+                    <TableHead className="text-xs text-right min-w-[100px]">Subtotal</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -347,12 +347,12 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                       <TableCell className="text-right tabular-nums text-sm">
                         {Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-sm">{fmtDOP(d.precio)}</TableCell>
-                      <TableCell className="text-right text-sm">
+                      <TableCell className="text-right tabular-nums text-sm whitespace-nowrap">{fmtDOP(d.precio)}</TableCell>
+                      <TableCell className="text-right text-sm whitespace-nowrap">
                         {Number(d.descuento) > 0 ? `${Number(d.descuento)}%` : "—"}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-sm">{fmtDOP(d.itbis)}</TableCell>
-                      <TableCell className="text-right font-semibold tabular-nums text-sm">{fmtDOP(d.subtotal)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-sm whitespace-nowrap">{fmtDOP(d.itbis)}</TableCell>
+                      <TableCell className="text-right font-semibold tabular-nums text-sm whitespace-nowrap">{fmtDOP(d.subtotal)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
