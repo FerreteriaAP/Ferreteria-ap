@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
 import { PrintButtons } from "@/components/nominas/print-buttons";
+import { PrintLogo } from "@/components/print/logo";
 import { EMPRESA } from "@/lib/empresa";
 
 interface PageProps {
@@ -24,10 +25,12 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
     day: "2-digit", month: "2-digit", year: "numeric",
   });
 
+  // Máximo 8 artículos por conduce
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const items: any[] = conduce?.detallesRecepcion?.length
+  const allItems: any[] = conduce?.detallesRecepcion?.length
     ? conduce.detallesRecepcion
     : v.detalles;
+  const items = allItems.slice(0, 8);
 
   const docNumero = conduce?.numero ?? v.numero;
 
@@ -35,7 +38,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
     <>
       <PrintButtons />
       <p className="no-print" style={{ textAlign: "center", fontSize: 12, color: "#888", padding: "16px 0 6px" }}>
-        Papel: <strong>8&quot; × 5.5&quot;</strong> · Presiona <strong>Ctrl+P</strong> / <strong>⌘+P</strong> para imprimir
+        Papel: <strong>8½&quot; × 5½&quot;</strong> · Presiona <strong>Ctrl+P</strong> / <strong>⌘+P</strong> para imprimir
       </p>
 
       <div className="wrap">
@@ -43,14 +46,9 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
 
           {/* ── ENCABEZADO ── */}
           <div className="hdr">
-            <div className="hdr-empresa">
-              {/* Logo textual — sin fondos de color para matricial */}
-              <div className="logo-text">
-                <span className="logo-ap">AP</span>
-                <span className="logo-ferreteria"> FERRETERÍA AP</span>
-              </div>
-              <div className="emp-info">{EMPRESA.dir} · {EMPRESA.ciudad}</div>
-              <div className="emp-info">Tel: {EMPRESA.tel} · RNC: {EMPRESA.rnc}</div>
+            <div className="hdr-logo">
+              <PrintLogo width={230} height={58} />
+              <div className="emp-sub">{EMPRESA.tel} · {EMPRESA.dir}, {EMPRESA.ciudad}</div>
             </div>
             <div className="hdr-doc">
               <div className="doc-tipo">CONDUCE DE ENTREGA</div>
@@ -61,10 +59,14 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
 
           {/* ── INFO CLIENTE / ENTREGA ── */}
           <div className="info-grid">
+            {/* IZQUIERDA: Entregar A */}
             <div className="info-block">
               <div className="info-lbl">ENTREGAR A</div>
               <div className="info-val-lg">{v.cliente.nombre}</div>
               {v.cliente.rnc && <div className="info-val">RNC: {v.cliente.rnc}</div>}
+              {conduce?.telefonoRecibido && (
+                <div className="info-val info-tel">📞 {conduce.telefonoRecibido}</div>
+              )}
               {v.direccion && (
                 <div className="info-val">
                   {v.direccion.etiqueta}: {v.direccion.direccion}
@@ -73,22 +75,24 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
                 </div>
               )}
               {v.direccion?.referencia && (
-                <div className="info-val">Ref: {v.direccion.referencia}</div>
+                <div className="info-val" style={{ fontStyle: "italic" }}>Ref: {v.direccion.referencia}</div>
               )}
             </div>
+
+            {/* DERECHA: Ref + datos despacho */}
             <div className="info-block">
               <div className="info-lbl">REF. ORDEN DE VENTA</div>
               <div className="info-val-lg">{v.numero}</div>
               {conduce?.firmaEntregado && (
-                <><div className="info-lbl" style={{ marginTop: 5 }}>ENTREGADO POR</div>
+                <><div className="info-lbl" style={{ marginTop: 4 }}>DESPACHADO POR</div>
                   <div className="info-val">{conduce.firmaEntregado}</div></>
               )}
               {conduce?.firmaChofer && (
-                <><div className="info-lbl" style={{ marginTop: 5 }}>CHOFER</div>
+                <><div className="info-lbl" style={{ marginTop: 4 }}>CHOFER</div>
                   <div className="info-val">{conduce.firmaChofer}</div></>
               )}
               {(conduce?.observaciones || v.notas) && (
-                <><div className="info-lbl" style={{ marginTop: 5 }}>OBSERVACIONES</div>
+                <><div className="info-lbl" style={{ marginTop: 4 }}>OBSERVACIONES</div>
                   <div className="info-val">{conduce?.observaciones ?? v.notas}</div></>
               )}
             </div>
@@ -125,6 +129,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
               <tr>
                 <td colSpan={3} className="tf-lines">
                   Total líneas: <strong>{items.length}</strong>
+                  {allItems.length > 8 ? ` de ${allItems.length} · Ver conduces adicionales` : ""}
                   {conduce?.detallesRecepcion?.length ? " · Envío parcial" : ""}
                 </td>
                 <td colSpan={3}></td>
@@ -132,7 +137,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
             </tfoot>
           </table>
 
-          {/* ── FIRMAS ── */}
+          {/* ── FIRMAS (margin-top:auto las empuja al fondo cuando hay espacio) ── */}
           <div className="firmas">
             <div className="firma">
               <div className="firma-line"></div>
@@ -146,7 +151,6 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
               <div className="firma-lbl">
                 Recibido por (cliente)
                 {conduce?.firmaRecibido && <><br /><strong>{conduce.firmaRecibido}</strong></>}
-                {conduce?.telefonoRecibido && <><br /><span style={{ fontSize: "9px", color: "#444" }}>Tel: {conduce.telefonoRecibido}</span></>}
               </div>
             </div>
             <div className="firma">
@@ -160,8 +164,9 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
 
           <div className="footer">
             Al firmar este conduce el cliente confirma haber recibido los productos en perfectas condiciones ·{" "}
-            {docNumero} · {fecha}
+            {docNumero} · {fecha} · RNC {EMPRESA.rnc}
           </div>
+
         </div>
       </div>
 
@@ -169,48 +174,44 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #000; background: #e8e8e8; }
 
-        .wrap { max-width: 680px; margin: 0 auto; padding: 0 12px 24px; }
+        .wrap { max-width: 760px; margin: 0 auto; padding: 0 12px 24px; }
         .doc {
           background: #fff;
           border: 1px solid #999;
-          padding: 14px 18px 12px;
+          padding: 14px 18px 10px;
           margin-top: 10px;
+          display: flex;
+          flex-direction: column;
         }
 
         /* ── ENCABEZADO ── */
         .hdr {
           display: flex; justify-content: space-between; align-items: flex-start;
-          border-bottom: 2px solid #000;
-          padding-bottom: 8px; margin-bottom: 8px;
+          border-bottom: 2.5px solid #000;
+          padding-bottom: 9px; margin-bottom: 8px;
         }
-        .logo-text { display: flex; align-items: baseline; gap: 0; margin-bottom: 3px; }
-        .logo-ap {
-          font-size: 15px; font-weight: 900; font-family: 'Arial Black', Impact, sans-serif;
-          border: 2px solid #000; padding: 0 4px; letter-spacing: -0.5px;
-        }
-        .logo-ferreteria {
-          font-size: 13px; font-weight: 900; font-family: 'Arial Black', Impact, sans-serif;
-          letter-spacing: 0.02em; margin-left: 4px;
-        }
-        .emp-info { font-size: 8px; color: #333; line-height: 1.5; }
+        .hdr-logo { display: flex; flex-direction: column; gap: 3px; }
+        .emp-sub { font-size: 8px; color: #444; margin-top: 3px; }
         .hdr-doc { text-align: right; }
         .doc-tipo { font-size: 7.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
-        .doc-num { font-size: 14px; font-weight: 900; line-height: 1.1; }
-        .doc-fecha { font-size: 9px; color: #444; margin-top: 1px; }
+        .doc-num { font-size: 16px; font-weight: 900; line-height: 1.1; }
+        .doc-fecha { font-size: 9px; color: #444; margin-top: 2px; }
 
         /* ── INFO CLIENTE ── */
         .info-grid {
-          display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 0;
           margin-bottom: 8px;
-          border: 1px solid #000; padding: 7px 9px;
+          border: 1px solid #000;
         }
-        .info-block + .info-block { border-left: 1px solid #bbb; padding-left: 9px; }
+        .info-block { padding: 7px 10px; }
+        .info-block + .info-block { border-left: 1px solid #bbb; }
         .info-lbl { font-size: 7px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #777; margin-bottom: 2px; }
         .info-val-lg { font-size: 11px; font-weight: 700; line-height: 1.3; }
         .info-val { font-size: 8.5px; color: #333; line-height: 1.5; }
+        .info-tel { font-size: 9px; font-weight: 700; color: #000; }
 
         /* ── TABLA ── */
-        .tbl { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 9px; }
+        .tbl { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 9px; }
         .th-n, .th-cod, .th-desc, .th-qty, .th-uni, .th-chk {
           padding: 4px 5px;
           border: 1px solid #000;
@@ -219,7 +220,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
           text-align: left;
         }
         .th-qty, .th-n { text-align: right; }
-        .th-chk { width: 22px; text-align: center; }
+        .th-chk { width: 20px; text-align: center; }
         .th-n { width: 18px; }
         .th-cod { width: 70px; }
         .th-uni { width: 52px; }
@@ -231,25 +232,33 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
         .td-cod { font-family: 'Courier New', monospace; font-size: 8.5px; }
         .td-qty { text-align: right; font-weight: 700; }
         .td-chk { border: 1px solid #000; }
-        .tf-lines { padding: 4px 5px; font-size: 8px; color: #555; border-top: 1px solid #000; }
+        .tf-lines { padding: 3px 5px; font-size: 8px; color: #555; border-top: 1px solid #000; }
 
-        /* ── FIRMAS ── */
-        .firmas { display: flex; gap: 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #000; }
+        /* ── FIRMAS — margin-top:auto las empuja al fondo con espacio libre ── */
+        .firmas {
+          display: flex; gap: 14px;
+          margin-top: auto;
+          padding-top: 14px;
+          border-top: 1px solid #000;
+        }
         .firma { flex: 1; }
-        .firma-line { border-bottom: 1px solid #000; height: 28px; margin-bottom: 3px; }
+        .firma-line { border-bottom: 1px solid #000; height: 36px; margin-bottom: 4px; }
         .firma-lbl { font-size: 8px; text-align: center; color: #444; }
 
         /* ── FOOTER ── */
-        .footer { font-size: 7.5px; color: #999; text-align: center; margin-top: 6px; padding-top: 5px; border-top: 1px solid #ddd; }
+        .footer { font-size: 7px; color: #999; text-align: center; margin-top: 7px; padding-top: 4px; border-top: 1px solid #ddd; }
 
         /* ── PRINT ── */
         @media print {
-          @page { size: 8in 5.5in; margin: 0.28in 0.32in; }
+          @page { size: 8.5in 5.5in; margin: 0.3in 0.32in; }
           body { background: white; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; margin: 0; padding: 0; }
-          .doc { border: none; padding: 0; margin: 0; }
-          .th-n, .th-cod, .th-desc, .th-qty, .th-uni, .th-chk {
+          .doc {
+            border: none; padding: 0; margin: 0;
+            min-height: calc(5.5in - 0.6in);
+          }
+          .th-n, .th-cod, .th-desc, .th-qty, .th-uni, .th-chk, .tr-alt {
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
           }
         }
