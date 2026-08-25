@@ -18,7 +18,8 @@ export default async function ImprimirOrdenCompraPage({ params }: PageProps) {
   const oc = await getOrdenCompra(id);
   if (!oc) notFound();
 
-  await marcarOrdenEnviadaAlImprimir(id);
+  // Marcar como enviada en background — no await para evitar revalidatePath durante SSR
+  marcarOrdenEnviadaAlImprimir(id).catch(() => {});
 
   const fecha = fmtDate(oc.fechaEmision ?? oc.createdAt);
   const subtotal = Number(oc.subtotal);

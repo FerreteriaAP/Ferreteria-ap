@@ -12,8 +12,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { crearOrdenCompra, type OcInput } from "@/actions/ordenes-compra";
 import { buscarProductosPorKeyword, getProductoPorCodigo } from "@/actions/productos";
+import { buscarSuplidores } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 
+// Quitar Select — no se usa para suplidor (reemplazado por typeahead)
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const DetalleSchema = z.object({
@@ -35,8 +37,6 @@ const FormSchema = z.object({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-interface Suplidor { id: string; nombre: string }
-
 const UNIDADES = ["UND","PIE","M","M2","M3","KG","LB","GLL","FND","CJA","RLL","PLG","TN","SACO","QUINTAL","METRO3"];
 const hoy = new Date().toISOString().split("T")[0];
 
@@ -49,16 +49,24 @@ const INPUT_CLS = "w-full h-9 rounded-lg border bg-background px-3 text-sm focus
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export function OcForm({ suplidores }: { suplidores: Suplidor[] }) {
+export function OcForm() {
   const router    = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState<string | null>(null);
+
+  // ── Búsqueda de productos ──────────────────────────────────────────────────
   const [busqueda,   setBusqueda]   = useState("");
   const [sugerencias, setSugerencias] = useState<Array<{
     id: string; nombre: string; codigo: string;
     unidadMedida: string; costoUltimo: number; exentoItbis: boolean;
   }>>([]);
   const [buscando, setBuscando] = useState(false);
+
+  // ── Búsqueda de suplidor ───────────────────────────────────────────────────
+  const [supQuery,    setSupQuery]    = useState("");
+  const [supNombre,   setSupNombre]   = useState(""); // nombre seleccionado (display)
+  const [supOpciones, setSupOpciones] = useState<Array<{ id: string; nombre: string; rnc: string | null }>>([]);
+  const [buscandoSup, setBuscandoSup] = useState(false);
 
   const form = useForm<FormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,6 +75,27 @@ export function OcForm({ suplidores }: { suplidores: Suplidor[] }) {
   });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "detalles" });
+
+  // Buscar suplidor por keyword
+  const buscarSup = useCallback(async (q: string) => {
+    setSupQuery(q);
+    setSupNombre("");
+    form.setValue("suplidorId", "");
+    if (!q.trim()) { setSupOpciones([]); return; }
+    setBuscandoSup(true);
+    try {
+      const res = await buscarSuplidores(q.trim());
+      setSupOpciones(res.map(s => ({ id: s.id, nombre: s.nombre, rnc: s.rnc ?? null })));
+    } finally { setBuscandoSup(false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function seleccionarSuplidor(s: { id: string; nombre: string; rnc: string | null }) {
+    form.setValue("suplidorId", s.id);
+    setSupNombre(s.nombre);
+    setSupQuery("");
+    setSupOpciones([]);
+  }
 
   // Buscar productos
   const buscarProductos = useCallback(async (q: string) => {
@@ -142,22 +171,48 @@ export function OcForm({ suplidores }: { suplidores: Suplidor[] }) {
         <p className="text-sm font-semibold">Datos de la orden</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Suplidor */}
-          <div className="space-y-1.5">
+          {/* Suplidor — typeahead */}
+          <div className="space-y-1.5 relative">
             <label className={LABEL}>Suplidor *</label>
-            <Select
-              value={form.watch("suplidorId") || undefined}
-              onValueChange={v => form.setValue("suplidorId", String(v ?? ""))}
-            >
-              <SelectTrigger className={form.formState.errors.suplidorId ? "border-destructive" : ""}>
-                <SelectValue placeholder="Selecciona suplidor..." />
-              </SelectTrigger>
-              <SelectContent>
-                {suplidores.map(s => (
-                  <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <input
+                value={supNombre || supQuery}
+                onChange={e => buscarSup(e.target.value)}
+                placeholder="Buscar suplidor por nombre o RNC…"
+                autoComplete="off"
+                className={cn(INPUT_CLS, form.formState.errors.suplidorId ? "border-destructive ring-1 ring-destructive/30" : "")}
+              />
+              {supNombre && (
+                <button
+                  type="button"
+                  onClick={() => { setSupNombre(""); setSupQuery(""); form.setValue("suplidorId", ""); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-lg leading-none"
+                  title="Cambiar suplidor"
+                >×</button>
+              )}
+              {buscandoSup && !supNombre && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">Buscando…</span>
+              )}
+              {supOpciones.length > 0 && !supNombre && (
+                <div
+                  className="absolute z-50 top-full left-0 right-0 mt-1 rounded-xl border shadow-xl overflow-hidden"
+                  style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
+                >
+                  {supOpciones.map(s => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => seleccionarSuplidor(s)}
+                      className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors text-sm flex justify-between items-center border-b last:border-0"
+                      style={{ borderColor: "color-mix(in oklch, var(--border) 40%, transparent)" }}
+                    >
+                      <span className="font-semibold">{s.nombre}</span>
+                      {s.rnc && <span className="text-xs text-muted-foreground font-mono">{s.rnc}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {form.formState.errors.suplidorId && (
               <p className="text-xs text-destructive">{form.formState.errors.suplidorId.message}</p>
             )}
