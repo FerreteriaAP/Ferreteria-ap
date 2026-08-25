@@ -47,7 +47,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
           {/* ── ENCABEZADO ── */}
           <div className="hdr">
             <div className="hdr-logo">
-              <PrintLogo width={230} height={58} />
+              <PrintLogo width={260} height={66} />
               <div className="emp-sub">{EMPRESA.tel} · {EMPRESA.dir}, {EMPRESA.ciudad}</div>
             </div>
             <div className="hdr-doc">
@@ -59,14 +59,16 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
 
           {/* ── INFO CLIENTE / ENTREGA ── */}
           <div className="info-grid">
-            {/* IZQUIERDA: Entregar A */}
+            {/* IZQUIERDA (2/3): Entregar A — nombre + tel en misma fila, dirección abajo */}
             <div className="info-block">
               <div className="info-lbl">ENTREGAR A</div>
-              <div className="info-val-lg">{v.cliente.nombre}</div>
+              <div className="info-row-top">
+                <span className="info-val-lg">{v.cliente.nombre}</span>
+                {conduce?.telefonoRecibido && (
+                  <span className="info-tel">📞 {conduce.telefonoRecibido}</span>
+                )}
+              </div>
               {v.cliente.rnc && <div className="info-val">RNC: {v.cliente.rnc}</div>}
-              {conduce?.telefonoRecibido && (
-                <div className="info-val info-tel">📞 {conduce.telefonoRecibido}</div>
-              )}
               {v.direccion && (
                 <div className="info-val">
                   {v.direccion.etiqueta}: {v.direccion.direccion}
@@ -79,18 +81,10 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
               )}
             </div>
 
-            {/* DERECHA: Ref + datos despacho */}
+            {/* DERECHA (1/3): solo Ref. Orden + Observaciones (despacho/chofer van en firmas) */}
             <div className="info-block">
               <div className="info-lbl">REF. ORDEN DE VENTA</div>
               <div className="info-val-lg">{v.numero}</div>
-              {conduce?.firmaEntregado && (
-                <><div className="info-lbl" style={{ marginTop: 4 }}>DESPACHADO POR</div>
-                  <div className="info-val">{conduce.firmaEntregado}</div></>
-              )}
-              {conduce?.firmaChofer && (
-                <><div className="info-lbl" style={{ marginTop: 4 }}>CHOFER</div>
-                  <div className="info-val">{conduce.firmaChofer}</div></>
-              )}
               {(conduce?.observaciones || v.notas) && (
                 <><div className="info-lbl" style={{ marginTop: 4 }}>OBSERVACIONES</div>
                   <div className="info-val">{conduce?.observaciones ?? v.notas}</div></>
@@ -186,34 +180,36 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
 
         /* ── ENCABEZADO ── */
         .hdr {
-          display: flex; justify-content: space-between; align-items: flex-start;
+          display: flex; justify-content: space-between; align-items: center;
           border-bottom: 2.5px solid #000;
-          padding-bottom: 9px; margin-bottom: 8px;
+          padding-bottom: 7px; margin-bottom: 7px;
         }
-        .hdr-logo { display: flex; flex-direction: column; gap: 3px; }
-        .emp-sub { font-size: 8px; color: #444; margin-top: 3px; }
+        .hdr-logo { display: flex; flex-direction: column; gap: 0; }
+        .emp-sub { font-size: 7.5px; color: #444; margin-top: 2px; }
         .hdr-doc { text-align: right; }
         .doc-tipo { font-size: 7.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
-        .doc-num { font-size: 16px; font-weight: 900; line-height: 1.1; }
+        .doc-num { font-size: 17px; font-weight: 900; line-height: 1.1; }
         .doc-fecha { font-size: 9px; color: #444; margin-top: 2px; }
 
         /* ── INFO CLIENTE ── */
         .info-grid {
-          display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-          margin-bottom: 8px;
+          display: grid; grid-template-columns: 2fr 1fr; gap: 0;
+          margin-bottom: 6px;
           border: 1px solid #000;
         }
-        .info-block { padding: 7px 10px; }
+        .info-block { padding: 5px 9px; }
         .info-block + .info-block { border-left: 1px solid #bbb; }
         .info-lbl { font-size: 7px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #777; margin-bottom: 2px; }
+        /* nombre + teléfono en la misma fila */
+        .info-row-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
         .info-val-lg { font-size: 11px; font-weight: 700; line-height: 1.3; }
-        .info-val { font-size: 8.5px; color: #333; line-height: 1.5; }
-        .info-tel { font-size: 9px; font-weight: 700; color: #000; }
+        .info-val { font-size: 8px; color: #333; line-height: 1.5; }
+        .info-tel { font-size: 9.5px; font-weight: 700; color: #000; white-space: nowrap; }
 
         /* ── TABLA ── */
-        .tbl { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 9px; }
+        .tbl { width: 100%; border-collapse: collapse; margin-bottom: 3px; font-size: 9px; }
         .th-n, .th-cod, .th-desc, .th-qty, .th-uni, .th-chk {
-          padding: 4px 5px;
+          padding: 3px 5px;
           border: 1px solid #000;
           font-weight: 900; font-size: 7.5px; text-transform: uppercase; letter-spacing: 0.04em;
           background: #eee;
@@ -226,27 +222,27 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
         .th-uni { width: 52px; }
         .tr-alt { background: #f5f5f5; }
         .td-n, .td-cod, .td-desc, .td-qty, .td-uni, .td-chk {
-          padding: 4px 5px; border: 1px solid #ccc; vertical-align: middle;
+          padding: 3px 5px; border: 1px solid #ccc; vertical-align: middle;
         }
         .td-n { text-align: center; color: #666; font-size: 8px; }
         .td-cod { font-family: 'Courier New', monospace; font-size: 8.5px; }
         .td-qty { text-align: right; font-weight: 700; }
         .td-chk { border: 1px solid #000; }
-        .tf-lines { padding: 3px 5px; font-size: 8px; color: #555; border-top: 1px solid #000; }
+        .tf-lines { padding: 2px 5px; font-size: 7.5px; color: #555; border-top: 1px solid #000; }
 
         /* ── FIRMAS — margin-top:auto las empuja al fondo con espacio libre ── */
         .firmas {
           display: flex; gap: 14px;
           margin-top: auto;
-          padding-top: 14px;
+          padding-top: 10px;
           border-top: 1px solid #000;
         }
         .firma { flex: 1; }
-        .firma-line { border-bottom: 1px solid #000; height: 36px; margin-bottom: 4px; }
+        .firma-line { border-bottom: 1px solid #000; height: 30px; margin-bottom: 3px; }
         .firma-lbl { font-size: 8px; text-align: center; color: #444; }
 
         /* ── FOOTER ── */
-        .footer { font-size: 7px; color: #999; text-align: center; margin-top: 7px; padding-top: 4px; border-top: 1px solid #ddd; }
+        .footer { font-size: 7px; color: #999; text-align: center; margin-top: 5px; padding-top: 3px; border-top: 1px solid #ddd; }
 
         /* ── PRINT ── */
         @media print {
