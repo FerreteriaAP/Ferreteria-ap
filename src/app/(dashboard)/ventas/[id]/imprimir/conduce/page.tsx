@@ -252,17 +252,25 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
 
         /* ── PRINT ── */
         /* SIN "size" en @page — el driver de la matricial controla el tamaño del papel.
-           Solo definimos márgenes mínimos para maximizar el área de impresión. */
+           Márgenes mínimos (3mm) para maximizar el área imprimible y evitar overflow. */
         @media print {
-          @page { margin: 4mm 6mm; }
+          @page { margin: 3mm 3mm; }
+          html, body { width: 100%; margin: 0; padding: 0; }
           body { background: white; font-size: 10px; }
           .no-print { display: none !important; }
-          .wrap { max-width: 100%; margin: 0; padding: 0; }
+          .wrap { width: 100%; max-width: 100%; margin: 0; padding: 0; }
           .doc {
+            width: 100%;
             border: none; padding: 0; margin: 0;
-            /* min-height basado en el área imprimible real del driver (5.5in - 8mm márgenes) */
-            min-height: calc(5.5in - 8mm);
+            min-height: calc(5.5in - 6mm);
           }
+          /* table-layout:fixed fuerza la tabla a respetar el 100% de ancho sin overflow */
+          .tbl { table-layout: fixed; }
+          /* Courier New se ve mal a 120×72 dpi — usar Arial en la matricial */
+          .td-cod { font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 0; }
+          /* Nombres en firmas más legibles */
+          .firma-lbl { font-size: 9px; }
+          .firma-lbl strong { font-size: 10px; }
           /* Fuentes ligeramente más grandes para que llenen el papel */
           .doc-num { font-size: 19px; }
           .info-val-lg { font-size: 12px; }
