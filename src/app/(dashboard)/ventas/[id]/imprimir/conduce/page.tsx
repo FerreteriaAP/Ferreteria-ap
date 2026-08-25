@@ -266,8 +266,9 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
             /* top 6mm: da espacio al logo para que no se corte */
             padding: 6mm 8mm 3mm;
             margin: 0;
-            /* min-height = página - márgenes @page → firmas con margin-top:auto van al fondo */
-            min-height: calc(5.5in - 6mm);
+            /* min-height = altura completa del papel — Chrome ignora @page margin con "Ninguno"
+               así que usamos 5.5in directamente para llenar el papel hasta el fondo */
+            min-height: 5.5in;
           }
           /* firmas al fondo de la página */
           .firmas { margin-top: auto; }
