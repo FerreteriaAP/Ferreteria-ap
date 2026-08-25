@@ -251,15 +251,23 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
         .footer { font-size: 7px; color: #999; text-align: center; margin-top: 5px; padding-top: 3px; border-top: 1px solid #ddd; }
 
         /* ── PRINT ── */
+        /* SIN "size" en @page — el driver de la matricial controla el tamaño del papel.
+           Solo definimos márgenes mínimos para maximizar el área de impresión. */
         @media print {
-          @page { size: 8.5in 5.5in; margin: 0.3in 0.32in; }
-          body { background: white; }
+          @page { margin: 4mm 6mm; }
+          body { background: white; font-size: 10px; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; margin: 0; padding: 0; }
           .doc {
             border: none; padding: 0; margin: 0;
-            min-height: calc(5.5in - 0.6in);
+            /* min-height basado en el área imprimible real del driver (5.5in - 8mm márgenes) */
+            min-height: calc(5.5in - 8mm);
           }
+          /* Fuentes ligeramente más grandes para que llenen el papel */
+          .doc-num { font-size: 19px; }
+          .info-val-lg { font-size: 12px; }
+          .info-tel { font-size: 10.5px; }
+          .td-desc { font-size: 9.5px; }
           .th-n, .th-cod, .th-desc, .th-qty, .th-uni, .th-chk, .tr-alt {
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
           }
