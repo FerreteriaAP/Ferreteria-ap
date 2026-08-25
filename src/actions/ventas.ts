@@ -312,17 +312,23 @@ export async function confirmarRecepcionConduce(
  const descuento = Number(detalle.descuento);
  const exento = detalle.exentoItbis;
 
- const nuevoSubtotal = precio * cantFinal * (1 - descuento / 100);
+ // CORRECCIÓN conduces fraccionados:
+ // No usar cantFinal (= cantRecibida de ESTE conduce) sino descontar solo la diferencia
+ // de ESTE conduce de la cantidad total acumulada en la venta.
+ // Ej: 100 unidades originales, conduces 1+2 entregaron 75 ya, conduce 3 envía 25 y el
+ // cliente no recibe nada → diferencia=25 → nuevaCantidad = 100 - 25 = 75 (no 0).
+ const nuevaCantidad = Number(detalle.cantidad) - diferencia;
+ const nuevoSubtotal = precio * nuevaCantidad * (1 - descuento / 100);
  const nuevoItbis = exento ? 0 : +(nuevoSubtotal * 0.18).toFixed(4);
 
- // Eliminar el detalle si el cliente no recibió nada; actualizar si fue parcial
- if (cantFinal === 0) {
+ // Eliminar el detalle solo si la cantidad resultante es 0 o negativa
+ if (nuevaCantidad <= 0) {
  await tx.detalleVenta.delete({ where: { id: detalle.id } });
  } else {
  await tx.detalleVenta.update({
  where: { id: detalle.id },
  data: {
- cantidad: cantFinal,
+ cantidad: nuevaCantidad,
  subtotal: nuevoSubtotal,
  itbis: nuevoItbis,
  },

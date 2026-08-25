@@ -1126,11 +1126,6 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
          <p className="text-lg font-bold font-mono">{fmt(f.total)}</p>
          <div className="flex gap-2 justify-end">
           <button
-           onClick={() => handleEliminar(f.id)} disabled={isPending}
-           className="text-xs px-2.5 py-1.5 rounded-lg border text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/5 transition-colors disabled:opacity-40">
-           Cancelar
-          </button>
-          <button
            onClick={() => abrirPago(f)}
            className="text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition-colors shadow-sm">
            Cobrar
