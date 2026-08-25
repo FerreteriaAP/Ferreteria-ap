@@ -60,7 +60,7 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
             <div className="tipo-box">
               <div className="tipo-titulo">{titulo}</div>
               <div className="tipo-det"><strong>No.:</strong> {v.numeroCotizacion ?? v.numero}</div>
-              <div className="tipo-det"><strong>Condición:</strong> {CREDITO_LABEL[v.credito] ?? v.credito}</div>
+              {/* Condición removida — ya está en el cuadro del cliente */}
             </div>
           </div>
 
@@ -173,9 +173,9 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .wrap { max-width: 820px; margin: 0 auto; padding: 0 16px 40px; }
         .doc { background: #fff; padding: 32px 40px 28px; margin-top: 10px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
 
-        .logo-area { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 3.5px solid #f5821f; }
+        .logo-area { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 3.5px solid #f5821f; }
 
-        .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 18px; align-items: start; }
+        .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 14px; align-items: start; }
         .emp-det { font-size: 10px; color: #444; line-height: 1.7; }
 
         /* Fecha de emisión — más grande y legible */
@@ -187,7 +187,7 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .tipo-titulo { font-size: 22px; font-weight: 700; color: #f5821f; line-height: 1.2; margin-bottom: 10px; }
         .tipo-det { font-size: 11.5px; color: #333; line-height: 1.9; }
 
-        .cli-box { background: #f7f7f7; border-left: 4px solid #f5821f; border-radius: 0 4px 4px 0; padding: 11px 16px; margin-bottom: 18px; }
+        .cli-box { background: #f7f7f7; border-left: 4px solid #f5821f; border-radius: 0 4px 4px 0; padding: 9px 14px; margin-bottom: 14px; }
         .cli-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .cli-row { font-size: 11.5px; line-height: 1.9; }
         .cli-lbl { color: #666; font-weight: 600; margin-right: 4px; }
@@ -208,9 +208,9 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .bold { font-weight: 700; }
         .etag { font-size: 9px; font-weight: 700; color: #2e7d32; background: #e8f5e9; padding: 1px 6px; border-radius: 20px; border: 1px solid #c8e6c9; }
 
-        .bot-grid { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; margin-bottom: 18px; }
-        .notas-tit { font-size: 8.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 5px; }
-        .notas-val { font-size: 11px; color: #333; margin-bottom: 12px; }
+        .bot-grid { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; margin-bottom: 10px; }
+        .notas-tit { font-size: 8.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 4px; }
+        .notas-val { font-size: 11px; color: #333; margin-bottom: 8px; }
         .disclaimer { font-size: 10px; color: #aaa; font-style: italic; }
 
         .tot-area { min-width: 260px; }
@@ -221,14 +221,14 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .tot-val-f { padding: 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 0 4px 4px 0; text-align: right; font-family: 'Courier New', monospace; }
 
         /* Footer — flujo normal, solo aparece al final del documento (última página) */
-        .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 12px; border-top: 1px solid #e8e8e8; margin-top: 20px; }
+        .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 8px; border-top: 1px solid #e8e8e8; margin-top: 10px; }
 
         @media print {
-          @page { size: letter; margin: 12mm 15mm 15mm; }
+          @page { size: letter; margin: 8mm 14mm 12mm; }
           body { background: white; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; padding: 0; }
-          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 16px 20px 20px; }
+          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 12px 18px 14px; }
           .th-l, .th-r, .th-c, .th-cod,
           .tot-lbl-f, .tot-val-f,
           .logo-area, .cli-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
