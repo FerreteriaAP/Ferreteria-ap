@@ -140,6 +140,90 @@ export async function buscarFacturaPorNumeroExacto(numero: string) {
  });
 }
 
+// ── Admin: todas las NCs ──────────────────────────────────────────────────────
+
+export async function getNotasCreditoAdmin(params?: {
+ estado?: "PENDIENTE" | "APLICADA" | "ANULADA" | "todas";
+ busqueda?: string;
+ page?: number;
+ pageSize?: number;
+}) {
+ const { estado = "todas", busqueda = "", page = 1, pageSize = 50 } = params ?? {};
+ const skip = (page - 1) * pageSize;
+
+ const where: Prisma.NotaCreditoWhereInput = {
+ ...(estado !== "todas" ? { estado } : {}),
+ ...(busqueda ? {
+ OR: [
+ { numero: { contains: busqueda, mode: "insensitive" } },
+ { cliente: { nombre: { contains: busqueda, mode: "insensitive" } } },
+ { venta: { numero: { contains: busqueda, mode: "insensitive" } } },
+ ],
+ } : {}),
+ };
+
+ const [rows, total] = await Promise.all([
+ prisma.notaCredito.findMany({
+ where,
+ skip,
+ take: pageSize,
+ orderBy: { createdAt: "desc" },
+ include: {
+ cliente: { select: { nombre: true, rnc: true } },
+ venta: { select: { numero: true } },
+ usuario: { select: { nombre: true } },
+ },
+ }),
+ prisma.notaCredito.count({ where }),
+ ]);
+
+ return {
+ rows: rows.map(r => ({
+ ...r,
+ monto: Number(r.monto),
+ montoRestante: Number(r.montoRestante),
+ })),
+ total,
+ pages: Math.ceil(total / pageSize),
+ };
+}
+
+export async function editarNotaCredito(id: string, data: {
+ motivo?: string;
+ notas?: string;
+ estado?: "PENDIENTE" | "APLICADA" | "ANULADA";
+}) {
+ const userId = await getUserId();
+ if (!userId) return { error: "No autenticado" };
+
+ const nc = await prisma.notaCredito.findUnique({ where: { id } });
+ if (!nc) return { error: "Nota de crédito no encontrada" };
+
+ // Si se anula una NC pendiente, devolver el saldoFavor al cliente (restar)
+ const anulando = data.estado === "ANULADA" && nc.estado === "PENDIENTE";
+
+ await prisma.$transaction(async (tx) => {
+ await tx.notaCredito.update({
+ where: { id },
+ data: {
+ ...(data.motivo !== undefined ? { motivo: data.motivo } : {}),
+ ...(data.notas !== undefined ? { notas: data.notas } : {}),
+ ...(data.estado !== undefined ? { estado: data.estado } : {}),
+ },
+ });
+ if (anulando) {
+ // Revertir saldo a favor acreditado originalmente
+ await tx.contacto.update({
+ where: { id: nc.clienteId },
+ data: { saldoFavor: { decrement: Number(nc.montoRestante) } },
+ });
+ }
+ });
+
+ revalidatePath("/contabilidad/notas-credito");
+ return { ok: true };
+}
+
 // Historial de notas de crédito de un cliente
 
 export async function getNotasCreditoCliente(clienteId: string) {

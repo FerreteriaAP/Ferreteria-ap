@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { crearCotizacion, buscarProductosVenta, type VentaInput } from "@/actions/ventas";
+import { crearCotizacion, actualizarCotizacion, buscarProductosVenta, type VentaInput } from "@/actions/ventas";
 import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import { completarDatosCliente } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
@@ -115,22 +115,53 @@ function Field({ label, children, hint, full }: {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-interface VentaFormProps { clientes: Cliente[] }
+export interface DetalleRowInit {
+  productoId: string; nombre: string; codigo: string;
+  unidad: string; unidadOriginal: string; unidadFraccion: string | null;
+  cantidad: number; precio: number; precioCompleto: number;
+  descuento: number; itbis: number; exentoItbis: boolean;
+  stockActual: number; esFraccionable: boolean; factorFraccion: number | null;
+  precioFraccion: number | null; modoFraccionar: boolean;
+  costoUltimo: number | null; categoriaCode: string;
+}
 
-export function VentaForm({ clientes }: VentaFormProps) {
+interface VentaFormProps {
+  clientes: Cliente[];
+  /** Cuando se proporciona, el formulario opera en modo edición */
+  ventaId?: string;
+  initialClienteId?: string;
+  initialDireccionId?: string;
+  initialCredito?: "CONTADO"|"DIAS_10"|"DIAS_15"|"DIAS_30"|"DIAS_45"|"DIAS_60"|"DIAS_90";
+  initialFechaEntrega?: string;
+  initialNotas?: string;
+  initialDetalles?: DetalleRowInit[];
+}
+
+export function VentaForm({
+  clientes,
+  ventaId,
+  initialClienteId = "",
+  initialDireccionId = "",
+  initialCredito = "CONTADO",
+  initialFechaEntrega,
+  initialNotas = "",
+  initialDetalles = [],
+}: VentaFormProps) {
   const router = useRouter();
   const [error,   setError]   = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const modoEdicion = !!ventaId;
+
   // Encabezado
-  const [clienteId,    setClienteId]    = useState("");
-  const [direccionId,  setDireccionId]  = useState("");
-  const [credito,      setCredito]      = useState<"CONTADO"|"DIAS_10"|"DIAS_15"|"DIAS_30"|"DIAS_45"|"DIAS_60"|"DIAS_90">("CONTADO");
-  const [fechaEntrega, setFechaEntrega] = useState(() => new Date().toISOString().slice(0, 10));
-  const [notas,        setNotas]        = useState("");
+  const [clienteId,    setClienteId]    = useState(initialClienteId);
+  const [direccionId,  setDireccionId]  = useState(initialDireccionId);
+  const [credito,      setCredito]      = useState<"CONTADO"|"DIAS_10"|"DIAS_15"|"DIAS_30"|"DIAS_45"|"DIAS_60"|"DIAS_90">(initialCredito);
+  const [fechaEntrega, setFechaEntrega] = useState(initialFechaEntrega ?? new Date().toISOString().slice(0, 10));
+  const [notas,        setNotas]        = useState(initialNotas);
 
   // Productos
-  const [detalles,    setDetalles]    = useState<DetalleRow[]>([]);
+  const [detalles,    setDetalles]    = useState<DetalleRow[]>(initialDetalles);
   const [busqueda,    setBusqueda]    = useState("");
   const [buscando,    setBuscando]    = useState(false);
   const [sugerencias, setSugerencias] = useState<ProductoSugerido[]>([]);
@@ -296,19 +327,29 @@ export function VentaForm({ clientes }: VentaFormProps) {
       if (!ok) return;
     }
 
+    const input: VentaInput = {
+      clienteId, direccionId: direccionId || undefined, credito,
+      fechaEntrega: fechaEntrega || undefined, notas: notas || undefined,
+      detalles: detalles.map(d => {
+        const { precioBase } = calcItbisLinea(d.precio, d.cantidad, d.descuento, d.exentoItbis);
+        return { productoId: d.productoId, unidad: d.unidad, cantidad: d.cantidad, precio: precioBase, precioFinal: d.precio, exentoItbis: d.exentoItbis, descuento: d.descuento, itbis: d.itbis };
+      }),
+    };
+
     setLoading(true);
     try {
-      const result = await crearCotizacion({
-        clienteId, direccionId: direccionId || undefined, credito,
-        fechaEntrega: fechaEntrega || undefined, notas: notas || undefined,
-        detalles: detalles.map(d => {
-          const { precioBase } = calcItbisLinea(d.precio, d.cantidad, d.descuento, d.exentoItbis);
-          return { productoId: d.productoId, unidad: d.unidad, cantidad: d.cantidad, precio: precioBase, precioFinal: d.precio, exentoItbis: d.exentoItbis, descuento: d.descuento, itbis: d.itbis };
-        }),
-      } as VentaInput);
-      setLoading(false);
-      if ("error" in result) { setError(String(result.error) || "Error al guardar la cotización"); return; }
-      router.push(`/ventas/${result.id}`);
+      if (modoEdicion && ventaId) {
+        const result = await actualizarCotizacion(ventaId, input);
+        setLoading(false);
+        if ("error" in result && result.error) { setError(String(result.error)); return; }
+        router.push(`/ventas/${ventaId}`);
+        router.refresh();
+      } else {
+        const result = await crearCotizacion(input as VentaInput);
+        setLoading(false);
+        if ("error" in result) { setError(String(result.error) || "Error al guardar la cotización"); return; }
+        router.push(`/ventas/${result.id}`);
+      }
     } catch (err) {
       setLoading(false); setError(err instanceof Error ? err.message : "Error inesperado");
     }
@@ -710,7 +751,7 @@ export function VentaForm({ clientes }: VentaFormProps) {
         <button type="submit" disabled={loading}
           className={cn("h-9 px-6 rounded-lg text-sm font-bold text-white transition-all", loading && "opacity-60 pointer-events-none")}
           style={{ backgroundColor: ACCENT }}>
-          {loading ? "Guardando…" : "Crear cotización"}
+          {loading ? "Guardando…" : modoEdicion ? "Guardar cambios" : "Crear cotización"}
         </button>
       </div>
     </form>

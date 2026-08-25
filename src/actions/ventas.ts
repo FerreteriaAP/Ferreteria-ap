@@ -25,7 +25,7 @@ export interface DetalleVentaInput {
 export interface VentaInput {
  clienteId: string;
  direccionId?: string;
- credito: "CONTADO" | "DIAS_30" | "DIAS_45" | "DIAS_60";
+ credito: "CONTADO" | "DIAS_10" | "DIAS_15" | "DIAS_30" | "DIAS_45" | "DIAS_60" | "DIAS_90";
  tipoNcf?: "B01" | "B02" | "B14" | "B15";
  fechaEntrega?: string;
  notas?: string;
@@ -48,9 +48,12 @@ async function siguienteNumero(tipo: string): Promise<string> {
 }
 
 function calcularDiasCredito(credito: string): number | null {
+ if (credito === "DIAS_10") return 10;
+ if (credito === "DIAS_15") return 15;
  if (credito === "DIAS_30") return 30;
  if (credito === "DIAS_45") return 45;
  if (credito === "DIAS_60") return 60;
+ if (credito === "DIAS_90") return 90;
  return null;
 }
 
@@ -158,6 +161,86 @@ export async function getVenta(id: string) {
  cuentasPorCobrar: { orderBy: { fechaVencimiento: "asc" } },
  },
  });
+}
+
+/** Cotización con datos de producto completos — para el formulario de edición */
+export async function getCotizacionParaEditar(id: string) {
+ const venta = await prisma.venta.findUnique({
+ where: { id },
+ include: {
+ cliente: {
+ select: {
+ id: true, nombre: true, rnc: true, telefono: true, email: true,
+ credito: true, limiteCredito: true, reglaPrecio: true, margenPrecio: true,
+ direcciones: { select: { id: true, etiqueta: true, direccion: true }, orderBy: { esPrincipal: "desc" } },
+ },
+ },
+ detalles: {
+ include: {
+ producto: {
+ select: {
+ id: true, codigo: true, nombre: true, unidadMedida: true,
+ precioVenta: true, costoUltimo: true, stockActual: true,
+ esFraccionable: true, unidadFraccion: true, factorFraccion: true,
+ precioFraccion: true, exentoItbis: true,
+ categoria: { select: { codigo: true } },
+ },
+ },
+ },
+ orderBy: { orden: "asc" },
+ },
+ },
+ });
+ if (!venta) return null;
+ // Serializar Decimal → number y aplanar relaciones
+ const cliente = venta.cliente;
+ const detalles = venta.detalles.map(d => ({
+ id: d.id,
+ productoId: d.productoId,
+ descripcion: d.descripcion,
+ unidad: d.unidad,
+ exentoItbis: d.exentoItbis,
+ cantidad: Number(d.cantidad),
+ precio: Number(d.precio),
+ precioFinal: Number(d.precioFinal),
+ descuento: Number(d.descuento),
+ itbis: Number(d.itbis),
+ subtotal: Number(d.subtotal),
+ producto: {
+ id: d.producto.id,
+ codigo: d.producto.codigo,
+ nombre: d.producto.nombre,
+ unidadMedida: d.producto.unidadMedida,
+ precioVenta: Number(d.producto.precioVenta),
+ costoUltimo: d.producto.costoUltimo ? Number(d.producto.costoUltimo) : null,
+ stockActual: Number(d.producto.stockActual),
+ esFraccionable: d.producto.esFraccionable,
+ unidadFraccion: d.producto.unidadFraccion,
+ factorFraccion: d.producto.factorFraccion ? Number(d.producto.factorFraccion) : null,
+ precioFraccion: d.producto.precioFraccion ? Number(d.producto.precioFraccion) : null,
+ exentoItbis: d.producto.exentoItbis,
+ categoriaCode: d.producto.categoria?.codigo ?? "",
+ },
+ }));
+ return {
+ id: venta.id,
+ numero: venta.numero,
+ tipo: venta.tipo,
+ clienteId: venta.clienteId,
+ direccionId: venta.direccionId,
+ credito: venta.credito,
+ fechaEntrega: venta.fechaEntrega,
+ notas: venta.notas,
+ subtotal: Number(venta.subtotal),
+ itbis: Number(venta.itbis),
+ total: Number(venta.total),
+ cliente: cliente ? {
+ ...cliente,
+ limiteCredito: cliente.limiteCredito ? Number(cliente.limiteCredito) : null,
+ margenPrecio: cliente.margenPrecio ? Number(cliente.margenPrecio) : null,
+ } : null,
+ detalles,
+ };
 }
 
 export async function getClientes() {
@@ -450,7 +533,77 @@ export async function crearCotizacion(input: VentaInput) {
  }
 }
 
-// Flujo: COT  OV 
+// Editar cotización (solo mientras tipo === "COTIZACION")
+
+export async function actualizarCotizacion(id: string, input: VentaInput) {
+ const session = await auth();
+ if (!session?.user?.id) return { error: "No autorizado" };
+
+ const existente = await prisma.venta.findUnique({ where: { id } });
+ if (!existente) return { error: "Cotización no encontrada" };
+ if (existente.tipo !== "COTIZACION") return { error: "Solo se pueden editar cotizaciones" };
+
+ const dias = calcularDiasCredito(input.credito);
+ const vence = dias ? new Date(Date.now() + dias * 86400000) : null;
+
+ const subtotal = input.detalles.reduce((s, d) => {
+ const base = d.cantidad * d.precio * (1 - d.descuento / 100);
+ return s + base;
+ }, 0);
+ const totalItbis = input.detalles.reduce((s, d) => s + d.itbis, 0);
+ const total = subtotal + totalItbis;
+
+ try {
+ await prisma.$transaction(async (tx) => {
+ // Eliminar detalles anteriores
+ await tx.detalleVenta.deleteMany({ where: { ventaId: id } });
+ // Actualizar encabezado y crear nuevos detalles
+ await tx.venta.update({
+ where: { id },
+ data: {
+ clienteId: input.clienteId,
+ direccionId: input.direccionId || null,
+ credito: input.credito as TipoCredito,
+ diasCredito: dias,
+ fechaVencimiento: vence,
+ fechaEntrega: input.fechaEntrega ? new Date(input.fechaEntrega) : null,
+ notas: input.notas || null,
+ subtotal,
+ itbis: totalItbis,
+ total,
+ detalles: {
+ create: input.detalles.map((d, i) => {
+ const base = d.cantidad * d.precio * (1 - d.descuento / 100);
+ return {
+ productoId: d.productoId,
+ descripcion: d.descripcion || null,
+ unidad: d.unidad || null,
+ cantidad: d.cantidad,
+ precio: d.precio,
+ precioFinal: d.precioFinal,
+ exentoItbis: d.exentoItbis,
+ descuento: d.descuento,
+ itbis: d.itbis,
+ subtotal: base,
+ orden: i,
+ };
+ }),
+ },
+ },
+ });
+ });
+
+ revalidatePath(`/ventas/${id}`);
+ revalidatePath("/ventas");
+ return { ok: true };
+ } catch (err) {
+ console.error("[actualizarCotizacion]", err);
+ const msg = err instanceof Error ? err.message : String(err);
+ return { error: msg };
+ }
+}
+
+// Flujo: COT  OV
 
 export async function avanzarCotizacion(id: string) {
  const session = await auth();

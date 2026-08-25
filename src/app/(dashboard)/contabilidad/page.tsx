@@ -4,20 +4,21 @@ import { auth } from "@/lib/auth";
 import type { LucideProps } from "lucide-react";
 import {
   HandCoins, TrendingDown, BarChart3,
-  Receipt, ScrollText, Calculator,
+  Receipt, ScrollText, Calculator, FileX2,
 } from "lucide-react";
 
 async function getBadges() {
   const hoy = new Date();
-  const [cxcVencidas, cxpVencidas] = await Promise.all([
+  const [cxcVencidas, cxpVencidas, ncPendientes] = await Promise.all([
     prisma.cuentaPorCobrar.count({
       where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
     }),
     prisma.cuentaPorPagar.count({
       where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
     }).catch(() => 0),
+    prisma.notaCredito.count({ where: { estado: "PENDIENTE" } }).catch(() => 0),
   ]);
-  return { cxcVencidas, cxpVencidas: Number(cxpVencidas) };
+  return { cxcVencidas, cxpVencidas: Number(cxpVencidas), ncPendientes: Number(ncPendientes) };
 }
 
 function ModuleCard({ label, sub, href, Icon, color, badge = 0 }: {
@@ -86,7 +87,8 @@ export default async function ContabilidadPage() {
     { label: "Analíticas",         sub: "Ventas y márgenes",href: "/contabilidad/analiticas",Icon: BarChart3,   color: "#8b5cf6", badge: 0              },
     { label: "Gastos",             sub: "Por categoría",   href: "/contabilidad/gastos",    Icon: Receipt,     color: "#f43f5e", badge: 0              },
     { label: "Reportes",           sub: "Informes",        href: "/contabilidad/reportes",  Icon: ScrollText,  color: "#64748b", badge: 0              },
-    { label: "Impuestos",          sub: "ITBIS / DGII",    href: "/contabilidad/impuestos", Icon: Calculator,  color: "#f97316", badge: 0              },
+    { label: "Impuestos",          sub: "ITBIS / DGII",    href: "/contabilidad/impuestos",       Icon: Calculator,  color: "#f97316", badge: 0                },
+    { label: "Notas de Crédito",  sub: "Devoluciones",    href: "/contabilidad/notas-credito",   Icon: FileX2,      color: "#a855f7", badge: b.ncPendientes },
   ].filter(m => !(ocultarAnaliticas && m.href === "/contabilidad/analiticas"));
 
   return (

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
 import {
   avanzarCotizacion,
   crearConduce,
@@ -241,6 +242,21 @@ export function AvanzarVentaButtons({
           }}>
           {error}
         </p>
+      )}
+
+      {/* COTIZACION → Editar */}
+      {tipo === "COTIZACION" && (
+        <Link
+          href={`/ventas/${ventaId}/editar`}
+          className={PILL + " w-full justify-center"}
+          style={{
+            backgroundColor: "color-mix(in oklch, var(--foreground) 5%, var(--card))",
+            color: "var(--foreground)",
+            borderColor: "var(--border)",
+          }}
+        >
+          ✎ Editar cotización
+        </Link>
       )}
 
       {/* COTIZACION → Orden de Venta */}
