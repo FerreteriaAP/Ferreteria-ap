@@ -141,7 +141,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
   const est = TIPO_STYLE[venta.tipo] ?? TIPO_STYLE.COTIZACION;
 
   return (
-    <div className="space-y-5 max-w-6xl">
+    <div className="space-y-5 max-w-7xl">
 
       {/* Volver */}
       <div className="flex items-center gap-3 flex-wrap">
