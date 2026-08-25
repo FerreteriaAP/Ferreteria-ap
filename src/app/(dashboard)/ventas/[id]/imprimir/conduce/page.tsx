@@ -162,10 +162,6 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
             </div>
           </div>
 
-          <div className="footer">
-            Al firmar este conduce el cliente confirma haber recibido los productos en perfectas condiciones ·{" "}
-            {docNumero} · {fecha} · RNC {EMPRESA.rnc}
-          </div>
 
         </div>
       </div>
