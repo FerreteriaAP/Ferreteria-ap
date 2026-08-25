@@ -220,7 +220,7 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
         .tot-lbl-f { padding: 10px 14px 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 4px 0 0 4px; }
         .tot-val-f { padding: 10px 12px; font-size: 14px; font-weight: 700; color: #fff; background: #f5821f; border-radius: 0 4px 4px 0; text-align: right; font-family: 'Courier New', monospace; }
 
-        /* Footer — flujo normal, solo aparece al final del documento (última página) */
+        /* Footer — se empuja al fondo de la última página con margin-top: auto */
         .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 8px; border-top: 1px solid #e8e8e8; margin-top: 10px; }
 
         @media print {
@@ -228,7 +228,13 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
           body { background: white; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; padding: 0; }
-          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 12px 18px 14px; }
+          /* Flex column + min-height de página → footer siempre al fondo de la última página */
+          .doc {
+            box-shadow: none; border-radius: 0; margin: 0; padding: 12px 18px 14px;
+            display: flex; flex-direction: column;
+            min-height: 259mm; /* carta 279mm − 8mm top − 12mm bottom */
+          }
+          .footer-line { margin-top: auto; }
           .th-l, .th-r, .th-c, .th-cod,
           .tot-lbl-f, .tot-val-f,
           .logo-area, .cli-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

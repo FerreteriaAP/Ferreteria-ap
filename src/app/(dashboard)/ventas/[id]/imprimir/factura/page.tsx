@@ -259,8 +259,8 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
 
         .notas-box { margin-bottom: 16px; font-size: 10.5px; color: #555; padding: 7px 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ddd; }
 
-        /* Información de pago + footer — flujo normal, solo última página */
-        .footer-area { padding-top: 16px; border-top: 1px solid #e8e8e8; margin-top: 20px; }
+        /* Información de pago + footer — empujado al fondo de la última página */
+        .footer-area { padding-top: 16px; border-top: 1px solid #e8e8e8; margin-top: auto; }
         .banco-tit { font-size: 8.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
         .banco-ref { font-size: 11px; margin-bottom: 6px; color: #333; }
         .banco-item { font-size: 11px; line-height: 1.9; display: flex; gap: 5px; }
@@ -269,11 +269,16 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
 
         /* Impresión */
         @media print {
-          @page { size: letter; margin: 12mm 15mm 15mm; }
+          @page { size: letter; margin: 8mm 14mm 12mm; }
           body { background: white; }
           .no-print { display: none !important; }
           .wrap { max-width: 100%; padding: 0; }
-          .doc { box-shadow: none; border-radius: 0; margin: 0; padding: 16px 20px 20px; }
+          /* Flex column + min-height → footer-area siempre al fondo de la última página */
+          .doc {
+            box-shadow: none; border-radius: 0; margin: 0; padding: 16px 20px 20px;
+            display: flex; flex-direction: column;
+            min-height: 259mm;
+          }
           .th-l, .th-r, .th-c, .th-cod,
           .tot-lbl-f, .tot-val-f,
           .logo-area, .cli-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
