@@ -251,9 +251,8 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
         .footer { font-size: 7px; color: #999; text-align: center; margin-top: 5px; padding-top: 3px; border-top: 1px solid #ddd; }
 
         /* ── PRINT ── */
-        /* Cuando Chrome usa "Ninguno" en márgenes, ignora @page { margin }.
-           El padding en .doc es el único margen que Chrome NO sobrescribe.
-           Sin min-height: dot matrix no necesita llenar la página entera. */
+        /* Chrome "Ninguno" ignora @page { margin } pero NO ignora padding en elementos.
+           min-height en .doc + margin-top:auto en .firmas → firmas al fondo de la página. */
         @media print {
           @page { margin: 3mm 0; }
           html, body { width: 100%; margin: 0; padding: 0; }
@@ -264,13 +263,20 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
             box-sizing: border-box;
             width: 100%;
             border: none;
-            padding: 4mm 8mm 3mm;   /* top 4mm para que el logo no se corte */
+            /* top 6mm: da espacio al logo para que no se corte */
+            padding: 6mm 8mm 3mm;
             margin: 0;
+            /* min-height = página - márgenes @page → firmas con margin-top:auto van al fondo */
+            min-height: calc(5.5in - 6mm);
           }
-          /* firmas con margen fijo — no auto — para no dejar hueco gigante */
-          .firmas { margin-top: 8px; }
+          /* firmas al fondo de la página */
+          .firmas { margin-top: auto; }
           .firma-line { height: 28px; }
-          /* table-layout:fixed fuerza la tabla a respetar el ancho del contenedor */
+          /* "CONDUCE DE ENTREGA" + núm + fecha: separar del borde derecho */
+          .hdr-doc { margin-right: 3mm; }
+          /* Fecha más grande — 9px se ve distorsionada a 120×72 dpi */
+          .doc-fecha { font-size: 11px; color: #333; }
+          /* table-layout:fixed — tabla respeta el ancho del contenedor */
           .tbl { table-layout: fixed; }
           /* Courier New se ve mal a 120×72 dpi — usar Arial */
           .td-cod { font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 0; }
