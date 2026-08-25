@@ -313,14 +313,14 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
           </div>
 
           {/* Productos */}
-          <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-            <div className="px-5 py-3 border-b flex items-center gap-2" style={{ backgroundColor: HEADER_BG }}>
+          <div className="rounded-xl border" style={{ backgroundColor: CARD_BG }}>
+            <div className="px-5 py-3 border-b flex items-center gap-2 rounded-t-xl" style={{ backgroundColor: HEADER_BG }}>
               <div className="w-1 h-4 rounded-full" style={{ backgroundColor: "var(--accent-hex)" }} />
               <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--muted-foreground)" }}>
                 Productos — {venta.detalles.length} línea{venta.detalles.length !== 1 ? "s" : ""}
               </h2>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-b-xl">
               <Table>
                 <TableHeader>
                   <TableRow>
