@@ -2,7 +2,7 @@
 
 export function PrintButtons() {
   return (
-    <div className="no-print fixed top-[80px] right-4 z-50 flex gap-2">
+    <div className="no-print fixed top-[130px] right-4 z-50 flex gap-2">
       <button
         onClick={() => window.print()}
         className="px-4 py-2 text-sm font-semibold rounded-lg shadow-lg transition-colors"
