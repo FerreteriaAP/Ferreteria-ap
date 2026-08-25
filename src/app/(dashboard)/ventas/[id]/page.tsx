@@ -141,7 +141,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
   const est = TIPO_STYLE[venta.tipo] ?? TIPO_STYLE.COTIZACION;
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <div className="space-y-5 max-w-6xl">
 
       {/* Volver */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -231,47 +231,30 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border p-4" style={{ backgroundColor: CARD_BG }}>
-          <p className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Subtotal</p>
-          <p className="text-xl font-bold mt-1.5 tabular-nums">{fmtDOP(venta.subtotal)}</p>
-          {Number(venta.descuento) > 0 && (
-            <p className="text-xs mt-1" style={{ color: "#dc2626" }}>
-              Descuento: −{fmtDOP(venta.descuento)}
-            </p>
-          )}
-        </div>
-        <div className="rounded-xl border p-4" style={{ backgroundColor: CARD_BG }}>
-          <p className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>ITBIS (18%)</p>
-          <p className="text-xl font-bold mt-1.5 tabular-nums">{fmtDOP(venta.itbis)}</p>
-          <p className="text-[10px] mt-1" style={{ color: "var(--muted-foreground)" }}>
-            Condición: {CRED_LABEL[venta.credito] ?? venta.credito}
-          </p>
-        </div>
-        <div
-          className="rounded-xl border p-4"
-          style={{
-            backgroundColor: "color-mix(in oklch, var(--accent-hex) 2%, var(--card))",
-            borderColor: "color-mix(in oklch, var(--accent-hex) 12%, var(--border))",
-          }}
-        >
-          <p className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Total</p>
-          <p className="text-xl font-bold mt-1.5 tabular-nums" style={{ color: "var(--accent-hex)" }}>
-            {fmtDOP(venta.total)}
-          </p>
-          {venta.pagosRecibidos.length > 0 && (
-            <p className="text-[10px] mt-1" style={{ color: saldo > 0 ? "#dc2626" : "#16a34a" }}>
-              Saldo: {fmtDOP(saldo)}
-            </p>
-          )}
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {/* Columna izquierda — datos + productos + conduces + pagos */}
+        {/* Columna izquierda — KPIs + datos + productos + conduces + pagos */}
         <div className="lg:col-span-2 space-y-4 min-w-0">
+
+          {/* KPIs — Subtotal e ITBIS alineados al ancho de esta columna */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-xl border p-4" style={{ backgroundColor: CARD_BG }}>
+              <p className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Subtotal</p>
+              <p className="text-xl font-bold mt-1.5 tabular-nums">{fmtDOP(venta.subtotal)}</p>
+              {Number(venta.descuento) > 0 && (
+                <p className="text-xs mt-1" style={{ color: "#dc2626" }}>
+                  Descuento: −{fmtDOP(venta.descuento)}
+                </p>
+              )}
+            </div>
+            <div className="rounded-xl border p-4" style={{ backgroundColor: CARD_BG }}>
+              <p className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>ITBIS (18%)</p>
+              <p className="text-xl font-bold mt-1.5 tabular-nums">{fmtDOP(venta.itbis)}</p>
+              <p className="text-[10px] mt-1" style={{ color: "var(--muted-foreground)" }}>
+                Condición: {CRED_LABEL[venta.credito] ?? venta.credito}
+              </p>
+            </div>
+          </div>
 
           {/* Datos del documento */}
           <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}>
@@ -501,8 +484,27 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
           )}
         </div>
 
-        {/* Panel lateral — acciones */}
+        {/* Panel lateral — total + acciones */}
         <div className="space-y-4">
+
+          {/* Total destacado */}
+          <div
+            className="rounded-xl border p-4"
+            style={{
+              backgroundColor: "color-mix(in oklch, var(--accent-hex) 2%, var(--card))",
+              borderColor: "color-mix(in oklch, var(--accent-hex) 12%, var(--border))",
+            }}
+          >
+            <p className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Total</p>
+            <p className="text-xl font-bold mt-1.5 tabular-nums" style={{ color: "var(--accent-hex)" }}>
+              {fmtDOP(venta.total)}
+            </p>
+            {venta.pagosRecibidos.length > 0 && (
+              <p className="text-[10px] mt-1" style={{ color: saldo > 0 ? "#dc2626" : "#16a34a" }}>
+                Saldo: {fmtDOP(saldo)}
+              </p>
+            )}
+          </div>
 
           {/* Acciones del flujo */}
           {venta.tipo !== "CANCELADA" && venta.tipo !== "FACTURADA" && (
