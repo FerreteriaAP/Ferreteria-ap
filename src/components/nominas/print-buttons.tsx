@@ -15,7 +15,7 @@ export function PrintButtons() {
       className="no-print"
       style={{
         position: "fixed",
-        top: 8,
+        top: 120,
         right: 16,
         zIndex: 9999,
         display: "flex",
