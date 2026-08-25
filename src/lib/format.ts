@@ -12,16 +12,20 @@ export function cap(s?: string | null): string {
   return s.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** Formatea un RNC dominicano como X-XX-XXXXX-X (9 dígitos).
- *  "131912176"  → "1-31-91217-6"
- *  "1-31-91217-6" → "1-31-91217-6" (ya formateado)
- *  Si no tiene 9 dígitos devuelve el string limpio sin formato.
+/** Formatea un RNC o Cédula dominicana según la cantidad de dígitos:
+ *  - 9 dígitos  → RNC    X-XX-XXXXX-X   ("131912176"  → "1-31-91217-6")
+ *  - 11 dígitos → Cédula XXX-XXXXXXX-X  ("40220015511" → "402-2001551-1")
+ *  Cualquier otra longitud → devuelve el string sin modificar.
+ *  Clientes/suplidores a veces usan su cédula como RNC fiscal.
  */
 export function formatRnc(s?: string | null): string {
   if (!s) return "";
   const digits = s.replace(/\D/g, "");
-  if (digits.length !== 9) return s.trim(); // no es un RNC estándar — guardar tal cual
-  return `${digits[0]}-${digits.slice(1, 3)}-${digits.slice(3, 8)}-${digits[8]}`;
+  if (digits.length === 9)
+    return `${digits[0]}-${digits.slice(1, 3)}-${digits.slice(3, 8)}-${digits[8]}`;
+  if (digits.length === 11)
+    return `${digits.slice(0, 3)}-${digits.slice(3, 10)}-${digits[10]}`;
+  return s.trim(); // longitud inesperada — guardar tal cual
 }
 
 /** Formatea una cédula dominicana como XXX-XXXXXXX-X (11 dígitos).
