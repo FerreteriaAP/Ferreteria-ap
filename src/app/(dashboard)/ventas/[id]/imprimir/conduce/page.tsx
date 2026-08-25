@@ -274,8 +274,8 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
           .firma-line { height: 28px; }
           /* "CONDUCE DE ENTREGA" + núm + fecha: separar del borde derecho */
           .hdr-doc { margin-right: 3mm; }
-          /* Fecha más grande — 9px se ve distorsionada a 120×72 dpi */
-          .doc-fecha { font-size: 11px; color: #333; }
+          /* Fecha más grande y negra — legible a 120×72 dpi */
+          .doc-fecha { font-size: 13px; font-weight: 700; color: #000; }
           /* table-layout:fixed — tabla respeta el ancho del contenedor */
           .tbl { table-layout: fixed; }
           /* Courier New se ve mal a 120×72 dpi — usar Arial */
@@ -283,6 +283,9 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
           /* Firmas más legibles */
           .firma-lbl { font-size: 9px; }
           .firma-lbl strong { font-size: 10.5px; }
+          /* # de ítem y cantidades en negrita */
+          .td-n { font-weight: 700; color: #000; font-size: 9px; }
+          .td-qty { font-size: 10px; }
           /* Fuentes un poco más grandes */
           .doc-num { font-size: 19px; }
           .info-val-lg { font-size: 12px; }
