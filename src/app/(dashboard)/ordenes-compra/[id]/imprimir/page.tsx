@@ -96,14 +96,8 @@ export default async function ImprimirOrdenCompraPage({ params }: PageProps) {
                 <div className="cli-sec">DATOS DE ENTREGA</div>
                 <div className="cli-row"><span className="cli-lbl">Estado:</span> <strong>SOLICITUD</strong></div>
                 <div className="cli-row">
-                  <span className="cli-lbl">Dirección de entrega:</span><br />
-                  <span style={{ fontSize: "10.5px" }}>{EMPRESA.dir}<br />{EMPRESA.ciudad}</span>
+                  <span className="cli-lbl">Dirección de entrega:</span> {EMPRESA.dir}, {EMPRESA.ciudad}
                 </div>
-                {oc.usuario && (
-                  <div className="cli-row" style={{ marginTop: 4 }}>
-                    <span className="cli-lbl">Solicitado por:</span> {oc.usuario.nombre}
-                  </div>
-                )}
               </div>
             </div>
           </div>
