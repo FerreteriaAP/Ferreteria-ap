@@ -22,11 +22,9 @@ export default async function ImprimirCotizacionPage({ params }: PageProps) {
   const fechaEmision = new Date(v.fechaEmision ?? new Date()).toLocaleDateString("es-DO", {
     day: "2-digit", month: "2-digit", year: "numeric",
   });
-  // Válida hasta: siempre 48 h después de emisión (aunque no esté guardado en DB)
+  // Válida hasta: siempre 48 h después de emisión, ignorar fechaVencimiento de crédito
   const baseDate = new Date(v.fechaEmision ?? new Date());
-  const venceDate = v.fechaVencimiento
-    ? new Date(v.fechaVencimiento)
-    : new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+  const venceDate = new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000);
   const fechaVence = venceDate.toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tieneDesc = v.detalles.some((d: any) => Number(d.descuento) > 0);
