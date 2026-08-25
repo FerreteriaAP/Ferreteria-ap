@@ -162,3 +162,118 @@ export async function getReporteMovimientos(desde: Date, hasta: Date) {
 
  return { movimientos: filas, resumen };
 }
+
+// ── Reporte 3: Dinero Recibido ────────────────────────────────────────────────
+
+import { auth } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
+
+/** Devuelve todos los turnos CERRADOS en el rango con su registro de dinero recibido.
+ *  También calcula montoApertura del turno siguiente (para efectivoEsperado).
+ */
+export async function getReporteDineroRecibido(desde: Date, hasta: Date) {
+  // Turnos cerrados en el rango, ordenados ASC para poder parear con el siguiente
+  const turnosCerrados = await prisma.turnoCaja.findMany({
+    where: { estado: "CERRADO", fechaCierre: { gte: desde, lte: hasta } },
+    include: {
+      usuario: { select: { nombre: true, apellido: true } },
+      registroDinero: true,
+    },
+    orderBy: { fechaCierre: "asc" },
+  });
+
+  if (!turnosCerrados.length) return { filas: [], resumen: null };
+
+  // Para cada turno cerrado, necesitamos el montoApertura del turno que abrió DESPUÉS
+  const ids = turnosCerrados.map(t => t.id);
+
+  // Fetch all turnos (cerrados + el abierto actual) para encontrar el siguiente por fecha
+  const todosTurnos = await prisma.turnoCaja.findMany({
+    select: { id: true, numero: true, fechaApertura: true, montoApertura: true },
+    orderBy: { fechaApertura: "asc" },
+  });
+
+  // Mapa: turnoId → montoApertura del turno siguiente
+  const siguienteApertura = new Map<string, number>();
+  for (let i = 0; i < todosTurnos.length; i++) {
+    const current = todosTurnos[i];
+    const next = todosTurnos[i + 1];
+    if (ids.includes(current.id) && next) {
+      siguienteApertura.set(current.id, Number(next.montoApertura));
+    }
+  }
+
+  const filas = turnosCerrados.map(t => {
+    const montoCierre = Number(t.montoCierre ?? 0);
+    const montoAperturaSig = siguienteApertura.get(t.id) ?? null;
+    const efectivoEsperado = montoAperturaSig !== null ? montoCierre - montoAperturaSig : montoCierre;
+    const montoRecibido = t.registroDinero?.montoRecibido ? Number(t.registroDinero.montoRecibido) : null;
+    const diferencia = montoRecibido !== null ? montoRecibido - efectivoEsperado : null;
+
+    return {
+      turnoId: t.id,
+      numero: t.numero,
+      cajero: `${t.usuario.nombre} ${t.usuario.apellido}`,
+      fechaCierre: t.fechaCierre!,
+      fechaApertura: t.fechaApertura,
+      montoCierre,
+      montoAperturaSig,
+      efectivoEsperado,
+      montoRecibido,
+      diferencia,
+      notas: t.registroDinero?.notas ?? null,
+      registrado: !!t.registroDinero,
+      registroId: t.registroDinero?.id ?? null,
+    };
+  });
+
+  // Resumen global
+  const conRegistro = filas.filter(f => f.montoRecibido !== null);
+  const resumen = {
+    totalTurnos: filas.length,
+    totalEsperado: filas.reduce((s, f) => s + f.efectivoEsperado, 0),
+    totalRecibido: conRegistro.reduce((s, f) => s + (f.montoRecibido ?? 0), 0),
+    diferenciaNeta: conRegistro.reduce((s, f) => s + (f.diferencia ?? 0), 0),
+    pendientes: filas.filter(f => !f.registrado).length,
+  };
+
+  return { filas, resumen };
+}
+
+/** Registra o actualiza el dinero recibido de un cierre de caja */
+export async function registrarDineroRecibido(data: {
+  turnoId: string;
+  montoCierre: number;
+  montoAperturaSig: number | null;
+  efectivoEsperado: number;
+  montoRecibido: number;
+  notas?: string;
+}) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autenticado" };
+
+  const diferencia = data.montoRecibido - data.efectivoEsperado;
+
+  await prisma.registroDineroRecibido.upsert({
+    where: { turnoId: data.turnoId },
+    update: {
+      montoRecibido: data.montoRecibido,
+      diferencia,
+      notas: data.notas ?? null,
+      usuarioId: session.user.id,
+    },
+    create: {
+      turnoId: data.turnoId,
+      montoCierre: data.montoCierre,
+      montoAperturaSig: data.montoAperturaSig,
+      efectivoEsperado: data.efectivoEsperado,
+      montoRecibido: data.montoRecibido,
+      diferencia,
+      notas: data.notas ?? null,
+      usuarioId: session.user.id,
+    },
+  });
+
+  revalidatePath("/contabilidad/reportes");
+  return { ok: true };
+}

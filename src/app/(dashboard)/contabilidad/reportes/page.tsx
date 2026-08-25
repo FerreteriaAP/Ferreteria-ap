@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getReporteCierres, getReporteMovimientos } from "@/actions/reportes-caja";
+import { getReporteCierres, getReporteMovimientos, getReporteDineroRecibido } from "@/actions/reportes-caja";
 import { rangoFechas } from "@/lib/rangos";
 import { ReportesFiltro } from "@/components/contabilidad/reportes-filtro";
+import { DineroRecibidoTabla } from "@/components/contabilidad/dinero-recibido-tabla";
 import { cn } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 
@@ -43,9 +44,10 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
 
   const { desde: dDesde, hasta: dHasta, label } = rangoFechas({ tipo, fecha, mes, q, desde, hasta });
 
-  const [dataCierres, dataMovs] = await Promise.all([
+  const [dataCierres, dataMovs, dataDinero] = await Promise.all([
     getReporteCierres(dDesde, dHasta),
     getReporteMovimientos(dDesde, dHasta),
+    getReporteDineroRecibido(dDesde, dHasta),
   ]);
 
   return (
@@ -162,6 +164,14 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
             </div>
           )}
         </div>
+      )}
+
+      {/* DINERO RECIBIDO */}
+      {reporte === "dinero-recibido" && (
+        <DineroRecibidoTabla
+          filas={dataDinero.filas as Parameters<typeof DineroRecibidoTabla>[0]["filas"]}
+          resumen={dataDinero.resumen}
+        />
       )}
 
       {/* MOVIMIENTOS DE CAJA */}

@@ -74,9 +74,10 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  return (
  <div className="rounded-xl border bg-card p-4 space-y-4"> {/* Selector de reporte */}
  <div className="flex gap-2 flex-wrap"> {[
- { key: "cierres", label: " Cierres de caja" },
- { key: "movimientos", label: " Movimientos de caja" },
- ].filter(r => !(soloMovimientos && r.key === "cierres")).map(r => (
+ { key: "cierres",         label: "📋 Cierres de caja" },
+ { key: "movimientos",     label: "💸 Movimientos de caja" },
+ { key: "dinero-recibido", label: "💵 Dinero Recibido" },
+ ].filter(r => !(soloMovimientos && r.key !== "movimientos")).map(r => (
  <a key={r.key}
  href={buildUrl({ reporte: r.key })}
  className={cn(
