@@ -32,6 +32,12 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
     : v.detalles;
   const items = allItems.slice(0, 8);
 
+  // detallesRecepcion es un JSON blob sin producto.codigo — construir mapa desde v.detalles
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const codigoMap: Record<string, string> = Object.fromEntries(
+    (v.detalles ?? []).map((d: any) => [d.productoId, d.producto?.codigo ?? ""])
+  );
+
   const docNumero = conduce?.numero ?? v.numero;
 
   return (
@@ -109,7 +115,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
               {items.map((item: any, i: number) => (
                 <tr key={item.id ?? item.productoId} className={i % 2 === 0 ? "tr-alt" : ""}>
                   <td className="td-n">{i + 1}</td>
-                  <td className="td-cod">{item.producto?.codigo ?? "—"}</td>
+                  <td className="td-cod">{item.producto?.codigo || codigoMap[item.productoId] || "—"}</td>
                   <td className="td-desc">{item.descripcion ?? item.nombre ?? item.producto?.nombre}</td>
                   <td className="td-qty">
                     {Number(item.cantEnviada ?? item.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 })}
