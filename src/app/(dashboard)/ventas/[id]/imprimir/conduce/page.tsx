@@ -137,7 +137,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
             </tfoot>
           </table>
 
-          {/* ── FIRMAS (margin-top:auto las empuja al fondo cuando hay espacio) ── */}
+          {/* ── FIRMAS ── */}
           <div className="firmas">
             <div className="firma">
               <div className="firma-line"></div>
@@ -162,6 +162,10 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
             </div>
           </div>
 
+          <div className="footer">
+            Al firmar este conduce el cliente confirma haber recibido los productos en perfectas condiciones ·{" "}
+            {docNumero} · {fecha} · RNC {EMPRESA.rnc}
+          </div>
 
         </div>
       </div>
@@ -232,15 +236,15 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
         .td-chk { border: 1px solid #000; }
         .tf-lines { padding: 2px 5px; font-size: 7.5px; color: #555; border-top: 1px solid #000; }
 
-        /* ── FIRMAS — margin-top:auto las empuja al fondo con espacio libre ── */
+        /* ── FIRMAS ── */
         .firmas {
           display: flex; gap: 14px;
-          margin-top: auto;
+          margin-top: 10px;
           padding-top: 6px;
           border-top: 1px solid #000;
         }
         .firma { flex: 1; }
-        .firma-line { border-bottom: 1px solid #000; height: 20px; margin-bottom: 3px; }
+        .firma-line { border-bottom: 1px solid #000; height: 28px; margin-bottom: 3px; }
         .firma-lbl { font-size: 8px; text-align: center; color: #444; }
 
         /* ── FOOTER ── */
@@ -248,7 +252,8 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
 
         /* ── PRINT ── */
         /* Cuando Chrome usa "Ninguno" en márgenes, ignora @page { margin }.
-           El padding en .doc es el único margen que Chrome NO sobrescribe. */
+           El padding en .doc es el único margen que Chrome NO sobrescribe.
+           Sin min-height: dot matrix no necesita llenar la página entera. */
         @media print {
           @page { margin: 3mm 0; }
           html, body { width: 100%; margin: 0; padding: 0; }
@@ -259,11 +264,12 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
             box-sizing: border-box;
             width: 100%;
             border: none;
-            /* padding lateral en el elemento — no se anula con "Ninguno" en Chrome */
-            padding: 0 8mm;
+            padding: 4mm 8mm 3mm;   /* top 4mm para que el logo no se corte */
             margin: 0;
-            min-height: calc(5.5in - 6mm);
           }
+          /* firmas con margen fijo — no auto — para no dejar hueco gigante */
+          .firmas { margin-top: 8px; }
+          .firma-line { height: 28px; }
           /* table-layout:fixed fuerza la tabla a respetar el ancho del contenedor */
           .tbl { table-layout: fixed; }
           /* Courier New se ve mal a 120×72 dpi — usar Arial */
