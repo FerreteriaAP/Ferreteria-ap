@@ -236,11 +236,11 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
         .firmas {
           display: flex; gap: 14px;
           margin-top: auto;
-          padding-top: 10px;
+          padding-top: 6px;
           border-top: 1px solid #000;
         }
         .firma { flex: 1; }
-        .firma-line { border-bottom: 1px solid #000; height: 30px; margin-bottom: 3px; }
+        .firma-line { border-bottom: 1px solid #000; height: 20px; margin-bottom: 3px; }
         .firma-lbl { font-size: 8px; text-align: center; color: #444; }
 
         /* ── FOOTER ── */
