@@ -201,6 +201,7 @@ export function AvanzarVentaButtons({
   const [mostrarConduce,   setMostrarConduce]   = useState(false);
   const [entregado,        setEntregado]         = useState("");
   const [recibido,         setRecibido]          = useState("");
+  const [telRecibido,      setTelRecibido]       = useState("");
   const [chofer,           setChofer]            = useState("");
   const [obsConduce,       setObsConduce]        = useState("");
 
@@ -281,13 +282,14 @@ export function AvanzarVentaButtons({
         >
           <p className="font-semibold text-sm">Datos del conduce</p>
           {[
-            { label: "Entregado por", val: entregado, set: setEntregado },
-            { label: "Recibido por",  val: recibido,  set: setRecibido  },
-            { label: "Chofer",        val: chofer,    set: setChofer    },
-          ].map(({ label, val, set }) => (
+            { label: "Entregado por", val: entregado,   set: setEntregado,   placeholder: "Nombre" },
+            { label: "Recibido por",  val: recibido,    set: setRecibido,    placeholder: "Nombre" },
+            { label: "Tel. receptor", val: telRecibido, set: setTelRecibido, placeholder: "Teléfono de quien recibe" },
+            { label: "Chofer",        val: chofer,      set: setChofer,      placeholder: "Nombre" },
+          ].map(({ label, val, set, placeholder }) => (
             <div key={label} className="space-y-1">
               <Label className="text-xs">{label}</Label>
-              <Input value={val} onChange={(e) => set(e.target.value)} className="h-8" placeholder="Nombre" />
+              <Input value={val} onChange={(e) => set(e.target.value)} className="h-8" placeholder={placeholder} />
             </div>
           ))}
           <div className="space-y-1">
@@ -297,10 +299,11 @@ export function AvanzarVentaButtons({
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => run(() => crearConduce(ventaId, {
-                firmaEntregado: entregado  || undefined,
-                firmaRecibido:  recibido   || undefined,
-                firmaChofer:    chofer     || undefined,
-                observaciones:  obsConduce || undefined,
+                firmaEntregado:   entregado    || undefined,
+                firmaRecibido:    recibido     || undefined,
+                telefonoRecibido: telRecibido  || undefined,
+                firmaChofer:      chofer       || undefined,
+                observaciones:    obsConduce   || undefined,
               }))}
               disabled={loading}
               className={PILL + " w-full justify-center"}

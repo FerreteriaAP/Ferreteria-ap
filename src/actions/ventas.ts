@@ -469,6 +469,7 @@ export async function avanzarCotizacion(id: string) {
 export async function crearConduce(ventaId: string, data: {
  firmaEntregado?: string;
  firmaRecibido?: string;
+ telefonoRecibido?: string;
  firmaChofer?: string;
  observaciones?: string;
 }) {
@@ -505,6 +506,7 @@ export async function crearConduce(ventaId: string, data: {
  tipo: "OUT",
  firmaEntregado: data.firmaEntregado || null,
  firmaRecibido: data.firmaRecibido || null,
+ telefonoRecibido: data.telefonoRecibido || null,
  firmaChofer: data.firmaChofer || null,
  observaciones: data.observaciones || null,
  },

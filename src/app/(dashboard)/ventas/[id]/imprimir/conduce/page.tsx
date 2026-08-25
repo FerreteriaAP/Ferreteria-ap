@@ -146,6 +146,7 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
               <div className="firma-lbl">
                 Recibido por (cliente)
                 {conduce?.firmaRecibido && <><br /><strong>{conduce.firmaRecibido}</strong></>}
+                {conduce?.telefonoRecibido && <><br /><span style={{ fontSize: "9px", color: "#444" }}>Tel: {conduce.telefonoRecibido}</span></>}
               </div>
             </div>
             <div className="firma">

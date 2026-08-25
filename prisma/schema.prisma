@@ -591,9 +591,10 @@ model Conduce {
   tipo           String   @default("OUT") // OUT o IN (devolución)
   fechaEmision   DateTime @default(now())
   // Firmas (3 líneas en el formato físico)
-  firmaEntregado String? // nombre quien entrega
-  firmaRecibido  String? // nombre quien recibe
-  firmaChofer    String? // nombre del chofer
+  firmaEntregado    String? // nombre quien entrega
+  firmaRecibido     String? // nombre quien recibe
+  telefonoRecibido  String? // teléfono de quien recibe (solo para conduce)
+  firmaChofer       String? // nombre del chofer
   observaciones   String?  @db.Text
   impreso         Boolean  @default(false)
   // Confirmación de recepción — obligatoria antes de facturar
