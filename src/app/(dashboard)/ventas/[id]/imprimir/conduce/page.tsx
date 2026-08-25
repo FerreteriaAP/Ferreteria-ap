@@ -276,6 +276,14 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
           .hdr-doc { margin-right: 3mm; }
           /* Fecha más grande y negra — legible a 120×72 dpi */
           .doc-fecha { font-size: 13px; font-weight: 700; color: #000; }
+          /* Texto pequeño que no se lee bien en matricial — subir tamaño */
+          .doc-tipo { font-size: 10px; letter-spacing: 0.05em; }
+          .emp-sub  { font-size: 9px; color: #000; }
+          .info-lbl { font-size: 8.5px; }
+          .info-val { font-size: 9.5px; color: #000; }
+          .tf-lines { font-size: 9px; color: #000; }
+          .firma-lbl { font-size: 10px; color: #000; }
+          .firma-lbl strong { font-size: 11.5px; }
           /* table-layout:fixed — tabla respeta el ancho del contenedor */
           .tbl { table-layout: fixed; }
           /* Courier New se ve mal a 120×72 dpi — usar Arial */
