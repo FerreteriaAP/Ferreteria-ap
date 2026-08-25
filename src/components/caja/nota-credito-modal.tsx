@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition, useRef, type FormEvent } from "react";
-import { buscarFacturasParaNC, crearNotaCredito, type NotaCreditoDetalleItem } from "@/actions/nota-credito";
+import { useState, useTransition, type FormEvent } from "react";
+import { buscarFacturaPorNumeroExacto, crearNotaCredito, type NotaCreditoDetalleItem } from "@/actions/nota-credito";
 import { cn } from "@/lib/utils";
 import { FileX2, Printer, CheckCircle2 } from "lucide-react";
 
@@ -9,7 +9,7 @@ const INPUT = "w-full h-10 rounded-lg border bg-background px-3 text-sm focus:ou
 
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-type FacturaResult = Awaited<ReturnType<typeof buscarFacturasParaNC>>[number];
+type FacturaResult = NonNullable<Awaited<ReturnType<typeof buscarFacturaPorNumeroExacto>>>;
 type DetalleVenta = FacturaResult["detalles"][number];
 
 interface ItemNC {
@@ -34,10 +34,10 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [ncCreada, setNcCreada] = useState<NcCreada | null>(null);
 
-  const [query, setQuery] = useState("");
-  const [resultados, setResultados] = useState<FacturaResult[]>([]);
+  // Búsqueda por número exacto — sin keywords ni dropdown
+  const [serial, setSerial] = useState("");
   const [buscando, setBuscando] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [busquedaError, setBusquedaError] = useState<string | null>(null);
 
   const [factura, setFactura] = useState<FacturaResult | null>(null);
   const [items, setItems] = useState<ItemNC[]>([]);
@@ -46,24 +46,20 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
 
   const totalNC = items.reduce((s, i) => s + (parseFloat(i.cantidad) || 0) * i.precioUnitario, 0);
 
-  const handleQuery = (val: string) => {
-    setQuery(val);
+  const buscarFactura = async () => {
+    const num = serial.trim();
+    if (!num) { setBusquedaError("Ingresa el número de factura"); return; }
+    setBuscando(true);
+    setBusquedaError(null);
     setFactura(null);
     setItems([]);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (!val.trim()) { setResultados([]); return; }
-    setBuscando(true);
-    timerRef.current = setTimeout(async () => {
-      const r = await buscarFacturasParaNC(val);
-      setResultados(r);
-      setBuscando(false);
-    }, 300);
-  };
-
-  const seleccionarFactura = (f: FacturaResult) => {
+    const f = await buscarFacturaPorNumeroExacto(num);
+    setBuscando(false);
+    if (!f) {
+      setBusquedaError("Factura no encontrada. Verifica el número e inténtalo de nuevo.");
+      return;
+    }
     setFactura(f);
-    setResultados([]);
-    setQuery(`${f.numero} — ${f.cliente.nombre}`);
     setItems(f.detalles.map((d: DetalleVenta) => ({
       productoId: d.productoId,
       nombre: d.descripcion ?? d.producto.nombre,
@@ -72,6 +68,14 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
       cantidad: "",
       precioUnitario: Number(d.precioFinal),
     })));
+    setError(null);
+  };
+
+  const limpiar = () => {
+    setSerial("");
+    setFactura(null);
+    setItems([]);
+    setBusquedaError(null);
     setError(null);
   };
 
@@ -173,52 +177,51 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl">✕</button>
         </div>
 
-        {/* Buscador — FUERA del scroll, z-10 para que el dropdown quede sobre el footer */}
-        <div className="px-5 shrink-0 relative z-10">
+        {/* Buscador por número EXACTO — sin keywords ni dropdown */}
+        <div className="px-5 shrink-0">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
-            Factura original
+            Número de factura
           </label>
-          <div className="relative">
-            <input
-              autoFocus
-              type="text"
-              value={query}
-              onChange={e => handleQuery(e.target.value)}
-              placeholder="Número de factura o nombre del cliente…"
-              className={INPUT}
-            />
-            {buscando && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
-                buscando…
-              </span>
-            )}
-            {resultados.length > 0 && (
-              <div className="absolute z-50 top-full mt-1 w-full border rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto" style={{ backgroundColor: "var(--card-bg-hex, var(--card))", borderColor: "var(--card-border-hex, var(--border))" }}>
-                {resultados.map(f => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => seleccionarFactura(f)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-accent transition-colors border-b last:border-0"
-                  >
-                    <div className="flex justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-mono font-bold" style={{ color: "var(--accent-hex)" }}>{f.numero}</p>
-                        <p className="text-xs font-medium">{f.cliente.nombre}</p>
-                        {f.cliente.rnc && <p className="text-xs text-muted-foreground">{f.cliente.rnc}</p>}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-mono font-bold">{fmt(Number(f.total))}</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {new Date(f.fechaEmision).toLocaleDateString("es-DO")}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+          {!factura ? (
+            <div className="flex gap-2">
+              <input
+                autoFocus
+                type="text"
+                value={serial}
+                onChange={e => { setSerial(e.target.value.toUpperCase()); setBusquedaError(null); }}
+                onKeyDown={e => e.key === "Enter" && buscarFactura()}
+                placeholder="Ej: FAC/2026/0071"
+                className={INPUT + " font-mono flex-1"}
+              />
+              <button
+                type="button"
+                onClick={buscarFactura}
+                disabled={buscando}
+                className="px-4 h-10 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-60"
+                style={{ backgroundColor: "#a855f7" }}
+              >
+                {buscando ? "…" : "Buscar"}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between rounded-lg border px-3 py-2.5 bg-muted/30">
+              <div>
+                <p className="text-sm font-mono font-bold" style={{ color: "#a855f7" }}>{factura.numero}</p>
+                <p className="text-xs text-muted-foreground">{factura.cliente.nombre}</p>
               </div>
-            )}
-          </div>
+              <button type="button" onClick={limpiar} className="text-xs text-muted-foreground hover:text-destructive transition-colors ml-3">
+                ✕ cambiar
+              </button>
+            </div>
+          )}
+          {busquedaError && (
+            <p className="text-xs text-destructive mt-1.5">{busquedaError}</p>
+          )}
+          {!factura && (
+            <p className="text-[11px] text-muted-foreground mt-1.5">
+              Requiere el número exacto de la factura física del cliente.
+            </p>
+          )}
         </div>
 
         {/* Contenido scrollable — solo cuando hay factura seleccionada */}

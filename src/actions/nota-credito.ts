@@ -90,6 +90,7 @@ export async function crearNotaCredito(input: CrearNotaCreditoInput) {
 
 // Obtener facturas para nota de crédito (facturadas del turno actual o búsqueda) 
 
+/** @deprecated — solo conservada para retrocompatibilidad, usar buscarFacturaPorNumeroExacto */
 export async function buscarFacturasParaNC(q: string) {
  if (!q || q.trim().length < 2) return [];
  const term = q.trim();
@@ -114,6 +115,28 @@ export async function buscarFacturasParaNC(q: string) {
  },
  orderBy: { createdAt: "desc" },
  take: 10,
+ });
+}
+
+/** Busca una factura por número EXACTO para nota de crédito.
+ *  La cajera debe ingresar el serial completo (ej. FAC/2026/0071).
+ *  No permite búsqueda por nombre ni keywords — requiere el documento físico.
+ */
+export async function buscarFacturaPorNumeroExacto(numero: string) {
+ if (!numero?.trim()) return null;
+ return prisma.venta.findFirst({
+ where: { tipo: "FACTURADA", numero: numero.trim() },
+ include: {
+ cliente: { select: { nombre: true, rnc: true, saldoFavor: true } },
+ detalles: {
+ select: {
+ id: true, productoId: true, descripcion: true, unidad: true,
+ cantidad: true, precioFinal: true, subtotal: true, itbis: true,
+ producto: { select: { nombre: true, unidadMedida: true } },
+ },
+ orderBy: { orden: "asc" },
+ },
+ },
  });
 }
 
