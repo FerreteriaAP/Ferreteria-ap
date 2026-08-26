@@ -160,13 +160,14 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
  <Card> <CardHeader><CardTitle className="text-base">Control de inventario</CardTitle></CardHeader> <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4"> <div className="space-y-1.5"> <Label htmlFor="stockActual"> Stock actual
  {esEdicion && <Badge variant="outline" className="ml-2 text-xs">Genera ajuste</Badge>}
  </Label> <Input id="stockActual" type="number" step="0.0001" min="0" placeholder="0" {...form.register("stockActual")} /> </div> <div className="space-y-1.5"> <Label htmlFor="stockMinimo"> Stock mínimo
- <span className="text-xs text-muted-foreground ml-1">(alerta)</span> </Label> <Input id="stockMinimo" type="number" step="0.0001" min="0" placeholder="0" {...form.register("stockMinimo")} /> </div> <div className="space-y-1.5"> <Label htmlFor="stockMaximo">Stock máximo</Label> <Input id="stockMaximo" type="number" step="0.0001" min="0" placeholder="Opcional" {...form.register("stockMaximo")} /> </div> </CardContent> </Card> <Separator /> <div className="flex items-center gap-3"> <button
- type="submit" disabled={isSubmitting}
- className={cn(buttonVariants(), isSubmitting && "opacity-50 pointer-events-none")}
- > {isSubmitting ? "Guardando..." : esEdicion ? "Guardar cambios" : "Crear producto"}
- </button> <button
+ <span className="text-xs text-muted-foreground ml-1">(alerta)</span> </Label> <Input id="stockMinimo" type="number" step="0.0001" min="0" placeholder="0" {...form.register("stockMinimo")} /> </div> <div className="space-y-1.5"> <Label htmlFor="stockMaximo">Stock máximo</Label> <Input id="stockMaximo" type="number" step="0.0001" min="0" placeholder="Opcional" {...form.register("stockMaximo")} /> </div> </CardContent> </Card> <Separator /> <div className="flex items-center justify-end gap-3"> <button
  type="button" onClick={() => router.back()}
  className={cn(buttonVariants({ variant: "outline" }))}
  > Cancelar
+ </button> <button
+ type="submit" disabled={isSubmitting}
+ className={cn("font-semibold transition-colors", isSubmitting && "opacity-50 pointer-events-none")}
+ style={{ backgroundColor: "var(--accent-hex)", color: "#fff", padding: "0.5rem 1.25rem", borderRadius: "0.5rem" }}
+ > {isSubmitting ? "Guardando..." : esEdicion ? "Guardar cambios" : "Crear producto"}
  </button> </div> </form> );
 }
