@@ -830,7 +830,7 @@ function NuevoProductoModal({ abierto, onClose, nombreInicial, costoInicial, cat
     if (duplicados.length > 0 && !ignorarDup) { setError("Se encontraron productos similares. Marca 'No es un duplicado' para continuar."); return; }
     setGuardando(true); setError(null);
     try {
-      const result = await crearProducto({ ...values, esFraccionable: false, exentoItbis: false, stockActual: 0, activo: true });
+      const result = await crearProducto({ ...values, esFraccionable: false, exentoItbis: false, esServicio: false, stockActual: 0, activo: true });
       if ("error" in result && result.error) { const errs = result.error as Record<string, string[]>; setError(Object.values(errs).flat()[0] ?? "Error al crear producto"); return; }
       if ("id" in result && result.id) {
         onProductoCreado({ id: result.id, nombre: values.nombre, codigo: values.codigo, unidadMedida: values.unidadMedida, costoUltimo: values.costoUltimo, stockActual: 0, precioVenta: values.precioVenta, porcentajeGanancia: values.porcentajeGanancia });

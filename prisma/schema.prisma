@@ -330,6 +330,8 @@ model Producto {
   stockMaximo        Decimal? @db.Decimal(12, 4)
   // Impuestos
   exentoItbis        Boolean  @default(false) // true = exento de ITBIS (ej. agregados)
+  // Servicios (precio variable por transacción, ej. Acarreo)
+  esServicio         Boolean  @default(false) // true = precio editable en PDV y Ventas para todos los roles
   // Metadatos
   imagen             String?
   activo             Boolean  @default(true)

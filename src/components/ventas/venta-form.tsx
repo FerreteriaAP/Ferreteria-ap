@@ -26,14 +26,14 @@ type ProductoSugerido = {
   precioVenta: unknown; costoUltimo: number | null; stockActual: unknown;
   esFraccionable: boolean; unidadFraccion: string | null; factorFraccion: unknown;
   precioFraccion: number | null;
-  exentoItbis: boolean; categoriaCode: string;
+  exentoItbis: boolean; esServicio: boolean; categoriaCode: string;
 };
 
 interface DetalleRow {
   productoId: string; nombre: string; codigo: string;
   unidad: string; unidadOriginal: string; unidadFraccion: string | null;
   cantidad: number; precio: number; precioCompleto: number;
-  descuento: number; itbis: number; exentoItbis: boolean;
+  descuento: number; itbis: number; exentoItbis: boolean; esServicio: boolean;
   stockActual: number; esFraccionable: boolean; factorFraccion: number | null;
   precioFraccion: number | null;
   modoFraccionar: boolean; costoUltimo: number | null; categoriaCode: string;
@@ -118,7 +118,7 @@ export interface DetalleRowInit {
   productoId: string; nombre: string; codigo: string;
   unidad: string; unidadOriginal: string; unidadFraccion: string | null;
   cantidad: number; precio: number; precioCompleto: number;
-  descuento: number; itbis: number; exentoItbis: boolean;
+  descuento: number; itbis: number; exentoItbis: boolean; esServicio?: boolean;
   stockActual: number; esFraccionable: boolean; factorFraccion: number | null;
   precioFraccion: number | null; modoFraccionar: boolean;
   costoUltimo: number | null; categoriaCode: string;
@@ -160,7 +160,9 @@ export function VentaForm({
   const [notas,        setNotas]        = useState(initialNotas);
 
   // Productos
-  const [detalles,    setDetalles]    = useState<DetalleRow[]>(initialDetalles);
+  const [detalles,    setDetalles]    = useState<DetalleRow[]>(
+    initialDetalles.map(d => ({ ...d, esServicio: d.esServicio ?? false }))
+  );
   const [busqueda,    setBusqueda]    = useState("");
   const [buscando,    setBuscando]    = useState(false);
   const [sugerencias, setSugerencias] = useState<ProductoSugerido[]>([]);
@@ -263,7 +265,7 @@ export function VentaForm({
       unidad: prod.unidadMedida, unidadOriginal: prod.unidadMedida,
       unidadFraccion: prod.unidadFraccion ?? null, cantidad: 1,
       precio: pventa, precioCompleto: pventa, descuento: 0,
-      itbis: itbisInicial, exentoItbis: esExento,
+      itbis: itbisInicial, exentoItbis: esExento, esServicio: prod.esServicio ?? false,
       stockActual: Number(prod.stockActual), esFraccionable: prod.esFraccionable,
       factorFraccion: factor, modoFraccionar: false,
       precioFraccion: prod.precioFraccion ?? null,
@@ -667,8 +669,11 @@ export function VentaForm({
                             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">RD$</span>
                             <input type="text" inputMode="decimal"
                               value={d.precio === 0 ? "" : String(d.precio)}
+                              placeholder={d.esServicio ? "0.00" : undefined}
                               onChange={e => { const v = parseFloat(e.target.value.replace(",", ".")); if (!isNaN(v) && v >= 0) actualizarDetalle(i, "precio", v); else if (e.target.value === "") actualizarDetalle(i, "precio", 0); }}
-                              className="w-32 h-8 rounded-lg border bg-background pl-7 pr-2 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                              className={cn("w-32 h-8 rounded-lg border bg-background pl-7 pr-2 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40",
+                                d.esServicio && d.precio === 0 && "border-amber-400 bg-amber-50 dark:bg-amber-950/20"
+                              )} />
                           </div>
                           <p className="text-[10px] text-muted-foreground text-right mt-0.5">
                             {d.exentoItbis ? `base · por ${d.unidad}` : `c/ITBIS · por ${d.unidad}`}

@@ -36,6 +36,7 @@ const FormSchema = z.object({
  stockActual: z.coerce.number().default(0),
  stockMinimo: z.coerce.number().min(0).default(0),
  stockMaximo: z.coerce.number().min(0).optional(),
+ esServicio: z.boolean().default(false),
  activo: z.boolean().default(true),
 });
 
@@ -69,6 +70,7 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
  unidadMedida: "UND",
  esFraccionable: false,
  exentoItbis: false,
+ esServicio: false,
  costoUltimo: 0,
  porcentajeGanancia: 30,
  precioVenta: 0,
@@ -151,6 +153,12 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
  type="checkbox" {...form.register("exentoItbis")}
  className="rounded" /> <span className="text-sm">Este producto está <strong>exento de ITBIS</strong></span> </label> </div> </CardHeader> {form.watch("exentoItbis") && (
  <div className="px-6 pb-4 text-xs text-muted-foreground"> Al agregar este producto a una cotización/venta, el ITBIS se marcará como exento automáticamente (ej. agregados, materiales exentos).
+ </div> )}
+ </Card> {/* Servicio (precio variable) */}
+ <Card> <CardHeader> <div className="flex items-center justify-between"> <CardTitle className="text-base">Tipo de producto</CardTitle> <label className="flex items-center gap-2 cursor-pointer"> <input
+ type="checkbox" {...form.register("esServicio")}
+ className="rounded" /> <span className="text-sm">Es un <strong>servicio</strong> (precio variable por venta)</span> </label> </div> </CardHeader> {form.watch("esServicio") && (
+ <div className="px-6 pb-4 text-xs text-muted-foreground"> Al agregar este producto en Ventas o PDV, cualquier usuario podrá ingresar el precio manualmente. Ideal para servicios como <strong>Acarreo</strong>, instalación o mano de obra donde el monto varía según cada cliente.
  </div> )}
  </Card> {/* Precios */}
  <Card> <CardHeader><CardTitle className="text-base">Precios</CardTitle></CardHeader> <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4"> <div className="space-y-1.5"> <Label htmlFor="costoUltimo">Costo (RD$)</Label> <Input id="costoUltimo" type="number" step="0.01" min="0" placeholder="0.00" {...form.register("costoUltimo")} /> </div> <div className="space-y-1.5"> <Label htmlFor="porcentajeGanancia">% Ganancia</Label> <Input id="porcentajeGanancia" type="number" step="0.01" min="0" placeholder="30" {...form.register("porcentajeGanancia")} /> {precioSugerido && (

@@ -10,7 +10,7 @@ const PRODUCTO_SELECT = {
   id: true, codigo: true, nombre: true,
   precioVenta: true, unidadMedida: true,
   esFraccionable: true, unidadFraccion: true, factorFraccion: true, precioFraccion: true,
-  exentoItbis: true, stockActual: true, stockMinimo: true,
+  exentoItbis: true, esServicio: true, stockActual: true, stockMinimo: true,
   costoUltimo: true,
   categoria: { select: { nombre: true, codigo: true } },
 } as const;

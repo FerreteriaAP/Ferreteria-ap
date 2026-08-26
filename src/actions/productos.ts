@@ -31,6 +31,8 @@ const ProductoSchema = z.object({
  stockMaximo: z.coerce.number().min(0).optional(),
  // Impuestos
  exentoItbis: z.boolean().default(false),
+ // Servicio (precio variable por venta)
+ esServicio: z.boolean().default(false),
  // Meta
  activo: z.boolean().default(true),
 });

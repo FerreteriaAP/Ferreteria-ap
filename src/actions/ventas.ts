@@ -323,6 +323,7 @@ export async function buscarProductosVenta(q: string) {
  factorFraccion: true,
  precioFraccion: true,
  exentoItbis: true,
+ esServicio: true,
  categoria: { select: { codigo: true } }, // necesario para alertas de margen
  },
  orderBy: { nombre: "asc" },
