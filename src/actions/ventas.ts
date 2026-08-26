@@ -152,6 +152,7 @@ export async function getVenta(id: string) {
  direccion: { select: { etiqueta: true, direccion: true, sector: true, ciudad: true, referencia: true } },
  vendedor: { select: { nombre: true, apellido: true } },
  creador: { select: { nombre: true, apellido: true } },
+ turno: { select: { usuario: { select: { nombre: true, apellido: true } } } },
  detalles: {
  include: { producto: { select: { codigo: true, nombre: true, unidadMedida: true } } },
  orderBy: { orden: "asc" },

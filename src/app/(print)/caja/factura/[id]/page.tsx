@@ -33,9 +33,12 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
     hour: "2-digit", minute: "2-digit",
   });
 
-  const vendedorNombre = v.vendedor
-    ? `${v.vendedor.nombre} ${v.vendedor.apellido}`.trim()
-    : "No asignado";
+  // Cajero = usuario que abrió el turno (no el vendedor)
+  const cajeroNombre = v.turno?.usuario
+    ? `${v.turno.usuario.nombre} ${v.turno.usuario.apellido}`.trim()
+    : v.vendedor
+      ? `${v.vendedor.nombre} ${v.vendedor.apellido}`.trim()
+      : "No asignado";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pagos: { metodo: string; monto: number; referencia: string | null }[] = (v.pagosRecibidos ?? []).map((p: any) => ({
@@ -81,9 +84,9 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         <div className="dbl"></div>
 
         {/* DOCUMENTO */}
-        <div className="centro">
+        <div>
           <div className="doc-tipo">{v.tipoNcf ? (NCF_LABEL[v.tipoNcf] ?? "FACTURA DE VENTA") : "FACTURA DE VENTA"}</div>
-          <div className="doc-num"># {v.numero}</div>
+          <div className="doc-num">Factura No. {v.numero}</div>
           <div className="doc-sub">{fecha}</div>
           {v.ncf && <div className="doc-sub">NCF: {v.ncf}</div>}
         </div>
@@ -163,7 +166,7 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         <div className="guion"></div>
 
         {/* CAJERO / TICKET */}
-        <div className="campo"><span>Cajero:</span><span>{vendedorNombre}</span></div>
+        <div className="campo"><span>Cajero:</span><span>{cajeroNombre}</span></div>
         <div className="campo"><span>Ticket:</span><span>{v.numero}</span></div>
 
         <div className="dbl"></div>
@@ -226,8 +229,8 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         .emp-lin   { font-size: 9.5px; line-height: 1.6; color: #222; }
 
         /* ── Documento ── */
-        .doc-tipo  { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
-        .doc-num   { font-size: 14px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .doc-tipo  { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+        .doc-num   { font-size: 12px; font-weight: 900; font-family: 'Courier New', monospace; }
         .doc-sub   { font-size: 9.5px; color: #222; margin-top: 1px; }
 
         /* ── Cliente ── */
@@ -244,7 +247,8 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         .cv { width: 56px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
 
         /* Cabecera tabla */
-        .tbl-hdr.sub { font-size: 9.5px; margin-bottom: 2px; }
+        .tbl-hdr.sub { font-size: 9.5px; margin-bottom: 2px; font-weight: 700; color: #000; }
+        .tbl-hdr.sub span { color: #000; }
 
         /* ── Productos ── */
         .item       { margin-bottom: 5px; }
@@ -260,10 +264,12 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         .tbl-hdr:first-of-type {
           font-size: 8px;
           font-weight: 900;
+          color: #000;
           text-transform: uppercase;
           letter-spacing: .04em;
           padding-bottom: 2px;
         }
+        .tbl-hdr:first-of-type span { color: #000; }
 
         /* ── Total ── */
         .total-lbl      { font-size: 13px; font-weight: 900; margin-bottom: 2px; }
