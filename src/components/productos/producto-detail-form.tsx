@@ -346,6 +346,7 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
                 <span className={PREFIX} style={{ color: "var(--accent-hex)", opacity: 0.7 }}>RD$</span>
                 <input
                   className={INPUT_PREFIXED + " text-right font-mono text-xl font-bold h-11"}
+                  style={{ color: "var(--accent-hex)" }}
                   type="number" step="0.01" min="0"
                   {...form.register("precioVenta", { setValueAs: v => parseFloat(Number(v).toFixed(2)) })}
                 />

@@ -68,7 +68,7 @@ export function ProductosTableBody({ productos }: Props) {
               {Number(p.stockMinimo).toLocaleString("es-DO")}
             </TableCell>
             <TableCell className="text-right text-sm">{formatDOP(p.costoUltimo)}</TableCell>
-            <TableCell className="text-right font-medium">{formatDOP(p.precioVenta)}</TableCell>
+            <TableCell className="text-right font-bold font-mono" style={{ color: "var(--accent-hex)" }}>{formatDOP(p.precioVenta)}</TableCell>
             <TableCell className="text-center">
               {stockBajo ? (
                 <Badge variant="destructive" className="text-xs">Bajo</Badge>
