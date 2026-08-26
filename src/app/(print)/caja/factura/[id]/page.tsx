@@ -159,9 +159,9 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
           <div className="sep-dashed"></div>
 
           <div className="total-final">
-            <span className="col-desc">TOTAL A PAGAR</span>
-            <span className="col-itbis tf-itbis">{fmtN(totalItbisItems)}</span>
-            <span className="col-valor tf-valor">{fmtN(totalValorItems)}</span>
+            <span style={{ flex: 1 }}>TOTAL A PAGAR</span>
+            <span style={{ width: 52, textAlign: "right", fontFamily: "'Courier New', monospace", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{fmtN(totalItbisItems)}</span>
+            <span style={{ width: 64, textAlign: "right", fontFamily: "'Courier New', monospace", fontSize: 15, fontWeight: 900, flexShrink: 0 }}>{fmtN(totalValorItems)}</span>
           </div>
 
           <div className="sep-dashed"></div>
@@ -266,11 +266,7 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
         /* ── Totales ── */
         .total-row  { display: flex; font-size: 9.5px; margin-bottom: 2px; }
-        .total-final { display: flex; align-items: baseline; padding: 2px 0; }
-        .col-desc.tf-label { font-size: 13px; font-weight: 900; }
-        .tf-itbis   { font-size: 11px; font-weight: 700; width: 52px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; }
-        .tf-valor   { font-size: 13px; font-weight: 900; width: 60px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; }
-        .total-final .col-desc { font-size: 13px; font-weight: 900; }
+        .total-final { display: flex; align-items: baseline; padding: 2px 0; font-size: 13px; font-weight: 900; }
 
         /* ── Pagos ── */
         .pago-row { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 2px; font-family: 'Courier New', monospace; }
