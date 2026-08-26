@@ -1048,6 +1048,8 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
   if (facturaSeleccionada) {
    setRemovedIds(prev => new Set([...prev, facturaSeleccionada.id]));
    setLastPaidId(facturaSeleccionada.id);
+   // Abrir recibo en pestaña nueva — se auto-imprime al cargar
+   window.open(`/caja/factura/${facturaSeleccionada.id}`, "_blank", "noopener,noreferrer");
   }
   setModal(null); setFacturaSeleccionada(null);
   router.refresh();

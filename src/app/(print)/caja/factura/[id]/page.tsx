@@ -6,7 +6,7 @@
 import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
 import { EMPRESA, CREDITO_LABEL, NCF_LABEL } from "@/lib/empresa";
-import { QzPrintBtn } from "@/components/caja/qz-print-btn";
+import { AutoPrint } from "@/components/caja/auto-print";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -61,10 +61,8 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
   return (
     <>
-      {/* Botón QZ Tray */}
-      <div className="no-print" style={{ maxWidth: 320, margin: "12px auto 0" }}>
-        <QzPrintBtn />
-      </div>
+      {/* Auto-imprime al cargar */}
+      <AutoPrint />
 
       <div className="wrap">
         <div id="recibo" className="recibo">
