@@ -146,13 +146,9 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
         <div className="guion"></div>
 
-        {/* TOTAL A PAGAR — en dos líneas para evitar colisión */}
-        <div className="total-lbl">TOTAL A PAGAR</div>
-        <div className="tbl-hdr">
-          <span className="cd total-itbis-lbl">ITBIS incl.</span>
-          <span className="ci total-itbis">{fmtN(totalItbis)}</span>
-          <span className="cv total-val">{fmtN(totalValor)}</span>
-        </div>
+        {/* TOTAL A PAGAR — 3 filas separadas, sin colisiones */}
+        <div className="campo bold"><span>ITBIS</span><span>{fmtN(totalItbis)}</span></div>
+        <div className="campo total-final"><span>TOTAL A PAGAR</span><span>{fmtN(totalValor)}</span></div>
 
         <div className="guion"></div>
 
@@ -227,18 +223,19 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         .centro    { text-align: center; }
         .centro svg { display: block; margin: 0 auto 3px; }
         .emp-nom   { font-size: 14px; font-weight: 900; letter-spacing: .03em; margin: 3px 0 2px; }
-        .emp-lin   { font-size: 9px; line-height: 1.5; color: #000; }
+        .emp-lin   { font-size: 9.5px; line-height: 1.6; color: #222; }
 
         /* ── Documento ── */
-        .doc-tipo  { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+        .doc-tipo  { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
         .doc-num   { font-size: 14px; font-weight: 900; font-family: 'Courier New', monospace; }
-        .doc-sub   { font-size: 9px; margin-top: 1px; }
+        .doc-sub   { font-size: 9.5px; color: #222; margin-top: 1px; }
 
         /* ── Cliente ── */
         .cli-nom   { font-size: 12px; font-weight: 700; margin: 2px 0; }
-        .campo     { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 1px; gap: 4px; }
+        .campo     { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
         .campo span:first-child { color: #000; }
-        .campo.bold { font-weight: 700; font-size: 10.5px; font-family: 'Courier New', monospace; }
+        .campo.bold { font-weight: 700; font-size: 11px; font-family: 'Courier New', monospace; }
+        .total-final { font-size: 14px; font-weight: 900; margin-top: 2px; }
 
         /* ── Columnas ── */
         .tbl-hdr { display: flex; align-items: baseline; gap: 2px; }
@@ -250,14 +247,14 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         .tbl-hdr.sub { font-size: 9.5px; margin-bottom: 2px; }
 
         /* ── Productos ── */
-        .item       { margin-bottom: 4px; }
-        .sombreado  { background: #f0f0f0; padding: 1px 2px; }
-        .item-nom   { font-size: 10px; font-weight: 700; line-height: 1.3; white-space: normal; word-break: break-word; }
-        .item-cod   { font-size: 8px; }
-        .item-det   { font-size: 8.5px; }
-        .item-num   { font-size: 9px; font-weight: 700; }
-        .item-desc  { font-size: 8px; }
-        .item-tag   { font-size: 8px; font-style: italic; }
+        .item       { margin-bottom: 5px; }
+        .sombreado  { background: #e0e0e0; padding: 1px 2px; }
+        .item-nom   { font-size: 10.5px; font-weight: 700; line-height: 1.3; white-space: normal; word-break: break-word; }
+        .item-cod   { font-size: 8.5px; color: #333; }
+        .item-det   { font-size: 9px; color: #222; }
+        .item-num   { font-size: 9.5px; font-weight: 700; }
+        .item-desc  { font-size: 8.5px; color: #333; }
+        .item-tag   { font-size: 8.5px; font-style: italic; color: #333; }
 
         /* Cabecera de tabla */
         .tbl-hdr:first-of-type {
@@ -276,20 +273,20 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
         /* ── Footer ── */
         .gracias   { font-size: 12px; font-weight: 900; margin-bottom: 2px; }
-        .wa-txt    { font-size: 9px; }
+        .wa-txt    { font-size: 9.5px; color: #222; }
 
         /* ── Política ── */
-        .pol-titulo { font-size: 8.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; text-align: center; margin: 3px 0; }
-        .pol        { font-size: 8px; line-height: 1.55; margin-bottom: 1px; }
+        .pol-titulo { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; text-align: center; margin: 3px 0; }
+        .pol        { font-size: 8.5px; color: #222; line-height: 1.6; margin-bottom: 2px; }
 
         /* ── Pie ── */
-        .pie { font-size: 8px; line-height: 1.6; }
+        .pie { font-size: 8.5px; color: #333; line-height: 1.6; }
 
         /* ══ IMPRESIÓN THERMAL ══ */
         @media print {
           @page {
             size: 80mm auto;
-            margin: 2mm 0mm;   /* solo top/bottom; el driver controla laterales */
+            margin: 3mm 0mm;
           }
           body {
             background: white;
@@ -300,13 +297,14 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
             width: 100%;
             max-width: 100%;
             margin: 0;
-            padding: 2mm 3mm 6mm;
+            /* 6mm laterales compensan márgenes hardware del driver Epson */
+            padding: 2mm 6mm 8mm;
             border-radius: 0;
             box-shadow: none;
           }
           /* Negro puro en toda la impresión */
           * { color: #000 !important; background: white !important; }
-          .sombreado { background: #e8e8e8 !important; }
+          .sombreado { background: #ddd !important; }
         }
       `}</style>
     </>
