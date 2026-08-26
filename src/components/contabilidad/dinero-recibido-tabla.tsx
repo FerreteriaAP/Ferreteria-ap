@@ -279,7 +279,6 @@ export function DineroRecibidoTabla({ filas: initialFilas, resumen }: Props) {
 
       {/* Nota de efectivo-only */}
       <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
-        <span>💵</span>
         <span>Solo efectivo — el esperado = montoCierre − apertura del turno siguiente</span>
       </div>
 
