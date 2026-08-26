@@ -84,8 +84,10 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         <div className="dbl"></div>
 
         {/* DOCUMENTO */}
-        <div>
+        <div className="centro">
           <div className="doc-tipo">{v.tipoNcf ? (NCF_LABEL[v.tipoNcf] ?? "FACTURA DE VENTA") : "FACTURA DE VENTA"}</div>
+        </div>
+        <div>
           <div className="doc-num">Factura No. {v.numero}</div>
           <div className="doc-sub">{fecha}</div>
           {v.ncf && <div className="doc-sub">NCF: {v.ncf}</div>}
@@ -102,7 +104,7 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         <div className="guion"></div>
 
         {/* CABECERA TABLA */}
-        <div className="tbl-hdr">
+        <div className="tbl-hdr tbl-col-hdr">
           <span className="cd">DESCRIPCION</span>
           <span className="ci">ITBIS</span>
           <span className="cv">VALOR</span>
@@ -260,8 +262,8 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         .item-desc  { font-size: 8.5px; color: #333; }
         .item-tag   { font-size: 8.5px; font-style: italic; color: #333; }
 
-        /* Cabecera de tabla */
-        .tbl-hdr:first-of-type {
+        /* Cabecera de columnas DESCRIPCION / ITBIS / VALOR */
+        .tbl-col-hdr {
           font-size: 8px;
           font-weight: 900;
           color: #000;
@@ -269,7 +271,7 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
           letter-spacing: .04em;
           padding-bottom: 2px;
         }
-        .tbl-hdr:first-of-type span { color: #000; }
+        .tbl-col-hdr span { color: #000; font-weight: 900; }
 
         /* ── Total ── */
         .total-lbl      { font-size: 13px; font-weight: 900; margin-bottom: 2px; }
