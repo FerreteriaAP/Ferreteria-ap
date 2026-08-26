@@ -3,15 +3,21 @@
 import { useEffect } from "react";
 
 /**
- * Imprime automáticamente al cargar y cierra la pestaña al terminar.
+ * Imprime automáticamente al cargar.
+ * - Cuando es pestaña directa: cierra la ventana después de imprimir.
+ * - Cuando está en iframe oculto: notifica al padre para que lo elimine.
  */
 export function AutoPrint() {
   useEffect(() => {
     const t = setTimeout(() => {
       window.print();
-      // Cierra la pestaña automáticamente después de imprimir
-      window.onafterprint = () => window.close();
-    }, 800);
+      window.onafterprint = () => {
+        // Notifica al iframe padre (si aplica)
+        try { window.parent?.postMessage({ type: "printDone" }, "*"); } catch { /* noop */ }
+        // Cierra si fue abierto como ventana/pestaña
+        window.close();
+      };
+    }, 900);
     return () => clearTimeout(t);
   }, []);
   return null;

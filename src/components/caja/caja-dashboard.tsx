@@ -1044,12 +1044,33 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
   });
  };
 
+ // Imprime el recibo en un iframe oculto — sin abrir ninguna pestaña
+ const silentPrint = (facturaId: string) => {
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:400px;height:600px;border:0;visibility:hidden;";
+  document.body.appendChild(iframe);
+
+  const cleanup = () => {
+   if (document.body.contains(iframe)) document.body.removeChild(iframe);
+   window.removeEventListener("message", onMsg);
+  };
+
+  const onMsg = (e: MessageEvent) => {
+   if (e.data?.type === "printDone") cleanup();
+  };
+  window.addEventListener("message", onMsg);
+
+  // Fallback: elimina el iframe a los 60 s por si el evento no llega
+  setTimeout(cleanup, 60_000);
+
+  iframe.src = `/caja/factura/${facturaId}`;
+ };
+
  const handlePagoOk = () => {
   if (facturaSeleccionada) {
    setRemovedIds(prev => new Set([...prev, facturaSeleccionada.id]));
    setLastPaidId(facturaSeleccionada.id);
-   // Abrir recibo en pestaña nueva — se auto-imprime al cargar
-   window.open(`/caja/factura/${facturaSeleccionada.id}`, "_blank", "noopener,noreferrer");
+   silentPrint(facturaSeleccionada.id);
   }
   setModal(null); setFacturaSeleccionada(null);
   router.refresh();
