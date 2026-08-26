@@ -14,7 +14,6 @@ import {
   confirmarRecepcionConduce,
   type ItemRecepcion,
 } from "@/actions/ventas";
-import { clearVendedorActivo } from "@/actions/vendedor-activo";
 
 interface DetalleResumen {
   productoId: string;
@@ -430,9 +429,6 @@ export function AvanzarVentaButtons({
             <button
               onClick={() => run(
                 () => facturarVenta(ventaId, { ncf, tipoNcf }),
-                modoVendedor
-                  ? async () => { await clearVendedorActivo(); router.push("/ventas"); }
-                  : undefined,
               )}
               disabled={loading}
               className={PILL + " w-full justify-center"}

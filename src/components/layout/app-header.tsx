@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bell, ChevronDown, LogOut, User } from "lucide-react";
 import { DateWidget } from "./date-widget";
 import { TemaQuickBtn } from "./tema-quick-btn";
+import { clearVendedorActivo } from "@/actions/vendedor-activo";
 
 interface AppHeaderProps {
   name:         string;
@@ -21,6 +23,15 @@ interface AppHeaderProps {
 export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta = false, temaActual = "dark-ops", mostrarTema = false }: AppHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [, startLogo] = useTransition();
+
+  function irAlDashboard() {
+    startLogo(async () => {
+      await clearVendedorActivo();
+      router.push("/dashboard");
+    });
+  }
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -41,7 +52,11 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
     >
       {/* Left: Logo + divider + caja status */}
       <div className="flex items-center gap-0">
-        <Link href="/dashboard" className="flex items-center hover:opacity-85 transition-opacity shrink-0">
+        <button
+          type="button"
+          onClick={irAlDashboard}
+          className="flex items-center hover:opacity-85 transition-opacity shrink-0 bg-transparent border-none p-0 cursor-pointer"
+        >
           <svg width="42" height="42" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon
               points="133.7,10 181.3,57.6 181.3,142.4 133.7,190 66.3,190 18.7,142.4 18.7,57.6 66.3,10"
@@ -60,7 +75,7 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
             <span style={{ color: "var(--accent-hex)", fontWeight: 900, fontSize: 17, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>F</span>
             <span style={{ color: "var(--foreground)", fontWeight: 900, fontSize: 17, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>ERRETERÍA</span>
           </span>
-        </Link>
+        </button>
 
         <div className="mx-5 h-7 w-px" style={{ backgroundColor: "var(--border)" }} />
 

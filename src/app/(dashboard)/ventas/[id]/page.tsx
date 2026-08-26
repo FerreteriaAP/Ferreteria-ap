@@ -7,6 +7,7 @@ import { AvanzarVentaButtons } from "@/components/ventas/avanzar-venta-buttons";
 import { RecalcularKolmenBtn } from "@/components/ventas/recalcular-kolmen-btn";
 import { NuevoConduceBtn } from "@/components/caja/conduce-despacho-btn";
 import { BtnEliminarDocumento } from "@/components/shared/btn-eliminar-documento";
+import { BtnVolverVentas } from "@/components/ventas/btn-volver-ventas";
 import { eliminarVenta } from "@/actions/ventas";
 
 interface PageProps {
@@ -145,16 +146,11 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
 
       {/* Volver */}
       <div className="flex items-center gap-3 flex-wrap">
-        <Link
+        <BtnVolverVentas
+          modoVendedor={modoVendedor}
           href={from === "cxc" ? "/contabilidad/cxc" : "/ventas"}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
-          style={{
-            backgroundColor: "color-mix(in oklch, var(--accent-hex) 14%, transparent)",
-            color: "var(--accent-hex)",
-          }}
-        >
-          ← {from === "cxc" ? "Cuentas por cobrar" : "Ventas"}
-        </Link>
+          label={from === "cxc" ? "Cuentas por cobrar" : "Ventas"}
+        />
       </div>
 
       {/* Encabezado */}

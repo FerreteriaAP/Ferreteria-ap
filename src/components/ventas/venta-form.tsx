@@ -7,7 +7,6 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { crearCotizacion, actualizarCotizacion, buscarProductosVenta, type VentaInput } from "@/actions/ventas";
-import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import { completarDatosCliente } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 import { Search, X, ShoppingCart, AlertCircle, Scissors, UserPen, Plus, Check } from "lucide-react";
