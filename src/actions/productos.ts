@@ -470,3 +470,41 @@ export async function ajustarStock(productoId: string, cantidad: number, notas?:
  revalidatePath("/productos");
  return { success: true };
 }
+
+// ── Archivar producto (soft-delete) ──────────────────────────────────────────
+
+export async function archivarProducto(id: string) {
+  await prisma.producto.update({
+    where: { id },
+    data: { activo: false },
+  });
+  revalidatePath("/productos");
+  revalidatePath(`/productos/${id}`);
+  return { success: true };
+}
+
+// ── Eliminar producto (hard-delete) — solo si no tiene historial ─────────────
+
+export async function eliminarProducto(id: string) {
+  // Verificar si el producto tiene registros relacionados que impidan borrarlo
+  const [ventas, compras, movimientos] = await Promise.all([
+    prisma.detalleVenta.count({ where: { productoId: id } }),
+    prisma.detalleOrdenCompra.count({ where: { productoId: id } }),
+    prisma.movimientoInventario.count({ where: { productoId: id } }),
+  ]);
+
+  if (ventas > 0 || compras > 0 || movimientos > 0) {
+    return {
+      error: `No se puede eliminar: el producto tiene ${ventas} venta(s), ${compras} compra(s) y ${movimientos} movimiento(s) de inventario. Usa "Archivar" para ocultarlo del inventario.`,
+    };
+  }
+
+  // Sin historial: eliminar alertas y luego el producto
+  await prisma.$transaction([
+    prisma.alertaInventario.deleteMany({ where: { productoId: id } }),
+    prisma.producto.delete({ where: { id } }),
+  ]);
+
+  revalidatePath("/productos");
+  return { success: true };
+}

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { getProducto, getCategorias } from "@/actions/productos";
 import { Badge } from "@/components/ui/badge";
 import { ProductoDetailForm } from "@/components/productos/producto-detail-form";
+import { BtnArchivarProducto } from "@/components/productos/btn-archivar-producto";
 import { cn } from "@/lib/utils";
 
 const ROLES_SOLO_LECTURA = ["VENDEDOR", "CAJA"];
@@ -83,24 +84,35 @@ export default async function ProductoPage({ params }: PageProps) {
       </div>
 
       {/* Accesos rápidos */}
-      <div className="flex gap-2 flex-wrap">
-        <Link
-          href={`/productos/${id}/movimientos`}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card hover:bg-accent transition-colors text-xs font-medium"
-        >
-          Movimientos de inventario
-          {producto.movimientos.length > 0 && (
-            <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
-              {producto.movimientos.length}+
-            </span>
-          )}
-        </Link>
-        <Link
-          href={`/productos/${id}/compras`}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card hover:bg-accent transition-colors text-xs font-medium"
-        >
-          Historial de compras
-        </Link>
+      <div className="flex gap-2 flex-wrap items-center justify-between">
+        <div className="flex gap-2 flex-wrap">
+          <Link
+            href={`/productos/${id}/movimientos`}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card hover:bg-accent transition-colors text-xs font-medium"
+          >
+            Movimientos de inventario
+            {producto.movimientos.length > 0 && (
+              <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                {producto.movimientos.length}+
+              </span>
+            )}
+          </Link>
+          <Link
+            href={`/productos/${id}/compras`}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card hover:bg-accent transition-colors text-xs font-medium"
+          >
+            Historial de compras
+          </Link>
+        </div>
+
+        {/* Acciones de admin */}
+        {rol === "ADMINISTRADOR" && (
+          <BtnArchivarProducto
+            productoId={id}
+            nombreProducto={producto.nombre}
+            activo={producto.activo}
+          />
+        )}
       </div>
 
       {/* Formulario inline editable */}
