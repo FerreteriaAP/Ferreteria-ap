@@ -17,7 +17,6 @@ async function getAlertas() {
  cxcPorVencer,
  cxpPorVencer,
  nominasBorrador,
- ocAprobadas,
  turnosAbiertos,
  chequesListos,
  alertasChequeEntregado,
@@ -68,13 +67,6 @@ async function getAlertas() {
  orderBy: { createdAt: "desc" },
  }),
 
- // Órdenes de compra aprobadas sin convertir
- prisma.ordenCompra.findMany({
- where: { estado: "ENVIADA" },
- select: { id: true, numero: true, suplidor: { select: { nombre: true } }, fechaEmision: true, total: true },
- orderBy: { fechaEmision: "asc" },
- }).catch(() => [] as never[]),
-
  // Turnos de caja abiertos hace más de 24h
  prisma.turnoCaja.findMany({
  where: { estado: "ABIERTO", fechaApertura: { lt: new Date(hoy.getTime() - 24 * 60 * 60 * 1000) } },
@@ -108,7 +100,6 @@ async function getAlertas() {
  cxcPorVencer,
  cxpPorVencer,
  nominasBorrador,
- ocAprobadas,
  turnosAbiertos,
  chequesListos,
  alertasChequeEntregado,
@@ -188,7 +179,6 @@ export default async function AlertasPage() {
  a.cxcPorVencer.length +
  a.cxpPorVencer.length +
  a.nominasBorrador.length +
- a.ocAprobadas.length +
  a.turnosAbiertos.length +
  a.chequesListos.length +
  a.alertasChequeEntregado.length;
@@ -242,12 +232,6 @@ export default async function AlertasPage() {
  </span> </Link> ))}
  </div> </AlertCard> )}
 
- {/* Órdenes de compra aprobadas */}
- {!soloStock && a.ocAprobadas.length > 0 && (
- <AlertCard titulo=" Órdenes de compra aprobadas" color="orange" count={a.ocAprobadas.length} href="/ordenes-compra"> <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1"> {(a.ocAprobadas as { id: string; numero: string; suplidor: { nombre: string }; fechaEmision: Date; total: unknown }[]).map((oc) => (
- <Link key={oc.id} href={`/ordenes-compra/${oc.id}`}
- className="flex items-center justify-between text-xs hover:bg-muted/50 rounded px-1 py-0.5 gap-2"> <div className="truncate"> <span className="font-medium">{oc.numero}</span> <span className="text-muted-foreground ml-1">— {oc.suplidor.nombre}</span> </div> <span className="shrink-0 font-bold">{fmt(oc.total)}</span> </Link> ))}
- </div> </AlertCard> )}
 
  {/* Turnos de caja abiertos +24h */}
  {!soloStock && a.turnosAbiertos.length > 0 && (
