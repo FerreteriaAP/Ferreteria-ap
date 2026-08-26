@@ -38,6 +38,7 @@ interface ItemCarrito extends LineaPDV {
   costoUltimo: number;
   categoriaCode: string;
   cantidadStr: string; // valor como string para el input (vacío = placeholder "0")
+  precioOriginal: number; // precio inicial del producto (0 = servicio, precio siempre editable)
 }
 
 // ─── MARGEN ───────────────────────────────────────────────────────────────────
@@ -209,6 +210,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
       itbis, subtotal,
       costoUltimo,
       categoriaCode: p.categoria.codigo,
+      precioOriginal: precioFinal,
     }]);
   }, [carrito]);
 
@@ -588,12 +590,16 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                         />
                       </td>
                       <td className="px-2 py-2">
-                        {puedeEditarPrecio ? (
+                        {(puedeEditarPrecio || item.precioOriginal === 0) ? (
                           <input
-                            type="number" min="0" step="0.01" value={item.precioFinal}
+                            type="number" min="0" step="0.01" value={item.precioFinal || ""}
+                            placeholder={item.precioOriginal === 0 ? "0.00" : undefined}
                             onChange={e => updatePrecio(item.key, parseFloat(e.target.value) || 0)}
                             onFocus={e => e.target.select()}
-                            className="w-full text-right h-7 rounded border bg-background px-1 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary"
+                            className={cn(
+                              "w-full text-right h-7 rounded border bg-background px-1 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary",
+                              item.precioOriginal === 0 && item.precioFinal === 0 && "border-amber-400 bg-amber-50 dark:bg-amber-950/20"
+                            )}
                           />
                         ) : (
                           <span className="text-xs font-mono block text-right">{item.precioFinal.toFixed(2)}</span>
