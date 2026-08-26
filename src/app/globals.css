@@ -176,8 +176,72 @@
 
   --card-fg-hex:       #FFFFFF;
 
+  /* Colores semánticos más apagados para Noir */
+  --success:           #3a7d58;
+  --warning:           #b06818;
+  --warning-foreground:#FFFFFF;
+  --danger:            #b03040;
+  --destructive:       #b03040;
+
+  /* Palette muted para tabs de reportes */
+  --report-tab-cierres:     #3a6fa8;
+  --report-tab-movimientos: #b03040;
+  --report-tab-notas:       #7a5aa8;
+  --report-tab-dinero:      #3a7d58;
+
   /* Íconos y texto blancos sobre tarjetas negras */
   [data-module] { --icon-color: #FFFFFF; }
+
+  /* ── Clases Tailwind de color → versiones apagadas ── */
+  /* Verde */
+  .text-green-600, .text-green-700 { color: #3a7d58; }
+  .text-green-400, .text-green-300 { color: #4e9e73; }
+  .bg-green-50  { background-color: rgba(58,125,88,0.07); }
+  .bg-green-100 { background-color: rgba(58,125,88,0.12); }
+  .border-green-200 { border-color: rgba(58,125,88,0.28); }
+
+  /* Rojo */
+  .text-red-600, .text-red-700 { color: #b03040; }
+  .text-red-400, .text-red-300 { color: #c04858; }
+  .bg-red-50  { background-color: rgba(176,48,64,0.07); }
+  .bg-red-100 { background-color: rgba(176,48,64,0.12); }
+  .border-red-200 { border-color: rgba(176,48,64,0.28); }
+
+  /* Ámbar / naranja */
+  .text-amber-600, .text-amber-700 { color: #b06818; }
+  .text-amber-400, .text-amber-500 { color: #c07820; }
+  .bg-amber-50  { background-color: rgba(176,104,24,0.07); }
+  .bg-amber-100 { background-color: rgba(176,104,24,0.12); }
+
+  /* Azul */
+  .text-blue-600, .text-blue-700 { color: #3a6fa8; }
+  .text-blue-400, .text-blue-500 { color: #4a82b8; }
+  .bg-blue-50  { background-color: rgba(58,111,168,0.07); }
+  .bg-blue-100 { background-color: rgba(58,111,168,0.12); }
+
+  /* Morado */
+  .text-purple-600, .text-purple-700 { color: #7a5aa8; }
+  .text-purple-400, .text-purple-500 { color: #8a6ab8; }
+
+  /* Filled backgrounds (progress bars, dots, badges) */
+  .bg-green-500  { background-color: #3a7d58; }
+  .bg-green-400  { background-color: #4e9e73; }
+  .bg-yellow-500 { background-color: #b06818; }
+  .bg-yellow-400 { background-color: #c07820; }
+  .bg-red-500    { background-color: #b03040; }
+  .bg-red-400    { background-color: #c04858; }
+  .bg-blue-500   { background-color: #3a6fa8; }
+
+  /* dark: aliases — en Noir no hay clase .dark, pero por si acaso */
+  .dark\:text-green-400  { color: #4e9e73; }
+  .dark\:text-red-400    { color: #c04858; }
+  .dark\:text-amber-400  { color: #c07820; }
+  .dark\:bg-green-900\/40  { background-color: rgba(58,125,88,0.12); }
+  .dark\:bg-green-950\/20  { background-color: rgba(58,125,88,0.07); }
+  .dark\:bg-green-950\/30  { background-color: rgba(58,125,88,0.09); }
+  .dark\:bg-red-900\/40    { background-color: rgba(176,48,64,0.12); }
+  .dark\:border-green-800  { border-color: rgba(58,125,88,0.28); }
+  .dark\:border-red-800    { border-color: rgba(176,48,64,0.28); }
 }
 
 /* ── CARBON ─────────────────────────────────────────────────────────────── */
