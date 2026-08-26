@@ -5,8 +5,8 @@
  */
 import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
-import { PrintButtons } from "@/components/nominas/print-buttons";
 import { EMPRESA, CREDITO_LABEL, NCF_LABEL } from "@/lib/empresa";
+import { QzPrintBtn } from "@/components/caja/qz-print-btn";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -51,13 +51,13 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
   return (
     <>
-      <PrintButtons />
-      <p className="no-print" style={{ textAlign: "center", fontSize: 11, color: "#888", padding: "12px 0 4px" }}>
-        Papel: <strong>80mm</strong> · Presiona <strong>Ctrl+P</strong> para imprimir
-      </p>
+      {/* Botón QZ Tray — imprime directo a la thermal sin diálogo */}
+      <div className="no-print" style={{ maxWidth: 320, margin: "12px auto 0" }}>
+        <QzPrintBtn />
+      </div>
 
       <div className="wrap">
-        <div className="recibo">
+        <div id="recibo" className="recibo">
 
           {/* ══ LOGO + EMPRESA ══ */}
           <div className="hdr">
@@ -227,7 +227,7 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         </div>
       </div>
 
-      <style>{`
+      <style id="recibo-style">{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: #111; background: #ddd; }
 
