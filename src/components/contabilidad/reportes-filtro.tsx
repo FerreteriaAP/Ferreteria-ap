@@ -76,6 +76,7 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  <div className="flex gap-2 flex-wrap"> {[
  { key: "cierres",         label: "Cierres de caja" },
  { key: "movimientos",     label: "Movimientos de caja" },
+ { key: "notas-credito",   label: "Notas de Crédito" },
  { key: "dinero-recibido", label: "Dinero Recibido" },
  ].filter(r => !(soloMovimientos && r.key !== "movimientos")).map(r => (
  <a key={r.key}
