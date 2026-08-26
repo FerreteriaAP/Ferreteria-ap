@@ -176,44 +176,44 @@
 
   --card-fg-hex:       #FFFFFF;
 
-  /* Colores semánticos más apagados para Noir */
-  --success:           #3a7d58;
-  --warning:           #b06818;
+  /* Colores semánticos calibrados para Noir */
+  --success:           #1f9e5c;
+  --warning:           #c07820;
   --warning-foreground:#FFFFFF;
-  --danger:            #b03040;
-  --destructive:       #b03040;
+  --danger:            #c03650;
+  --destructive:       #c03650;
 
-  /* Palette muted para tabs de reportes */
+  /* Palette calibrada para tabs de reportes */
   --report-tab-cierres:     #3a6fa8;
-  --report-tab-movimientos: #b03040;
+  --report-tab-movimientos: #c03650;
   --report-tab-notas:       #7a5aa8;
-  --report-tab-dinero:      #3a7d58;
+  --report-tab-dinero:      #1f9e5c;
 
   /* Íconos y texto blancos sobre tarjetas negras */
   [data-module] { --icon-color: #FFFFFF; }
 
-  /* ── Clases Tailwind de color → versiones apagadas ── */
-  /* Verde */
-  .text-green-600, .text-green-700 { color: #3a7d58; }
-  .text-green-400, .text-green-300 { color: #4e9e73; }
-  .bg-green-50  { background-color: rgba(58,125,88,0.07); }
-  .bg-green-100 { background-color: rgba(58,125,88,0.12); }
-  .border-green-200 { border-color: rgba(58,125,88,0.28); }
+  /* ── Clases Tailwind de color → versiones calibradas ── */
+  /* Verde — legible, no neon */
+  .text-green-600, .text-green-700 { color: #1f9e5c; }
+  .text-green-400, .text-green-300 { color: #29b86a; }
+  .bg-green-50  { background-color: rgba(31,158,92,0.08); }
+  .bg-green-100 { background-color: rgba(31,158,92,0.14); }
+  .border-green-200 { border-color: rgba(31,158,92,0.30); }
 
-  /* Rojo */
-  .text-red-600, .text-red-700 { color: #b03040; }
-  .text-red-400, .text-red-300 { color: #c04858; }
-  .bg-red-50  { background-color: rgba(176,48,64,0.07); }
-  .bg-red-100 { background-color: rgba(176,48,64,0.12); }
-  .border-red-200 { border-color: rgba(176,48,64,0.28); }
+  /* Rojo — claro pero no alarma */
+  .text-red-600, .text-red-700 { color: #c03650; }
+  .text-red-400, .text-red-300 { color: #d04868; }
+  .bg-red-50  { background-color: rgba(192,54,80,0.07); }
+  .bg-red-100 { background-color: rgba(192,54,80,0.13); }
+  .border-red-200 { border-color: rgba(192,54,80,0.28); }
 
   /* Ámbar / naranja */
-  .text-amber-600, .text-amber-700 { color: #b06818; }
-  .text-amber-400, .text-amber-500 { color: #c07820; }
-  .bg-amber-50  { background-color: rgba(176,104,24,0.07); }
-  .bg-amber-100 { background-color: rgba(176,104,24,0.12); }
+  .text-amber-600, .text-amber-700 { color: #c07820; }
+  .text-amber-400, .text-amber-500 { color: #d08830; }
+  .bg-amber-50  { background-color: rgba(192,120,32,0.07); }
+  .bg-amber-100 { background-color: rgba(192,120,32,0.13); }
 
-  /* Azul */
+  /* Azul — sin cambio */
   .text-blue-600, .text-blue-700 { color: #3a6fa8; }
   .text-blue-400, .text-blue-500 { color: #4a82b8; }
   .bg-blue-50  { background-color: rgba(58,111,168,0.07); }
@@ -224,12 +224,12 @@
   .text-purple-400, .text-purple-500 { color: #8a6ab8; }
 
   /* Filled backgrounds (progress bars, dots, badges) */
-  .bg-green-500  { background-color: #3a7d58; }
-  .bg-green-400  { background-color: #4e9e73; }
-  .bg-yellow-500 { background-color: #b06818; }
-  .bg-yellow-400 { background-color: #c07820; }
-  .bg-red-500    { background-color: #b03040; }
-  .bg-red-400    { background-color: #c04858; }
+  .bg-green-500  { background-color: #1f9e5c; }
+  .bg-green-400  { background-color: #29b86a; }
+  .bg-yellow-500 { background-color: #c07820; }
+  .bg-yellow-400 { background-color: #d08830; }
+  .bg-red-500    { background-color: #c03650; }
+  .bg-red-400    { background-color: #d04868; }
   .bg-blue-500   { background-color: #3a6fa8; }
 
   /* dark: aliases — en Noir no hay clase .dark, pero por si acaso */
