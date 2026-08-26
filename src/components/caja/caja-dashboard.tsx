@@ -1022,6 +1022,7 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
  const [modal, setModal] = useState<ModalType>(null);
  const [facturaSeleccionada, setFacturaSeleccionada] = useState<FacturaPendiente | null>(null);
+ const [lastPaidId, setLastPaidId] = useState<string | null>(null);
 
  // Facturas visibles = las del servidor menos las ya procesadas localmente
  const facturas = initialFacturas.filter(f => !removedIds.has(f.id));
@@ -1044,7 +1045,10 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
  };
 
  const handlePagoOk = () => {
-  if (facturaSeleccionada) setRemovedIds(prev => new Set([...prev, facturaSeleccionada.id]));
+  if (facturaSeleccionada) {
+   setRemovedIds(prev => new Set([...prev, facturaSeleccionada.id]));
+   setLastPaidId(facturaSeleccionada.id);
+  }
   setModal(null); setFacturaSeleccionada(null);
   router.refresh();
  };
@@ -1053,6 +1057,33 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
 
  return (
   <div className="space-y-6">
+
+   {/* Banner imprimir recibo — aparece tras cobrar */}
+   {lastPaidId && (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950/30 px-4 py-3">
+     <div className="flex items-center gap-2 text-sm font-semibold text-green-700 dark:text-green-400">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Venta cobrada exitosamente
+     </div>
+     <div className="flex items-center gap-2">
+      <a
+       href={`/caja/factura/${lastPaidId}`}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors"
+       style={{ borderColor: "var(--accent-hex)", color: "var(--accent-hex)", backgroundColor: "color-mix(in oklch, var(--accent-hex) 10%, transparent)" }}
+      >
+       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+       Imprimir recibo
+      </a>
+      <button
+       onClick={() => setLastPaidId(null)}
+       className="text-xs text-muted-foreground hover:text-foreground px-1"
+       title="Cerrar"
+      >✕</button>
+     </div>
+    </div>
+   )}
 
    {/* Botones de movimientos */}
    <div>
