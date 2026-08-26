@@ -3,12 +3,15 @@
 import { useEffect } from "react";
 
 /**
- * Dispara window.print() automáticamente al cargar el recibo.
- * Se usa en la página de recibo thermal para imprimir sin intervención.
+ * Imprime automáticamente al cargar y cierra la pestaña al terminar.
  */
 export function AutoPrint() {
   useEffect(() => {
-    const t = setTimeout(() => window.print(), 800);
+    const t = setTimeout(() => {
+      window.print();
+      // Cierra la pestaña automáticamente después de imprimir
+      window.onafterprint = () => window.close();
+    }, 800);
     return () => clearTimeout(t);
   }, []);
   return null;
