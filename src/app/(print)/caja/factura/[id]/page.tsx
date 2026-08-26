@@ -1,7 +1,6 @@
 /**
  * Recibo de venta PDV — impresora thermal 80mm
- * Ruta: /caja/factura/[ventaId]
- * Diseño fusionado: logo/estética propia + estructura fiscal dominicana
+ * Optimizado para impresión térmica: negro puro, columnas calibradas, sin grises
  */
 import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
@@ -45,7 +44,6 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
     referencia: p.referencia ?? null,
   }));
 
-  // ITBIS e total por ítem
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const detalles = v.detalles.map((d: any) => {
     const subtotal  = Number(d.subtotal);
@@ -61,139 +59,143 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
   return (
     <>
-      {/* Auto-imprime al cargar — sin intervención de la cajera */}
       <AutoPrint />
 
       <div id="recibo">
 
-        {/* ══ LOGO + EMPRESA ══ */}
-        <div className="hdr">
-          <svg width="44" height="44" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="21,2 49,2 67,20 67,50 49,68 21,68 3,50 3,20" fill="white" stroke="#111" strokeWidth="2.5"/>
-            <polygon points="22,7 48,7 63,22 63,48 48,63 22,63 7,48 7,22" fill="none" stroke="#111" strokeWidth="1"/>
+        {/* LOGO + EMPRESA */}
+        <div className="centro">
+          <svg width="42" height="42" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="21,2 49,2 67,20 67,50 49,68 21,68 3,50 3,20" fill="white" stroke="#000" strokeWidth="3"/>
+            <polygon points="22,7 48,7 63,22 63,48 48,63 22,63 7,48 7,22" fill="none" stroke="#000" strokeWidth="1.5"/>
             <text x="35" y="35" dominantBaseline="central" textAnchor="middle"
-              fontFamily="'Arial Black', Impact, sans-serif" fontSize="27" fontWeight="900" fill="#f5821f">AP</text>
+              fontFamily="'Arial Black', Impact, sans-serif" fontSize="26" fontWeight="900" fill="#000">AP</text>
           </svg>
-          <div className="emp-nombre"><span className="naranja">F</span>ERRETERÍA AP</div>
-          <div className="emp-sub">{EMPRESA.dir}</div>
-          <div className="emp-sub">{EMPRESA.ciudad}</div>
-          <div className="emp-sub">RNC: {EMPRESA.rnc}</div>
-          <div className="emp-sub">Tel.: {EMPRESA.tel}</div>
+          <div className="emp-nom">FERRETERIA AP</div>
+          <div className="emp-lin">{EMPRESA.dir}</div>
+          <div className="emp-lin">{EMPRESA.ciudad}</div>
+          <div className="emp-lin">RNC: {EMPRESA.rnc}</div>
+          <div className="emp-lin">Tel.: {EMPRESA.tel}</div>
         </div>
 
         <div className="dbl"></div>
 
-        {/* ══ DOCUMENTO ══ */}
-        <div className="doc-center">
+        {/* DOCUMENTO */}
+        <div className="centro">
           <div className="doc-tipo">{v.tipoNcf ? (NCF_LABEL[v.tipoNcf] ?? "FACTURA DE VENTA") : "FACTURA DE VENTA"}</div>
           <div className="doc-num"># {v.numero}</div>
-          <div className="doc-fecha">{fecha}</div>
-          {v.ncf && <div className="doc-ncf">NCF: {v.ncf}</div>}
+          <div className="doc-sub">{fecha}</div>
+          {v.ncf && <div className="doc-sub">NCF: {v.ncf}</div>}
         </div>
 
-        <div className="dash"></div>
+        <div className="guion"></div>
 
-        {/* ══ CLIENTE ══ */}
-        {v.cliente.rnc && <div className="cli-rnc">RNC: {v.cliente.rnc}</div>}
+        {/* CLIENTE */}
+        {v.cliente.rnc && <div className="campo"><span>RNC:</span><span>{v.cliente.rnc}</span></div>}
         <div className="cli-nom">{v.cliente.nombre}</div>
-        {v.cliente.telefono && <div className="cli-sub">Tel: {v.cliente.telefono}</div>}
-        <div className="cli-sub">Condición: {CREDITO_LABEL[v.credito] ?? v.credito}</div>
+        {v.cliente.telefono && <div className="campo"><span>Tel:</span><span>{v.cliente.telefono}</span></div>}
+        <div className="campo"><span>Condicion:</span><span>{CREDITO_LABEL[v.credito] ?? v.credito}</span></div>
 
-        <div className="dash"></div>
+        <div className="guion"></div>
 
-        {/* ══ TABLA PRODUCTOS ══ */}
-        <div className="row tbl-hdr">
-          <span className="c-desc">DESCRIPCIÓN</span>
-          <span className="c-itbis">ITBIS</span>
-          <span className="c-valor">VALOR</span>
+        {/* CABECERA TABLA */}
+        <div className="tbl-hdr">
+          <span className="cd">DESCRIPCION</span>
+          <span className="ci">ITBIS</span>
+          <span className="cv">VALOR</span>
         </div>
-        <div className="solid"></div>
+        <div className="linea"></div>
 
+        {/* PRODUCTOS */}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {detalles.map((d: any, i: number) => {
-          const nombre = d.descripcion ?? d.producto.nombre;
-          const codigo = d.producto?.codigo ?? null;
-          const unidad = d.unidad ?? d.producto.unidadMedida;
+          const nombre = (d.descripcion ?? d.producto.nombre) as string;
+          const codigo = d.producto?.codigo as string | null ?? null;
+          const unidad = (d.unidad ?? d.producto.unidadMedida) as string;
           const cant   = Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 });
           return (
-            <div key={d.id} className={i % 2 === 1 ? "item item-alt" : "item"}>
+            <div key={d.id} className={i % 2 === 1 ? "item sombreado" : "item"}>
               <div className="item-nom">{nombre}</div>
               {codigo && <div className="item-cod">{codigo}</div>}
-              <div className="row">
-                <span className="c-desc item-qty">{cant} {unidad} × {fmtN(d.precio)}</span>
-                <span className="c-itbis item-num">{d.exentoItbis ? "—" : fmtN(d.itbisItem)}</span>
-                <span className="c-valor item-num">{fmtN(d.valorItem)}</span>
+              <div className="tbl-hdr" style={{ marginTop: 1 }}>
+                <span className="cd item-det">{cant} {unidad} x {fmtN(d.precio)}</span>
+                <span className="ci item-num">{d.exentoItbis ? "  -" : fmtN(d.itbisItem)}</span>
+                <span className="cv item-num">{fmtN(d.valorItem)}</span>
               </div>
-              {Number(d.descuento ?? 0) > 0 && <div className="item-desc-txt">Desc: -{fmtN(d.descuento)}</div>}
+              {Number(d.descuento ?? 0) > 0 && <div className="item-desc">Desc: -{fmtN(d.descuento)}</div>}
               {d.exentoItbis && <div className="item-tag">Exento ITBIS</div>}
             </div>
           );
         })}
 
-        <div className="solid"></div>
+        <div className="linea"></div>
 
-        {/* ══ SUBTOTALES ══ */}
+        {/* SUBTOTALES */}
         {tieneDesc && (
-          <div className="row sub-row">
-            <span className="c-desc">Descuento</span>
-            <span className="c-itbis"></span>
-            <span className="c-valor">-{fmtN(totalDesc)}</span>
+          <div className="tbl-hdr sub">
+            <span className="cd">Descuento</span>
+            <span className="ci"></span>
+            <span className="cv">-{fmtN(totalDesc)}</span>
           </div>
         )}
-        <div className="row sub-row">
-          <span className="c-desc">SUBTOTAL</span>
-          <span className="c-itbis">{fmtN(totalItbis)}</span>
-          <span className="c-valor">{fmtN(totalValor)}</span>
+        <div className="tbl-hdr sub">
+          <span className="cd">SUBTOTAL</span>
+          <span className="ci">{fmtN(totalItbis)}</span>
+          <span className="cv">{fmtN(totalValor)}</span>
         </div>
 
-        <div className="dash"></div>
+        <div className="guion"></div>
 
-        {/* ══ TOTAL A PAGAR ══ */}
-        <div className="row total-row">
-          <span className="c-desc total-lbl">TOTAL A PAGAR</span>
-          <span className="c-itbis total-itbis">{fmtN(totalItbis)}</span>
-          <span className="c-valor total-val">{fmtN(totalValor)}</span>
+        {/* TOTAL A PAGAR — en dos líneas para evitar colisión */}
+        <div className="total-lbl">TOTAL A PAGAR</div>
+        <div className="tbl-hdr">
+          <span className="cd total-itbis-lbl">ITBIS incl.</span>
+          <span className="ci total-itbis">{fmtN(totalItbis)}</span>
+          <span className="cv total-val">{fmtN(totalValor)}</span>
         </div>
 
-        <div className="dash"></div>
+        <div className="guion"></div>
 
-        {/* ══ PAGOS ══ */}
+        {/* PAGOS */}
         {pagos.map((p, i) => (
-          <div key={i} className="row pago-row">
+          <div key={i} className="campo bold">
             <span>{METODO_LABEL[p.metodo] ?? p.metodo}{p.referencia ? ` (${p.referencia})` : ""}</span>
             <span>{fmtN(p.monto)}</span>
           </div>
         ))}
 
-        <div className="dash"></div>
+        <div className="guion"></div>
 
-        {/* ══ CAJERO / TICKET ══ */}
-        <div className="row staff-row"><span>Cajero:</span><span>{vendedorNombre}</span></div>
-        <div className="row staff-row"><span>Ticket:</span><span>{v.numero}</span></div>
+        {/* CAJERO / TICKET */}
+        <div className="campo"><span>Cajero:</span><span>{vendedorNombre}</span></div>
+        <div className="campo"><span>Ticket:</span><span>{v.numero}</span></div>
 
         <div className="dbl"></div>
 
-        {/* ══ FOOTER ══ */}
-        <div className="footer-grc">¡Gracias por su compra!</div>
-        <div className="footer-wa">WhatsApp: {EMPRESA.tel}</div>
+        {/* FOOTER */}
+        <div className="centro">
+          <div className="gracias">Gracias por su compra!</div>
+          <div className="wa-txt">WhatsApp: {EMPRESA.tel}</div>
+        </div>
 
-        <div className="dash"></div>
+        <div className="guion"></div>
 
-        {/* ══ POLÍTICA ══ */}
-        <div className="pol-titulo">POLÍTICA DE DEVOLUCIONES</div>
-        <div className="pol-item">✓ Devoluciones e intercambios hasta <b>30 días</b> después de la compra.</div>
-        <div className="pol-item">✓ Se requiere presentar esta <b>factura original</b>. Sin factura no se procesará ninguna devolución.</div>
-        <div className="pol-item">✓ El producto debe estar en su <b>estado original</b>, sin uso, sin daños y en su empaque original.</div>
-        <div className="pol-item">✓ No aplican devoluciones en <b>efectivo</b>; al momento de la devolución se emitirá una <b>nota de crédito</b> por el valor devuelto.</div>
-        <div className="pol-item">✓ <b>Revise sus productos</b> antes de retirarse. No se aceptarán reclamaciones por daños visibles una vez retirado el artículo.</div>
-        <div className="pol-item">✓ Productos con daños por mal uso quedan excluidos de la garantía.</div>
+        {/* POLITICA */}
+        <div className="pol-titulo">POLITICA DE DEVOLUCIONES</div>
+        <div className="pol">- Devoluciones hasta 30 dias con factura original.</div>
+        <div className="pol">- Producto en estado original, sin uso ni danos.</div>
+        <div className="pol">- No aplican devoluciones en efectivo; se emite nota de credito.</div>
+        <div className="pol">- Revise sus productos antes de retirarse.</div>
+        <div className="pol">- Danos por mal uso quedan fuera de garantia.</div>
 
-        <div className="dash"></div>
+        <div className="guion"></div>
 
-        {/* ══ PIE LEGAL ══ */}
-        <div className="pie">RNC: {EMPRESA.rnc}</div>
-        <div className="pie">Documento generado electrónicamente.</div>
-        <div className="pie">Conserve esta factura para cualquier reclamación.</div>
+        {/* PIE */}
+        <div className="centro">
+          <div className="pie">RNC: {EMPRESA.rnc}</div>
+          <div className="pie">Documento generado electronicamente.</div>
+          <div className="pie">Conserve esta factura para reclamaciones.</div>
+        </div>
 
       </div>
 
@@ -201,96 +203,93 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-          font-family: 'Helvetica Neue', Arial, sans-serif;
-          font-size: 11px;
-          color: #111;
-          background: #ccc;
+          font-family: Arial, 'Helvetica Neue', sans-serif;
+          font-size: 12px;
+          color: #000;
+          background: #bbb;
         }
 
         #recibo {
-          width: 72mm;
+          width: 76mm;
           margin: 8px auto;
           background: #fff;
-          padding: 10px 8px 16px;
+          padding: 8px 6px 20px;
           border-radius: 3px;
-          box-shadow: 0 2px 10px rgba(0,0,0,.2);
+          box-shadow: 0 2px 8px rgba(0,0,0,.25);
         }
 
-        /* ── Columnas ── */
-        .row     { display: flex; align-items: baseline; }
-        .c-desc  { flex: 1 1 auto; min-width: 0; text-align: left; }
-        .c-itbis { width: 48px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
-        .c-valor { width: 58px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
-
         /* ── Separadores ── */
-        .dbl   { border-top: 3px double #111; margin: 6px 0; }
-        .dash  { border-top: 1px dashed #bbb; margin: 5px 0; }
-        .solid { border-top: 1px solid #888; margin: 4px 0; }
+        .dbl   { border-top: 2px solid #000; margin: 6px 0; border-bottom: 1px solid #000; padding-bottom: 1px; }
+        .guion { border-top: 1px dashed #000; margin: 5px 0; }
+        .linea { border-top: 1px solid #000; margin: 3px 0; }
 
         /* ── Empresa ── */
-        .hdr       { text-align: center; margin-bottom: 5px; }
-        .hdr svg   { display: block; margin: 0 auto 3px; }
-        .naranja   { color: #f5821f; }
-        .emp-nombre { font-size: 14px; font-weight: 900; font-family: 'Arial Black', Impact, sans-serif; letter-spacing: .02em; margin-bottom: 2px; }
-        .emp-sub   { font-size: 8.5px; color: #555; line-height: 1.6; }
+        .centro    { text-align: center; }
+        .centro svg { display: block; margin: 0 auto 3px; }
+        .emp-nom   { font-size: 14px; font-weight: 900; letter-spacing: .03em; margin: 3px 0 2px; }
+        .emp-lin   { font-size: 9px; line-height: 1.5; color: #000; }
 
         /* ── Documento ── */
-        .doc-center { text-align: center; }
-        .doc-tipo   { font-size: 8.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: #888; margin-bottom: 2px; }
-        .doc-num    { font-size: 14px; font-weight: 900; font-family: 'Courier New', monospace; }
-        .doc-fecha  { font-size: 8.5px; color: #666; margin-top: 1px; }
-        .doc-ncf    { font-size: 8.5px; color: #444; font-family: monospace; margin-top: 2px; }
+        .doc-tipo  { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+        .doc-num   { font-size: 14px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .doc-sub   { font-size: 9px; margin-top: 1px; }
 
         /* ── Cliente ── */
-        .cli-rnc  { font-size: 8.5px; color: #555; }
-        .cli-nom  { font-size: 12px; font-weight: 700; margin: 1px 0; }
-        .cli-sub  { font-size: 8.5px; color: #666; line-height: 1.6; }
+        .cli-nom   { font-size: 12px; font-weight: 700; margin: 2px 0; }
+        .campo     { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 1px; gap: 4px; }
+        .campo span:first-child { color: #000; }
+        .campo.bold { font-weight: 700; font-size: 10.5px; font-family: 'Courier New', monospace; }
 
-        /* ── Tabla header ── */
-        .tbl-hdr { font-size: 7.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; color: #999; padding-bottom: 2px; }
+        /* ── Columnas ── */
+        .tbl-hdr { display: flex; align-items: baseline; gap: 2px; }
+        .cd { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ci { width: 46px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
+        .cv { width: 56px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
 
-        /* ── Items ── */
-        .item       { margin-bottom: 5px; }
-        .item-alt   { background: #f5f5f5; padding: 2px 3px; border-radius: 2px; }
-        .item-nom   { font-size: 10px; font-weight: 600; line-height: 1.3; word-break: break-word; }
-        .item-cod   { font-size: 8px; color: #888; }
-        .item-qty   { font-size: 8.5px; color: #555; }
-        .item-num   { font-size: 9px; font-weight: 600; }
-        .item-desc-txt { font-size: 8px; color: #e07020; }
-        .item-tag   { font-size: 7.5px; color: #aaa; font-style: italic; }
+        /* Cabecera tabla */
+        .tbl-hdr.sub { font-size: 9.5px; margin-bottom: 2px; }
 
-        /* ── Subtotales ── */
-        .sub-row { font-size: 9px; margin-bottom: 2px; }
+        /* ── Productos ── */
+        .item       { margin-bottom: 4px; }
+        .sombreado  { background: #f0f0f0; padding: 1px 2px; }
+        .item-nom   { font-size: 10px; font-weight: 700; line-height: 1.3; white-space: normal; word-break: break-word; }
+        .item-cod   { font-size: 8px; }
+        .item-det   { font-size: 8.5px; }
+        .item-num   { font-size: 9px; font-weight: 700; }
+        .item-desc  { font-size: 8px; }
+        .item-tag   { font-size: 8px; font-style: italic; }
 
-        /* ── Total a pagar ── */
-        .total-row  { padding: 2px 0; }
-        .total-lbl  { font-size: 12px; font-weight: 900; }
-        .total-itbis { font-size: 10px; font-weight: 700; width: 48px; }
-        .total-val  { font-size: 14px; font-weight: 900; width: 58px; }
+        /* Cabecera de tabla */
+        .tbl-hdr:first-of-type {
+          font-size: 8px;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: .04em;
+          padding-bottom: 2px;
+        }
 
-        /* ── Pagos ── */
-        .pago-row { justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; font-family: 'Courier New', monospace; }
-
-        /* ── Staff ── */
-        .staff-row { justify-content: space-between; font-size: 8.5px; color: #555; margin-bottom: 1px; }
+        /* ── Total ── */
+        .total-lbl      { font-size: 13px; font-weight: 900; margin-bottom: 2px; }
+        .total-itbis-lbl { font-size: 8.5px; }
+        .total-itbis    { font-size: 9.5px; font-weight: 700; }
+        .total-val      { font-size: 14px; font-weight: 900; }
 
         /* ── Footer ── */
-        .footer-grc { text-align: center; font-size: 11px; font-weight: 700; margin-bottom: 2px; }
-        .footer-wa  { text-align: center; font-size: 8.5px; color: #777; }
+        .gracias   { font-size: 12px; font-weight: 900; margin-bottom: 2px; }
+        .wa-txt    { font-size: 9px; }
 
         /* ── Política ── */
-        .pol-titulo { font-size: 7.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: #888; text-align: center; margin: 4px 0; }
-        .pol-item   { font-size: 8px; color: #555; line-height: 1.6; margin-bottom: 2px; }
-        .pol-item b { color: #333; }
+        .pol-titulo { font-size: 8.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; text-align: center; margin: 3px 0; }
+        .pol        { font-size: 8px; line-height: 1.55; margin-bottom: 1px; }
 
         /* ── Pie ── */
-        .pie { text-align: center; font-size: 7.5px; color: #aaa; line-height: 1.7; }
+        .pie { font-size: 8px; line-height: 1.6; }
 
-        /* ══ IMPRESIÓN ══ */
+        /* ══ IMPRESIÓN THERMAL ══ */
         @media print {
           @page {
             size: 80mm auto;
-            margin: 0;
+            margin: 2mm 0mm;   /* solo top/bottom; el driver controla laterales */
           }
           body {
             background: white;
@@ -299,11 +298,15 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
           }
           #recibo {
             width: 100%;
+            max-width: 100%;
             margin: 0;
-            padding: 4mm 3mm 8mm;
+            padding: 2mm 3mm 6mm;
             border-radius: 0;
             box-shadow: none;
           }
+          /* Negro puro en toda la impresión */
+          * { color: #000 !important; background: white !important; }
+          .sombreado { background: #e8e8e8 !important; }
         }
       `}</style>
     </>
