@@ -24,6 +24,10 @@ function ModuleCard({ label, sub, href, Icon, color, badge = 0 }: {
   label: string; sub: string; href: string;
   Icon: React.ComponentType<LucideProps>; color: string; badge?: number;
 }) {
+  // En tema Noir (--card-fg-hex = #FFF) los íconos y texto deben ser blancos.
+  // En otros temas --card-fg-hex no está definido y cae al color individual.
+  const iconColor = `var(--card-fg-hex, ${color})`;
+
   return (
     <Link
       href={href}
@@ -46,29 +50,31 @@ function ModuleCard({ label, sub, href, Icon, color, badge = 0 }: {
 
       {/* Ícono */}
       <div className="flex items-center justify-center mb-2">
-        <Icon size={38} strokeWidth={1.5} style={{ color }} />
+        <Icon size={38} strokeWidth={1.5} style={{ color: iconColor }} />
       </div>
 
       {/* Texto */}
       <div className="text-center mb-4 space-y-0.5">
-        <p className="font-semibold leading-tight" style={{ color: "var(--foreground)", fontSize: 13 }}>
+        <p className="font-semibold leading-tight" style={{ color: "var(--card-fg-hex, var(--foreground))", fontSize: 13 }}>
           {label}
         </p>
-        <p className="text-[10px] text-muted-foreground leading-tight">{sub}</p>
+        <p className="text-[10px] leading-tight" style={{ color: "var(--card-fg-hex, var(--muted-foreground))", opacity: 0.65 }}>
+          {sub}
+        </p>
       </div>
 
       {/* Barrita de color */}
       <div
         className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full transition-all duration-150"
-        style={{ width: 32, height: 3, backgroundColor: color, opacity: 0.8 }}
+        style={{ width: 32, height: 3, backgroundColor: iconColor, opacity: 0.8 }}
       />
 
       {/* Hover overlay */}
       <div
         className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
         style={{
-          backgroundColor: `color-mix(in oklch, ${color} 6%, transparent)`,
-          border: `1px solid color-mix(in oklch, ${color} 30%, transparent)`,
+          backgroundColor: "color-mix(in oklch, var(--card-fg-hex, " + color + ") 8%, transparent)",
+          border: "1px solid color-mix(in oklch, var(--card-fg-hex, " + color + ") 25%, transparent)",
         }}
       />
     </Link>

@@ -842,7 +842,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
        placeholder="Ej: FAC-00023 ó nombre del cliente…" className={INPUT_CLS} />
       {buscando && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">buscando…</span>}
       {resultados.length > 0 && (
-       <div className="absolute z-50 top-full mt-1 w-full border rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto" style={{ backgroundColor: "var(--card-bg-hex, var(--card))", borderColor: "var(--card-border-hex, var(--border))" }}>
+       <div className="absolute z-50 top-full mt-1 w-full border rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto" style={{ backgroundColor: "var(--popover)", borderColor: "var(--border)" }}>
         {resultados.map(c => (
          <button key={c.id} type="button" onClick={() => agregarCxC(c)}
           className="w-full text-left px-3 py-2.5 hover:bg-accent transition-colors border-b last:border-0">

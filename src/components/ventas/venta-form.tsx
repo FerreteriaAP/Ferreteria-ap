@@ -490,7 +490,7 @@ export function VentaForm({
                     {direccionId ? (() => { const d = direcciones.find(d => d.id === direccionId); return d ? `${d.etiqueta}: ${d.direccion}` : null; })() : null}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent style={{ backgroundColor: "var(--card-bg-hex)", borderColor: "var(--card-border-hex)" }}>
+                <SelectContent style={{ backgroundColor: "var(--popover)", borderColor: "var(--border)" }}>
                   {direcciones.map(dir => <SelectItem key={dir.id} value={dir.id}>{dir.etiqueta}: {dir.direccion}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -500,7 +500,7 @@ export function VentaForm({
           <Field label="Condición de pago">
             <Select value={credito} onValueChange={v => setCredito((v ?? "CONTADO") as typeof credito)}>
               <SelectTrigger className="h-9"><SelectValue>{CREDITO_LABEL[credito] ?? credito}</SelectValue></SelectTrigger>
-              <SelectContent style={{ backgroundColor: "var(--card-bg-hex)", borderColor: "var(--card-border-hex)" }}>
+              <SelectContent style={{ backgroundColor: "var(--popover)", borderColor: "var(--border)" }}>
                 <SelectItem value="CONTADO">Contado</SelectItem>
                 <SelectItem value="DIAS_10">10 Días</SelectItem>
                 <SelectItem value="DIAS_15">15 Días</SelectItem>
@@ -547,7 +547,7 @@ export function VentaForm({
 
             {/* Dropdown sugerencias */}
             {mostrarSug && sugerencias.length > 0 && (
-              <div className="absolute z-50 top-full mt-1 w-full rounded-xl border shadow-xl max-h-72 overflow-y-auto" style={{ backgroundColor: "var(--card-bg-hex, var(--card))", borderColor: "var(--card-border-hex, var(--border))" }}>
+              <div className="absolute z-50 top-full mt-1 w-full rounded-xl border shadow-xl max-h-72 overflow-y-auto" style={{ backgroundColor: "var(--popover)", borderColor: "var(--border)" }}>
                 {sugerencias.map(s => {
                   const factor = s.factorFraccion ? Number(s.factorFraccion) : null;
                   return (

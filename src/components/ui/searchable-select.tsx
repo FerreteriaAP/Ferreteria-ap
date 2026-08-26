@@ -115,12 +115,12 @@ export function SearchableSelect({
         <div
           className="absolute z-50 top-[calc(100%+4px)] left-0 right-0 rounded-xl border shadow-xl overflow-hidden"
           style={{
-            backgroundColor: "var(--card-bg-hex, var(--card))",
-            borderColor:     "var(--card-border-hex, var(--border))",
+            backgroundColor: "var(--popover)",
+            borderColor:     "var(--border)",
           }}
         >
           {/* Search row */}
-          <div className="px-2 pt-2 pb-1.5 border-b" style={{ borderColor: "var(--card-border-hex, var(--border))" }}>
+          <div className="px-2 pt-2 pb-1.5 border-b" style={{ borderColor: "var(--border)" }}>
             <div className="relative">
               <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
@@ -158,7 +158,7 @@ export function SearchableSelect({
                     "w-full text-left px-3 py-2 transition-colors border-b last:border-0 hover:bg-muted/40",
                     item.id === value && "bg-muted/30",
                   )}
-                  style={{ borderColor: "var(--card-border-hex, var(--border))" }}
+                  style={{ borderColor: "var(--border)" }}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-medium text-sm truncate">{item.label}</span>

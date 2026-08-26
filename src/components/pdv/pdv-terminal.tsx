@@ -455,7 +455,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                 </button>
 
                 {showClienteSearch && (
-                  <div className="absolute left-0 top-full mt-1 w-80 border rounded-xl shadow-2xl z-50 p-3 space-y-2" style={{ backgroundColor: "var(--card-bg-hex, var(--card))", borderColor: "var(--card-border-hex, var(--border))" }}>
+                  <div className="absolute left-0 top-full mt-1 w-80 border rounded-xl shadow-2xl z-50 p-3 space-y-2" style={{ backgroundColor: "var(--popover)", borderColor: "var(--border)" }}>
                     <button
                       onClick={() => seleccionarCliente({ ...consumidorFinal, rnc: null, tipoComprobante: "B02", telefono: null, direcciones: [] })}
                       className="w-full text-left px-2.5 py-2 rounded-lg text-sm hover:bg-accent transition-colors font-medium"
