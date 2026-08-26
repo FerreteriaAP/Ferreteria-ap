@@ -74,17 +74,18 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  return (
  <div className="rounded-xl border bg-card p-4 space-y-4"> {/* Selector de reporte */}
  <div className="flex gap-2 flex-wrap"> {[
- { key: "cierres",         label: "Cierres de caja" },
- { key: "movimientos",     label: "Movimientos de caja" },
- { key: "notas-credito",   label: "Notas de Crédito" },
- { key: "dinero-recibido", label: "Dinero Recibido" },
+ { key: "cierres",         label: "Cierres de caja",    color: "#3b82f6" },
+ { key: "movimientos",     label: "Movimientos de caja", color: "#ef4444" },
+ { key: "notas-credito",   label: "Notas de Crédito",   color: "#a855f7" },
+ { key: "dinero-recibido", label: "Dinero Recibido",    color: "#22c55e" },
  ].filter(r => !(soloMovimientos && r.key !== "movimientos")).map(r => (
  <a key={r.key}
  href={buildUrl({ reporte: r.key })}
- className={cn(
- "px-4 py-2 rounded-lg text-sm font-semibold border transition-colors",
- reporte === r.key
- ? "bg-primary text-primary-foreground border-primary" : "hover:bg-accent border-muted" )}> {r.label}
+ style={reporte === r.key
+   ? { backgroundColor: `color-mix(in oklch, ${r.color} 12%, transparent)`, color: r.color, borderColor: r.color }
+   : { color: r.color, borderColor: `color-mix(in oklch, ${r.color} 35%, transparent)`, backgroundColor: "transparent" }
+ }
+ className="px-4 py-2 rounded-lg text-sm font-semibold border transition-colors hover:opacity-80"> {r.label}
  </a> ))}
  </div> <div className="border-t pt-4 space-y-3"> {/* Tipo de período */}
  <div className="flex flex-wrap gap-2 items-center"> <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide shrink-0 w-24"> Tipo:
