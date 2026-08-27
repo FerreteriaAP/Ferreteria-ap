@@ -87,18 +87,18 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
         boxSizing: "border-box",
       }}>
 
-        {/* ── Encabezado: logo izquierda, título derecha, alineados al centro ── */}
+        {/* ── Encabezado: logo izquierda, título derecha ── */}
         <div style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",          /* centra verticalmente logo vs título */
+          alignItems: "flex-end",
           borderBottom: "3.5px solid #f5821f",
-          paddingBottom: 12,
+          paddingBottom: 10,
           marginBottom: 14,
         }}>
-          {/* El SVG de PrintLogo tiene su propio viewBox; forzamos que no recorte */}
+          {/* viewBox 320×72 → aspect ratio 4.444 → height = 210/4.444 = 47px */}
           <div style={{ lineHeight: 0 }}>
-            <PrintLogo width={230} height={60} />
+            <PrintLogo width={210} height={47} />
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 17, fontWeight: 900, color: "#f5821f", letterSpacing: "-0.5px" }}>
@@ -107,61 +107,57 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
             <div style={{ fontSize: 8.5, color: "#777", marginTop: 3 }}>
               Generado: {fmtFecha(generadoEn)}
             </div>
-            <div style={{ fontSize: 8, color: "#999", marginTop: 1 }}>
-              RNC: {EMPRESA.rnc} · {EMPRESA.tel} · {EMPRESA.email}
-            </div>
           </div>
         </div>
 
-        {/* ── Datos del cliente ── */}
+        {/* ── Caja de información: empresa (izq) + cliente (der) ── */}
         <div style={{
-          background: "#f8f8f8",
-          borderLeft: "4px solid #f5821f",
-          padding: "9px 13px",
-          marginBottom: 14,
-          borderRadius: "0 4px 4px 0",
+          display: "grid", gridTemplateColumns: "1fr 1px 1fr",
+          gap: 0, marginBottom: 14, border: "1px solid #e5e7eb",
+          borderRadius: 5, overflow: "hidden", fontSize: 9,
         }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1.4fr 1.4fr", gap: 14 }}>
-            {/* Col 1: nombre + email */}
-            <div>
-              <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#999", letterSpacing: "0.06em" }}>Cliente</div>
-              <div style={{ fontSize: 13, fontWeight: 900, marginTop: 2 }}>{cliente.nombre}</div>
-              {cliente.nombreLegal && cliente.nombreLegal !== cliente.nombre && (
-                <div style={{ fontSize: 9.5, color: "#555", marginTop: 1 }}>{cliente.nombreLegal}</div>
-              )}
-              {cliente.email && (
-                <div style={{ fontSize: 9, color: "#777", marginTop: 3 }}>{cliente.email}</div>
-              )}
+          {/* Columna empresa */}
+          <div style={{ padding: "9px 13px", background: "#fafafa" }}>
+            <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#f5821f", letterSpacing: "0.06em", marginBottom: 4 }}>
+              Emisor
             </div>
-            {/* Col 2: RNC + teléfonos */}
-            <div>
-              {cliente.rnc && (
-                <>
-                  <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#999", letterSpacing: "0.06em" }}>RNC / Cédula</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, marginTop: 2 }}>{cliente.rnc}</div>
-                </>
-              )}
-              {cliente.telefono && (
-                <>
-                  <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#999", letterSpacing: "0.06em", marginTop: 6 }}>Teléfono</div>
-                  <div style={{ fontSize: 10, fontWeight: 600, marginTop: 2 }}>{cliente.telefono}</div>
-                </>
-              )}
-              {(cliente as { telefonoAlt?: string | null }).telefonoAlt && (
-                <div style={{ fontSize: 9.5, color: "#555", marginTop: 1 }}>
-                  Alt: {(cliente as { telefonoAlt?: string | null }).telefonoAlt}
-                </div>
-              )}
+            <div style={{ fontSize: 11, fontWeight: 900, color: "#000204" }}>{EMPRESA.nombre}</div>
+            <div style={{ color: "#555", marginTop: 3 }}>RNC: <strong>{EMPRESA.rnc}</strong></div>
+            <div style={{ color: "#555", marginTop: 1 }}>{EMPRESA.tel}</div>
+            <div style={{ color: "#555", marginTop: 1 }}>{EMPRESA.email}</div>
+            <div style={{ color: "#777", marginTop: 1, fontSize: 8.5 }}>{EMPRESA.dir}, {EMPRESA.ciudad}</div>
+          </div>
+          {/* Separador vertical */}
+          <div style={{ background: "#e5e7eb" }} />
+          {/* Columna cliente */}
+          <div style={{ padding: "9px 13px", background: "#fff", borderLeft: "3px solid #f5821f" }}>
+            <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#f5821f", letterSpacing: "0.06em", marginBottom: 4 }}>
+              Cliente
             </div>
-            {/* Col 3: crédito + límite */}
-            <div>
-              <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#999", letterSpacing: "0.06em" }}>Condición crédito</div>
-              <div style={{ fontSize: 10, fontWeight: 700, marginTop: 2 }}>{CREDITO_LABELS[cliente.credito] ?? cliente.credito}</div>
+            <div style={{ fontSize: 11, fontWeight: 900, color: "#000204" }}>{cliente.nombre}</div>
+            {cliente.nombreLegal && cliente.nombreLegal !== cliente.nombre && (
+              <div style={{ color: "#555", marginTop: 1 }}>{cliente.nombreLegal}</div>
+            )}
+            {cliente.rnc && (
+              <div style={{ color: "#555", marginTop: 3 }}>RNC/Céd: <strong>{cliente.rnc}</strong></div>
+            )}
+            {cliente.telefono && (
+              <div style={{ color: "#555", marginTop: 1 }}>
+                {cliente.telefono}
+                {(cliente as { telefonoAlt?: string | null }).telefonoAlt && (
+                  <span style={{ marginLeft: 6, color: "#888" }}>· {(cliente as { telefonoAlt?: string | null }).telefonoAlt}</span>
+                )}
+              </div>
+            )}
+            {cliente.email && <div style={{ color: "#777", marginTop: 1, fontSize: 8.5 }}>{cliente.email}</div>}
+            <div style={{ marginTop: 4, display: "flex", gap: 10 }}>
+              <span style={{ fontSize: 8, color: "#888" }}>
+                Crédito: <strong style={{ color: "#111" }}>{CREDITO_LABELS[cliente.credito] ?? cliente.credito}</strong>
+              </span>
               {cliente.limiteCredito && (
-                <>
-                  <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#999", letterSpacing: "0.06em", marginTop: 6 }}>Límite de crédito</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, marginTop: 2 }}>{fmt(Number(cliente.limiteCredito))}</div>
-                </>
+                <span style={{ fontSize: 8, color: "#888" }}>
+                  Límite: <strong style={{ color: "#111" }}>{fmt(Number(cliente.limiteCredito))}</strong>
+                </span>
               )}
             </div>
           </div>
@@ -190,19 +186,19 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
             );
           })}
 
-          {/* Card "Total vencidas" — siempre rojo */}
+          {/* Card "Vencido" — rojo solo si hay monto vencido */}
           <div style={{
             flex: 1,
-            border: "2px solid #fca5a5",
+            border: totales.vencido > 0 ? "2px solid #fca5a5" : "1px solid #d1d5db",
             borderRadius: 5,
             padding: "8px 10px",
             textAlign: "center",
-            background: "#fef2f2",
+            background: totales.vencido > 0 ? "#fef2f2" : "#fafafa",
           }}>
-            <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#991b1b" }}>
+            <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: totales.vencido > 0 ? "#991b1b" : "#888" }}>
               VENCIDO
             </div>
-            <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "monospace", marginTop: 4, color: "#991b1b" }}>
+            <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "monospace", marginTop: 4, color: totales.vencido > 0 ? "#991b1b" : "#bbb" }}>
               {totales.vencido > 0 ? fmt(totales.vencido) : "—"}
             </div>
           </div>
@@ -285,10 +281,10 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
                     <td style={TD_C}>
                       <span style={{
                         display: "inline-block", background: diasBg, color: diasColor,
-                        fontSize: 8, fontWeight: 700, fontFamily: "monospace",
+                        fontSize: 8, fontWeight: 700,
                         padding: "2px 5px", borderRadius: 20,
                       }}>
-                        {f.diasTranscurridos}d
+                        {f.diasTranscurridos} Días
                       </span>
                     </td>
                     <td style={{ ...TD_R, fontFamily: "monospace", fontWeight: 800, color: saldoColor }}>
@@ -325,10 +321,9 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
                   {fmt(totales.total)}
                 </td>
                 <td style={{ ...TF, fontSize: 8.5 }}>
-                  {totales.vencido > 0
-                    ? <span style={{ color: "#991b1b", fontWeight: 700 }}>Vencido: {fmt(totales.vencido)}</span>
-                    : <span style={{ color: "#15803d", fontWeight: 700 }}>Al día ✓</span>
-                  }
+                  {totales.vencido > 0 && (
+                    <span style={{ color: "#991b1b", fontWeight: 700 }}>Vencido: {fmt(totales.vencido)}</span>
+                  )}
                 </td>
               </tr>
             </tfoot>
