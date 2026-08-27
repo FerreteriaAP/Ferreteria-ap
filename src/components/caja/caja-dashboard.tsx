@@ -13,7 +13,7 @@ import {
  buscarCxCPorFactura,
 } from "@/actions/caja";
 import { NotaCreditoModal } from "@/components/caja/nota-credito-modal";
-import { buscarNCPorNumero, buscarNCsDelCliente } from "@/actions/nota-credito";
+import { buscarNCPorNumero } from "@/actions/nota-credito";
 import { buscarSuplidores } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 import {
@@ -22,6 +22,8 @@ import {
  Banknote,
  HandCoins,
  FileX2,
+ CheckCircle2,
+ Printer,
 } from "lucide-react";
 
 // Tipos
@@ -706,12 +708,19 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
  const [metodo, setMetodo] = useState<"EFECTIVO" | "TARJETA" | "TRANSFERENCIA" | "CHEQUE">("EFECTIVO");
  const [notas, setNotas] = useState("");
 
- // NC automática
- const [ncCandidatas, setNcCandidatas] = useState<NCInfo[]>([]);
+ // NC — sólo por número manual (el cajero debe tener el documento físico)
+ const [ncNumero, setNcNumero] = useState("");
  const [ncSeleccionada, setNcSeleccionada] = useState<NCInfo | null>(null);
  const [montoNC, setMontoNC] = useState("");
- const [ncCargando, setNcCargando] = useState(false);
+ const [ncBuscando, setNcBuscando] = useState(false);
+ const [ncError, setNcError] = useState<string | null>(null);
+ const ncTimerRef2 = useRef<ReturnType<typeof setTimeout> | null>(null);
  const clienteIdRef = useRef<string | null>(null);
+
+ // Estado de éxito (para mostrar botón imprimir comprobante)
+ const [cobroExitoso, setCobroExitoso] = useState<{
+  params: string; cliente: string;
+ } | null>(null);
 
  const idsEnLista = new Set(lineas.map(l => l.cxcId));
  const totalCobro = lineas.reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
@@ -757,24 +766,32 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   }, 250);
  };
 
- const agregarCxC = async (c: CxCResultado) => {
+ const agregarCxC = (c: CxCResultado) => {
   if (idsEnLista.has(c.id)) return;
   setLineas(prev => [...prev, { cxcId: c.id, monto: c.saldo.toFixed(2), cxc: c }]);
   setResultados([]);
   setQuery("");
   setError(null);
-  // Auto-detectar NCs del cliente si es el primero en la lista
   if (!clienteIdRef.current && c.clienteId) {
    clienteIdRef.current = c.clienteId;
-   setNcCargando(true);
-   const ncs = await buscarNCsDelCliente(c.clienteId);
-   setNcCandidatas(ncs);
-   if (ncs.length > 0) {
-    setNcSeleccionada(ncs[0]);
-    setMontoNC(Math.min(ncs[0].montoRestante, c.saldo).toFixed(2));
-   }
-   setNcCargando(false);
   }
+ };
+
+ // Busca NC por número escrito manualmente por el cajero
+ const handleNcNumero = (val: string) => {
+  setNcNumero(val);
+  setNcError(null);
+  if (ncSeleccionada) { setNcSeleccionada(null); setMontoNC(""); }
+  if (ncTimerRef2.current) clearTimeout(ncTimerRef2.current);
+  if (!val.trim() || !clienteIdRef.current) return;
+  setNcBuscando(true);
+  ncTimerRef2.current = setTimeout(async () => {
+   const nc = await buscarNCPorNumero(val.trim(), clienteIdRef.current!);
+   setNcBuscando(false);
+   if (!nc) { setNcError("Nota de crédito no encontrada o no pertenece a este cliente"); return; }
+   setNcSeleccionada(nc);
+   setMontoNC(Math.min(nc.montoRestante, totalCobro).toFixed(2));
+  }, 400);
  };
 
  const quitarLinea = (cxcId: string) => {
@@ -783,8 +800,9 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
    if (next.length === 0) {
     // Limpiar NC si se vacía la lista
     clienteIdRef.current = null;
-    setNcCandidatas([]);
     setNcSeleccionada(null);
+    setNcNumero("");
+    setNcError(null);
     setMontoNC("");
    }
    return next;
@@ -792,11 +810,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
  };
  const setMontoLinea = (cxcId: string, val: string) => setLineas(prev => prev.map(l => l.cxcId === cxcId ? { ...l, monto: val } : l));
 
- const aplicarNC = (nc: NCInfo) => {
-  setNcSeleccionada(nc);
-  setMontoNC(Math.min(nc.montoRestante, totalCobro).toFixed(2));
- };
- const cancelarNC = () => { setNcSeleccionada(null); setMontoNC(""); };
+ const cancelarNC = () => { setNcSeleccionada(null); setMontoNC(""); setNcNumero(""); setNcError(null); };
 
  const handleSubmit = (e: FormEvent) => {
   e.preventDefault();
@@ -820,6 +834,11 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   const ncAplicacion = ncSeleccionada && montoNCNum > 0
    ? { ncId: ncSeleccionada.id, montoAplicar: montoNCNum }
    : undefined;
+  // Capturamos datos para el comprobante antes de que el estado se limpie
+  const clienteNombre = lineas[0]?.cxc.cliente.nombre ?? "";
+  const clienteRnc    = lineas[0]?.cxc.cliente.rnc ?? null;
+  const facturasParam = lineas.map(l => `${l.cxc.venta.numero}:${parseFloat(l.monto).toFixed(2)}`).join(",");
+  const montoTotal    = totalConNC > 0 ? totalConNC : totalCobro;
   startTransition(async () => {
    const res = await registrarCobrosMultiplesCxC({
     turnoId,
@@ -829,9 +848,49 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
     ncAplicacion,
    });
    if ("error" in res && res.error) { setError(res.error); return; }
+   const sp = new URLSearchParams({
+    cliente: clienteNombre,
+    ...(clienteRnc ? { rnc: clienteRnc } : {}),
+    monto: montoTotal.toFixed(2),
+    metodo,
+    fecha: new Date().toISOString(),
+    facturas: facturasParam,
+    ...(notas ? { notas } : {}),
+   });
+   setCobroExitoso({ params: sp.toString(), cliente: clienteNombre });
    onOk();
   });
  };
+
+ // Pantalla de éxito con botón de imprimir
+ if (cobroExitoso) {
+  return (
+   <ModalWrapper title="Cobro registrado" icon={<HandCoins size={18} />} iconColor="#16a34a" onClose={onClose}>
+    <div className="flex flex-col items-center gap-4 text-center py-2">
+     <CheckCircle2 size={48} className="text-green-500" />
+     <div>
+      <p className="text-sm text-muted-foreground">Cobro registrado exitosamente</p>
+      <p className="text-base font-bold mt-1">{cobroExitoso.cliente}</p>
+     </div>
+     <div className="flex flex-col gap-2 w-full">
+      <a
+       href={`/comprobante-cxc?${cobroExitoso.params}`}
+       target="_blank" rel="noopener noreferrer"
+       className="flex items-center justify-center gap-2 w-full h-10 rounded-xl text-white font-semibold text-sm transition-colors"
+       style={{ backgroundColor: "#16a34a" }}
+      >
+       <Printer size={16} />
+       Imprimir comprobante de pago
+      </a>
+      <button onClick={onClose}
+       className="w-full h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors">
+       Cerrar
+      </button>
+     </div>
+    </div>
+   </ModalWrapper>
+  );
+ }
 
  return (
   <ModalWrapper title="Cobro de cuentas por cobrar" icon={<HandCoins size={18} />} iconColor="#16a34a" onClose={onClose}>
@@ -867,28 +926,25 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
      </div>
     </Field>
 
-    {/* NC automática — sugerencia */}
-    {ncCargando && (
-     <p className="text-xs text-muted-foreground animate-pulse">Verificando notas de crédito…</p>
+    {/* NC — requiere que el cajero escriba el número físico del documento */}
+    {lineas.length > 0 && (
+     <Field label="Nota de crédito (opcional — escriba el No. del documento físico)">
+      <div className="relative">
+       <input
+        type="text" value={ncNumero}
+        onChange={e => handleNcNumero(e.target.value)}
+        placeholder="Ej: NCR-00001"
+        className={INPUT_CLS}
+        style={ncSeleccionada ? { borderColor: "#a855f7" } : undefined}
+       />
+       {ncBuscando && (
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">buscando…</span>
+       )}
+      </div>
+      {ncError && <p className="text-xs text-destructive mt-1">{ncError}</p>}
+     </Field>
     )}
-    {!ncCargando && ncCandidatas.length > 0 && !ncSeleccionada && (
-     <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.06)" }}>
-      <p className="text-xs font-bold" style={{ color: "#a855f7" }}>Notas de crédito disponibles</p>
-      {ncCandidatas.map(nc => (
-       <div key={nc.id} className="flex items-center justify-between gap-2">
-        <div>
-         <span className="text-xs font-mono font-bold" style={{ color: "#a855f7" }}>{nc.numero}</span>
-         <span className="text-xs text-muted-foreground ml-2">Saldo: {fmtMoney(nc.montoRestante)}</span>
-        </div>
-        <button type="button" onClick={() => aplicarNC(nc)}
-         className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ backgroundColor: "#a855f7", color: "#fff" }}>
-         Aplicar
-        </button>
-       </div>
-      ))}
-     </div>
-    )}
-    {!ncCargando && ncSeleccionada && (
+    {!ncBuscando && ncSeleccionada && (
      <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.08)" }}>
       <div className="flex items-center justify-between">
        <p className="text-xs font-bold" style={{ color: "#a855f7" }}>NC aplicada: {ncSeleccionada.numero}</p>
