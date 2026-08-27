@@ -11,6 +11,20 @@ async function getUserId() {
  return s?.user?.id ?? null;
 }
 
+async function getSession() {
+ const s = await auth();
+ if (!s?.user) return null;
+ const user = s.user as { id: string; rol?: string };
+ return { userId: user.id, rol: user.rol ?? "" };
+}
+
+const DIAS_LIMITE_DEVOLUCION = 30;   // días máx para aceptar devolución en factura
+const DIAS_LIMITE_NC         = 90;   // días máx para usar una nota de crédito
+
+function diasDesde(fecha: Date): number {
+ return Math.floor((Date.now() - fecha.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 async function siguienteNumeroNC(): Promise<string> {
   return generarNumero("NOTA_CREDITO", "NCR");
 }
@@ -162,6 +176,18 @@ export async function buscarFacturaPorNumeroExacto(numero: string) {
  },
  });
  if (!venta) return null;
+
+ // ── Validación de política de devoluciones (30 días) ──
+ const dias = diasDesde(venta.createdAt);
+ if (dias > DIAS_LIMITE_DEVOLUCION) {
+  const sess = await getSession();
+  if (sess?.rol !== "ADMINISTRADOR") {
+   return {
+    blocked: true,
+    mensaje: `Esta factura tiene ${dias} días de emitida. Solo se aceptan devoluciones dentro de los ${DIAS_LIMITE_DEVOLUCION} días posteriores a la compra. Contacta al administrador para autorizar esta operación.`,
+   };
+  }
+ }
 
  // Sumar cantidades ya creditadas por producto en NCs previas (no anuladas)
  const ncsExistentes = await prisma.notaCredito.findMany({
@@ -334,6 +360,19 @@ export async function buscarNCPorNumero(ncNumero: string, clienteId: string) {
  if (!nc) return null;
  const montoRestante = Number(nc.montoRestante);
  if (montoRestante <= 0) return null;
+
+ // ── Validación de vigencia de NC (90 días) ──
+ const dias = diasDesde(nc.createdAt);
+ if (dias > DIAS_LIMITE_NC) {
+  const sess = await getSession();
+  if (sess?.rol !== "ADMINISTRADOR") {
+   return {
+    blocked: true,
+    mensaje: `Esta nota de crédito tiene ${dias} días de emitida y ya no es válida. Las notas de crédito tienen vigencia de ${DIAS_LIMITE_NC} días. Contacta al administrador.`,
+   } as const;
+  }
+ }
+
  return {
  id: nc.id,
  numero: nc.numero,
@@ -341,6 +380,7 @@ export async function buscarNCPorNumero(ncNumero: string, clienteId: string) {
  montoRestante,
  ventaNumero: nc.venta.numero,
  motivo: nc.motivo,
+ createdAt: nc.createdAt,
  };
 }
 

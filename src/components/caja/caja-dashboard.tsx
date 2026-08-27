@@ -123,6 +123,7 @@ function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
    const info = await buscarNCPorNumero(val.trim(), factura.cliente.id);
    setNcBuscando(false);
    if (!info) { setNcError("NC no encontrada, ya fue aplicada o no pertenece a este cliente"); return; }
+   if ("blocked" in info) { setNcError((info as { blocked: true; mensaje: string }).mensaje); return; }
    setNcInfo(info);
    setMontoNC(Math.min(info.montoRestante, factura.total));
   }, 400);
@@ -806,6 +807,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
    const nc = await buscarNCPorNumero(val.trim(), clienteIdRef.current!);
    setNcBuscando(false);
    if (!nc) { setNcError("Nota de crédito no encontrada o no pertenece a este cliente"); return; }
+   if ("blocked" in nc) { setNcError((nc as { blocked: true; mensaje: string }).mensaje); return; }
    setNcSeleccionada(nc);
    setMontoNC(Math.min(nc.montoRestante, totalCobro).toFixed(2));
   }, 400);

@@ -9,7 +9,11 @@ const INPUT = "w-full h-10 rounded-lg border bg-background px-3 text-sm focus:ou
 
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-type FacturaResult = NonNullable<Awaited<ReturnType<typeof buscarFacturaPorNumeroExacto>>>;
+// Excluye el caso { blocked } — el modal solo guarda en estado la factura real
+type FacturaResult = Extract<
+  NonNullable<Awaited<ReturnType<typeof buscarFacturaPorNumeroExacto>>>,
+  { id: string }
+>;
 type DetalleVenta = FacturaResult["detalles"][number];
 
 interface ItemNC {
@@ -57,6 +61,10 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
     setBuscando(false);
     if (!f) {
       setBusquedaError("Factura no encontrada. Verifica el número e inténtalo de nuevo.");
+      return;
+    }
+    if ("blocked" in f) {
+      setBusquedaError((f as { blocked: true; mensaje: string }).mensaje);
       return;
     }
     setFactura(f);
