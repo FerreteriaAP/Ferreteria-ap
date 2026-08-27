@@ -588,6 +588,7 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
  nombreLegal: true,
  rnc: true,
  telefono: true,
+ telefonoAlt: true,
  email: true,
  credito: true,
  limiteCredito: true,
