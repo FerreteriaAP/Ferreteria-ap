@@ -858,7 +858,6 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
     ...(notas ? { notas } : {}),
    });
    setCobroExitoso({ params: sp.toString(), cliente: clienteNombre });
-   onOk();
   });
  };
 
@@ -882,7 +881,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
        <Printer size={16} />
        Imprimir comprobante de pago
       </a>
-      <button onClick={onClose}
+      <button onClick={() => { onOk(); onClose(); }}
        className="w-full h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors">
        Cerrar
       </button>
@@ -1184,7 +1183,7 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
      />
      <AccionBtn
       icon={<HandCoins size={24} />} label="Cobro CxC" desc="Pago de cliente"
-      color="green" onClick={() => setModal("cobro_cxc")}
+      color="purple" onClick={() => setModal("cobro_cxc")}
      />
     </div>
    </div>

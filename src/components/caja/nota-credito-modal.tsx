@@ -330,12 +330,12 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
             form="nc-form"
             disabled={isPending || !factura || totalNC <= 0}
             className={cn(
-              "flex-1 h-10 rounded-xl text-sm font-bold transition-all",
+              "flex-1 h-10 rounded-xl text-sm font-bold transition-all border-2",
               isPending || !factura || totalNC <= 0
-                ? "bg-muted text-muted-foreground cursor-not-allowed"
-                : "text-white"
+                ? "border-muted text-muted-foreground cursor-not-allowed"
+                : ""
             )}
-            style={!(isPending || !factura || totalNC <= 0) ? { backgroundColor: "#a855f7" } : undefined}
+            style={!(isPending || !factura || totalNC <= 0) ? { borderColor: "#a855f7", color: "#a855f7" } : undefined}
           >
             {isPending ? "Generando…" : `Generar nota de crédito${totalNC > 0 ? ` (${fmt(totalNC)})` : ""}`}
           </button>
