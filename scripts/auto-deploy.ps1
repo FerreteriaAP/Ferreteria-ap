@@ -87,12 +87,16 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# ── Permisos: el build corre como SYSTEM, dar acceso a Administrators ──
+Log "Paso 3b/4: fijando permisos en .next..."
+icacls "$projectDir\.next" /grant "Administrators:(OI)(CI)F" /T /Q 2>&1 | Out-Null
+
 # ── Reinicio del servidor ──────────────────────────────────
 Log "Paso 4/4: reiniciando servidor..."
 taskkill /F /IM node.exe 2>&1 | Out-Null
 Start-Sleep -Seconds 3
 schtasks /run /tn "FerreteriaStartup" 2>&1 | Out-Null
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 15
 
 # Verifica que node arrancó
 $nodeProc = Get-Process -Name "node" -ErrorAction SilentlyContinue
