@@ -43,16 +43,32 @@ export type ProductoInput = z.infer<typeof ProductoSchema>;
 
 /** Genera el siguiente número de secuencia con padding (global) */
 export async function siguienteCodigoProducto(): Promise<string> {
- const count = await prisma.producto.count();
- return `PROD-${String(count + 1).padStart(5, "0")}`;
+ const productos = await prisma.producto.findMany({
+  where: { codigo: { startsWith: "PROD-" } },
+  select: { codigo: true },
+ });
+ let maxNum = 0;
+ for (const p of productos) {
+  const num = parseInt(p.codigo.replace("PROD-", ""), 10);
+  if (!isNaN(num) && num > maxNum) maxNum = num;
+ }
+ return `PROD-${String(maxNum + 1).padStart(5, "0")}`;
 }
 
 /** Genera el siguiente código por categoría: <CODIGO_CAT>-00001 */
 export async function siguienteCodigoPorCategoria(categoriaId: string): Promise<string> {
  const cat = await prisma.categoria.findUnique({ where: { id: categoriaId }, select: { codigo: true } });
  const prefix = cat?.codigo ?? "PROD";
- const count = await prisma.producto.count({ where: { categoriaId } });
- return `${prefix}-${String(count + 1).padStart(5, "0")}`;
+ const productos = await prisma.producto.findMany({
+  where: { codigo: { startsWith: `${prefix}-` } },
+  select: { codigo: true },
+ });
+ let maxNum = 0;
+ for (const p of productos) {
+  const num = parseInt(p.codigo.replace(`${prefix}-`, ""), 10);
+  if (!isNaN(num) && num > maxNum) maxNum = num;
+ }
+ return `${prefix}-${String(maxNum + 1).padStart(5, "0")}`;
 }
 
 /** Busca productos por keyword (nombre, código o código de barras) */
@@ -345,12 +361,14 @@ export async function crearProducto(data: ProductoInput) {
  } catch (e: unknown) {
  console.error("[crearProducto] Error al guardar:", e);
  const error = e as { code?: string; meta?: { target?: string[] } };
- if (error.code === "P2002") {
- const field = error.meta?.target?.[0];
- if (field === "codigo") return { error: { codigo: ["Este código ya existe"] } };
- if (field === "codigoBarras") return { error: { codigoBarras: ["Este código de barras ya existe"] } };
- }
  const msg = e instanceof Error ? e.message : String(e);
+ const isUnique = error.code === "P2002" || msg.includes("Unique constraint") || msg.includes("unique constraint");
+ if (isUnique) {
+  const field = error.meta?.target?.[0];
+  if (field === "codigo") return { error: { codigo: ["Este código ya existe"] } };
+  if (field === "codigoBarras") return { error: { codigoBarras: ["Este código de barras ya existe"] } };
+  return { error: { codigo: ["El código interno o código de barras ya existe en otro producto"] } };
+ }
  return { error: { _: [`Error: ${msg.slice(0, 300)}`] } };
  }
 }
