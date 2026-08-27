@@ -209,7 +209,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
 
         /* ── Documento ── */
         .doc-tipo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
-        .doc-num  { font-size: 12px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .doc-num  { font-size: 12px; font-weight: 900; }
         .doc-sub  { font-size: 9.5px; color: #222; margin-top: 1px; }
         .doc-ref  { font-size: 9px; color: #333; margin-top: 2px; }
 
@@ -218,7 +218,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         .cli-det  { font-size: 9.5px; color: #222; margin-bottom: 1px; }
         .campo    { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
         .campo span:first-child { color: #000; }
-        .campo.bold { font-weight: 700; font-size: 12px; font-family: 'Courier New', monospace; }
+        .campo.bold { font-weight: 700; font-size: 12px; }
 
         /* ── Motivo ── */
         .motivo-titulo { font-size: 8px; font-weight: 900; text-transform: uppercase;
@@ -230,8 +230,8 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         /* ── Columnas tabla ── */
         .tbl-hdr { display: flex; align-items: baseline; gap: 2px; }
         .cd { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ci { width: 46px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
-        .cv { width: 56px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
+        .ci { width: 46px; text-align: right; flex-shrink: 0; white-space: nowrap; }
+        .cv { width: 56px; text-align: right; flex-shrink: 0; white-space: nowrap; }
 
         .tbl-col-hdr { font-size: 8px; font-weight: 900; color: #000;
                        text-transform: uppercase; letter-spacing: .04em; padding-bottom: 2px; }

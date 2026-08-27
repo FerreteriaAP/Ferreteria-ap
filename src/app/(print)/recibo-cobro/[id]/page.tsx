@@ -200,7 +200,7 @@ export default async function ReciboCobro({ params }: PageProps) {
 
         /* ── Documento ── */
         .doc-tipo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
-        .doc-num  { font-size: 12px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .doc-num  { font-size: 12px; font-weight: 900; }
         .doc-sub  { font-size: 9.5px; color: #222; margin-top: 1px; }
 
         /* ── Cliente ── */
@@ -208,7 +208,7 @@ export default async function ReciboCobro({ params }: PageProps) {
         .cli-det  { font-size: 9.5px; color: #222; margin-bottom: 1px; }
         .campo    { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
         .campo span:first-child { color: #000; }
-        .bold-mono  { font-weight: 900; font-family: 'Courier New', monospace; }
+        .bold-mono  { font-weight: 900; }
         .notas-campo { font-style: italic; }
 
         /* ── Sección ── */
@@ -218,8 +218,7 @@ export default async function ReciboCobro({ params }: PageProps) {
         /* ── Monto grande ── */
         .recibido-lbl { font-size: 9px; font-weight: 900; text-transform: uppercase;
                         letter-spacing: .08em; margin-top: 4px; margin-bottom: 1px; }
-        .recibido-val { font-size: 22px; font-weight: 900; font-family: 'Courier New', monospace;
-                        margin-bottom: 8px; }
+        .recibido-val { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
 
         /* ── Firmas ── */
         .firmas     { display: flex; gap: 12px; margin: 6px 0 2px; }

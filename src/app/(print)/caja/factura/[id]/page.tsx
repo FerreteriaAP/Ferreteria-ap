@@ -232,21 +232,21 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
         /* ── Documento ── */
         .doc-tipo  { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
-        .doc-num   { font-size: 12px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .doc-num   { font-size: 12px; font-weight: 900; }
         .doc-sub   { font-size: 9.5px; color: #222; margin-top: 1px; }
 
         /* ── Cliente ── */
         .cli-nom   { font-size: 12px; font-weight: 700; margin: 2px 0; }
         .campo     { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
         .campo span:first-child { color: #000; }
-        .campo.bold { font-weight: 700; font-size: 11px; font-family: 'Courier New', monospace; }
+        .campo.bold { font-weight: 700; font-size: 11px; }
         .total-final { font-size: 14px; font-weight: 900; margin-top: 2px; }
 
         /* ── Columnas ── */
         .tbl-hdr { display: flex; align-items: baseline; gap: 2px; }
         .cd { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ci { width: 46px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
-        .cv { width: 56px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
+        .ci { width: 46px; text-align: right; flex-shrink: 0; white-space: nowrap; }
+        .cv { width: 56px; text-align: right; flex-shrink: 0; white-space: nowrap; }
 
         /* Cabecera tabla */
         .tbl-hdr.sub { font-size: 9.5px; margin-bottom: 2px; font-weight: 700; color: #000; }
