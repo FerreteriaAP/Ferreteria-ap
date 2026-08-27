@@ -39,12 +39,17 @@ export default async function proxy(request: NextRequest) {
 
  const rol = (token.rol as string) ?? "";
 
- // CAJA: solo puede acceder a /caja/** 
+ // CAJA: /caja/** + páginas de impresión de documentos
  if (rol === "CAJA") {
  if (pathname === "/dashboard") {
  return NextResponse.redirect(new URL("/caja", request.url));
  }
- if (!pathname.startsWith("/caja")) {
+ const cajaPermitido =
+  pathname.startsWith("/caja") ||
+  pathname.startsWith("/recibo-cobro") ||
+  pathname.startsWith("/nota-credito") ||
+  pathname.startsWith("/comprobante-cxc");
+ if (!cajaPermitido) {
  return NextResponse.redirect(new URL("/caja", request.url));
  }
  return NextResponse.next();
