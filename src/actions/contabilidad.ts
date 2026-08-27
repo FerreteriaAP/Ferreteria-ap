@@ -1046,7 +1046,23 @@ export async function pagarMultiplesCxC(
  return { ok: true };
 }
 
-// Pago masivo CxP 
+/** Pago de venta con datos de cliente y factura — para recibo de ingreso térmico */
+export async function getPagoVenta(id: string) {
+  return prisma.pagoVenta.findUnique({
+    where: { id },
+    include: {
+      venta: {
+        include: {
+          cliente: { select: { nombre: true, rnc: true, telefono: true } },
+          turno:   { select: { usuario: { select: { nombre: true, apellido: true } } } },
+          vendedor:{ select: { nombre: true, apellido: true } },
+        },
+      },
+    },
+  });
+}
+
+// Pago masivo CxP
 
 export interface PagoMasivoCxPItem {
  cxpId: string;

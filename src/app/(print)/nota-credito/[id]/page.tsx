@@ -1,11 +1,11 @@
 /**
- * Nota de Crédito — impresora thermal 80mm
- * Ruta: /nota-credito/[ncId]
+ * Recibo Nota de Crédito — impresora thermal 80mm
+ * Mismo sistema de diseño que la factura de venta PDV
  */
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { PrintButtons } from "@/components/nominas/print-buttons";
+import { getNotaCredito } from "@/actions/nota-credito";
 import { EMPRESA } from "@/lib/empresa";
+import { AutoPrint } from "@/components/caja/auto-print";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -16,7 +16,7 @@ const fmtN = (n: any) => {
 };
 
 interface NCDetalle {
-  productoId: string;
+  productoId?: string;
   nombre: string;
   unidad: string;
   cantidad: number;
@@ -26,14 +26,8 @@ interface NCDetalle {
 
 export default async function ImprimirNotaCredito({ params }: PageProps) {
   const { id } = await params;
-
-  const nc = await prisma.notaCredito.findUnique({
-    where: { id },
-    include: {
-      cliente: { select: { nombre: true, rnc: true } },
-      venta:   { select: { numero: true } },
-    },
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nc = (await getNotaCredito(id)) as any;
   if (!nc) notFound();
 
   const fecha = new Date(nc.createdAt).toLocaleString("es-DO", {
@@ -41,175 +35,238 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
     hour: "2-digit", minute: "2-digit",
   });
 
-  const detalles = (nc.detalles as unknown as NCDetalle[]) ?? [];
+  const cajeroNombre = nc.turno?.usuario
+    ? `${nc.turno.usuario.nombre} ${nc.turno.usuario.apellido}`.trim()
+    : nc.usuario
+      ? `${nc.usuario.nombre} ${nc.usuario.apellido}`.trim()
+      : "No asignado";
+
+  const detalles: NCDetalle[] = Array.isArray(nc.detalles) ? nc.detalles : [];
 
   return (
     <>
-      <PrintButtons />
-      <p className="no-print" style={{ textAlign: "center", fontSize: 11, color: "#888", padding: "12px 0 4px" }}>
-        Papel: <strong>80mm</strong> · Presiona <strong>Ctrl+P</strong> para imprimir
-      </p>
+      <AutoPrint />
 
-      <div className="wrap">
-        <div className="recibo">
-          {/* ── HEADER ── */}
-          <div className="hdr">
-            <div className="empresa-ap">
-              <span className="ap-box">AP</span>
-              <span className="empresa-nombre"> FERRETERÍA AP</span>
-            </div>
-            <div className="empresa-sub">{EMPRESA.dir}</div>
-            <div className="empresa-sub">{EMPRESA.ciudad}</div>
-            <div className="empresa-sub">RNC: {EMPRESA.rnc}</div>
-            <div className="empresa-sub">Tel: {EMPRESA.tel}</div>
-          </div>
+      <div id="recibo">
 
-          <div className="sep-double"></div>
+        {/* LOGO + EMPRESA */}
+        <div className="centro">
+          <svg width="42" height="42" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="21,2 49,2 67,20 67,50 49,68 21,68 3,50 3,20" fill="white" stroke="#000" strokeWidth="3"/>
+            <polygon points="22,7 48,7 63,22 63,48 48,63 22,63 7,48 7,22" fill="none" stroke="#000" strokeWidth="1.5"/>
+            <text x="35" y="35" dominantBaseline="central" textAnchor="middle"
+              fontFamily="'Arial Black', Impact, sans-serif" fontSize="26" fontWeight="900" fill="#000">AP</text>
+          </svg>
+          <div className="emp-nom">FERRETERIA AP</div>
+          <div className="emp-lin">{EMPRESA.dir}</div>
+          <div className="emp-lin">{EMPRESA.ciudad}</div>
+          <div className="emp-lin">RNC: {EMPRESA.rnc}</div>
+          <div className="emp-lin">Tel.: {EMPRESA.tel}</div>
+        </div>
 
-          {/* ── TÍTULO ── */}
-          <div className="doc-info">
-            <div className="doc-tipo">NOTA DE CRÉDITO</div>
-            <div className="doc-num">{nc.numero}</div>
-            <div className="doc-fecha">{fecha}</div>
-          </div>
+        <div className="dbl"></div>
 
-          <div className="sep-dashed"></div>
-
-          {/* ── CLIENTE ── */}
-          <div className="cliente-info">
-            <div className="cli-lbl">CLIENTE</div>
-            <div className="cli-nombre">{nc.cliente.nombre}</div>
-            {nc.cliente.rnc && <div className="cli-sub">RNC: {nc.cliente.rnc}</div>}
-          </div>
+        {/* DOCUMENTO */}
+        <div className="centro">
+          <div className="doc-tipo">NOTA DE CRÉDITO</div>
+        </div>
+        <div>
+          <div className="doc-num">Nota No. {nc.numero}</div>
+          <div className="doc-sub">{fecha}</div>
           {nc.venta?.numero && (
-            <div className="ref-line">Factura referencia: <strong>{nc.venta.numero}</strong></div>
+            <div className="doc-ref">Factura original: {nc.venta.numero}</div>
           )}
+          {nc.venta?.ncf && (
+            <div className="doc-ref">NCF: {nc.venta.ncf}</div>
+          )}
+        </div>
 
-          <div className="sep-dashed"></div>
+        <div className="guion"></div>
 
-          {/* ── MOTIVO ── */}
-          <div className="motivo-box">
-            <div className="motivo-lbl">MOTIVO</div>
-            <div className="motivo-txt">{nc.motivo}</div>
-          </div>
+        {/* CLIENTE */}
+        {nc.cliente?.rnc && (
+          <div className="campo"><span>RNC:</span><span>{nc.cliente.rnc}</span></div>
+        )}
+        <div className="cli-nom">{nc.cliente?.nombre ?? "—"}</div>
+        {nc.cliente?.telefono && (
+          <div className="campo"><span>Tel:</span><span>{nc.cliente.telefono}</span></div>
+        )}
 
-          <div className="sep-dashed"></div>
+        {/* MOTIVO */}
+        <div className="motivo-titulo">MOTIVO DE DEVOLUCIÓN</div>
+        <div className="motivo-txt">{nc.motivo}</div>
+        {nc.notas && <div className="motivo-txt notas-txt">{nc.notas}</div>}
 
-          {/* ── ARTÍCULOS ── */}
-          {detalles.length > 0 && (
-            <>
-              <div className="items-hdr">
-                <span>ARTÍCULO</span>
-                <span>CRÉDITO</span>
-              </div>
-              {detalles.map((d, i) => (
-                <div key={d.productoId} className={`item ${i % 2 === 1 ? "item-alt" : ""}`}>
-                  <div className="item-nombre">{d.nombre}</div>
-                  <div className="item-detalle">
-                    <span>{d.cantidad} {d.unidad} @ RD$ {fmtN(d.precioUnitario)}</span>
-                    <span className="item-total">RD$ {fmtN(d.subtotal)}</span>
+        <div className="guion"></div>
+
+        {/* ÍTEMS */}
+        {detalles.length > 0 && (
+          <>
+            <div className="tbl-col-hdr tbl-hdr">
+              <span className="cd">DESCRIPCION</span>
+              <span className="ci">ITBIS</span>
+              <span className="cv">VALOR</span>
+            </div>
+            <div className="linea"></div>
+
+            {detalles.map((d, i) => {
+              const subtotal  = Number(d.subtotal ?? 0);
+              const itbisItem = subtotal * (18 / 118);
+              const cant = Number(d.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 4 });
+              return (
+                <div key={i} className={i % 2 === 1 ? "item sombreado" : "item"}>
+                  <div className="item-nom">{d.nombre}</div>
+                  <div className="tbl-hdr" style={{ marginTop: 1 }}>
+                    <span className="cd item-det">{cant} {d.unidad} x {fmtN(d.precioUnitario)}</span>
+                    <span className="ci item-num">{fmtN(itbisItem)}</span>
+                    <span className="cv item-num">{fmtN(subtotal)}</span>
                   </div>
                 </div>
-              ))}
-              <div className="sep-dashed"></div>
-            </>
-          )}
+              );
+            })}
 
-          {/* ── MONTOS ── */}
-          <div className="total-row">
-            <span>Total nota de crédito</span>
-            <span>RD$ {fmtN(nc.monto)}</span>
-          </div>
-          <div className="total-row muted">
-            <span>Saldo restante</span>
-            <span>RD$ {fmtN(nc.montoRestante)}</span>
-          </div>
+            <div className="linea"></div>
 
-          <div className="sep-dashed"></div>
-
-          <div className="total-final">
-            <span>CRÉDITO TOTAL</span>
-            <span>RD$ {fmtN(nc.monto)}</span>
-          </div>
-
-          {/* ── ESTADO ── */}
-          <div className={`estado-nc ${nc.estado === "PENDIENTE" ? "pendiente" : "aplicado"}`}>
-            {nc.estado === "PENDIENTE" ? "📋 Pendiente de aplicación" : "✓ Crédito aplicado"}
-          </div>
-
-          <div className="sep-double"></div>
-
-          {/* ── FOOTER ── */}
-          <div className="footer">
-            <div className="footer-txt">
-              Esta nota de crédito acredita un saldo a favor del cliente.
-              Presentar al momento de aplicar en próxima factura.
+            {/* subtotales con ITBIS */}
+            <div className="tbl-hdr sub">
+              <span className="cd">SUBTOTAL</span>
+              <span className="ci">{fmtN(detalles.reduce((s, d) => s + Number(d.subtotal) * 18 / 118, 0))}</span>
+              <span className="cv">{fmtN(nc.monto)}</span>
             </div>
-            <div className="footer-sub">
-              {EMPRESA.nombre} · {EMPRESA.tel}
-            </div>
-          </div>
+            <div className="guion"></div>
+          </>
+        )}
+
+        {/* TOTAL */}
+        <div className="campo bold"><span>CRÉDITO EMITIDO</span><span>{fmtN(nc.monto)}</span></div>
+        {Number(nc.montoRestante) < Number(nc.monto) && (
+          <div className="campo"><span>Saldo disponible:</span><span>{fmtN(nc.montoRestante)}</span></div>
+        )}
+
+        {/* ESTADO */}
+        <div className="estado-box">
+          <span className="estado-val estado-borde">
+            {nc.estado === "APLICADA" ? "✓ CRÉDITO APLICADO" : "⏳ PENDIENTE DE APLICAR"}
+          </span>
         </div>
+
+        <div className="guion"></div>
+
+        {/* CAJERO */}
+        <div className="campo"><span>Cajero:</span><span>{cajeroNombre}</span></div>
+        <div className="campo"><span>Ref. Nota:</span><span>{nc.numero}</span></div>
+
+        <div className="dbl"></div>
+
+        {/* FOOTER */}
+        <div className="centro">
+          <div className="gracias">Gracias por su preferencia!</div>
+          <div className="wa-txt">WhatsApp: {EMPRESA.tel}</div>
+        </div>
+
+        <div className="guion"></div>
+
+        <div className="pol-titulo">CONDICIONES DE LA NOTA DE CRÉDITO</div>
+        <div className="pol">- Válida únicamente en Ferretería AP.</div>
+        <div className="pol">- No canjeable por efectivo.</div>
+        <div className="pol">- Presente este recibo al momento de utilizar el crédito.</div>
+        <div className="pol">- Conserve este documento para sus registros.</div>
+
+        <div className="guion"></div>
+
+        <div className="centro">
+          <div className="pie">RNC: {EMPRESA.rnc}</div>
+          <div className="pie">Documento generado electrónicamente.</div>
+        </div>
+
       </div>
 
       <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: #111; background: #ddd; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: Arial, 'Helvetica Neue', sans-serif;
+          font-size: 12px; color: #000; background: #bbb;
+        }
+        #recibo {
+          width: 76mm; margin: 8px auto; background: #fff;
+          padding: 8px 6px 20px; border-radius: 3px;
+          box-shadow: 0 2px 8px rgba(0,0,0,.25);
+        }
 
-        .wrap { max-width: 320px; margin: 0 auto; padding: 0 8px 24px; }
-        .recibo { background: #fff; padding: 14px 14px 12px; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+        /* ── Separadores ── */
+        .dbl   { border-top: 2px solid #000; margin: 6px 0; border-bottom: 1px solid #000; padding-bottom: 1px; }
+        .guion { border-top: 1px dashed #000; margin: 5px 0; }
+        .linea { border-top: 1px solid #000; margin: 3px 0; }
 
-        .hdr { text-align: center; margin-bottom: 10px; }
-        .empresa-ap { display: flex; align-items: center; justify-content: center; gap: 2px; margin-bottom: 3px; }
-        .ap-box { border: 2px solid #000; padding: 0 3px; font-size: 15px; font-weight: 900; font-family: 'Arial Black', sans-serif; }
-        .empresa-nombre { font-size: 14px; font-weight: 900; font-family: 'Arial Black', sans-serif; }
-        .empresa-sub { font-size: 9px; color: #555; line-height: 1.5; }
+        /* ── Empresa ── */
+        .centro     { text-align: center; }
+        .centro svg { display: block; margin: 0 auto 3px; }
+        .emp-nom    { font-size: 14px; font-weight: 900; letter-spacing: .03em; margin: 3px 0 2px; }
+        .emp-lin    { font-size: 9.5px; line-height: 1.6; color: #222; }
 
-        .sep-double { border-top: 3px double #000; margin: 8px 0; }
-        .sep-dashed { border-top: 1px dashed #ccc; margin: 6px 0; }
+        /* ── Documento ── */
+        .doc-tipo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+        .doc-num  { font-size: 12px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .doc-sub  { font-size: 9.5px; color: #222; margin-top: 1px; }
+        .doc-ref  { font-size: 9px; color: #333; margin-top: 2px; font-style: italic; }
 
-        .doc-info { text-align: center; }
-        .doc-tipo { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #888; }
-        .doc-num { font-size: 14px; font-weight: 900; font-family: 'Courier New', monospace; }
-        .doc-fecha { font-size: 9px; color: #666; }
+        /* ── Cliente ── */
+        .cli-nom { font-size: 12px; font-weight: 700; margin: 2px 0; }
+        .campo   { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
+        .campo span:first-child { color: #000; }
+        .campo.bold { font-weight: 700; font-size: 12px; font-family: 'Courier New', monospace; }
 
-        .cliente-info { margin-bottom: 3px; }
-        .cli-lbl { font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; }
-        .cli-nombre { font-size: 12px; font-weight: 700; }
-        .cli-sub { font-size: 9px; color: #666; }
-        .ref-line { font-size: 9px; color: #555; }
+        /* ── Motivo ── */
+        .motivo-titulo { font-size: 8px; font-weight: 900; text-transform: uppercase;
+                         letter-spacing: .06em; margin: 5px 0 2px; color: #000; }
+        .motivo-txt    { font-size: 9.5px; color: #000; line-height: 1.5; margin-bottom: 2px;
+                         white-space: pre-wrap; word-break: break-word; }
+        .notas-txt     { font-style: italic; color: #333; }
 
-        .motivo-box { margin-bottom: 3px; }
-        .motivo-lbl { font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; margin-bottom: 2px; }
-        .motivo-txt { font-size: 11px; font-style: italic; color: #333; }
+        /* ── Columnas tabla ── */
+        .tbl-hdr { display: flex; align-items: baseline; gap: 2px; }
+        .cd { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ci { width: 46px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
+        .cv { width: 56px; text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace; white-space: nowrap; }
 
-        .items-hdr { display: flex; justify-content: space-between; font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #aaa; margin-bottom: 4px; }
-        .item { margin-bottom: 5px; }
-        .item-alt { background: #f9f9f9; padding: 1px 3px; }
-        .item-nombre { font-size: 10.5px; font-weight: 600; }
-        .item-detalle { display: flex; justify-content: space-between; font-size: 9.5px; color: #555; }
-        .item-total { font-weight: 700; color: #111; font-family: 'Courier New', monospace; }
+        .tbl-col-hdr { font-size: 8px; font-weight: 900; color: #000;
+                       text-transform: uppercase; letter-spacing: .04em; padding-bottom: 2px; }
+        .tbl-col-hdr span { color: #000; font-weight: 900; }
 
-        .total-row { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 3px; }
-        .total-row.muted { color: #888; font-size: 9.5px; }
-        .total-final { display: flex; justify-content: space-between; font-size: 14px; font-weight: 900; }
-        .total-final span:last-child { font-family: 'Courier New', monospace; }
+        .tbl-hdr.sub { font-size: 9.5px; margin-bottom: 2px; font-weight: 700; color: #000; }
+        .tbl-hdr.sub span { color: #000; }
 
-        .estado-nc { text-align: center; font-size: 9.5px; font-weight: 600; padding: 5px; border-radius: 3px; margin: 6px 0; }
-        .estado-nc.pendiente { color: #92400e; background: #fffbeb; border: 1px dashed #fde68a; }
-        .estado-nc.aplicado { color: #166534; background: #f0fdf4; border: 1px dashed #bbf7d0; }
+        /* ── Productos ── */
+        .item      { margin-bottom: 5px; }
+        .sombreado { background: #e0e0e0; padding: 1px 2px; }
+        .item-nom  { font-size: 10.5px; font-weight: 700; line-height: 1.3; white-space: normal; word-break: break-word; }
+        .item-det  { font-size: 9px; color: #222; }
+        .item-num  { font-size: 9.5px; font-weight: 700; }
 
-        .footer { text-align: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
-        .footer-txt { font-size: 8.5px; color: #666; line-height: 1.5; margin-bottom: 5px; }
-        .footer-sub { font-size: 8.5px; color: #aaa; }
+        /* ── Estado ── */
+        .estado-box  { margin: 4px 0; }
+        .estado-val  { display: inline-block; font-size: 8.5px; font-weight: 900;
+                       padding: 2px 8px; border-radius: 2px; }
+        .estado-borde { border: 1.5px solid #000; }
 
+        /* ── Footer ── */
+        .gracias    { font-size: 12px; font-weight: 900; margin-bottom: 2px; }
+        .wa-txt     { font-size: 9.5px; color: #222; }
+        .pol-titulo { font-size: 9px; font-weight: 900; text-transform: uppercase;
+                      letter-spacing: .08em; text-align: center; margin: 3px 0; }
+        .pol        { font-size: 8.5px; color: #222; line-height: 1.6; margin-bottom: 2px; }
+        .pie        { font-size: 8.5px; color: #333; line-height: 1.6; }
+
+        /* ══ IMPRESIÓN THERMAL ══ */
         @media print {
-          @page { size: 80mm auto; margin: 4mm 3mm; }
-          body { background: white; }
-          .no-print { display: none !important; }
-          .wrap { max-width: 100%; margin: 0; padding: 0; }
-          .recibo { border-radius: 0; box-shadow: none; padding: 0; }
-          .estado-nc { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { size: 80mm auto; margin: 3mm 0mm; }
+          body  { background: white; margin: 0; padding: 0; }
+          #recibo {
+            width: 100%; max-width: 100%; margin: 0;
+            padding: 2mm 6mm 8mm; border-radius: 0; box-shadow: none;
+          }
+          * { color: #000 !important; background: white !important; }
+          .sombreado { background: #ddd !important; }
         }
       `}</style>
     </>

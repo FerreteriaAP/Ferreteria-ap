@@ -234,6 +234,19 @@ export async function getNotasCreditoCliente(clienteId: string) {
  });
 }
 
+/** Nota de crédito completa para impresión térmica */
+export async function getNotaCredito(id: string) {
+  return prisma.notaCredito.findUnique({
+    where: { id },
+    include: {
+      cliente:  { select: { nombre: true, rnc: true, telefono: true } },
+      venta:    { select: { numero: true, ncf: true } },
+      usuario:  { select: { nombre: true, apellido: true } },
+      turno:    { select: { usuario: { select: { nombre: true, apellido: true } } } },
+    },
+  });
+}
+
 // NCs pendientes de un cliente (para mostrar en CobroCxC y estado de cuenta)
 
 export async function buscarNCsDelCliente(clienteId: string) {
