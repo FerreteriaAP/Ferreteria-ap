@@ -927,21 +927,24 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
 
     {/* NC — requiere que el cajero escriba el número físico del documento */}
     {lineas.length > 0 && (
-     <Field label="Nota de crédito (opcional — escriba el No. del documento físico)">
+     <div>
+      <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "#a855f7" }}>
+       Nota de crédito <span className="font-normal normal-case" style={{ color: "#a855f7", opacity: 0.7 }}>(opcional — escriba el No. del documento físico)</span>
+      </p>
       <div className="relative">
        <input
         type="text" value={ncNumero}
         onChange={e => handleNcNumero(e.target.value)}
         placeholder="Ej: NCR-00001"
         className={INPUT_CLS}
-        style={ncSeleccionada ? { borderColor: "#a855f7" } : undefined}
+        style={{ borderColor: "#a855f750" }}
        />
        {ncBuscando && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">buscando…</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs animate-pulse" style={{ color: "#a855f7" }}>buscando…</span>
        )}
       </div>
       {ncError && <p className="text-xs text-destructive mt-1">{ncError}</p>}
-     </Field>
+     </div>
     )}
     {!ncBuscando && ncSeleccionada && (
      <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.08)" }}>
@@ -1183,7 +1186,7 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
      />
      <AccionBtn
       icon={<HandCoins size={24} />} label="Cobro CxC" desc="Pago de cliente"
-      color="purple" onClick={() => setModal("cobro_cxc")}
+      color="green" onClick={() => setModal("cobro_cxc")}
      />
     </div>
    </div>
