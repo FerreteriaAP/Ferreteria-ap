@@ -84,10 +84,10 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         <div className="guion"></div>
 
         {/* CLIENTE */}
+        <div className="cli-nom">{nc.cliente?.nombre ?? "—"}</div>
         {nc.cliente?.rnc && (
           <div className="campo"><span>RNC:</span><span>{nc.cliente.rnc}</span></div>
         )}
-        <div className="cli-nom">{nc.cliente?.nombre ?? "—"}</div>
         {nc.cliente?.telefono && (
           <div className="campo"><span>Tel:</span><span>{nc.cliente.telefono}</span></div>
         )}
