@@ -86,10 +86,10 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         {/* CLIENTE */}
         <div className="cli-nom">{nc.cliente?.nombre ?? "—"}</div>
         {nc.cliente?.rnc && (
-          <div className="campo"><span>RNC:</span><span>{nc.cliente.rnc}</span></div>
+          <div className="cli-det">RNC: {nc.cliente.rnc}</div>
         )}
         {nc.cliente?.telefono && (
-          <div className="campo"><span>Tel:</span><span>{nc.cliente.telefono}</span></div>
+          <div className="cli-det">Tel: {nc.cliente.telefono}</div>
         )}
 
         {/* MOTIVO */}
@@ -214,8 +214,9 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         .doc-ref  { font-size: 9px; color: #333; margin-top: 2px; }
 
         /* ── Cliente ── */
-        .cli-nom { font-size: 12px; font-weight: 700; margin: 2px 0; }
-        .campo   { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
+        .cli-nom  { font-size: 12px; font-weight: 700; margin: 2px 0; }
+        .cli-det  { font-size: 9.5px; color: #222; margin-bottom: 1px; }
+        .campo    { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
         .campo span:first-child { color: #000; }
         .campo.bold { font-weight: 700; font-size: 12px; font-family: 'Courier New', monospace; }
 

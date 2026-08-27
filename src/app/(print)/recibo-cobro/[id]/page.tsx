@@ -99,10 +99,10 @@ export default async function ReciboCobro({ params }: PageProps) {
         {/* CLIENTE */}
         <div className="cli-nom">{cxc?.cliente?.nombre ?? "—"}</div>
         {cxc?.cliente?.rnc && (
-          <div className="campo"><span>RNC:</span><span>{cxc.cliente.rnc}</span></div>
+          <div className="cli-det">RNC: {cxc.cliente.rnc}</div>
         )}
         {cxc?.cliente?.telefono && (
-          <div className="campo"><span>Tel:</span><span>{cxc.cliente.telefono}</span></div>
+          <div className="cli-det">Tel: {cxc.cliente.telefono}</div>
         )}
 
         <div className="guion"></div>
@@ -205,6 +205,7 @@ export default async function ReciboCobro({ params }: PageProps) {
 
         /* ── Cliente ── */
         .cli-nom  { font-size: 12px; font-weight: 700; margin: 2px 0; }
+        .cli-det  { font-size: 9.5px; color: #222; margin-bottom: 1px; }
         .campo    { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
         .campo span:first-child { color: #000; }
         .bold-mono  { font-weight: 900; font-family: 'Courier New', monospace; }
