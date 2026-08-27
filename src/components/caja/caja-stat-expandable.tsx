@@ -75,7 +75,7 @@ function BtnConduce({ ventaId, conduceId, entregado }: {
  }
 
  return (
- <div className="flex flex-col gap-0.5"> <button
+ <span className="inline-flex flex-col gap-0.5"> <button
  onClick={() => {
  setErr(null);
  start(async () => {
@@ -87,12 +87,12 @@ function BtnConduce({ ventaId, conduceId, entregado }: {
  }}
  disabled={isPending}
  className={cn(
- "text-xs px-2.5 py-1 rounded-lg border border-blue-300 text-blue-700",
- "hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors",
+ "text-xs px-2 py-0.5 rounded border border-blue-300 text-blue-700 whitespace-nowrap",
+ "hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:border-blue-700 dark:text-blue-400 transition-colors",
  isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Generando…" : " Generar conduce"}
+ > {isPending ? "Generando…" : "Conduce"}
  </button> {err && <span className="text-[10px] text-destructive">{err}</span>}
- </div> );
+ </span> );
 }
 
 // 
@@ -144,16 +144,15 @@ export function CajaStatExpandable({ cobros, movimientos }: Props) {
  <div className="space-y-2"> {cobros.map(v => {
  const conduce = v.conduces?.[0] ?? null;
  return (
- <div key={v.id} className="flex items-start justify-between gap-3 py-1.5 border-b last:border-0"> <div className="min-w-0"> <div className="flex items-center gap-1.5 flex-wrap"> <span
+ <div key={v.id} className="flex items-center justify-between gap-3 py-1 border-b last:border-0"> <div className="flex items-center gap-1.5 flex-wrap min-w-0"> <span
  className="font-mono text-xs font-bold" > {v.numero}
  </span> <span className="text-[10px] text-muted-foreground">{fmtTime(v.createdAt)}</span> {v.pagosRecibidos.map((p, i) => (
  <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded"> {p.metodo}
- </span> ))}
- </div> <div className="mt-1"> <BtnConduce
+ </span> ))} <BtnConduce
  ventaId={v.id}
  conduceId={conduce?.id}
  entregado={conduce?.clienteRecibio}
- /> </div> </div> <span className="font-mono text-sm font-bold shrink-0">{fmt(v.total)}</span> </div> );
+ /> </div> <span className="font-mono text-sm font-bold shrink-0">{fmt(v.total)}</span> </div> );
  })}
  <div className="pt-1"> <Link
  href="/ventas/despachos" className="text-xs text-primary hover:underline font-medium" > Ver todos los despachos 

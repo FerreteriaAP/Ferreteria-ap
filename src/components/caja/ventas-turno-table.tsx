@@ -53,7 +53,7 @@ function BtnConduceCajera({ ventaId, conduceId }: {
  }
 
  return (
- <div className="space-y-0.5"> <button
+ <div className="flex flex-col gap-0.5 items-start"> <button
  onClick={() => {
  setErr(null);
  start(async () => {
@@ -65,10 +65,10 @@ function BtnConduceCajera({ ventaId, conduceId }: {
  }}
  disabled={isPending}
  className={cn(
- "text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-colors",
+ "text-xs px-2 py-0.5 rounded border font-medium transition-colors whitespace-nowrap",
  "border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30",
  isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Generando…" : " Generar conduce"}
+ > {isPending ? "Generando…" : "Conduce"}
  </button> {err && <p className="text-[10px] text-destructive">{err}</p>}
  </div> );
 }
