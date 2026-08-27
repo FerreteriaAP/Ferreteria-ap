@@ -22,10 +22,15 @@ export const authConfig: NextAuthConfig = {
  const path = nextUrl.pathname;
  const rol = (auth?.user as { rol?: string })?.rol ?? "";
 
- // CAJA: solo puede acceder a /caja/** 
+ // CAJA: /caja/** + páginas de impresión de documentos
  if (rol === "CAJA") {
  if (path === "/dashboard") return Response.redirect(new URL("/caja", nextUrl));
- if (!path.startsWith("/caja")) return Response.redirect(new URL("/caja", nextUrl));
+ const cajaPermitido =
+  path.startsWith("/caja") ||
+  path.startsWith("/recibo-cobro") ||
+  path.startsWith("/nota-credito") ||
+  path.startsWith("/comprobante-cxc");
+ if (!cajaPermitido) return Response.redirect(new URL("/caja", nextUrl));
  return true;
  }
 
