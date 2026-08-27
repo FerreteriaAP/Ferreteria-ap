@@ -719,7 +719,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
 
  // Estado de éxito (para mostrar botón imprimir comprobante)
  const [cobroExitoso, setCobroExitoso] = useState<{
-  params: string; cliente: string;
+  movimientoId: string | null; cliente: string;
  } | null>(null);
 
  const idsEnLista = new Set(lineas.map(l => l.cxcId));
@@ -834,11 +834,8 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   const ncAplicacion = ncSeleccionada && montoNCNum > 0
    ? { ncId: ncSeleccionada.id, montoAplicar: montoNCNum }
    : undefined;
-  // Capturamos datos para el comprobante antes de que el estado se limpie
+  // Capturamos nombre del cliente antes de que el estado se limpie
   const clienteNombre = lineas[0]?.cxc.cliente.nombre ?? "";
-  const clienteRnc    = lineas[0]?.cxc.cliente.rnc ?? null;
-  const facturasParam = lineas.map(l => `${l.cxc.venta.numero}:${parseFloat(l.monto).toFixed(2)}`).join(",");
-  const montoTotal    = totalConNC > 0 ? totalConNC : totalCobro;
   startTransition(async () => {
    const res = await registrarCobrosMultiplesCxC({
     turnoId,
@@ -848,16 +845,8 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
     ncAplicacion,
    });
    if ("error" in res && res.error) { setError(res.error); return; }
-   const sp = new URLSearchParams({
-    cliente: clienteNombre,
-    ...(clienteRnc ? { rnc: clienteRnc } : {}),
-    monto: montoTotal.toFixed(2),
-    metodo,
-    fecha: new Date().toISOString(),
-    facturas: facturasParam,
-    ...(notas ? { notas } : {}),
-   });
-   setCobroExitoso({ params: sp.toString(), cliente: clienteNombre });
+   const ids = (res as { ok: true; movimientoIds: string[] }).movimientoIds ?? [];
+   setCobroExitoso({ movimientoId: ids[0] ?? null, cliente: clienteNombre });
   });
  };
 
@@ -872,15 +861,17 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
       <p className="text-base font-bold mt-1">{cobroExitoso.cliente}</p>
      </div>
      <div className="flex flex-col gap-2 w-full">
-      <a
-       href={`/comprobante-cxc?${cobroExitoso.params}`}
-       target="_blank" rel="noopener noreferrer"
-       className="flex items-center justify-center gap-2 w-full h-10 rounded-xl text-white font-semibold text-sm transition-colors"
-       style={{ backgroundColor: "#16a34a" }}
-      >
-       <Printer size={16} />
-       Imprimir comprobante de pago
-      </a>
+      {cobroExitoso.movimientoId && (
+       <a
+        href={`/recibo-cobro/${cobroExitoso.movimientoId}`}
+        target="_blank" rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full h-10 rounded-xl text-white font-semibold text-sm transition-colors"
+        style={{ backgroundColor: "#16a34a" }}
+       >
+        <Printer size={16} />
+        Imprimir comprobante de pago
+       </a>
+      )}
       <button onClick={() => { onOk(); onClose(); }}
        className="w-full h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors">
        Cerrar

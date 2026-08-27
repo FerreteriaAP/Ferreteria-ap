@@ -1,21 +1,23 @@
+/**
+ * Recibo de Ingreso — Cobro CxC — impresora thermal 80mm
+ * Carga datos de movimientoCaja por ID — mismo diseño que factura PDV
+ */
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { PrintButtons } from "@/components/nominas/print-buttons";
 import { EMPRESA } from "@/lib/empresa";
+import { PrintBtn } from "@/components/caja/print-btn";
 
 interface PageProps { params: Promise<{ id: string }> }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fmtNum = (n: any) => {
+const fmtN = (n: any) => {
   const [ent, dec] = Number(n).toFixed(2).split(".");
   return ent.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "." + dec;
 };
 
-const metodosLabel: Record<string, string> = {
-  EFECTIVO: "Efectivo",
-  TARJETA: "Tarjeta",
-  TRANSFERENCIA: "Transferencia",
-  CHEQUE: "Cheque",
+const METODO_LABEL: Record<string, string> = {
+  EFECTIVO: "Efectivo", TARJETA: "Tarjeta",
+  TRANSFERENCIA: "Transferencia", CHEQUE: "Cheque",
 };
 
 export default async function ReciboCobro({ params }: PageProps) {
@@ -23,7 +25,9 @@ export default async function ReciboCobro({ params }: PageProps) {
 
   const mov = await prisma.movimientoCaja.findUnique({
     where: { id },
-    include: { turno: { include: { usuario: { select: { nombre: true, apellido: true } } } } },
+    include: {
+      turno: { include: { usuario: { select: { nombre: true, apellido: true } } } },
+    },
   });
   if (!mov || mov.subTipo !== "COBRO_CXC") notFound();
 
@@ -33,166 +37,204 @@ export default async function ReciboCobro({ params }: PageProps) {
     cxc = await prisma.cuentaPorCobrar.findUnique({
       where: { id: mov.cxcId },
       include: {
-        venta: { select: { numero: true, total: true } },
+        venta:   { select: { numero: true } },
         cliente: { select: { nombre: true, rnc: true, telefono: true } },
       },
     });
   }
 
-  const fechaHora = new Date(mov.fecha).toLocaleString("es-DO", {
+  const fecha = new Date(mov.fecha).toLocaleString("es-DO", {
     day: "2-digit", month: "2-digit", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   });
-  const cajera = `${mov.turno.usuario.nombre} ${mov.turno.usuario.apellido}`.trim();
-  const noRecibo = id.slice(-8).toUpperCase();
+  const hoy = new Date().toLocaleString("es-DO", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+  const cajeroNombre = `${mov.turno.usuario.nombre} ${mov.turno.usuario.apellido}`.trim();
+  const reciboNo = id.slice(-8).toUpperCase();
+  const metodoLabel = METODO_LABEL[mov.metodo ?? ""] ?? mov.metodo ?? "—";
 
   return (
     <>
-      <PrintButtons />
-      <p className="no-print" style={{ textAlign: "center", fontSize: 12, color: "#888", padding: "16px 0 6px" }}>
-        Presiona <strong>Ctrl+P</strong> / <strong>⌘+P</strong> para imprimir
-      </p>
+      <PrintBtn />
 
-      <div className="wrap">
-        <div className="recibo">
-          {/* HEADER */}
-          <div className="hdr">
-            <div className="hdr-empresa">
-              <div className="empresa-ap">
-                <span className="ap-box">AP</span>
-                <span className="empresa-txt"> FERRETERÍA AP</span>
-              </div>
-              <div className="empresa-dir">{EMPRESA.dir} · {EMPRESA.ciudad}</div>
-              <div className="empresa-dir">RNC: {EMPRESA.rnc} · Tel: {EMPRESA.tel}</div>
-            </div>
-            <div className="hdr-tipo">
-              <div className="tipo-txt">RECIBO DE INGRESO</div>
-              <div className="recibo-num">No. {noRecibo}</div>
-              <div className="recibo-fecha">{fechaHora}</div>
-            </div>
+      <div id="recibo">
+
+        {/* LOGO + EMPRESA */}
+        <div className="centro">
+          <svg width="42" height="42" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="21,2 49,2 67,20 67,50 49,68 21,68 3,50 3,20" fill="white" stroke="#000" strokeWidth="3"/>
+            <polygon points="22,7 48,7 63,22 63,48 48,63 22,63 7,48 7,22" fill="none" stroke="#000" strokeWidth="1.5"/>
+            <text x="35" y="35" dominantBaseline="central" textAnchor="middle"
+              fontFamily="'Arial Black', Impact, sans-serif" fontSize="26" fontWeight="900" fill="#000">AP</text>
+          </svg>
+          <div className="emp-nom">FERRETERIA AP</div>
+          <div className="emp-lin">{EMPRESA.dir}</div>
+          <div className="emp-lin">{EMPRESA.ciudad}</div>
+          <div className="emp-lin">RNC: {EMPRESA.rnc}</div>
+          <div className="emp-lin">Tel.: {EMPRESA.tel}</div>
+        </div>
+
+        <div className="dbl"></div>
+
+        {/* DOCUMENTO */}
+        <div className="centro">
+          <div className="doc-tipo">RECIBO DE INGRESO</div>
+        </div>
+        <div>
+          <div className="doc-num">Recibo No. {reciboNo}</div>
+          <div className="doc-sub">Impreso: {hoy}</div>
+          <div className="doc-sub">Pago del: {fecha}</div>
+        </div>
+
+        <div className="guion"></div>
+
+        {/* CLIENTE */}
+        {cxc?.cliente?.rnc && (
+          <div className="campo"><span>RNC:</span><span>{cxc.cliente.rnc}</span></div>
+        )}
+        <div className="cli-nom">{cxc?.cliente?.nombre ?? "—"}</div>
+        {cxc?.cliente?.telefono && (
+          <div className="campo"><span>Tel:</span><span>{cxc.cliente.telefono}</span></div>
+        )}
+
+        <div className="guion"></div>
+
+        {/* DETALLE DEL PAGO */}
+        <div className="sec-titulo">DETALLE DEL PAGO</div>
+
+        {cxc?.venta?.numero && (
+          <div className="campo">
+            <span>Factura:</span>
+            <span className="bold-mono">{cxc.venta.numero}</span>
           </div>
-
-          <div className="sep"></div>
-
-          {/* CLIENTE */}
-          <div className="section">
-            <div className="section-lbl">RECIBIDO DE</div>
-            <div className="section-val-lg">{cxc?.cliente?.nombre ?? "—"}</div>
-            {cxc?.cliente?.rnc && <div className="section-sub">RNC: {cxc.cliente.rnc}</div>}
-            {cxc?.cliente?.telefono && <div className="section-sub">Tel: {cxc.cliente.telefono}</div>}
+        )}
+        <div className="campo">
+          <span>Forma de pago:</span>
+          <span>{metodoLabel}</span>
+        </div>
+        {mov.notas && (
+          <div className="campo notas-campo">
+            <span>Notas:</span>
+            <span>{mov.notas}</span>
           </div>
+        )}
 
-          <div className="sep-dashed"></div>
+        <div className="guion"></div>
 
-          {/* DETALLE DEL PAGO */}
-          {cxc?.venta?.numero && (
-            <div className="row-data">
-              <span className="row-lbl">Factura referencia</span>
-              <span className="row-val mono">{cxc.venta.numero}</span>
-            </div>
-          )}
-          <div className="row-data">
-            <span className="row-lbl">Forma de pago</span>
-            <span className="row-val">{metodosLabel[mov.metodo ?? ""] ?? mov.metodo ?? "—"}</span>
+        {/* MONTO GRANDE */}
+        <div className="recibido-lbl">MONTO RECIBIDO</div>
+        <div className="recibido-val">RD$ {fmtN(mov.monto)}</div>
+
+        {/* FIRMAS */}
+        <div className="firmas">
+          <div className="firma">
+            <div className="firma-linea"></div>
+            <div className="firma-txt">Recibido por</div>
           </div>
-          <div className="row-data">
-            <span className="row-lbl">Atendido por</span>
-            <span className="row-val">{cajera}</span>
-          </div>
-          {mov.notas && (
-            <div className="row-data">
-              <span className="row-lbl">Notas</span>
-              <span className="row-val">{mov.notas}</span>
-            </div>
-          )}
-
-          <div className="sep-dashed"></div>
-
-          {/* MONTO */}
-          <div className="monto-box">
-            <div className="monto-lbl">MONTO RECIBIDO</div>
-            <div className="monto-val">RD$ {fmtNum(mov.monto)}</div>
-          </div>
-
-          <div className="sep-dashed"></div>
-
-          {/* ESTADO */}
-          <div className={`estado ${mov.confirmado ? "confirmado" : "pendiente"}`}>
-            {mov.confirmado ? "✓ Cobro confirmado y aplicado" : "⏳ Pendiente de confirmación"}
-          </div>
-
-          <div className="sep-dashed"></div>
-
-          {/* FIRMA */}
-          <div className="firmas">
-            <div className="firma">
-              <div className="firma-line"></div>
-              <div className="firma-lbl">Cajero/a: {cajera}</div>
-            </div>
-            <div className="firma">
-              <div className="firma-line"></div>
-              <div className="firma-lbl">Cliente</div>
-            </div>
-          </div>
-
-          <div className="footer">
-            Este recibo acredita el pago indicado. Consérvelo como comprobante.
+          <div className="firma">
+            <div className="firma-linea"></div>
+            <div className="firma-txt">Firma del cliente</div>
           </div>
         </div>
+
+        <div className="guion"></div>
+
+        {/* CAJERO */}
+        <div className="campo"><span>Cajero:</span><span>{cajeroNombre}</span></div>
+        <div className="campo"><span>Ref. pago:</span><span>{reciboNo}</span></div>
+
+        <div className="dbl"></div>
+
+        {/* FOOTER */}
+        <div className="centro">
+          <div className="gracias">Gracias por su pago!</div>
+          <div className="wa-txt">WhatsApp: {EMPRESA.tel}</div>
+        </div>
+
+        <div className="guion"></div>
+
+        <div className="pol-titulo">INFORMACIÓN</div>
+        <div className="pol">- Conserve este recibo como comprobante de pago.</div>
+        <div className="pol">- Para consultas comuníquese al {EMPRESA.tel}.</div>
+
+        <div className="guion"></div>
+
+        <div className="centro">
+          <div className="pie">RNC: {EMPRESA.rnc}</div>
+          <div className="pie">Documento generado electrónicamente.</div>
+        </div>
+
       </div>
 
       <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: #111; background: #e0e0e0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: Arial, 'Helvetica Neue', sans-serif;
+          font-size: 12px; color: #000; background: #bbb;
+        }
+        #recibo {
+          width: 76mm; margin: 8px auto; background: #fff;
+          padding: 8px 6px 20px; border-radius: 3px;
+          box-shadow: 0 2px 8px rgba(0,0,0,.25);
+        }
 
-        .wrap { max-width: 400px; margin: 0 auto; padding: 0 12px 32px; }
-        .recibo { background: #fff; border-radius: 6px; padding: 20px 22px 16px; margin-top: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+        /* ── Separadores ── */
+        .dbl   { border-top: 2px solid #000; margin: 6px 0; border-bottom: 1px solid #000; padding-bottom: 1px; }
+        .guion { border-top: 1px dashed #000; margin: 5px 0; }
 
-        /* Header */
-        .hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .ap-box { display: inline-block; border: 2px solid #000204; padding: 0 3px; font-size: 14px; font-weight: 900; font-family: 'Arial Black', sans-serif; }
-        .empresa-txt { font-size: 13px; font-weight: 900; font-family: 'Arial Black', sans-serif; }
-        .empresa-dir { font-size: 8px; color: #666; line-height: 1.5; margin-top: 2px; }
-        .hdr-tipo { text-align: right; }
-        .tipo-txt { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #f5821f; }
-        .recibo-num { font-size: 15px; font-weight: 900; line-height: 1.1; }
-        .recibo-fecha { font-size: 9px; color: #666; margin-top: 2px; }
+        /* ── Empresa ── */
+        .centro     { text-align: center; }
+        .centro svg { display: block; margin: 0 auto 3px; }
+        .emp-nom    { font-size: 14px; font-weight: 900; letter-spacing: .03em; margin: 3px 0 2px; }
+        .emp-lin    { font-size: 9.5px; line-height: 1.6; color: #222; }
 
-        .sep { border-top: 2.5px solid #000204; margin: 0 0 12px; }
-        .sep-dashed { border-top: 1px dashed #ccc; margin: 10px 0; }
+        /* ── Documento ── */
+        .doc-tipo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+        .doc-num  { font-size: 12px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .doc-sub  { font-size: 9.5px; color: #222; margin-top: 1px; }
 
-        .section { margin-bottom: 10px; }
-        .section-lbl { font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #999; margin-bottom: 3px; }
-        .section-val-lg { font-size: 14px; font-weight: 700; line-height: 1.2; }
-        .section-sub { font-size: 10px; color: #555; }
+        /* ── Cliente ── */
+        .cli-nom  { font-size: 12px; font-weight: 700; margin: 2px 0; }
+        .campo    { display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px; gap: 4px; }
+        .campo span:first-child { color: #000; }
+        .bold-mono  { font-weight: 900; font-family: 'Courier New', monospace; }
+        .notas-campo { font-style: italic; }
 
-        .row-data { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-        .row-lbl { font-size: 9.5px; color: #777; font-weight: 600; }
-        .row-val { font-size: 10.5px; font-weight: 500; text-align: right; max-width: 55%; }
-        .mono { font-family: 'Courier New', monospace; }
+        /* ── Sección ── */
+        .sec-titulo { font-size: 8px; font-weight: 900; text-transform: uppercase;
+                      letter-spacing: .06em; margin: 0 0 5px; color: #000; }
 
-        .monto-box { text-align: center; padding: 10px 0; }
-        .monto-lbl { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; color: #999; margin-bottom: 4px; }
-        .monto-val { font-size: 26px; font-weight: 900; font-family: 'Courier New', monospace; color: #000204; }
+        /* ── Monto grande ── */
+        .recibido-lbl { font-size: 9px; font-weight: 900; text-transform: uppercase;
+                        letter-spacing: .08em; margin-top: 4px; margin-bottom: 1px; }
+        .recibido-val { font-size: 22px; font-weight: 900; font-family: 'Courier New', monospace;
+                        margin-bottom: 8px; }
 
-        .estado { font-size: 10px; font-weight: 600; text-align: center; padding: 6px 10px; border-radius: 4px; }
-        .estado.confirmado { color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; }
-        .estado.pendiente { color: #92400e; background: #fffbeb; border: 1px solid #fde68a; }
+        /* ── Firmas ── */
+        .firmas     { display: flex; gap: 12px; margin: 6px 0 2px; }
+        .firma      { flex: 1; }
+        .firma-linea { border-bottom: 1px solid #000; height: 24px; margin-bottom: 3px; }
+        .firma-txt  { font-size: 8px; text-align: center; color: #333; }
 
-        .firmas { display: flex; gap: 20px; }
-        .firma { flex: 1; }
-        .firma-line { border-bottom: 1px solid #aaa; height: 30px; margin-bottom: 4px; }
-        .firma-lbl { font-size: 8.5px; color: #888; text-align: center; }
+        /* ── Footer ── */
+        .gracias    { font-size: 12px; font-weight: 900; margin-bottom: 2px; }
+        .wa-txt     { font-size: 9.5px; color: #222; }
+        .pol-titulo { font-size: 9px; font-weight: 900; text-transform: uppercase;
+                      letter-spacing: .08em; text-align: center; margin: 3px 0; }
+        .pol        { font-size: 8.5px; color: #222; line-height: 1.6; margin-bottom: 2px; }
+        .pie        { font-size: 8.5px; color: #333; line-height: 1.6; }
 
-        .footer { font-size: 8.5px; color: #bbb; text-align: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #eee; }
-
+        /* ══ IMPRESIÓN THERMAL ══ */
         @media print {
-          @page { size: 80mm auto; margin: 4mm 3mm; }
-          body { background: white; }
-          .no-print { display: none !important; }
-          .wrap { max-width: 100%; margin: 0; padding: 0; }
-          .recibo { border-radius: 0; box-shadow: none; padding: 0; }
-          .estado { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { size: 80mm auto; margin: 3mm 0mm; }
+          body  { background: white; margin: 0; padding: 0; }
+          #recibo {
+            width: 100%; max-width: 100%; margin: 0;
+            padding: 2mm 6mm 8mm; border-radius: 0; box-shadow: none;
+          }
+          * { color: #000 !important; background: white !important; }
         }
       `}</style>
     </>
