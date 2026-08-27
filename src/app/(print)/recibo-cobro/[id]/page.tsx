@@ -98,11 +98,11 @@ export default async function ReciboCobro({ params }: PageProps) {
 
         {/* CLIENTE */}
         <div className="cli-nom">{cxc?.cliente?.nombre ?? "—"}</div>
-        {(cxc?.cliente?.rnc || cxc?.cliente?.telefono) && (
-          <div className="campo">
-            <span>{cxc?.cliente?.rnc ? `RNC: ${cxc.cliente.rnc}` : ""}</span>
-            <span>{cxc?.cliente?.telefono ? `Tel: ${cxc.cliente.telefono}` : ""}</span>
-          </div>
+        {cxc?.cliente?.rnc && (
+          <div className="campo"><span>RNC:</span><span>{cxc.cliente.rnc}</span></div>
+        )}
+        {cxc?.cliente?.telefono && (
+          <div className="campo"><span>Tel:</span><span>{cxc.cliente.telefono}</span></div>
         )}
 
         <div className="guion"></div>
