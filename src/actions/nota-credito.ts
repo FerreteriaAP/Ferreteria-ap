@@ -123,20 +123,51 @@ export async function buscarFacturasParaNC(q: string) {
  */
 export async function buscarFacturaPorNumeroExacto(numero: string) {
  if (!numero?.trim()) return null;
- return prisma.venta.findFirst({
+
+ const venta = await prisma.venta.findFirst({
  where: { tipo: "FACTURADA", numero: numero.trim() },
  include: {
- cliente: { select: { nombre: true, rnc: true, saldoFavor: true } },
- detalles: {
- select: {
- id: true, productoId: true, descripcion: true, unidad: true,
- cantidad: true, precioFinal: true, subtotal: true, itbis: true,
- producto: { select: { nombre: true, unidadMedida: true } },
- },
- orderBy: { orden: "asc" },
- },
+  cliente: { select: { nombre: true, rnc: true, saldoFavor: true } },
+  detalles: {
+  select: {
+   id: true, productoId: true, descripcion: true, unidad: true,
+   cantidad: true, precioFinal: true, subtotal: true, itbis: true,
+   producto: { select: { nombre: true, unidadMedida: true } },
+  },
+  orderBy: { orden: "asc" },
+  },
  },
  });
+ if (!venta) return null;
+
+ // Sumar cantidades ya creditadas por producto en NCs previas (no anuladas)
+ const ncsExistentes = await prisma.notaCredito.findMany({
+ where: { ventaId: venta.id, estado: { not: "ANULADA" } },
+ select: { detalles: true },
+ });
+
+ // Acumular cantidades creditadas por productoId
+ const creditadoPorProducto: Record<string, number> = {};
+ for (const nc of ncsExistentes) {
+ const dets = nc.detalles as Array<{ productoId?: string; cantidad?: number }>;
+ if (!Array.isArray(dets)) continue;
+ for (const d of dets) {
+  if (d.productoId) {
+  creditadoPorProducto[d.productoId] = (creditadoPorProducto[d.productoId] ?? 0) + Number(d.cantidad ?? 0);
+  }
+ }
+ }
+
+ // Devolver solo ítems con cantidad disponible > 0
+ const detallesFiltrados = venta.detalles
+ .map(d => ({
+  ...d,
+  cantidadDisponible: Number(d.cantidad) - (creditadoPorProducto[d.productoId ?? ""] ?? 0),
+  cantidadOriginal: Number(d.cantidad),
+ }))
+ .filter(d => d.cantidadDisponible > 0.001);
+
+ return { ...venta, detalles: detallesFiltrados };
 }
 
 // ── Admin: todas las NCs ──────────────────────────────────────────────────────

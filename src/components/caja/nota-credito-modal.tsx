@@ -64,7 +64,9 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
       productoId: d.productoId,
       nombre: d.descripcion ?? d.producto.nombre,
       unidad: d.unidad ?? d.producto.unidadMedida,
-      cantidadMax: Number(d.cantidad),
+      // cantidadDisponible = original - ya creditado (calculado en el action)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      cantidadMax: Number((d as any).cantidadDisponible ?? (d as any).cantidad ?? 0),
       cantidad: "",
       precioUnitario: Number(d.precioFinal),
     })));
