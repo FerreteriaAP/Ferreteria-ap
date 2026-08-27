@@ -5,7 +5,7 @@
 import { notFound } from "next/navigation";
 import { getNotaCredito } from "@/actions/nota-credito";
 import { EMPRESA } from "@/lib/empresa";
-import { AutoPrint } from "@/components/caja/auto-print";
+import { PrintBtn } from "@/components/caja/print-btn";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -45,7 +45,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
 
   return (
     <>
-      <AutoPrint />
+      <PrintBtn />
 
       <div id="recibo">
 

@@ -6,7 +6,7 @@
  *   ref, facturas (FAC/2026/0001:500.00,...), notas
  */
 import { EMPRESA } from "@/lib/empresa";
-import { AutoPrint } from "@/components/caja/auto-print";
+import { PrintBtn } from "@/components/caja/print-btn";
 
 interface PageProps {
   searchParams: Promise<{
@@ -67,7 +67,7 @@ export default async function ComprobanteCxC({ searchParams }: PageProps) {
 
   return (
     <>
-      <AutoPrint />
+      <PrintBtn />
 
       <div id="recibo">
 
