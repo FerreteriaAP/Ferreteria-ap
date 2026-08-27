@@ -137,7 +137,7 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
         </div>
       </div>
 
-      {/* Notas de crédito disponibles */}
+      {/* Notas de crédito disponibles (solo contado — las de CxC ya están aplicadas) */}
       {notasCredito.length > 0 && (
         <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.06)" }}>
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.1)" }}>
@@ -179,15 +179,13 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
               <thead>
                 <tr className="border-b" style={{ backgroundColor: HEADER_BG }}>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Fecha</th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Factura</th>
-                  <th className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Monto</th>
-                  {BUCKETS.map(b => (
-                    <th key={b} className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
-                      {b} días
-                    </th>
-                  ))}
-                  <th className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Saldo</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Estado</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">No. Factura</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">NCF</th>
+                  <th className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Monto</th>
+                  <th className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Crédito</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Días</th>
+                  <th className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Saldo</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Estado</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -198,36 +196,36 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                       <Link href={`/ventas/${f.ventaId}`} className="font-mono text-xs font-semibold hover:underline" style={{ color: "var(--accent-hex)" }}>
                         {f.numero}
                       </Link>
-                      {f.ncf && (
-                        <span className="font-mono text-[10px] text-muted-foreground block">
-                          {f.tipoNcf && <span className="mr-1">{f.tipoNcf}</span>}{f.ncf}
-                        </span>
-                      )}
-                      {f.pagosNc.map((p, i) => (
-                        <span key={i} className="text-[10px] font-semibold block" style={{ color: "#a855f7" }}>
-                          {p.referencia ? `Pagado con ${p.referencia}` : "Pagado con NC"} (−{fmt(p.monto)})
-                        </span>
-                      ))}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {f.ncf
+                        ? <span className="font-mono text-[10px] text-muted-foreground">{f.tipoNcf ? `${f.tipoNcf} ` : ""}{f.ncf}</span>
+                        : <span className="text-muted-foreground/30 text-xs">—</span>
+                      }
                     </td>
                     <td className="px-3 py-3 text-right font-mono text-xs">{fmt(f.monto)}</td>
-                    {BUCKETS.map(b => (
-                      <td key={b} className={cn("px-3 py-3 text-right font-mono text-xs",
-                        f.bucket === b && f.vencida  ? "text-destructive font-semibold" :
-                        f.bucket === b && !f.vencida ? "font-semibold" :
-                        "text-muted-foreground/30")}
-                        style={f.bucket === b && !f.vencida ? { color: "var(--accent-hex)" } : undefined}>
-                        {f.bucket === b ? fmt(f.saldo) : "—"}
-                      </td>
-                    ))}
+                    <td className="px-3 py-3 text-right font-mono text-xs">
+                      {f.credito > 0
+                        ? <span className="font-semibold" style={{ color: "#a855f7" }}>−{fmt(f.credito)}</span>
+                        : <span className="text-muted-foreground/30">—</span>
+                      }
+                    </td>
+                    <td className="px-3 py-3 text-center">
+                      <span className={cn(
+                        "inline-block font-mono text-xs font-semibold px-2 py-0.5 rounded-full",
+                        f.diasTranscurridos <= 30 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        : f.diasTranscurridos <= 60 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                        : f.diasTranscurridos <= 90 ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      )}>
+                        {f.diasTranscurridos}d
+                      </span>
+                    </td>
                     <td className={cn("px-3 py-3 text-right font-mono text-xs font-bold", f.vencida ? "text-destructive" : "")}>
                       {fmt(f.saldo)}
                     </td>
                     <td className="px-4 py-3">
-                      {f.estado === "PAGADO" && f.totalPagadoConNc > 0 ? (
-                        <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ color: "#a855f7", backgroundColor: "rgba(168,85,247,0.12)" }}>
-                          {f.pagosNc[0]?.referencia ? f.pagosNc[0].referencia : "Pagado NC"}
-                        </span>
-                      ) : f.vencida ? (
+                      {f.vencida ? (
                         <span className="inline-flex items-center text-[11px] font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">Vencida</span>
                       ) : (
                         <span className="inline-flex items-center text-[11px] font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">Vigente</span>
@@ -238,20 +236,16 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
               </tbody>
               <tfoot>
                 <tr className="border-t-2 bg-muted/30">
-                  <td colSpan={2} className="px-4 py-3 font-bold text-sm">
+                  <td colSpan={3} className="px-4 py-3 font-bold text-sm">
                     Totales <span className="ml-1 text-xs font-normal text-muted-foreground">{facturas.length} factura{facturas.length !== 1 ? "s" : ""}</span>
                   </td>
                   <td className="px-3 py-3 text-right font-mono font-bold text-xs">
                     {fmt(facturas.reduce((s, f) => s + f.monto, 0))}
                   </td>
-                  {BUCKETS.map(b => {
-                    const t = totales[b] ?? 0;
-                    return (
-                      <td key={b} className={cn("px-3 py-3 text-right font-mono font-bold text-xs", t > 0 ? "text-destructive" : "text-muted-foreground")}>
-                        {t > 0 ? fmt(t) : "—"}
-                      </td>
-                    );
-                  })}
+                  <td className="px-3 py-3 text-right font-mono font-bold text-xs" style={{ color: "#a855f7" }}>
+                    {facturas.some(f => f.credito > 0) ? `−${fmt(facturas.reduce((s, f) => s + f.credito, 0))}` : "—"}
+                  </td>
+                  <td />
                   <td className={cn("px-3 py-3 text-right font-mono font-bold text-sm", totales.vencido > 0 ? "text-destructive" : "")}>
                     {fmt(totales.total)}
                   </td>

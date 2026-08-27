@@ -50,41 +50,64 @@ export async function crearNotaCredito(input: CrearNotaCreditoInput) {
 
  const numero = await siguienteNumeroNC();
 
+ // Verificar si la factura tiene CxC activa — si la tiene, la NC se aplica
+ // directamente a esa CxC (no va al saldoFavor del cliente)
+ const cxcActiva = await prisma.cuentaPorCobrar.findFirst({
+  where: { ventaId: input.ventaId, estado: { not: "PAGADO" } },
+ });
+
+ let ncId: string | null = null;
+
  await prisma.$transaction(async (tx) => {
- // 1. Crear la nota de crédito
- await tx.notaCredito.create({
- data: {
- numero,
- ventaId: input.ventaId,
- clienteId: venta.clienteId,
- turnoId: input.turnoId,
- usuarioId: userId,
- motivo: input.motivo,
- detalles: input.detalles as unknown as Prisma.InputJsonValue,
- monto,
- montoRestante: monto,
- notas: input.notas ?? null,
- estado: "PENDIENTE",
- },
- });
+  // 1. Crear la nota de crédito
+  const nc = await tx.notaCredito.create({
+   data: {
+    numero,
+    ventaId: input.ventaId,
+    clienteId: venta.clienteId,
+    turnoId: input.turnoId,
+    usuarioId: userId,
+    motivo: input.motivo,
+    detalles: input.detalles as unknown as Prisma.InputJsonValue,
+    monto,
+    // Si hay CxC activa: la NC queda APLICADA inmediatamente con montoRestante=0
+    montoRestante: cxcActiva ? 0 : monto,
+    notas: input.notas ?? null,
+    estado: cxcActiva ? "APLICADA" : "PENDIENTE",
+   },
+   select: { id: true },
+  });
+  ncId = nc.id;
 
- // 2. Acreditar el saldo a favor del cliente
- await tx.contacto.update({
- where: { id: venta.clienteId },
- data: { saldoFavor: { increment: monto } },
- });
- });
+  if (cxcActiva) {
+   // 2a. CxC activa → descontar NC del saldo de esa factura directamente
+   const nuevoMontoPagado = Number(cxcActiva.montoPagado) + monto;
+   const nuevoSaldo = Math.max(0, Number(cxcActiva.saldo) - monto);
+   const quedaCerrada = nuevoSaldo <= 0.001;
 
- // Obtener el id de la NC recién creada para enlace al imprimible
- const ncCreada = await prisma.notaCredito.findFirst({
-  where: { numero },
-  select: { id: true },
-  orderBy: { createdAt: "desc" },
+   await tx.cuentaPorCobrar.update({
+    where: { id: cxcActiva.id },
+    data: {
+     montoPagado: nuevoMontoPagado,
+     saldo: nuevoSaldo,
+     ...(quedaCerrada ? { estado: "PAGADO" } : {}),
+    },
+   });
+   // La NC se aplica a la CxC → NO incrementa saldoFavor
+  } else {
+   // 2b. Sin CxC (cliente contado) → acreditar saldo a favor como antes
+   await tx.contacto.update({
+    where: { id: venta.clienteId },
+    data: { saldoFavor: { increment: monto } },
+   });
+  }
  });
 
  revalidatePath("/caja");
  revalidatePath(`/ventas/${input.ventaId}`);
- return { ok: true, numero, id: ncCreada?.id ?? null };
+ revalidatePath("/contabilidad/cxc");
+ revalidatePath(`/contabilidad/cxc/estado/${venta.clienteId}`);
+ return { ok: true, numero, id: ncId };
 }
 
 // Obtener facturas para nota de crédito (facturadas del turno actual o búsqueda) 

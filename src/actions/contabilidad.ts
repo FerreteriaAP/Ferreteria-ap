@@ -636,27 +636,18 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
  const diasDesdeVto = Math.floor(
  (hoy.getTime() - new Date(c.fechaVencimiento).getTime()) / 86400000
  );
- // Bucket de aging basado en la EDAD de la factura (días desde emisión).
- // Una factura de 2 días siempre va en 0-30, sin importar el plazo de crédito.
- // El flag vencida sigue basado en diasDesdeVto > 0 (¿ya pasó la fecha de pago?).
- const diasDesdeEmision = Math.max(
+ const diasTranscurridos = Math.max(
  0,
  Math.floor((hoy.getTime() - new Date(c.fechaEmision).getTime()) / 86400000)
  );
+ // Bucket de aging para los cuadros resumen (basado en días desde emisión)
  let bucket: "0-30" | "30-60" | "60-90" | "90+";
- if (diasDesdeEmision <= 30) bucket = "0-30";
- else if (diasDesdeEmision <= 60) bucket = "30-60";
- else if (diasDesdeEmision <= 90) bucket = "60-90";
+ if (diasTranscurridos <= 30) bucket = "0-30";
+ else if (diasTranscurridos <= 60) bucket = "30-60";
+ else if (diasTranscurridos <= 90) bucket = "60-90";
  else bucket = "90+";
 
  const vencida = diasDesdeVto > 0;
-
- // Pagos con NC registrados en PagoVenta
- const pagosNc = c.venta.pagosRecibidos.map((p: { monto: unknown; referencia: string | null }) => ({
- monto: Number(p.monto),
- referencia: p.referencia ?? null,
- }));
- const totalPagadoConNc = pagosNc.reduce((s: number, p: { monto: number }) => s + p.monto, 0);
 
  return {
  id: c.id,
@@ -668,14 +659,14 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
  fechaEmision: c.fechaEmision,
  fechaVencimiento: c.fechaVencimiento,
  monto: Number(c.monto),
- montoPagado: Number(c.montoPagado),
+ // montoPagado = total de créditos ya aplicados a esta factura (abonos + NCs)
+ credito: Number(c.montoPagado),
  saldo: Number(c.saldo),
  estado: c.estado,
+ diasTranscurridos,
  diasDesdeVto,
  bucket,
  vencida,
- pagosNc,
- totalPagadoConNc,
  };
  });
 
