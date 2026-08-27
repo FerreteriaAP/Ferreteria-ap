@@ -275,25 +275,14 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
                         : <span style={{ color: "#d0d0d0" }}>—</span>
                       }
                     </td>
-                    <td style={TD_C}>
-                      <span style={{
-                        display: "inline-block", background: diasBg, color: diasColor,
-                        fontSize: 8, fontWeight: 700,
-                        padding: "2px 5px", borderRadius: 20,
-                      }}>
-                        {f.diasTranscurridos} Días
-                      </span>
+                    <td style={{ ...TD_C, color: diasColor, fontWeight: 700, fontSize: 9 }}>
+                      {f.diasTranscurridos} Días
                     </td>
                     <td style={{ ...TD_R, fontFamily: "monospace", fontWeight: 800, color: saldoColor }}>
                       {fmt(f.saldo)}
                     </td>
-                    <td style={TD}>
-                      <span style={{
-                        display: "inline-block", background: estadoBg, color: estadoColor,
-                        fontSize: 8, fontWeight: 700, padding: "2px 7px", borderRadius: 20,
-                      }}>
-                        {f.vencida ? "Vencida" : "Vigente"}
-                      </span>
+                    <td style={{ ...TD, color: estadoColor, fontWeight: 700, fontSize: 9 }}>
+                      {f.vencida ? "Vencida" : "Vigente"}
                     </td>
                   </tr>
                 );
