@@ -16,6 +16,7 @@ interface PageProps {
     q?: string;
     categoria?: string;
     stockBajo?: string;
+    archivados?: string;
     page?: string;
     vista?: string;
   }>;
@@ -32,13 +33,14 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   const busqueda = params.q ?? "";
   const categoriaId = params.categoria ?? "";
   const stockBajo = params.stockBajo === "1";
+  const verArchivados = params.archivados === "1";
   const page = Number(params.page ?? 1);
   const jar = await cookies();
   const cookieVista = jar.get("vista-preferida")?.value;
   const vista = (params.vista ?? cookieVista) === "grid" ? "grid" : "lista";
 
   const [{ productos, total, pages }, categorias] = await Promise.all([
-    getProductos({ busqueda, categoriaId: categoriaId || undefined, stockBajo, page }),
+    getProductos({ busqueda, categoriaId: categoriaId || undefined, stockBajo, page, soloActivos: !verArchivados }),
     getCategorias(),
   ]);
 
@@ -46,6 +48,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   const formatDOP = (n: any) => `RD$ ${Number(n).toLocaleString("es-DO", { minimumFractionDigits: 2 })}`;
 
   const vistaQS = vista === "grid" ? "&vista=grid" : "";
+  const archivadosQS = verArchivados ? "&archivados=1" : "";
 
   return (
     <div className="space-y-5">
@@ -54,7 +57,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
         <div>
           <h1 className="text-2xl font-bold">Productos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {total} productos {stockBajo ? "con stock bajo" : "en catálogo"}
+            {total} producto{total !== 1 ? "s" : ""} {verArchivados ? "archivados" : stockBajo ? "con stock bajo" : "en catálogo"}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -105,6 +108,12 @@ export default async function ProductosPage({ searchParams }: PageProps) {
           >
             Stock bajo
           </Link>
+          <Link
+            href={verArchivados ? `/productos?q=${busqueda}${vistaQS}` : `/productos?archivados=1&q=${busqueda}${vistaQS}`}
+            className={cn(buttonVariants({ variant: verArchivados ? "secondary" : "outline", size: "sm" }))}
+          >
+            Archivados
+          </Link>
         </div>
       </div>
 
@@ -138,7 +147,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
       <Paginacion
         page={page}
         pages={pages}
-        buildHref={(p) => `/productos?q=${busqueda}&page=${p}${vistaQS}`}
+        buildHref={(p) => `/productos?q=${busqueda}&page=${p}${vistaQS}${archivadosQS}`}
       />
     </div>
   );

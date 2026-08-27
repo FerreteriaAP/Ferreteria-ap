@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { archivarProducto, eliminarProducto } from "@/actions/productos";
+import { archivarProducto, eliminarProducto, reactivarProducto } from "@/actions/productos";
 
 interface Props {
   productoId: string;
@@ -21,6 +21,13 @@ export function BtnArchivarProducto({ productoId, nombreProducto, activo }: Prop
     setModo(m);
     setError(null);
     setOpen(true);
+  };
+
+  const reactivar = () => {
+    start(async () => {
+      await reactivarProducto(productoId);
+      router.refresh();
+    });
   };
 
   const confirmar = () => {
@@ -44,7 +51,7 @@ export function BtnArchivarProducto({ productoId, nombreProducto, activo }: Prop
     <>
       {/* Botones */}
       <div className="flex gap-2 flex-wrap">
-        {activo && (
+        {activo ? (
           <button
             type="button"
             onClick={() => abrirModal("archivar")}
@@ -53,6 +60,17 @@ export function BtnArchivarProducto({ productoId, nombreProducto, activo }: Prop
               hover:bg-amber-50 dark:hover:bg-amber-900/20"
           >
             Archivar
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={reactivar}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors
+              text-green-700 dark:text-green-400 border-green-300 dark:border-green-700
+              hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50"
+          >
+            {isPending ? "Reactivando…" : "↩ Reactivar"}
           </button>
         )}
         <button

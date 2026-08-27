@@ -473,12 +473,22 @@ export async function ajustarStock(productoId: string, cantidad: number, notas?:
  return { success: true };
 }
 
-// ── Archivar producto (soft-delete) ──────────────────────────────────────────
+// ── Archivar / Reactivar producto (soft-delete) ──────────────────────────────
 
 export async function archivarProducto(id: string) {
   await prisma.producto.update({
     where: { id },
     data: { activo: false },
+  });
+  revalidatePath("/productos");
+  revalidatePath(`/productos/${id}`);
+  return { success: true };
+}
+
+export async function reactivarProducto(id: string) {
+  await prisma.producto.update({
+    where: { id },
+    data: { activo: true },
   });
   revalidatePath("/productos");
   revalidatePath(`/productos/${id}`);
