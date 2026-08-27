@@ -68,7 +68,7 @@ function BtnConduceCajera({ ventaId, conduceId }: {
  "text-xs px-2 py-0.5 rounded border font-medium transition-colors whitespace-nowrap",
  "border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30",
  isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Generando…" : "Conduce"}
+ > {isPending ? "Generando…" : "Enviar conduce"}
  </button> {err && <p className="text-[10px] text-destructive">{err}</p>}
  </div> );
 }

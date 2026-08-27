@@ -90,7 +90,7 @@ function BtnConduce({ ventaId, conduceId, entregado }: {
  "text-xs px-2 py-0.5 rounded border border-blue-300 text-blue-700 whitespace-nowrap",
  "hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:border-blue-700 dark:text-blue-400 transition-colors",
  isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Generando…" : "Conduce"}
+ > {isPending ? "Generando…" : "Enviar conduce"}
  </button> {err && <span className="text-[10px] text-destructive">{err}</span>}
  </span> );
 }
