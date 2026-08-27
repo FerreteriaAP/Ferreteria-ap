@@ -34,7 +34,8 @@ foreach ($p in @(
 }
 if (-not $pnpmPath) {
     # fallback: buscar en PATH
-    $pnpmPath = (Get-Command pnpm -ErrorAction SilentlyContinue)?.Source
+    $cmd = Get-Command pnpm -ErrorAction SilentlyContinue
+    if ($cmd) { $pnpmPath = $cmd.Source }
 }
 if (-not $pnpmPath) {
     Log "ERROR: no se encontró pnpm. Abortando."
