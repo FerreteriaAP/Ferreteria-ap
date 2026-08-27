@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -60,6 +60,7 @@ const UNIDADES = ["UND", "M", "M2", "M3", "KG", "LB", "GLL", "LT", "PIE", "ROLLO
 export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo }: ProductoFormProps) {
  const router = useRouter();
  const [serverError, setServerError] = useState<string | null>(null);
+ const errorRef = useRef<HTMLDivElement>(null);
  const esEdicion = !!productoId;
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -105,26 +106,32 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
 
  const onSubmit: SubmitHandler<FormValues> = async (values) => {
  setServerError(null);
+ try {
+  const result = esEdicion
+   ? await actualizarProducto(productoId, values as ProductoInput)
+   : await crearProducto(values as ProductoInput);
 
- const result = esEdicion
- ? await actualizarProducto(productoId, values as ProductoInput)
- : await crearProducto(values as ProductoInput);
+  if ("error" in result && result.error) {
+   const errs = result.error as Record<string, string[]>;
+   setServerError(Object.values(errs).flat()[0] ?? "Error al guardar");
+   setTimeout(() => errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+   return;
+  }
 
- if ("error" in result && result.error) {
- const errs = result.error as Record<string, string[]>;
- setServerError(Object.values(errs).flat()[0] ?? "Error al guardar");
- return;
+  const id = "id" in result ? result.id : productoId;
+  router.push(`/productos/${id}`);
+ } catch (err) {
+  console.error("[ProductoForm] onSubmit error:", err);
+  setServerError("Error al conectar con el servidor. Intenta de nuevo.");
+  setTimeout(() => errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
  }
-
- const id = "id" in result ? result.id : productoId;
- router.push(`/productos/${id}`);
  };
 
  const precioSugerido = costo > 0 ? (costo * (1 + ganancia / 100)).toFixed(2) : null;
 
  return (
  <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6 max-w-4xl"> {serverError && (
- <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive"> {serverError}
+ <div ref={errorRef} className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive font-medium"> ⚠️ {serverError}
  </div> )}
 
  {/* Identificación */}
