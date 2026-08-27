@@ -331,13 +331,13 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
             type="submit"
             form="nc-form"
             disabled={isPending || !factura || totalNC <= 0}
-            className={cn(
-              "flex-1 h-10 rounded-xl text-sm font-bold transition-all border-2",
-              isPending || !factura || totalNC <= 0
-                ? "border-muted text-muted-foreground cursor-not-allowed"
-                : ""
-            )}
-            style={!(isPending || !factura || totalNC <= 0) ? { borderColor: "#a855f7", color: "#a855f7" } : undefined}
+            className="flex-1 h-10 rounded-xl text-sm font-bold transition-all border-2"
+            style={{
+              borderColor: "#a855f7",
+              color: "#a855f7",
+              opacity: (isPending || !factura || totalNC <= 0) ? 0.4 : 1,
+              cursor: (isPending || !factura || totalNC <= 0) ? "not-allowed" : "pointer",
+            }}
           >
             {isPending ? "Generando…" : `Generar nota de crédito${totalNC > 0 ? ` (${fmt(totalNC)})` : ""}`}
           </button>

@@ -314,7 +314,7 @@ export function CxCMultiSelect({ grupos }: Props) {
  > <div className="overflow-x-auto">
  {g.facturas.map((f) => (
  <div key={f.id} className={cn(
- "px-3 py-2 flex items-center gap-2 border-b last:border-0 min-w-[700px]",
+ "px-3 py-2 flex items-center gap-2 border-b last:border-0 min-w-[760px]",
  seleccionadas.has(f.id) && "bg-orange-500/5"
  )}>
  {/* Checkbox — 20px */}
@@ -323,10 +323,10 @@ export function CxCMultiSelect({ grupos }: Props) {
  ? <input type="checkbox" checked={seleccionadas.has(f.id)} onChange={() => toggle(f.id)} className="w-4 h-4 cursor-pointer" />
  : null}
  </div>
- {/* Número factura — 92px */}
- <div className="w-[92px] shrink-0">
+ {/* Número factura — 150px (FAC/2026/XXXX cabe completo) */}
+ <div className="w-[150px] shrink-0">
  <Link href={`/ventas/${f.ventaId}?from=cxc`}
- className="font-mono text-xs font-semibold hover:underline block truncate"
+ className="font-mono text-xs font-semibold hover:underline block"
  style={{ color: "var(--accent-hex)" }}>
  {f.numero}
  </Link>
