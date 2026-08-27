@@ -37,7 +37,6 @@ export async function crearNotaCredito(input: CrearNotaCreditoInput) {
  if (!userId) return { error: "No autenticado" };
 
  if (!input.detalles.length) return { error: "Agrega al menos un artículo a devolver" };
- if (!input.motivo.trim()) return { error: "Indica el motivo de la nota de crédito" };
 
  const venta = await prisma.venta.findUnique({
  where: { id: input.ventaId },

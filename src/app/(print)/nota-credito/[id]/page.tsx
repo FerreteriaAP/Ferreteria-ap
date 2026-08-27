@@ -146,7 +146,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         {/* ESTADO */}
         <div className="estado-box">
           <span className="estado-val estado-borde">
-            {nc.estado === "APLICADA" ? "✓ CRÉDITO APLICADO" : "⏳ PENDIENTE DE APLICAR"}
+            {nc.estado === "APLICADA" ? "CREDITO APLICADO" : "PENDIENTE DE APLICAR"}
           </span>
         </div>
 
@@ -168,6 +168,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
 
         <div className="pol-titulo">CONDICIONES DE LA NOTA DE CRÉDITO</div>
         <div className="pol">- Válida únicamente en Ferretería AP.</div>
+        <div className="pol">- Válida por 90 días a partir de la fecha de emisión.</div>
         <div className="pol">- No canjeable por efectivo.</div>
         <div className="pol">- Presente este recibo al momento de utilizar el crédito.</div>
         <div className="pol">- Conserve este documento para sus registros.</div>
@@ -208,7 +209,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         .doc-tipo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
         .doc-num  { font-size: 12px; font-weight: 900; font-family: 'Courier New', monospace; }
         .doc-sub  { font-size: 9.5px; color: #222; margin-top: 1px; }
-        .doc-ref  { font-size: 9px; color: #333; margin-top: 2px; font-style: italic; }
+        .doc-ref  { font-size: 9px; color: #333; margin-top: 2px; }
 
         /* ── Cliente ── */
         .cli-nom { font-size: 12px; font-weight: 700; margin: 2px 0; }
@@ -244,9 +245,9 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         .item-num  { font-size: 9.5px; font-weight: 700; }
 
         /* ── Estado ── */
-        .estado-box  { margin: 4px 0; }
-        .estado-val  { display: inline-block; font-size: 8.5px; font-weight: 900;
-                       padding: 2px 8px; border-radius: 2px; }
+        .estado-box   { margin: 4px 0; }
+        .estado-val   { display: block; font-size: 9px; font-weight: 900; text-align: center;
+                        padding: 3px 0; border-radius: 2px; }
         .estado-borde { border: 1.5px solid #000; }
 
         /* ── Footer ── */

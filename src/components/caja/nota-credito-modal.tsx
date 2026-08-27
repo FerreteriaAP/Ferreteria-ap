@@ -85,7 +85,7 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!factura) { setError("Selecciona una factura"); return; }
-    if (!motivo.trim()) { setError("Indica el motivo de la devolución"); return; }
+
 
     const detalles: NotaCreditoDetalleItem[] = items
       .filter(i => parseFloat(i.cantidad) > 0)
@@ -274,14 +274,13 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
           {factura && (
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
-                Motivo de la devolución *
+                Motivo de la devolución
               </label>
               <input
                 value={motivo}
                 onChange={e => setMotivo(e.target.value)}
-                placeholder="Producto defectuoso, error en pedido…"
+                placeholder="Producto defectuoso, error en pedido… (opcional)"
                 className={INPUT}
-                required
               />
             </div>
           )}
