@@ -722,6 +722,18 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   movimientoId: string | null; cliente: string;
  } | null>(null);
 
+ // Si el router.refresh() de Next.js desmontó el modal antes de que se mostrara la pantalla
+ // de éxito, recuperamos el último ID de sessionStorage al montar
+ useEffect(() => {
+  try {
+   const lastId = sessionStorage.getItem("ultimo-recibo-cobro");
+   if (lastId) {
+    sessionStorage.removeItem("ultimo-recibo-cobro");
+    setCobroExitoso({ movimientoId: lastId, cliente: "" });
+   }
+  } catch { /* ignore */ }
+ }, []);
+
  const idsEnLista = new Set(lineas.map(l => l.cxcId));
  const totalCobro = lineas.reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
  const montoNCNum = parseFloat(montoNC) || 0;
@@ -846,6 +858,10 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
    });
    if ("error" in res && res.error) { setError(res.error); return; }
    const ids = (res as { ok: true; movimientoIds: string[] }).movimientoIds ?? [];
+   // Guardar en sessionStorage para sobrevivir al router.refresh() automático de Next.js
+   if (ids[0]) {
+    try { sessionStorage.setItem("ultimo-recibo-cobro", ids[0]); } catch { /* ignore */ }
+   }
    setCobroExitoso({ movimientoId: ids[0] ?? null, cliente: clienteNombre });
   });
  };
@@ -861,7 +877,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
       <p className="text-base font-bold mt-1">{cobroExitoso.cliente}</p>
      </div>
      <div className="flex flex-col gap-2 w-full">
-      {cobroExitoso.movimientoId && (
+      {cobroExitoso.movimientoId ? (
        <a
         href={`/recibo-cobro/${cobroExitoso.movimientoId}`}
         target="_blank" rel="noopener noreferrer"
@@ -871,6 +887,10 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
         <Printer size={16} />
         Imprimir comprobante de pago
        </a>
+      ) : (
+       <p className="text-xs text-muted-foreground text-center">
+        Cobro aplicado por nota de crédito (sin movimiento de caja)
+       </p>
       )}
       <button onClick={() => { onOk(); onClose(); }}
        className="w-full h-10 rounded-xl border text-sm font-medium hover:bg-accent transition-colors">

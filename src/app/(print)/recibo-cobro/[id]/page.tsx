@@ -170,12 +170,14 @@ export default async function ReciboCobro({ params }: PageProps) {
 
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-          font-family: Arial, 'Helvetica Neue', sans-serif;
-          font-size: 12px; color: #000; background: #bbb;
+        html, body {
+          background: #bbbbbb !important;
+          color: #000 !important;
+          font-family: Arial, 'Helvetica Neue', sans-serif !important;
+          font-size: 12px !important;
         }
         #recibo {
-          width: 76mm; margin: 8px auto; background: #fff;
+          width: 76mm; margin: 8px auto; background: #ffffff !important;
           padding: 8px 6px 20px; border-radius: 3px;
           box-shadow: 0 2px 8px rgba(0,0,0,.25);
         }
