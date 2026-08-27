@@ -343,13 +343,15 @@ export async function crearProducto(data: ProductoInput) {
  revalidatePath("/productos");
  return { success: true, id: producto.id };
  } catch (e: unknown) {
+ console.error("[crearProducto] Error al guardar:", e);
  const error = e as { code?: string; meta?: { target?: string[] } };
  if (error.code === "P2002") {
  const field = error.meta?.target?.[0];
  if (field === "codigo") return { error: { codigo: ["Este código ya existe"] } };
  if (field === "codigoBarras") return { error: { codigoBarras: ["Este código de barras ya existe"] } };
  }
- return { error: { _: ["Error al guardar el producto"] } };
+ const msg = e instanceof Error ? e.message : String(e);
+ return { error: { _: [`Error: ${msg.slice(0, 300)}`] } };
  }
 }
 
