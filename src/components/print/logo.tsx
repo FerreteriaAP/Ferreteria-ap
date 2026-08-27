@@ -42,9 +42,9 @@ export function PrintLogo({ width = 280, height = 72, isoOnly = false }: PrintLo
         fontFamily="'Arial Black', Impact, 'Franklin Gothic Heavy', sans-serif"
         fontSize="27" fontWeight="900" fill="#f5821f"
       >AP</text>
-      {/* FERRETERÍA — F en naranja, resto negro; fuente más grande */}
+      {/* FERRETERÍA — F en naranja, resto negro; centrado visualmente con el octágono */}
       <text
-        x="82" y="36"
+        x="82" y="42"
         dominantBaseline="central" textAnchor="start"
         fontFamily="'Arial Black', 'Franklin Gothic Heavy', Impact, sans-serif"
         fontSize="37" fontWeight="900"

@@ -118,9 +118,6 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
         }}>
           {/* Columna empresa */}
           <div style={{ padding: "9px 13px", background: "#fafafa" }}>
-            <div style={{ fontSize: 7.5, fontWeight: 700, textTransform: "uppercase", color: "#f5821f", letterSpacing: "0.06em", marginBottom: 4 }}>
-              Emisor
-            </div>
             <div style={{ fontSize: 11, fontWeight: 900, color: "#000204" }}>{EMPRESA.nombre}</div>
             <div style={{ color: "#555", marginTop: 3 }}>RNC: <strong>{EMPRESA.rnc}</strong></div>
             <div style={{ color: "#555", marginTop: 1 }}>{EMPRESA.tel}</div>
