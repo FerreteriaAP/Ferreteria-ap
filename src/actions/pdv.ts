@@ -53,15 +53,18 @@ export async function getTopProductosPDV(limit = 50) {
 // Búsqueda de productos
 
 export async function buscarProductosPDV(q: string) {
-  if (!q || q.trim().length < 1) return [];
+  const term = q?.trim() ?? "";
+  if (term.length < 2) return [];
 
   return prisma.producto.findMany({
     where: {
       activo: true,
       OR: [
-        { codigo: { contains: q, mode: "insensitive" } },
-        { codigoBarras: { contains: q, mode: "insensitive" } },
-        { nombre: { contains: q, mode: "insensitive" } },
+        // startsWith usa índice B-tree; covers code/barcode prefix scan
+        { codigo:      { startsWith: term, mode: "insensitive" } },
+        { codigoBarras:{ startsWith: term, mode: "insensitive" } },
+        // contains usa índice GIN trigrama (pg_trgm) para búsqueda por nombre
+        { nombre:      { contains:   term, mode: "insensitive" } },
       ],
     },
     select: { ...PRODUCTO_SELECT, codigoBarras: true },

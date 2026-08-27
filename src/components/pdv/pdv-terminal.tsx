@@ -149,6 +149,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
     if (!queryProd.trim()) { setResultados([]); setBuscando(false); return; }
     setBuscando(true);
     timerRef.current = setTimeout(async () => {
+      if (queryProd.trim().length < 2) { setResultados([]); setBuscando(false); return; }
       const r = await buscarProductosPDV(queryProd);
       setResultados(r.map(p => ({
         ...p,
@@ -160,7 +161,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
         costoUltimo:    Number(p.costoUltimo),
       })));
       setBuscando(false);
-    }, 180);
+    }, 350);
   }, [queryProd]);
 
   // Búsqueda de clientes con debounce
