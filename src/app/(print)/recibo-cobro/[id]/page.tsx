@@ -52,8 +52,14 @@ export default async function ReciboCobro({ params }: PageProps) {
     hour: "2-digit", minute: "2-digit",
   });
   const cajeroNombre = `${mov.turno.usuario.nombre} ${mov.turno.usuario.apellido}`.trim();
-  const reciboNo = id.slice(-8).toUpperCase();
   const metodoLabel = METODO_LABEL[mov.metodo ?? ""] ?? mov.metodo ?? "—";
+
+  // Número de recibo secuencial: RCB/YYYY/NNNN
+  const year = new Date(mov.fecha).getFullYear();
+  const seq = await prisma.movimientoCaja.count({
+    where: { subTipo: "COBRO_CXC", fecha: { lte: mov.fecha } },
+  });
+  const reciboNo = `RCB/${year}/${String(seq).padStart(4, "0")}`;
 
   return (
     <>
@@ -91,12 +97,12 @@ export default async function ReciboCobro({ params }: PageProps) {
         <div className="guion"></div>
 
         {/* CLIENTE */}
-        {cxc?.cliente?.rnc && (
-          <div className="campo"><span>RNC:</span><span>{cxc.cliente.rnc}</span></div>
-        )}
         <div className="cli-nom">{cxc?.cliente?.nombre ?? "—"}</div>
-        {cxc?.cliente?.telefono && (
-          <div className="campo"><span>Tel:</span><span>{cxc.cliente.telefono}</span></div>
+        {(cxc?.cliente?.rnc || cxc?.cliente?.telefono) && (
+          <div className="campo">
+            <span>{cxc?.cliente?.rnc ? `RNC: ${cxc.cliente.rnc}` : ""}</span>
+            <span>{cxc?.cliente?.telefono ? `Tel: ${cxc.cliente.telefono}` : ""}</span>
+          </div>
         )}
 
         <div className="guion"></div>
