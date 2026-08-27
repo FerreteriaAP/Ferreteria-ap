@@ -71,6 +71,22 @@ export async function siguienteCodigoPorCategoria(categoriaId: string): Promise<
  return `${prefix}-${String(maxNum + 1).padStart(5, "0")}`;
 }
 
+/** Detecta productos similares por nombre para advertir duplicados en el formulario de creación */
+export async function detectarProductosDuplicados(nombre: string, excludeId?: string) {
+ const term = nombre.trim();
+ if (term.length < 3) return [];
+ const resultados = await prisma.producto.findMany({
+  where: {
+   nombre: { contains: term, mode: "insensitive" },
+   ...(excludeId ? { id: { not: excludeId } } : {}),
+  },
+  select: { id: true, nombre: true, codigo: true, activo: true },
+  take: 5,
+  orderBy: { nombre: "asc" },
+ });
+ return resultados;
+}
+
 /** Busca productos por keyword (nombre, código o código de barras) */
 export async function buscarProductosPorKeyword(q: string) {
  if (!q || q.trim().length < 2) return [];

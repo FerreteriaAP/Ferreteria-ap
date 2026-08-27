@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { crearProducto, actualizarProducto, siguienteCodigoPorCategoria, type ProductoInput } from "@/actions/productos";
+import { crearProducto, actualizarProducto, siguienteCodigoPorCategoria, detectarProductosDuplicados, type ProductoInput } from "@/actions/productos";
 import { cn } from "@/lib/utils";
 
 // Schema 
@@ -62,6 +62,8 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
  const [serverError, setServerError] = useState<string | null>(null);
  const errorRef = useRef<HTMLDivElement>(null);
  const esEdicion = !!productoId;
+ const [duplicados, setDuplicados] = useState<{ id: string; nombre: string; codigo: string; activo: boolean }[]>([]);
+ const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const form = useForm<FormValues>({
@@ -104,6 +106,17 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
  }
  }, [costo, ganancia, esEdicion, form]);
 
+ // Chequea duplicados por nombre con debounce de 500ms
+ const handleNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const val = e.target.value;
+  if (timerRef.current) clearTimeout(timerRef.current);
+  if (val.trim().length < 3) { setDuplicados([]); return; }
+  timerRef.current = setTimeout(async () => {
+   const res = await detectarProductosDuplicados(val, productoId);
+   setDuplicados(res);
+  }, 500);
+ };
+
  const onSubmit: SubmitHandler<FormValues> = async (values) => {
  setServerError(null);
  try {
@@ -137,7 +150,19 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
  {/* Identificación */}
  <Card> <CardHeader><CardTitle className="text-base">Identificación</CardTitle></CardHeader> <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4"> <div className="space-y-1.5"> <Label htmlFor="codigo">Código interno *</Label> <Input id="codigo" placeholder="PROD-00001" {...form.register("codigo")} /> {errors.codigo && <p className="text-xs text-destructive">{errors.codigo.message}</p>}
  </div> <div className="space-y-1.5"> <Label htmlFor="codigoBarras">Código de barras</Label> <Input id="codigoBarras" placeholder="7896543210123" {...form.register("codigoBarras")} /> {errors.codigoBarras && <p className="text-xs text-destructive">{errors.codigoBarras.message}</p>}
- </div> <div className="space-y-1.5 sm:col-span-2"> <Label htmlFor="nombre">Nombre del producto *</Label> <Input id="nombre" placeholder="Cable #12 THHN Negro" {...form.register("nombre")} /> {errors.nombre && <p className="text-xs text-destructive">{errors.nombre.message}</p>}
+ </div> <div className="space-y-1.5 sm:col-span-2"> <Label htmlFor="nombre">Nombre del producto *</Label> <Input id="nombre" placeholder="Cable #12 THHN Negro" {...form.register("nombre", { onChange: handleNombreChange })} /> {errors.nombre && <p className="text-xs text-destructive">{errors.nombre.message}</p>}
+ {duplicados.length > 0 && (
+  <div className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-3 py-2 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+   <p className="font-semibold">⚠️ Posible duplicado — ya existe un producto similar:</p>
+   {duplicados.map(d => (
+    <div key={d.id} className="flex items-center gap-2">
+     <span className="font-mono text-[10px] bg-amber-100 dark:bg-amber-900 px-1 rounded">{d.codigo}</span>
+     <span>{d.nombre}</span>
+     {!d.activo && <span className="text-[10px] text-muted-foreground">(archivado)</span>}
+    </div>
+   ))}
+  </div>
+ )}
  </div> <div className="space-y-1.5"> <Label>Categoría *</Label> <Select
  value={(form.watch("categoriaId") as string | undefined) ?? ""}
  onValueChange={(v) => handleCategoriaChange((v ?? "") as string)}
