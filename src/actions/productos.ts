@@ -95,6 +95,7 @@ export async function getProductos(params?: {
  categoriaId?: string;
  busqueda?: string;
  soloActivos?: boolean;
+ soloArchivados?: boolean;
  stockBajo?: boolean;
  page?: number;
  pageSize?: number;
@@ -103,6 +104,7 @@ export async function getProductos(params?: {
  categoriaId,
  busqueda = "",
  soloActivos = true,
+ soloArchivados = false,
  stockBajo = false,
  page = 1,
  pageSize = 50,
@@ -110,7 +112,8 @@ export async function getProductos(params?: {
 
  const where: Prisma.ProductoWhereInput = {};
 
- if (soloActivos) where.activo = true;
+ if (soloArchivados) where.activo = false;
+ else if (soloActivos) where.activo = true;
  if (categoriaId) where.categoriaId = categoriaId;
 
  if (busqueda) {

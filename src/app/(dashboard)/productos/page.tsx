@@ -40,7 +40,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   const vista = (params.vista ?? cookieVista) === "grid" ? "grid" : "lista";
 
   const [{ productos, total, pages }, categorias] = await Promise.all([
-    getProductos({ busqueda, categoriaId: categoriaId || undefined, stockBajo, page, soloActivos: !verArchivados }),
+    getProductos({ busqueda, categoriaId: categoriaId || undefined, stockBajo, page, soloArchivados: verArchivados }),
     getCategorias(),
   ]);
 
