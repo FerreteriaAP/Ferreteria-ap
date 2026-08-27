@@ -94,16 +94,21 @@ icacls "$projectDir\.next" /grant "Administrators:(OI)(CI)F" /T /Q 2>&1 | Out-Nu
 # ── Reinicio del servidor ──────────────────────────────────
 Log "Paso 4/4: reiniciando servidor..."
 taskkill /F /IM node.exe 2>&1 | Out-Null
-Start-Sleep -Seconds 3
-schtasks /run /tn "FerreteriaStartup" 2>&1 | Out-Null
-Start-Sleep -Seconds 15
+Start-Sleep -Seconds 2
+
+# Arranque directo (igual que startup.ps1 pero sin el Sleep de 30s del boot)
+Start-Process -FilePath "C:\Program Files\nodejs\node.exe" `
+    -ArgumentList "node_modules\next\dist\bin\next start -p 3000" `
+    -WorkingDirectory $projectDir `
+    -WindowStyle Hidden
+Start-Sleep -Seconds 20
 
 # Verifica que node arrancó
 $nodeProc = Get-Process -Name "node" -ErrorAction SilentlyContinue
 if ($nodeProc) {
     Log "Servidor reiniciado correctamente (PID $($nodeProc.Id))."
 } else {
-    Log "ADVERTENCIA: node no está corriendo después del reinicio. Revisar FerreteriaStartup."
+    Log "ADVERTENCIA: node no inició. Verificar manualmente."
 }
 
 Log "Deploy completado."
