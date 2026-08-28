@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getNotasCreditoPrint } from "@/actions/nota-credito";
 import { PrintLogo } from "@/components/print/logo";
+import { PrintCloseButtons } from "@/components/contabilidad/print-close-buttons";
 import { EMPRESA } from "@/lib/empresa";
 
 interface Props {
@@ -81,16 +82,9 @@ export default async function NotasCreditoPrintPage({ searchParams }: Props) {
           thead { display: table-header-group; }
           .no-print { display: none !important; }
         }
-        .no-print { text-align: center; margin: 16px 0; }
-        .no-print button {
-          padding: 8px 20px; background: #000204; color: #fff;
-          border: none; border-radius: 6px; cursor: pointer; font-size: 14px;
-        }
       `}</style>
 
-      <div className="no-print">
-        <button onClick={() => window.print()}>🖨️ Imprimir</button>
-      </div>
+      <PrintCloseButtons />
 
       <div className="reporte-wrapper" style={wrapperStyle}>
 
