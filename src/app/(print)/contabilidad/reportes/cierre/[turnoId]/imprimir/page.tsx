@@ -88,7 +88,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
         Presiona <strong>Ctrl+P</strong> (Windows) · <strong>⌘P</strong> (Mac) → <strong>Guardar como PDF</strong>
       </p>
 
-      <div style={{
+      <div className="reporte-wrapper" style={{
         width: "8.5in", minHeight: "11in", margin: "16px auto 40px",
         background: "#fff", padding: "0.45in 0.5in",
         boxShadow: "0 2px 24px rgba(0,0,0,.14)",
@@ -160,7 +160,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
         </div>
 
         {/* ── Desglose de ventas por método ── */}
-        <div style={SECTION}>
+        <div className="seccion" style={SECTION}>
           <div style={SECTION_TITLE}>Ventas — {ventas.cantidad} factura{ventas.cantidad !== 1 ? "s" : ""}</div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
@@ -184,7 +184,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
 
         {/* ── Gastos ── */}
         {gastos.length > 0 && (
-          <div style={SECTION}>
+          <div className="seccion" style={SECTION}>
             <div style={SECTION_TITLE}>Gastos</div>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -215,7 +215,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
 
         {/* ── Compras de mercancía ── */}
         {compras.length > 0 && (
-          <div style={SECTION}>
+          <div className="seccion" style={SECTION}>
             <div style={SECTION_TITLE}>Compras de Mercancía</div>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -246,7 +246,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
 
         {/* ── Préstamos a empleados ── */}
         {prestamos.length > 0 && (
-          <div style={SECTION}>
+          <div className="seccion" style={SECTION}>
             <div style={SECTION_TITLE}>Préstamos a Empleados</div>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -279,7 +279,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
 
         {/* ── Cobros CxC ── */}
         {cobros.length > 0 && (
-          <div style={SECTION}>
+          <div className="seccion" style={SECTION}>
             <div style={SECTION_TITLE}>Cobros de Cuentas por Cobrar</div>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -333,7 +333,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
 
         {/* ── NC emitidas ── */}
         {ncsEmitidas.length > 0 && (
-          <div style={SECTION}>
+          <div className="seccion" style={SECTION}>
             <div style={SECTION_TITLE}>Notas de Crédito Emitidas</div>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -468,7 +468,17 @@ export default async function ImprimirCierrePage({ params }: Props) {
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          body { margin: 0; }
+          body { margin: 0; background: #fff; }
+          .reporte-wrapper {
+            box-shadow: none !important;
+            margin: 0 !important;
+            width: 100% !important;
+            padding: 0.4in 0.45in !important;
+          }
+          tr { break-inside: avoid; page-break-inside: avoid; }
+          .seccion { break-inside: avoid; page-break-inside: avoid; }
+          thead { display: table-header-group; }
+          tfoot { display: table-footer-group; }
         }
       `}</style>
     </>

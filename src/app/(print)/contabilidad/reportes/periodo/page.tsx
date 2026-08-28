@@ -64,10 +64,10 @@ export default async function ImprimirPeriodoPage({ searchParams }: Props) {
         Presiona <strong>Ctrl+P</strong> (Windows) · <strong>⌘P</strong> (Mac) → <strong>Guardar como PDF</strong>
       </p>
 
-      <div style={{
+      <div className="reporte-wrapper" style={{
         width: "8.5in", minHeight: "11in", margin: "16px auto 40px",
         background: "#fff", padding: "0.45in 0.5in",
-        boxShadow: "0 2px 24px rgba(0,0,0,.14)",
+        boxShadow: "0 2px 24px rgba(0,0,0,.14)", height: "auto",
         fontFamily: "'Helvetica Neue', Arial, Helvetica, sans-serif",
         fontSize: 9.5, color: "#111", lineHeight: 1.45,
         boxSizing: "border-box",
@@ -220,7 +220,7 @@ export default async function ImprimirPeriodoPage({ searchParams }: Props) {
 
         {/* ── Movimientos consolidados del período ── */}
         {(consolidado.totalGastos > 0 || consolidado.totalCompras > 0 || consolidado.totalPrestamos > 0 || consolidado.totalCobros > 0 || consolidado.totalNCs > 0) && (
-          <div style={{ marginBottom: 14 }}>
+          <div className="resumen-movimientos" style={{ marginBottom: 14 }}>
             <div style={SECTION_TITLE}>Resumen de Movimientos — Período Completo</div>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -281,7 +281,7 @@ export default async function ImprimirPeriodoPage({ searchParams }: Props) {
           if (!hayDetalle) return null;
 
           return (
-            <div key={f.turno.id} style={{
+            <div key={f.turno.id} className="turno-bloque" style={{
               marginBottom: 14, paddingTop: 10,
               borderTop: "1px dashed #d1d5db",
             }}>
@@ -396,7 +396,20 @@ export default async function ImprimirPeriodoPage({ searchParams }: Props) {
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          body { margin: 0; }
+          body { margin: 0; background: #fff; }
+          /* Liberar el contenedor para que fluya en múltiples páginas */
+          .reporte-wrapper {
+            box-shadow: none !important;
+            margin: 0 !important;
+            width: 100% !important;
+            padding: 0.4in 0.45in !important;
+          }
+          /* Evitar cortes dentro de secciones y filas de tabla */
+          tr { break-inside: avoid; page-break-inside: avoid; }
+          .turno-bloque { break-inside: avoid; page-break-inside: avoid; }
+          .resumen-movimientos { break-inside: avoid; page-break-inside: avoid; }
+          thead { display: table-header-group; }
+          tfoot { display: table-footer-group; }
         }
       `}</style>
     </>
