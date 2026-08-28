@@ -72,6 +72,13 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
 
  const aplicar = () => router.push(buildUrl());
 
+ const REPORTE_PRINT_PATH: Record<string, string> = {
+  "cierres":         "/contabilidad/reportes/periodo",
+  "movimientos":     "/contabilidad/reportes/movimientos",
+  "notas-credito":   "/contabilidad/reportes/notas-credito",
+  "dinero-recibido": "/contabilidad/reportes/dinero-recibido",
+ };
+
  const buildPeriodoUrl = () => {
   const { desde: d, hasta: h, label: lbl } = rangoFechas({ tipo, fecha, mes, q, desde, hasta });
   const params = new URLSearchParams({
@@ -79,7 +86,8 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
    hasta: h.toISOString(),
    label: lbl,
   });
-  return `/contabilidad/reportes/periodo?${params.toString()}`;
+  const path = REPORTE_PRINT_PATH[reporte] ?? "/contabilidad/reportes/periodo";
+  return `${path}?${params.toString()}`;
  };
 
 
@@ -147,8 +155,8 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  className="h-9 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm">
   Generar
  </button>
- {/* Botón: emitir reporte del período (solo cierres) */}
- {reporte === "cierres" && !soloMovimientos && (
+ {/* Botón: emitir reporte del período (todos los tabs con página de impresión) */}
+ {!soloMovimientos && REPORTE_PRINT_PATH[reporte] && (
   <a
    href={buildPeriodoUrl()}
    target="_blank"

@@ -303,6 +303,44 @@ export async function editarNotaCredito(id: string, data: {
  return { ok: true };
 }
 
+// Notas de crédito para reporte de período (impresión 8.5×11)
+
+export async function getNotasCreditoPrint(desde: Date, hasta: Date) {
+  const rows = await prisma.notaCredito.findMany({
+    where: { createdAt: { gte: desde, lte: hasta } },
+    orderBy: { createdAt: "desc" },
+    include: {
+      cliente: { select: { nombre: true } },
+      venta:   { select: { numero: true } },
+      usuario: { select: { nombre: true } },
+    },
+  });
+
+  const filas = rows.map(r => ({
+    id:           r.id,
+    numero:       r.numero,
+    fecha:        r.createdAt,
+    factura:      r.venta.numero,
+    cliente:      r.cliente.nombre,
+    emitidaPor:   r.usuario.nombre,
+    monto:        Number(r.monto),
+    montoRestante: Number(r.montoRestante),
+    estado:       r.estado as "PENDIENTE" | "APLICADA" | "ANULADA",
+    motivo:       r.motivo ?? "",
+  }));
+
+  const resumen = {
+    total:     filas.length,
+    montoTotal: filas.reduce((s, f) => s + f.monto, 0),
+    pendientes: filas.filter(f => f.estado === "PENDIENTE").length,
+    aplicadas:  filas.filter(f => f.estado === "APLICADA").length,
+    anuladas:   filas.filter(f => f.estado === "ANULADA").length,
+    montoPendiente: filas.filter(f => f.estado === "PENDIENTE").reduce((s, f) => s + f.montoRestante, 0),
+  };
+
+  return { filas, resumen };
+}
+
 // Historial de notas de crédito de un cliente
 
 export async function getNotasCreditoCliente(clienteId: string) {
