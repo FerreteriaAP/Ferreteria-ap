@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { rangoFechas } from "@/lib/rangos";
+import { Printer } from "lucide-react";
 
 // Tipos de período disponibles 
 
@@ -70,6 +72,16 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
 
  const aplicar = () => router.push(buildUrl());
 
+ const buildPeriodoUrl = () => {
+  const { desde: d, hasta: h, label: lbl } = rangoFechas({ tipo, fecha, mes, q, desde, hasta });
+  const params = new URLSearchParams({
+   desde: d.toISOString(),
+   hasta: h.toISOString(),
+   label: lbl,
+  });
+  return `/contabilidad/reportes/periodo?${params.toString()}`;
+ };
+
 
  return (
  <div className="rounded-xl border bg-card p-4 space-y-4"> {/* Selector de reporte */}
@@ -132,6 +144,21 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
 
  {/* Botón Aplicar */}
  <button type="button" onClick={aplicar}
- className="h-9 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"> Generar 
- </button> </div> </div> </div> );
+ className="h-9 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm">
+  Generar
+ </button>
+ {/* Botón: emitir reporte del período (solo cierres) */}
+ {reporte === "cierres" && !soloMovimientos && (
+  <a
+   href={buildPeriodoUrl()}
+   target="_blank"
+   rel="noopener noreferrer"
+   className="h-9 px-4 rounded-lg text-sm font-semibold border transition-colors hover:bg-accent flex items-center gap-1.5"
+   style={{ borderColor: "#f5821f", color: "#f5821f" }}
+  >
+   <Printer size={14} />
+   Emitir reporte del período
+  </a>
+ )}
+ </div> </div> </div> );
 }

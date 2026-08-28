@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Printer } from "lucide-react";
 import { getReporteCierres, getReporteMovimientos, getReporteDineroRecibido } from "@/actions/reportes-caja";
 import { getNotasCreditoAdmin } from "@/actions/nota-credito";
 import { rangoFechas } from "@/lib/rangos";
@@ -118,6 +119,7 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
                       <th className="text-right px-4 py-3">Transf.</th>
                       <th className="text-right px-4 py-3">Cheque</th>
                       <th className="text-right px-4 py-3">Crédito</th>
+                      <th className="px-4 py-3"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -146,6 +148,18 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
                         <td className="px-4 py-3 text-right font-mono text-xs">{t.pagos.TRANSFERENCIA > 0 ? fmt(t.pagos.TRANSFERENCIA) : "—"}</td>
                         <td className="px-4 py-3 text-right font-mono text-xs">{t.pagos.CHEQUE > 0 ? fmt(t.pagos.CHEQUE) : "—"}</td>
                         <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground">{t.pagos.CREDITO > 0 ? fmt(t.pagos.CREDITO) : "—"}</td>
+                        <td className="px-4 py-3">
+                          <Link
+                            href={`/contabilidad/reportes/cierre/${t.id}/imprimir`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Imprimir cierre"
+                            className="inline-flex items-center justify-center w-7 h-7 rounded-md border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                            style={{ borderColor: "#f5821f20", color: "#f5821f" }}
+                          >
+                            <Printer size={13} />
+                          </Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -159,6 +173,7 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
                         <td className="px-4 py-3 text-right font-mono">{fmt(dataCierres.resumen.pagos.TRANSFERENCIA)}</td>
                         <td className="px-4 py-3 text-right font-mono">{fmt(dataCierres.resumen.pagos.CHEQUE)}</td>
                         <td className="px-4 py-3 text-right font-mono text-muted-foreground">{fmt(dataCierres.resumen.pagos.CREDITO)}</td>
+                        <td className="px-4 py-3"></td>
                       </tr>
                     </tfoot>
                   )}

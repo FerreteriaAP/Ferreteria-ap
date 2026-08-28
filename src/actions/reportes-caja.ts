@@ -277,3 +277,229 @@ export async function registrarDineroRecibido(data: {
   revalidatePath("/contabilidad/reportes");
   return { ok: true };
 }
+
+// ── Reporte de cierre detallado (para impresión) ──────────────────────────────
+
+async function buildDetalleTurno(turnoId: string) {
+  const turno = await prisma.turnoCaja.findUnique({
+    where: { id: turnoId },
+    include: {
+      usuario: { select: { nombre: true, apellido: true } },
+      registroDinero: true,
+      notasCredito: {
+        where: { estado: { not: "ANULADA" } },
+        include: {
+          venta:   { select: { numero: true } },
+          cliente: { select: { nombre: true } },
+        },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+  if (!turno) return null;
+
+  // Pagos de ventas del turno
+  const pagosRaw = await prisma.pagoVenta.findMany({
+    where: { venta: { turnoId, tipo: "FACTURADA" } },
+    select: { monto: true, metodo: true },
+  });
+
+  // Conteo de facturas
+  const cantidadFacturas = await prisma.venta.count({
+    where: { turnoId, tipo: "FACTURADA" },
+  });
+
+  // Movimientos de caja del turno (todos los clasificados)
+  const movs = await prisma.movimientoCaja.findMany({
+    where: {
+      turnoId,
+      subTipo: { in: ["GASTO", "COMPRA_MERCANCIA", "PRESTAMO", "COBRO_CXC"] },
+    },
+    orderBy: { fecha: "asc" },
+  });
+
+  // Enriquecer empleados y CxCs
+  const empleadoIds = [...new Set(movs.filter(m => m.empleadoId).map(m => m.empleadoId!))];
+  const cxcIds      = [...new Set(movs.filter(m => m.cxcId).map(m => m.cxcId!))];
+
+  const [empleados, cxcs] = await Promise.all([
+    empleadoIds.length
+      ? prisma.empleado.findMany({
+          where: { id: { in: empleadoIds } },
+          select: { id: true, nombre: true, apellido: true },
+        })
+      : Promise.resolve([] as Array<{ id: string; nombre: string; apellido: string }>),
+    cxcIds.length
+      ? prisma.cuentaPorCobrar.findMany({
+          where: { id: { in: cxcIds } },
+          include: {
+            venta:   { select: { numero: true, id: true } },
+            cliente: { select: { nombre: true } },
+          },
+        })
+      : Promise.resolve([] as Array<{
+          id: string;
+          venta: { numero: string; id: string };
+          cliente: { nombre: string };
+        }>),
+  ]);
+
+  // NCs aplicadas a las ventas de esas CxCs
+  const ventaIds = cxcs.map(c => c.venta.id);
+  const ncsAplicadasRaw = ventaIds.length
+    ? await prisma.notaCredito.findMany({
+        where: { ventaId: { in: ventaIds }, estado: "APLICADA" },
+        select: { numero: true, monto: true, ventaId: true },
+      })
+    : [];
+
+  const ncsPorVenta = new Map<string, Array<{ numero: string; monto: number }>>();
+  for (const nc of ncsAplicadasRaw) {
+    const arr = ncsPorVenta.get(nc.ventaId) ?? [];
+    arr.push({ numero: nc.numero, monto: Number(nc.monto) });
+    ncsPorVenta.set(nc.ventaId, arr);
+  }
+
+  const empMap = new Map(empleados.map(e => [e.id, `${e.nombre} ${e.apellido}`]));
+  const cxcMap = new Map(cxcs.map(c => [c.id, {
+    factura:    c.venta.numero,
+    cliente:    c.cliente.nombre,
+    ncsAplicadas: ncsPorVenta.get(c.venta.id) ?? [],
+  }]));
+
+  // Pagos por método
+  const porMetodo: Record<string, number> = {};
+  for (const p of pagosRaw) {
+    porMetodo[p.metodo] = (porMetodo[p.metodo] ?? 0) + Number(p.monto);
+  }
+  const totalVentas = Object.values(porMetodo).reduce((s, v) => s + v, 0);
+
+  // Clasificar movimientos
+  type MovRow = { concepto: string; monto: number; notas: string | null };
+  const gastos:   MovRow[] = [];
+  const compras:  MovRow[] = [];
+  const prestamos: Array<MovRow & { empleado: string | null }> = [];
+  const cobros: Array<{
+    factura: string; cliente: string; monto: number; metodo: string | null;
+    confirmado: boolean;
+    ncsAplicadas: Array<{ numero: string; monto: number }>;
+  }> = [];
+
+  for (const m of movs) {
+    const base = { concepto: m.concepto, monto: Number(m.monto), notas: m.notas };
+    if (m.subTipo === "GASTO")            gastos.push(base);
+    else if (m.subTipo === "COMPRA_MERCANCIA") compras.push(base);
+    else if (m.subTipo === "PRESTAMO")    prestamos.push({ ...base, empleado: m.empleadoId ? empMap.get(m.empleadoId) ?? null : null });
+    else if (m.subTipo === "COBRO_CXC") {
+      const info = m.cxcId ? cxcMap.get(m.cxcId) : null;
+      cobros.push({
+        factura:      info?.factura ?? "—",
+        cliente:      info?.cliente ?? "—",
+        monto:        Number(m.monto),
+        metodo:       m.metodo,
+        confirmado:   m.confirmado,
+        ncsAplicadas: info?.ncsAplicadas ?? [],
+      });
+    }
+  }
+
+  // Totales movimientos
+  const sum = (arr: Array<{ monto: number }>) => arr.reduce((s, r) => s + r.monto, 0);
+
+  // NC emitidas en este turno
+  const ncsEmitidas = turno.notasCredito.map(nc => ({
+    numero:          nc.numero,
+    facturaOriginal: nc.venta.numero,
+    cliente:         nc.cliente.nombre,
+    monto:           Number(nc.monto),
+    motivo:          nc.motivo,
+  }));
+
+  // Dinero recibido
+  const dr = turno.registroDinero;
+  const dineroRecibido = dr
+    ? {
+        efectivoEsperado: Number(dr.efectivoEsperado),
+        montoRecibido:    Number(dr.montoRecibido),
+        diferencia:       Number(dr.diferencia),
+      }
+    : null;
+
+  return {
+    turno: {
+      id:            turno.id,
+      numero:        turno.numero,
+      cajero:        `${turno.usuario.nombre} ${turno.usuario.apellido}`,
+      fechaApertura: turno.fechaApertura,
+      fechaCierre:   turno.fechaCierre!,
+      montoApertura: Number(turno.montoApertura),
+      montoEsperado: Number(turno.montoEsperado ?? 0),
+      montoCierre:   Number(turno.montoCierre ?? 0),
+      diferencia:    Number(turno.diferencia ?? 0),
+      notas:         turno.notas,
+    },
+    ventas: {
+      total:           totalVentas,
+      cantidad:        cantidadFacturas,
+      porMetodo: {
+        EFECTIVO:      porMetodo["EFECTIVO"]      ?? 0,
+        TARJETA:       porMetodo["TARJETA"]       ?? 0,
+        TRANSFERENCIA: porMetodo["TRANSFERENCIA"] ?? 0,
+        CHEQUE:        porMetodo["CHEQUE"]        ?? 0,
+        CREDITO:       porMetodo["CREDITO"]       ?? 0,
+      },
+    },
+    gastos,
+    compras,
+    prestamos,
+    cobros,
+    ncsEmitidas,
+    totales: {
+      gastos:   sum(gastos),
+      compras:  sum(compras),
+      prestamos: sum(prestamos),
+      cobros:   sum(cobros),
+      ncs:      ncsEmitidas.reduce((s, n) => s + n.monto, 0),
+    },
+    dineroRecibido,
+  };
+}
+
+/** Reporte detallado de un turno específico para impresión */
+export async function getReporteCierrePrint(turnoId: string) {
+  return buildDetalleTurno(turnoId);
+}
+
+/** Reporte de período para impresión — resumen por turno + totales consolidados */
+export async function getReportePeriodoPrint(desde: Date, hasta: Date) {
+  const turnos = await prisma.turnoCaja.findMany({
+    where: { estado: "CERRADO", fechaCierre: { gte: desde, lte: hasta } },
+    select: { id: true },
+    orderBy: { fechaCierre: "asc" },
+  });
+
+  if (!turnos.length) return null;
+
+  const detalles = await Promise.all(turnos.map(t => buildDetalleTurno(t.id)));
+  const filas = detalles.filter((d): d is NonNullable<typeof d> => d !== null);
+
+  const consolidado = {
+    totalVentas:   filas.reduce((s, f) => s + f.ventas.total, 0),
+    totalGastos:   filas.reduce((s, f) => s + f.totales.gastos, 0),
+    totalCompras:  filas.reduce((s, f) => s + f.totales.compras, 0),
+    totalPrestamos: filas.reduce((s, f) => s + f.totales.prestamos, 0),
+    totalCobros:   filas.reduce((s, f) => s + f.totales.cobros, 0),
+    totalNCs:      filas.reduce((s, f) => s + f.totales.ncs, 0),
+    porMetodo: {
+      EFECTIVO:      filas.reduce((s, f) => s + f.ventas.porMetodo.EFECTIVO, 0),
+      TARJETA:       filas.reduce((s, f) => s + f.ventas.porMetodo.TARJETA, 0),
+      TRANSFERENCIA: filas.reduce((s, f) => s + f.ventas.porMetodo.TRANSFERENCIA, 0),
+      CHEQUE:        filas.reduce((s, f) => s + f.ventas.porMetodo.CHEQUE, 0),
+      CREDITO:       filas.reduce((s, f) => s + f.ventas.porMetodo.CREDITO, 0),
+    },
+    turnos: filas.length,
+    cantidadFacturas: filas.reduce((s, f) => s + f.ventas.cantidad, 0),
+  };
+
+  return { filas, consolidado, desde, hasta };
+}
