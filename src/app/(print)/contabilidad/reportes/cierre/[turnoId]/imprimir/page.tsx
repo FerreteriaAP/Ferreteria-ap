@@ -78,7 +78,7 @@ export default async function ImprimirCierrePage({ params }: Props) {
   const data = await getReporteCierrePrint(turnoId);
   if (!data) notFound();
 
-  const { turno, ventas, gastos, compras, prestamos, cobros, ncsEmitidas, totales, dineroRecibido } = data;
+  const { turno, ventas, gastos, compras, prestamos, cobros, ncsEmitidas, totales } = data;
   const difColor = turno.diferencia < 0 ? "#dc2626" : turno.diferencia > 0 ? "#16a34a" : "#888";
 
   return (
@@ -388,34 +388,6 @@ export default async function ImprimirCierrePage({ params }: Props) {
             ))}
           </div>
         </div>
-
-        {/* ── Dinero recibido ── */}
-        {dineroRecibido && (
-          <div style={{
-            marginTop: 10, padding: "10px 14px",
-            background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 5,
-          }}>
-            <div style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.06em", color: "#16a34a", marginBottom: 8 }}>
-              Registro de Dinero Recibido
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-              <div>
-                <div style={{ fontSize: 8, color: "#888" }}>Efectivo esperado</div>
-                <div style={{ fontSize: 12, fontWeight: 900 }}>{fmt(dineroRecibido.efectivoEsperado)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 8, color: "#888" }}>Efectivo recibido</div>
-                <div style={{ fontSize: 12, fontWeight: 900, color: "#16a34a" }}>{fmt(dineroRecibido.montoRecibido)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 8, color: "#888" }}>Diferencia</div>
-                <div style={{ fontSize: 12, fontWeight: 900, color: dineroRecibido.diferencia < 0 ? "#dc2626" : dineroRecibido.diferencia > 0 ? "#16a34a" : "#888" }}>
-                  {dineroRecibido.diferencia >= 0 ? "+" : ""}{fmt(dineroRecibido.diferencia)}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── Conteo físico vs esperado ── */}
         <div style={{
