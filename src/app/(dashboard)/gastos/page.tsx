@@ -84,7 +84,6 @@ export default async function GastosPage({ searchParams }: PageProps) {
             {/* Tabla */}
             {gastos.length === 0 ? (
               <div className="text-center py-10 text-muted-foreground">
-                <div className="text-3xl mb-2">📭</div>
                 <p className="font-medium">Sin gastos registrados</p>
               </div>
             ) : (

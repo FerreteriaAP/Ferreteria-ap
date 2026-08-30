@@ -186,7 +186,6 @@ export default async function GastosPage({ searchParams }: PageProps) {
 
       {data.detalle.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
-          <div className="text-4xl mb-3">📭</div>
           <p className="font-medium">Sin gastos registrados en el período</p>
         </div>
       )}

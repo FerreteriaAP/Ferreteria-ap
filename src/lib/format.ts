@@ -4,12 +4,19 @@
  */
 
 /** Primera letra de cada palabra en mayúscula, resto en minúscula.
+ *  Preserva siglas de 2–5 letras mayúsculas (STD, PVC, LED, SRL, GE…).
  *  "CEMENTO GRIS 2LB" → "Cemento Gris 2lb"
  *  "consultora kolmen srl" → "Consultora Kolmen Srl"
+ *  "tubo 1/2 sch40 STD"   → "Tubo 1/2 Sch40 STD"
  */
 export function cap(s?: string | null): string {
   if (!s) return "";
-  return s.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  return s.trim().replace(/\S+/g, (word) => {
+    // Siglas puras: 2–3 letras A-Z todas mayúsculas (STD, PVC, LED, SRL, HG, GE…)
+    if (/^[A-Z]{2,3}$/.test(word)) return word;
+    // Caso normal: primera letra mayúscula, resto minúscula
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
 }
 
 /** Formatea un RNC o Cédula dominicana según la cantidad de dígitos:
