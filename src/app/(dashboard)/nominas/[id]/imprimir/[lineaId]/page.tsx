@@ -156,7 +156,7 @@ export default async function ImprimirLineaPage({ params }: PageProps) {
        /* Empleado */
        .emp-section {
          margin-bottom: 16px; padding: 10px 14px;
-         background: #fff8f3; border-radius: 5px; border-left: 3px solid #f5821f;
+         background: #f4f4f4; border-radius: 5px; border-left: 3px solid #f5821f;
        }
        .emp-name { font-size: 15px; font-weight: 900; letter-spacing: -0.3px; }
        .emp-details { display: flex; gap: 24px; margin-top: 4px; font-size: 11px; color: #555; }
@@ -179,7 +179,7 @@ export default async function ImprimirLineaPage({ params }: PageProps) {
        /* Neto */
        .neto-bar {
          display: flex; justify-content: space-between; align-items: center;
-         background: #f5821f; color: #fff; padding: 11px 16px;
+         background: #3a3a3a; color: #fff; padding: 11px 16px;
          border-radius: 5px; margin-bottom: 16px;
          -webkit-print-color-adjust: exact; print-color-adjust: exact;
        }
