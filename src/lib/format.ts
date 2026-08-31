@@ -4,18 +4,28 @@
  */
 
 /** Primera letra de cada palabra en mayúscula, resto en minúscula.
- *  Preserva siglas de 2–5 letras mayúsculas (STD, PVC, LED, SRL, GE…).
- *  "CEMENTO GRIS 2LB" → "Cemento Gris 2lb"
- *  "consultora kolmen srl" → "Consultora Kolmen Srl"
- *  "tubo 1/2 sch40 STD"   → "Tubo 1/2 Sch40 STD"
+ *  Preserva siglas de 2–3 letras mayúsculas (STD, PVC, LED, SRL, GE…).
+ *  Palabras con '/' se capitalizan parte por parte: "T/Sayco" → "T/Sayco", "PVC/STD" → "PVC/STD"
+ *  "CEMENTO GRIS 2LB"           → "Cemento Gris 2lb"
+ *  "consultora kolmen srl"      → "Consultora Kolmen Srl"
+ *  "Mezcladora Fregadero T/Sayco" → "Mezcladora Fregadero T/Sayco"
  */
 export function cap(s?: string | null): string {
   if (!s) return "";
-  return s.trim().replace(/\S+/g, (word) => {
+
+  const capWord = (word: string): string => {
     // Siglas puras: 2–3 letras A-Z todas mayúsculas (STD, PVC, LED, SRL, HG, GE…)
     if (/^[A-Z]{2,3}$/.test(word)) return word;
     // Caso normal: primera letra mayúscula, resto minúscula
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  };
+
+  return s.trim().replace(/\S+/g, (token) => {
+    // Tokens con '/' → capitalizar cada segmento por separado
+    if (token.includes("/")) {
+      return token.split("/").map(capWord).join("/");
+    }
+    return capWord(token);
   });
 }
 
