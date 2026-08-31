@@ -128,7 +128,16 @@ export async function crearNomina(data: {
  const lastDay = new Date(y, mi + 1, 0).getDate(); // último día del mes
 
  const fechaDesde = data.periodo === "PRIMERA_QUINCENA" ? drStart(1) : drStart(16);
- const fechaHasta = data.periodo === "PRIMERA_QUINCENA" ? drEnd(15)  : drEnd(lastDay);
+ let   fechaHasta = data.periodo === "PRIMERA_QUINCENA" ? drEnd(15)  : drEnd(lastDay);
+
+ // Corte: los préstamos del día en que se genera la nómina van a la quincena siguiente.
+ // "Hoy en RD" (UTC-4) → fin del día ANTERIOR = UTC de hoy a las 03:59:59.
+ const drHoy = new Date(Date.now() - 4 * 60 * 60 * 1000); // ahora en hora dominicana
+ const fechaCorte = new Date(Date.UTC(
+   drHoy.getUTCFullYear(), drHoy.getUTCMonth(), drHoy.getUTCDate(),
+   3, 59, 59, 999,
+ )); // = fin del día (hoy_DR - 1) expresado en UTC
+ if (fechaCorte < fechaHasta) fechaHasta = fechaCorte;
 
  const empleados = await prisma.empleado.findMany({
  where: { estado: "ACTIVO" },
@@ -328,7 +337,15 @@ export async function recalcularPrestamosNomina(nominaId: string) {
  const lastDay2 = new Date(y2, mi2 + 1, 0).getDate();
 
  const fechaDesde = nomina.periodo === "PRIMERA_QUINCENA" ? drStart2(1)  : drStart2(16);
- const fechaHasta = nomina.periodo === "PRIMERA_QUINCENA" ? drEnd2(15)   : drEnd2(lastDay2);
+ let   fechaHasta = nomina.periodo === "PRIMERA_QUINCENA" ? drEnd2(15)   : drEnd2(lastDay2);
+
+ // Igual que en crearNomina: préstamos del día de recálculo van a la quincena siguiente
+ const drHoy2 = new Date(Date.now() - 4 * 60 * 60 * 1000);
+ const fechaCorte2 = new Date(Date.UTC(
+   drHoy2.getUTCFullYear(), drHoy2.getUTCMonth(), drHoy2.getUTCDate(),
+   3, 59, 59, 999,
+ ));
+ if (fechaCorte2 < fechaHasta) fechaHasta = fechaCorte2;
 
  // Obtener todos los préstamos del período
  const movimientos = await prisma.movimientoCaja.findMany({
