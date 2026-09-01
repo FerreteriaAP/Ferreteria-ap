@@ -14,8 +14,8 @@ export function cap(s?: string | null): string {
   if (!s) return "";
 
   const capWord = (word: string): string => {
-    // Siglas puras: 2–3 letras A-Z todas mayúsculas (STD, PVC, LED, SRL, HG, GE…)
-    if (/^[A-Z]{2,3}$/.test(word)) return word;
+    // Siglas: 2–3 letras mayúsculas, con dígitos opcionales al final (STD, PVC, PN20, SCH40…)
+    if (/^[A-Z]{2,3}\d*$/.test(word)) return word;
     // "x" como separador de dimensiones → siempre minúscula (1 x 2 x 8)
     if (word.toLowerCase() === "x") return "x";
     // Caso normal: primera letra mayúscula, resto minúscula
