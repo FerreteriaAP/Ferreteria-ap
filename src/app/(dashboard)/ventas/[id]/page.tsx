@@ -131,12 +131,14 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
     venta.conduces.every((c: any) => c.clienteRecibio);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const detallesParaConduce = venta.detalles.map((d: any) => ({
-    productoId: d.productoId,
-    nombre:     d.descripcion || d.producto.nombre,
-    unidad:     d.unidad ?? d.producto.unidadMedida ?? "",
-    cantidad:   Number(d.cantidad),
-  }));
+  const detallesParaConduce = venta.detalles
+    .filter((d: any) => !d.producto?.esServicio)
+    .map((d: any) => ({
+      productoId: d.productoId,
+      nombre:     d.descripcion || d.producto.nombre,
+      unidad:     d.unidad ?? d.producto.unidadMedida ?? "",
+      cantidad:   Number(d.cantidad),
+    }));
 
   const modoVendedor = ["VENDEDOR", "CAJA"].includes(rolUsuario);
   const est = TIPO_STYLE[venta.tipo] ?? TIPO_STYLE.COTIZACION;

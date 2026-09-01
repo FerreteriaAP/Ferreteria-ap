@@ -964,7 +964,7 @@ export async function getConducesPDV(filtro?: "pendiente" | "entregado") {
  descripcion: true,
  unidad: true,
  cantidad: true,
- producto: { select: { nombre: true, unidadMedida: true } },
+ producto: { select: { nombre: true, unidadMedida: true, esServicio: true } },
  },
  orderBy: { orden: "asc" },
  },
@@ -998,7 +998,7 @@ export async function getConducesPDV(filtro?: "pendiente" | "entregado") {
  ventaTotal: Number(v.total),
  fechaEmision: v.fechaEmision,
  cliente: v.cliente,
- detalles: v.detalles.map(d => ({
+ detalles: v.detalles.filter(d => !d.producto.esServicio).map(d => ({
  productoId: d.productoId,
  nombre: d.descripcion ?? d.producto.nombre,
  unidad: d.unidad ?? d.producto.unidadMedida,

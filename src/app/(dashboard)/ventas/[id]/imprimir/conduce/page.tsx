@@ -25,11 +25,20 @@ export default async function ImprimirConducePage({ params, searchParams }: Page
     day: "2-digit", month: "2-digit", year: "numeric",
   });
 
-  // Máximo 8 artículos por conduce
+  // Máximo 8 artículos por conduce — servicios (acarreo, etc.) no se incluyen
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const allItems: any[] = conduce?.detallesRecepcion?.length
+  const allItemsRaw: any[] = conduce?.detallesRecepcion?.length
     ? conduce.detallesRecepcion
     : v.detalles;
+  // Mapa de esServicio por productoId para filtrar tanto detallesRecepcion como detalles directos
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const esServicioMap: Record<string, boolean> = Object.fromEntries(
+    (v.detalles ?? []).map((d: any) => [d.productoId, d.producto?.esServicio ?? false])
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allItems: any[] = allItemsRaw.filter((item: any) =>
+    !esServicioMap[item.productoId ?? item.id]
+  );
   const items = allItems.slice(0, 8);
 
   // detallesRecepcion es un JSON blob sin producto.codigo — construir mapa desde v.detalles
