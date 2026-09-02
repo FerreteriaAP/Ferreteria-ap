@@ -64,7 +64,8 @@ export function GastoForm({ categorias }: GastoFormProps) {
  </option> ))}
  </select> </div> <div className="space-y-1.5"> <Label>Descripción *</Label> <Input name="descripcion" required placeholder="Descripción del gasto" /> </div> <div className="space-y-1.5"> <Label>Monto (RD$) *</Label> <Input name="monto" type="number" step="0.01" min="0.01" required /> </div> <div className="space-y-1.5"> <Label>Fecha *</Label> <Input name="fecha" type="date" defaultValue={hoy} required /> </div> <div className="space-y-1.5"> <Label>Método de pago</Label> <Select value={metodo} onValueChange={(v) => setMetodo((v ?? "EFECTIVO") as string)}> <SelectTrigger><SelectValue /></SelectTrigger> <SelectContent> <SelectItem value="EFECTIVO">Efectivo</SelectItem> <SelectItem value="CHEQUE">Cheque</SelectItem> <SelectItem value="TRANSFERENCIA">Transferencia</SelectItem> <SelectItem value="TARJETA">Tarjeta</SelectItem> </SelectContent> </Select> </div> <div className="space-y-1.5"> <Label>Notas</Label> <Textarea name="notas" rows={2} placeholder="Observaciones opcionales" /> </div> <Separator /> <button
  type="submit" disabled={loading}
- className={cn(buttonVariants(), "w-full", loading && "opacity-50 pointer-events-none")}
+ className={cn("w-full h-9 rounded-md border px-4 text-sm font-semibold transition-colors", loading && "opacity-50 pointer-events-none")}
+ style={{ borderColor: "var(--accent-hex)", color: "var(--accent-hex)", background: "transparent" }}
  > {loading ? "Guardando..." : "Registrar gasto"}
  </button> </form> );
 }
