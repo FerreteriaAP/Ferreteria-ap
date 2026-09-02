@@ -117,6 +117,28 @@ export default async function ConfiguracionPage() {
  </div>
  )}
 
+ {/* Gastos fijos — admin y asistente */}
+ {(esAdmin || rol === "ASISTENTE_ADMINISTRATIVO") && (
+ <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}>
+   <div className="px-6 py-4 border-b flex items-center gap-3" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}>
+     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 12%, transparent)" }}>
+       <span style={{ color: "var(--accent-hex)", fontSize: 16 }}>📋</span>
+     </div>
+     <div className="flex-1">
+       <h2 className="font-semibold text-sm" style={{ color: "var(--foreground)" }}>Gastos Fijos Mensuales</h2>
+       <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>Se proyectan en analíticas el día 10 de cada mes</p>
+     </div>
+     <a
+       href="/configuracion/gastos-fijos"
+       className="text-xs px-3 py-1.5 rounded-lg border font-medium hover:bg-accent transition-colors"
+       style={{ color: "var(--accent-hex)", borderColor: "color-mix(in oklch, var(--accent-hex) 40%, var(--border))" }}
+     >
+       Administrar →
+     </a>
+   </div>
+ </div>
+ )}
+
  {/* Parámetros nómina */}
  <div
  className="rounded-2xl p-6" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}

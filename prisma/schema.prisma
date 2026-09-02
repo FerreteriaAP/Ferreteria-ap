@@ -737,6 +737,21 @@ model CategoriaGasto {
   @@map("categorias_gasto")
 }
 
+// Gastos fijos mensuales — plantillas que se proyectan en analíticas el día 10 de cada mes.
+// NO generan registros en la tabla gastos; se incluyen en reportes al exportar.
+model GastoFijo {
+  id        String   @id @default(cuid())
+  nombre    String
+  categoria String   // "Internet", "Celulares", "Limpieza", etc.
+  monto     Decimal  @db.Decimal(12, 2)
+  activo    Boolean  @default(true)
+  orden     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gastos_fijos")
+}
+
 model Gasto {
   id          String   @id @default(cuid())
   numero      String   @unique // GAS-00001

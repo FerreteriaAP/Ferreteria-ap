@@ -58,7 +58,8 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  const now = new Date();
  const params = await searchParams;
  const año = Number(params.año ?? now.getFullYear());
- const mes = params.mes ? Number(params.mes) : undefined;
+ // Default: mes actual (no "año completo")
+ const mes = params.mes !== undefined ? Number(params.mes) : (now.getMonth() + 1);
 
  // Años disponibles (2023  año actual)
  const añosDisp = Array.from({ length: now.getFullYear() - 2022 }, (_, i) => 2023 + i);
@@ -128,14 +129,14 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring min-w-[72px]" > {añosDisp.map((a) => (
  <option key={a} value={String(a)}>{a}</option> ))}
  </select> <select
- name="mes" defaultValue={mes != null ? String(mes) : ""}
+ name="mes" defaultValue={String(mes)}
  className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring min-w-[140px]" > <option value="">Año completo</option> {MESES_COMPLETOS.slice(1).map((m, i) => (
  <option key={i + 1} value={String(i + 1)}>{m}</option> ))}
  </select> <button
  type="submit" className="h-8 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 shrink-0" > Aplicar
- </button> {(mes != null || año !== now.getFullYear()) && (
+ </button> {año !== now.getFullYear() && (
  <a
- href="/contabilidad/analiticas" className="h-8 px-3 inline-flex items-center rounded-md border text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors shrink-0" > Limpiar
+ href="/contabilidad/analiticas" className="h-8 px-3 inline-flex items-center rounded-md border text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors shrink-0" > Mes actual
  </a> )}
  {mes != null && (
  <span className="ml-auto text-xs px-2.5 py-1 rounded-full font-medium shrink-0" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 15%, transparent)", color: "var(--accent-hex)" }}> {MESES_COMPLETOS[mes]} {año}

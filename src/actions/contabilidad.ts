@@ -313,11 +313,16 @@ export async function getCxPPorSuplidor(opts: {
 export async function getResumenMensualPL(año: number) {
  type VRow = { mes: number; ventas: string; cogs: string; num: string };
  type GRow = { mes: number; gastos: string };
+ type NRow = { mes: number; nomina: string };
 
- const [ventaRows, gastoRows] = await Promise.all([
+ // Fecha DR actual (UTC-4)
+ const drNow = new Date(Date.now() - 4 * 60 * 60 * 1000);
+ const mesActual = drNow.getUTCMonth() + 1;
+ const añoActual = drNow.getUTCFullYear();
+ const diaActual = drNow.getUTCDate();
+
+ const [ventaRows, gastoRows, nominaRows, gastosFijos] = await Promise.all([
  // Ventas CON ITBIS (total facturado al cliente) + COGS con costoPromedio
- // Revenue = subtotal + itbis (dinero real recibido del cliente)
- // COGS = cantidad × costoPromedio; si fraccionado ÷ factorFraccion
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
  SUM(dv.subtotal + dv.itbis)::text AS ventas,
@@ -327,10 +332,8 @@ export async function getResumenMensualPL(año: number) {
  AND p."factorFraccion" IS NOT NULL
  AND p."factorFraccion" > 0
  AND (
- -- Datos nuevos: unidad explícita diferente a la base
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR
- -- Datos viejos (unidad NULL): fraccionado si precioFinal < precioVenta
  (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
  THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
@@ -340,11 +343,12 @@ export async function getResumenMensualPL(año: number) {
  COUNT(DISTINCT v.id)::text AS num
  FROM ventas v
  JOIN detalles_venta dv ON dv."ventaId" = v.id
- JOIN productos p ON p.id = dv."productoId" WHERE v.tipo = 'FACTURADA' AND EXTRACT(YEAR FROM v."createdAt") = ${año}
+ JOIN productos p ON p.id = dv."productoId"
+ WHERE v.tipo = 'FACTURADA' AND EXTRACT(YEAR FROM v."createdAt") = ${año}
  GROUP BY mes
  ORDER BY mes
  `,
- // Gastos operativos por mes
+ // Gastos operativos registrados en el módulo de gastos (NO de caja)
  prisma.$queryRaw<GRow[]>` SELECT
  EXTRACT(MONTH FROM fecha)::int AS mes,
  SUM(monto)::text AS gastos
@@ -353,25 +357,66 @@ export async function getResumenMensualPL(año: number) {
  GROUP BY mes
  ORDER BY mes
  `,
+ // Nómina como gasto: totalBruto − AFP empleado − SFS empleado por mes
+ prisma.$queryRaw<NRow[]>` SELECT
+ n.mes,
+ SUM(ln."totalBruto" - ln."afpEmpleado" - ln."sfsEmpleado")::text AS nomina
+ FROM nominas n
+ JOIN lineas_nomina ln ON ln."nominaId" = n.id
+ WHERE n.anio = ${año}
+ GROUP BY n.mes
+ ORDER BY n.mes
+ `,
+ // Gastos fijos activos
+ prisma.$queryRaw<{ total: string }[]>`
+ SELECT SUM(monto)::text AS total FROM gastos_fijos WHERE activo = true
+ `,
  ]);
+
+ const totalGastosFijos = Number(gastosFijos[0]?.total ?? 0);
 
  return Array.from({ length: 12 }, (_, i) => {
  const m = i + 1;
  const vr = ventaRows.find((r) => r.mes === m);
  const gr = gastoRows.find((r) => r.mes === m);
+ const nr = nominaRows.find((r) => r.mes === m);
 
  const ventas = Number(vr?.ventas ?? 0);
  const cogs = Number(vr?.cogs ?? 0);
- const gastos = Number(gr?.gastos ?? 0);
+ const gastosModulo = Number(gr?.gastos ?? 0);
+ const num = Number(vr?.num ?? 0);
+
+ // Agosto 2026: excepción — solo ventas, sin gastos (2 días de arranque)
+ const esAgosto2026 = año === 2026 && m === 8;
+
+ let gastos = 0;
+ if (!esAgosto2026) {
+ // Gastos registrados en el módulo
+ gastos += gastosModulo;
+
+ // Nómina del mes
+ gastos += Number(nr?.nomina ?? 0);
+
+ // Gastos fijos: se proyectan a partir del día 10 de cada mes
+ // - Meses pasados completos: siempre se incluyen
+ // - Mes actual: solo si ya pasó el día 10
+ // - Meses futuros: no se incluyen
+ const esMesActual = año === añoActual && m === mesActual;
+ const esMesPasado = año < añoActual || (año === añoActual && m < mesActual);
+ if (esMesPasado || (esMesActual && diaActual >= 10)) {
+ gastos += totalGastosFijos;
+ }
+ }
+
  const gananciaBruta = ventas - cogs;
  const gananciaNeta = gananciaBruta - gastos;
- const num = Number(vr?.num ?? 0);
 
  return {
  mes: m,
  ventas,
  cogs,
  gastos,
+ gastosModulo, // desglose para reportes
  gananciaBruta,
  gananciaNeta,
  margenBruto: ventas > 0 ? (gananciaBruta / ventas) * 100 : 0,
@@ -1115,4 +1160,55 @@ export async function pagarMultiplesCxP(
  revalidatePath("/contabilidad/cxp");
  revalidatePath("/compras");
  return { ok: true };
+}
+
+// ─── GASTOS FIJOS ──────────────────────────────────────────────────────────────
+
+export async function getGastosFijos() {
+  return prisma.$queryRaw<{
+    id: string; nombre: string; categoria: string;
+    monto: string; activo: boolean; orden: number;
+  }[]>`
+    SELECT id, nombre, categoria, monto::text, activo, orden
+    FROM gastos_fijos
+    ORDER BY orden ASC, nombre ASC
+  `;
+}
+
+export async function upsertGastoFijo(data: {
+  id?: string;
+  nombre: string;
+  categoria: string;
+  monto: number;
+  activo?: boolean;
+}) {
+  if (data.id) {
+    await prisma.$executeRaw`
+      UPDATE gastos_fijos
+      SET nombre = ${data.nombre}, categoria = ${data.categoria},
+          monto = ${data.monto}, activo = ${data.activo ?? true},
+          "updatedAt" = NOW()
+      WHERE id = ${data.id}
+    `;
+  } else {
+    const maxOrden = await prisma.$queryRaw<{ max: number }[]>`
+      SELECT COALESCE(MAX(orden), 0) AS max FROM gastos_fijos
+    `;
+    const orden = Number((maxOrden[0] as { max: number }).max) + 1;
+    await prisma.$executeRaw`
+      INSERT INTO gastos_fijos (id, nombre, categoria, monto, activo, orden)
+      VALUES (gen_random_uuid()::text, ${data.nombre}, ${data.categoria},
+              ${data.monto}, ${data.activo ?? true}, ${orden})
+    `;
+  }
+  revalidatePath("/contabilidad/analiticas");
+  revalidatePath("/configuracion/gastos-fijos");
+  return { ok: true };
+}
+
+export async function deleteGastoFijo(id: string) {
+  await prisma.$executeRaw`DELETE FROM gastos_fijos WHERE id = ${id}`;
+  revalidatePath("/contabilidad/analiticas");
+  revalidatePath("/configuracion/gastos-fijos");
+  return { ok: true };
 }
