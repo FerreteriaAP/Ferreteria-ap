@@ -51,10 +51,10 @@ export default async function GastosPage({ searchParams }: PageProps) {
 
         {/* Formulario nuevo gasto */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-            <div className="px-5 py-3 border-b flex items-center gap-2" style={{ backgroundColor: HEADER_BG }}>
+          <div className="rounded-xl overflow-hidden" style={{ backgroundColor: CARD_BG, border: "1.5px solid var(--accent-hex)" }}>
+            <div className="px-5 py-3 border-b flex items-center gap-2" style={{ backgroundColor: HEADER_BG, borderColor: "var(--accent-hex)" }}>
               <div className="w-1 h-4 rounded-full" style={{ backgroundColor: "var(--accent-hex)" }} />
-              <h2 className="font-semibold text-sm">Registrar gasto</h2>
+              <h2 className="font-semibold text-sm" style={{ color: "var(--accent-hex)" }}>Registrar gasto</h2>
             </div>
             <div className="p-5">
               <GastoForm categorias={categoriasForm} />
