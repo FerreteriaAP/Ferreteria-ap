@@ -321,7 +321,7 @@ export async function getResumenMensualPL(año: number) {
  const añoActual = drNow.getUTCFullYear();
  const diaActual = drNow.getUTCDate();
 
- const [ventaRows, gastoRows, nominaRows, gastosFijos] = await Promise.all([
+ const [ventaRows, gastoRows, gastosFijos] = await Promise.all([
  // Ventas CON ITBIS (total facturado al cliente) + COGS con costoPromedio
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
@@ -357,21 +357,27 @@ export async function getResumenMensualPL(año: number) {
  GROUP BY mes
  ORDER BY mes
  `,
- // Nómina como gasto: totalBruto − AFP empleado − SFS empleado por mes
- prisma.$queryRaw<NRow[]>` SELECT
- n.mes,
- SUM(ln."totalBruto" - ln."afpEmpleado" - ln."sfsEmpleado")::text AS nomina
- FROM nominas n
- JOIN lineas_nomina ln ON ln."nominaId" = n.id
- WHERE n.anio = ${año}
- GROUP BY n.mes
- ORDER BY n.mes
- `,
  // Gastos fijos activos
  prisma.$queryRaw<{ total: string }[]>`
  SELECT SUM(monto)::text AS total FROM gastos_fijos WHERE activo = true
  `,
  ]);
+
+ // Nómina: query separada con fallback por si la tabla no existe aún en producción
+ let nominaRows: NRow[] = [];
+ try {
+   nominaRows = await prisma.$queryRaw<NRow[]>`
+     SELECT n.mes,
+            SUM(ln."totalBruto" - ln."afpEmpleado" - ln."sfsEmpleado")::text AS nomina
+     FROM nominas n
+     JOIN lineas_nomina ln ON ln."nominaId" = n.id
+     WHERE n.anio = ${año}
+     GROUP BY n.mes
+     ORDER BY n.mes
+   `;
+ } catch {
+   // lineas_nomina aún no existe en producción — nómina = 0
+ }
 
  const totalGastosFijos = Number(gastosFijos[0]?.total ?? 0);
 
