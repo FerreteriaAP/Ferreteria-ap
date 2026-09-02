@@ -28,6 +28,10 @@ export default async function GastosPage({ searchParams }: PageProps) {
     getCategoriasGasto(),
   ]);
 
+  // Solo categorías variables para el formulario de registro
+  // (las fijas se proyectan automáticamente desde gastos_fijos)
+  const categoriasForm = categorias.filter((c) => c.tipo === "VARIABLE");
+
   const totalMonto = gastos.reduce((s, g) => s + Number(g.monto), 0);
 
   return (
@@ -53,7 +57,7 @@ export default async function GastosPage({ searchParams }: PageProps) {
               <h2 className="font-semibold text-sm">Registrar gasto</h2>
             </div>
             <div className="p-5">
-              <GastoForm categorias={categorias} />
+              <GastoForm categorias={categoriasForm} />
             </div>
           </div>
         </div>
