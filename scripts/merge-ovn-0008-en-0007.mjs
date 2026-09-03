@@ -5,7 +5,8 @@
 //
 // Correr: node scripts/merge-ovn-0008-en-0007.mjs
 
-import { PrismaClient } from "@prisma/client";
+import pkg from "@prisma/client";
+const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
 const N_0007 = "OVN/2026/0007";

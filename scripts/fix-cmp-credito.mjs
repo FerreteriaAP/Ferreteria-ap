@@ -1,5 +1,6 @@
 // Extiende CMP/2026/0001: crédito 30→60 días (+30 días a fechaVencimiento)
-import { PrismaClient } from "@prisma/client";
+import pkg from "@prisma/client";
+const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient();
 
