@@ -5,7 +5,7 @@
 //
 // Correr: node scripts/merge-ovn.cjs
 
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient } = require("../src/generated/prisma");
 const prisma = new PrismaClient();
 
 const N_0007 = "OVN/2026/0007";
