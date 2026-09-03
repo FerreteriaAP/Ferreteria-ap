@@ -309,7 +309,8 @@ export function CxPMultiSelect({ grupos }: Props) {
                   <div className="w-[134px] shrink-0">NCF</div>
                   <div className="w-[76px] shrink-0">F. Factura</div>
                   <div className="flex-1" />
-                  <div className="w-[100px] shrink-0 text-right">Vencimiento</div>
+                  <div className="w-[76px] shrink-0 text-right">F. Vence</div>
+                  <div className="w-[96px] shrink-0 text-right">Días</div>
                   <div className="w-[80px] shrink-0 text-center">Estado</div>
                   <div className="w-[130px] shrink-0 text-right">Saldo</div>
                 </div>
@@ -361,19 +362,25 @@ export function CxPMultiSelect({ grupos }: Props) {
 
                     <div className="flex-1" />
 
-                    {/* Vencimiento: fecha + días */}
-                    <div className="w-[100px] shrink-0 text-right">
-                      <p className="text-xs text-muted-foreground whitespace-nowrap">
+                    {/* Fecha de vencimiento */}
+                    <div className="w-[76px] shrink-0 text-right">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
                         {new Date(c.fechaVencimiento).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "2-digit" })}
-                      </p>
-                      <p className={cn(
-                        "text-[11px] font-semibold whitespace-nowrap",
+                      </span>
+                    </div>
+
+                    {/* Días restantes / vencida */}
+                    <div className="w-[96px] shrink-0 text-right">
+                      <span className={cn(
+                        "text-xs font-semibold whitespace-nowrap",
                         c.diasRestantes < 0 ? "text-destructive" : "text-muted-foreground"
                       )}>
-                        {c.diasRestantes === 0 ? "Vence hoy"
-                          : c.diasRestantes < 0 ? `${Math.abs(c.diasRestantes)}d vencida`
-                          : `en ${c.diasRestantes}d`}
-                      </p>
+                        {c.diasRestantes === 0
+                          ? "Vence hoy"
+                          : c.diasRestantes < 0
+                            ? `${Math.abs(c.diasRestantes)} Días vencida`
+                            : `${c.diasRestantes} Días`}
+                      </span>
                     </div>
 
                     {/* Estado */}
