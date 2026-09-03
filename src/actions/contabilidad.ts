@@ -336,8 +336,8 @@ export async function getResumenMensualPL(año: number) {
  OR
  (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
- ELSE dv.cantidad * p."costoPromedio"
+ THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
  END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS num
@@ -786,8 +786,8 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
- ELSE dv.cantidad * p."costoPromedio"
+ THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
  END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS facturas
@@ -857,8 +857,8 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
- ELSE dv.cantidad * p."costoPromedio"
+ THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
  END
  )::text AS cogs,
  SUM(

@@ -773,8 +773,19 @@ export async function facturarVenta(ventaId: string, data: {
  },
  });
 
- // TODO: activar tras migrar servidor (pnpm prisma db push)
- // Snapshot costoAlVender para COGS histórico exacto — pendiente de columna en servidor
+ // Snapshot costoAlVender: congela el costoPromedio de cada producto al momento de facturar
+ {
+   const detallesConCosto = await tx.detalleVenta.findMany({
+     where: { ventaId },
+     include: { producto: { select: { costoPromedio: true } } },
+   });
+   for (const d of detallesConCosto) {
+     await tx.detalleVenta.update({
+       where: { id: d.id },
+       data: { costoAlVender: d.producto.costoPromedio },
+     });
+   }
+ }
 
  // Crear CxC para TODAS las ventas del módulo (contado = vence hoy, crédito = N días).
  // PDV/caja gestiona su propia CxC; este bloque es solo para el flujo cotización→factura.

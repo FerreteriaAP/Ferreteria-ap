@@ -577,7 +577,7 @@ model DetalleVenta {
   descuento   Decimal @default(0) @db.Decimal(5, 2) // %
   itbis         Decimal  @default(0) @db.Decimal(12, 2)
   subtotal      Decimal  @db.Decimal(12, 2) // base sin ITBIS
-  // costoAlVender Decimal? @db.Decimal(12, 4) // snapshot de costoPromedio — PENDIENTE: agregar tras correr `pnpm prisma db push` en servidor
+  costoAlVender Decimal? @db.Decimal(12, 4) // snapshot de costoPromedio al momento de facturar (inmutable)
   orden         Int      @default(0) // para ordenar ítems en conduce
 
   venta    Venta    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
