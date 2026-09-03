@@ -37,6 +37,7 @@ const RecepcionItemSchema = z.object({
  cantRecibida: z.coerce.number().min(0),
  costo: z.coerce.number().min(0),
  itbisPct: z.coerce.number().min(0).default(0),
+ descuento: z.coerce.number().min(0).max(100).default(0),
 });
 
 const RecepcionSchema = z.object({
@@ -48,6 +49,7 @@ const RecepcionSchema = z.object({
  fechaVencimiento: z.string().optional(),
  notas: z.string().optional(),
  items: z.array(RecepcionItemSchema).min(1),
+ ajustesPrecio: z.array(z.object({ productoId: z.string(), nuevoPrecioVenta: z.number() })).optional(),
 });
 
 export type RecepcionInput = z.infer<typeof RecepcionSchema>;
@@ -113,7 +115,7 @@ export async function getOrdenCompra(id: string) {
  detalles: {
  include: {
  producto: {
- select: { id: true, nombre: true, codigo: true, unidadMedida: true, costoUltimo: true, stockActual: true },
+ select: { id: true, nombre: true, codigo: true, unidadMedida: true, costoUltimo: true, stockActual: true, precioVenta: true, porcentajeGanancia: true },
  },
  },
  },
@@ -228,14 +230,15 @@ export async function confirmarRecepcionOC(ordenId: string, data: RecepcionInput
  if (oc.estado === "CANCELADA") return { error: "La orden está cancelada" };
  if (oc.estado === "RECIBIDA") return { error: "La orden ya fue totalmente recibida" };
 
- const { suplidorId, noFacturaSuplidor, ncf, tipoNcfCompra, fechaFactura, fechaVencimiento, notas, items } = parsed.data;
+ const { suplidorId, noFacturaSuplidor, ncf, tipoNcfCompra, fechaFactura, fechaVencimiento, notas, items, ajustesPrecio } = parsed.data;
 
  // Solo ítems con cantidad recibida > 0
  const itemsRecibidos = items.filter((i) => i.cantRecibida > 0);
  if (itemsRecibidos.length === 0) return { error: "Debe recibir al menos un ítem" };
 
- const subtotal = itemsRecibidos.reduce((s, i) => s + i.cantRecibida * i.costo, 0);
- const totalItbis = itemsRecibidos.reduce((s, i) => s + i.cantRecibida * i.costo * (i.itbisPct / 100), 0);
+ // Los costos llegan ya normalizados (sin ITBIS, con descuento aplicado) desde el form
+ const subtotal   = itemsRecibidos.reduce((s, i) => s + i.cantRecibida * i.costo, 0);
+ const totalItbis = itemsRecibidos.reduce((s, i) => s + i.cantRecibida * i.costo * 0.18, 0);
  const total = subtotal + totalItbis;
 
  try {
@@ -329,7 +332,19 @@ export async function confirmarRecepcionOC(ordenId: string, data: RecepcionInput
  });
  }
 
- // 5. Actualizar estado de la OC
+ // 5. Actualizar precios de venta si el usuario lo indicó
+ if (ajustesPrecio && ajustesPrecio.length > 0) {
+  for (const aj of ajustesPrecio) {
+   if (aj.nuevoPrecioVenta > 0) {
+    await tx.producto.update({
+     where: { id: aj.productoId },
+     data: { precioVenta: aj.nuevoPrecioVenta },
+    });
+   }
+  }
+ }
+
+ // 6. Actualizar estado de la OC
  const detallesActualizados = await tx.detalleOrdenCompra.findMany({ where: { ordenId } });
  const todosRecibidos = detallesActualizados.every(
  (d) => Number(d.cantRecibida) >= Number(d.cantidad)
