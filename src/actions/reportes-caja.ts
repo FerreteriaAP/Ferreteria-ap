@@ -171,15 +171,19 @@ import { revalidatePath } from "next/cache";
 /** Devuelve todos los turnos CERRADOS en el rango con su registro de dinero recibido.
  *  También calcula montoApertura del turno siguiente (para efectivoEsperado).
  */
-export async function getReporteDineroRecibido(desde: Date, hasta: Date) {
-  // Turnos cerrados en el rango, ordenados ASC para poder parear con el siguiente
+export async function getReporteDineroRecibido(desde: Date | null, hasta: Date | null) {
+  // Sin fechas → últimos 25 cierres; con fechas → filtrar por rango
   const turnosCerrados = await prisma.turnoCaja.findMany({
-    where: { estado: "CERRADO", fechaCierre: { gte: desde, lte: hasta } },
+    where: {
+      estado: "CERRADO",
+      ...(desde && hasta ? { fechaCierre: { gte: desde, lte: hasta } } : {}),
+    },
     include: {
       usuario: { select: { nombre: true, apellido: true } },
       registroDinero: true,
     },
-    orderBy: { fechaCierre: "asc" },
+    orderBy: { fechaCierre: "desc" },
+    ...(desde && hasta ? {} : { take: 25 }),
   });
 
   if (!turnosCerrados.length) return { filas: [], resumen: null };

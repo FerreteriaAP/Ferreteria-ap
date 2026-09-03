@@ -37,21 +37,28 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
   const rol = (session?.user as { rol?: string })?.rol ?? "";
   const soloMovimientos = rol === "ASISTENTE_ADMINISTRATIVO";
 
-  const tipo   = p.tipo   ?? "mes";
-  const fecha  = p.fecha;
-  const mes    = p.mes;
-  const q      = p.q;
-  const desde  = p.desde;
-  const hasta  = p.hasta;
   const reporte = soloMovimientos ? "movimientos" : (p.reporte ?? "cierres");
 
+  // Movimientos: si no tiene filtro explícito, defaultear a hoy
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const tieneFiltrExplicito = p.tipo !== undefined;
+  const tipo  = tieneFiltrExplicito ? p.tipo! : (reporte === "movimientos" ? "dia" : "mes");
+  const fecha = tieneFiltrExplicito ? p.fecha : (reporte === "movimientos" ? todayStr : undefined);
+  const mes   = p.mes;
+  const q     = p.q;
+  const desde = p.desde;
+  const hasta = p.hasta;
+
   const { desde: dDesde, hasta: dHasta, label } = rangoFechas({ tipo, fecha, mes, q, desde, hasta });
+
+  // Dinero recibido: sin filtro explícito → últimos 25 cierres
+  const dineroConFiltro = reporte === "dinero-recibido" && tieneFiltrExplicito;
 
   const [dataCierres, dataMovs, dataDinero, dataNCs] = await Promise.all([
     getReporteCierres(dDesde, dHasta),
     getReporteMovimientos(dDesde, dHasta),
-    getReporteDineroRecibido(dDesde, dHasta),
-    getNotasCreditoAdmin({ pageSize: 500 }),
+    getReporteDineroRecibido(dineroConFiltro ? dDesde : null, dineroConFiltro ? dHasta : null),
+    getNotasCreditoAdmin({ pageSize: 25 }),
   ]);
 
   return (
@@ -78,7 +85,7 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
 
       {/* Filtro interactivo */}
       <ReportesFiltro
-        tipo={tipo} fecha={fecha} mes={mes} q={q} desde={desde} hasta={hasta}
+        tipo={tipo} fecha={fecha ?? todayStr} mes={mes} q={q} desde={desde} hasta={hasta}
         reporte={reporte}
         soloMovimientos={soloMovimientos}
       />

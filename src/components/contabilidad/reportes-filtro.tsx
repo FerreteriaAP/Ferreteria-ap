@@ -152,7 +152,8 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
 
  {/* Botón Aplicar */}
  <button type="button" onClick={aplicar}
- className="h-9 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm">
+ className="h-9 px-5 rounded-lg text-sm font-semibold transition-colors"
+ style={{ border: "1.5px solid #F47717", color: "#F47717", background: "transparent" }}>
   Generar
  </button>
  {/* Botón: emitir reporte del período (todos los tabs con página de impresión) */}
@@ -161,8 +162,7 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
    href={buildPeriodoUrl()}
    target="_blank"
    rel="noopener noreferrer"
-   className="h-9 px-4 rounded-lg text-sm font-semibold border transition-colors hover:bg-accent flex items-center gap-1.5"
-   style={{ borderColor: "#f5821f", color: "#f5821f" }}
+   className="h-9 px-4 rounded-lg text-sm font-semibold border transition-colors hover:bg-accent flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
   >
    <Printer size={14} />
    Emitir reporte del período

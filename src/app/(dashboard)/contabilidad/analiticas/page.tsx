@@ -133,13 +133,16 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring min-w-[140px]" > <option value="">Año completo</option> {MESES_COMPLETOS.slice(1).map((m, i) => (
  <option key={i + 1} value={String(i + 1)}>{m}</option> ))}
  </select> <button
- type="submit" className="h-8 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 shrink-0" > Aplicar
+ type="submit"
+ className="h-8 px-4 rounded-md text-sm font-semibold shrink-0 transition-colors"
+ style={{ border: "1.5px solid #F47717", color: "#F47717", background: "transparent" }}
+ > Aplicar
  </button> {año !== now.getFullYear() && (
  <a
  href="/contabilidad/analiticas" className="h-8 px-3 inline-flex items-center rounded-md border text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors shrink-0" > Mes actual
  </a> )}
- {mes != null && (
- <span className="ml-auto text-xs px-2.5 py-1 rounded-full font-medium shrink-0" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 15%, transparent)", color: "var(--accent-hex)" }}> {MESES_COMPLETOS[mes]} {año}
+ {mes > 0 && (
+ <span className="ml-auto text-xs px-2.5 py-1 rounded-full font-medium shrink-0" style={{ border: "1px solid rgba(255,255,255,0.55)", color: "var(--foreground)", background: "transparent" }}> {MESES_COMPLETOS[mes]} {año}
  </span> )}
  </div> </form> {/* Estado de resultados (P&L) */}
  <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Estado de resultados — {etiquetaPeriodo}</h2> </div> <div className="p-5 space-y-0 divide-y"> {/* Ventas */}
