@@ -32,9 +32,11 @@ async function main() {
   }
 
   await prisma.$transaction(async (tx) => {
-    // Eliminar detalles primero (por si no hay cascade configurado)
+    // 1. Eliminar conduces asociados
+    await tx.conduce.deleteMany({ where: { ventaId: v.id } });
+    // 2. Eliminar detalles
     await tx.detalleVenta.deleteMany({ where: { ventaId: v.id } });
-    // Eliminar la venta
+    // 3. Eliminar la venta
     await tx.venta.delete({ where: { id: v.id } });
   });
 
