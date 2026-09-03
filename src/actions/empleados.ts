@@ -149,3 +149,46 @@ export async function actualizarEmpleado(id: string, data: Partial<{
  revalidatePath("/empleados");
  return { ok: true };
 }
+
+// Estadísticas de actividad — para comisiones por desempeño
+
+export async function getEstadisticasEmpleado(empleadoId: string, mes?: string) {
+ // Resolver el usuarioId a partir del empleadoId
+ const usuario = await prisma.usuario.findFirst({ where: { empleadoId }, select: { id: true } });
+ if (!usuario) return { pdvTotal: 0, cotizaciones: 0, ordenes: 0, conduces: 0, facturas: 0, ordenesCompra: 0 };
+ const usuarioId = usuario.id;
+
+ // Rango de fechas si se filtra por mes (YYYY-MM)
+ let desde: Date | undefined;
+ let hasta: Date | undefined;
+ if (mes) {
+  const [y, m] = mes.split("-").map(Number);
+  desde = new Date(y, m - 1, 1, 0, 0, 0, 0);
+  hasta = new Date(y, m, 0, 23, 59, 59, 999);
+ }
+
+ const fechaWhere = desde && hasta
+  ? { createdAt: { gte: desde, lte: hasta } }
+  : {};
+
+ const [
+  pdvTotal,
+  cotizaciones,
+  ordenes,
+  conduces,
+  facturas,
+  ordenesCompra,
+ ] = await Promise.all([
+  // Ventas PDV: turnoId != null, creador = este usuario
+  prisma.venta.count({ where: { creadorId: usuarioId, turnoId: { not: null }, ...fechaWhere } }),
+  // Módulo ventas por tipo, vendedor = este usuario
+  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "COTIZACION", ...fechaWhere } }),
+  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "ORDEN_VENTA", ...fechaWhere } }),
+  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "CONDUCE", ...fechaWhere } }),
+  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "FACTURADA", ...fechaWhere } }),
+  // Órdenes de compra
+  prisma.ordenCompra.count({ where: { usuarioId, ...fechaWhere } }),
+ ]);
+
+ return { pdvTotal, cotizaciones, ordenes, conduces, facturas, ordenesCompra };
+}
