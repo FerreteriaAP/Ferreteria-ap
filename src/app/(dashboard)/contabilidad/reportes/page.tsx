@@ -39,11 +39,12 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
 
   const reporte = soloMovimientos ? "movimientos" : (p.reporte ?? "cierres");
 
-  // Movimientos: si no tiene filtro explícito, defaultear a hoy
+  // Movimientos y cierres: si no tiene filtro explícito, defaultear a hoy
   const todayStr = new Date().toISOString().slice(0, 10);
   const tieneFiltrExplicito = p.tipo !== undefined;
-  const tipo  = tieneFiltrExplicito ? p.tipo! : (reporte === "movimientos" ? "dia" : "mes");
-  const fecha = tieneFiltrExplicito ? p.fecha : (reporte === "movimientos" ? todayStr : undefined);
+  const defaultDia = reporte === "movimientos" || reporte === "cierres";
+  const tipo  = tieneFiltrExplicito ? p.tipo! : (defaultDia ? "dia" : "mes");
+  const fecha = tieneFiltrExplicito ? p.fecha : (defaultDia ? todayStr : undefined);
   const mes   = p.mes;
   const q     = p.q;
   const desde = p.desde;
