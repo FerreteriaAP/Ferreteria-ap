@@ -125,10 +125,12 @@ export async function getResumenTurno(id: string): Promise<ResumenTurno> {
  const totalVentas = turno.ventas.reduce((s, v) => s + Number(v.total), 0);
 
  const entradasMov = turno.movimientos
- .filter(m => m.tipo === "ENTRADA" && m.subTipo !== "COBRO_CXC") // COBRO_CXC no confirmado no suma
+ .filter(m => m.tipo === "ENTRADA" && m.subTipo !== "COBRO_CXC")
  .reduce((s, m) => s + Number(m.monto), 0);
+ // CxC en efectivo: siempre cuentan en la gaveta (el dinero ya está físicamente ahí,
+ // sin importar si el admin confirmó el cobro o no). Tarjeta/transf./cheque no afectan efectivo.
  const entradasCxC = turno.movimientos
- .filter(m => m.tipo === "ENTRADA" && m.subTipo === "COBRO_CXC" && m.confirmado)
+ .filter(m => m.tipo === "ENTRADA" && m.subTipo === "COBRO_CXC" && m.metodo === "EFECTIVO")
  .reduce((s, m) => s + Number(m.monto), 0);
  const salidasMov = turno.movimientos
  .filter(m => m.tipo === "SALIDA")
