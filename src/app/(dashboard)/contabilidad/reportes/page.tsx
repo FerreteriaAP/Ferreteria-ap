@@ -28,7 +28,7 @@ const SUB_TIPOS = [
 interface PageProps {
   searchParams: Promise<{
     tipo?: string; fecha?: string; mes?: string; q?: string;
-    desde?: string; hasta?: string; reporte?: string;
+    desde?: string; hasta?: string; reporte?: string; filtrar?: string;
   }>;
 }
 
@@ -51,8 +51,9 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
 
   const { desde: dDesde, hasta: dHasta, label } = rangoFechas({ tipo, fecha, mes, q, desde, hasta });
 
-  // Dinero recibido: sin filtro explícito → últimos 25 cierres
-  const dineroConFiltro = reporte === "dinero-recibido" && tieneFiltrExplicito;
+  // Dinero recibido: solo aplica rango cuando el usuario hizo clic en "Generar" (filtrar=1)
+  // Si el usuario solo cambió de tab la URL lleva tipo= pero NO filtrar=1 → mostramos últimos 25
+  const dineroConFiltro = reporte === "dinero-recibido" && p.filtrar === "1";
 
   const [dataCierres, dataMovs, dataDinero, dataNCs] = await Promise.all([
     getReporteCierres(dDesde, dHasta),

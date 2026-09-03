@@ -70,7 +70,16 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  return `${pathname}?${new URLSearchParams(p).toString()}`;
  };
 
- const aplicar = () => router.push(buildUrl());
+ // Para dinero-recibido: añade filtrar=1 al aplicar (indica que el usuario quiso filtrar)
+ const aplicar = () => {
+  const base = buildUrl();
+  if (reporte === "dinero-recibido") {
+   const sep = base.includes("?") ? "&" : "?";
+   router.push(`${base}${sep}filtrar=1`);
+  } else {
+   router.push(base);
+  }
+ };
 
  const REPORTE_PRINT_PATH: Record<string, string> = {
   "cierres":         "/contabilidad/reportes/periodo",
