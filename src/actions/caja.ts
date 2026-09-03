@@ -499,7 +499,7 @@ export async function eliminarFacturaPDV(ventaId: string) {
     if (venta.cuentasPorCobrar.length > 0) {
       await tx.cuentaPorCobrar.updateMany({
         where: { ventaId },
-        data: { estado: "CANCELADO" },
+        data: { saldo: 0, estado: "PAGADO" },
       });
     }
 
