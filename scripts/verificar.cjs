@@ -1,11 +1,13 @@
-// Verifica el estado actual de CMP/2026/0001 y OVN/2026/0007
-// Correr: node scripts/verificar.cjs
+// node scripts/verificar.cjs
+require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 
 const { PrismaClient } = require("../src/generated/prisma");
-const prisma = new PrismaClient();
+const { PrismaPg }     = require("@prisma/adapter-pg");
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma  = new PrismaClient({ adapter });
 
 async function main() {
-  // CMP
   const compra = await prisma.compra.findFirst({
     where: { numero: "CMP/2026/0001" },
     select: { numero: true, fechaVencimiento: true, cuentasPorPagar: { select: { fechaVencimiento: true, saldo: true } } },
@@ -13,7 +15,6 @@ async function main() {
   console.log("\n── CMP/2026/0001 ──");
   console.log(compra ?? "No encontrada");
 
-  // OVN 0007
   const v0007 = await prisma.venta.findFirst({
     where: { numero: "OVN/2026/0007" },
     select: {
@@ -24,14 +25,13 @@ async function main() {
   console.log("\n── OVN/2026/0007 ──");
   if (v0007) {
     console.log("total:", v0007.total, "subtotal:", v0007.subtotal);
-    v0007.detalles.forEach(d => {
-      console.log(`  ${d.producto.codigo} — ${d.producto.nombre}: ${d.cantidad}`);
-    });
+    v0007.detalles.forEach(d =>
+      console.log(`  ${d.producto.codigo} — ${d.producto.nombre}: ${d.cantidad}`)
+    );
   } else {
     console.log("No encontrada");
   }
 
-  // OVN 0008
   const v0008 = await prisma.venta.findFirst({
     where: { numero: "OVN/2026/0008" },
     select: { numero: true, estado: true, total: true },
