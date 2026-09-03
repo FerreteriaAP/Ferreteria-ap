@@ -33,13 +33,6 @@ function Row({ label, value }: { label: string; value: string | undefined | null
   );
 }
 
-// Empleados para los que se muestra el cuadro de actividad/comisiones
-const EMPLEADOS_COMISION = ["eddy", "raul", "raúl"];
-
-function esEmpleadoComision(nombre: string) {
-  return EMPLEADOS_COMISION.some(n => nombre.toLowerCase().startsWith(n));
-}
-
 function StatTile({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div
@@ -61,7 +54,7 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rol = ((session?.user) as any)?.rol ?? "";
   const esAdmin = rol === "ADMINISTRADOR";
-  const mostrarActividad = esAdmin && esEmpleadoComision(empleado.nombre) && !!empleado.usuario;
+  const mostrarActividad = esAdmin && !!empleado.usuario;
 
   const mes = sp.mes;
 
