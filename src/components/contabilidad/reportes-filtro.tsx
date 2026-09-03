@@ -57,7 +57,7 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  setDesde(desdeProp || mesStr + "-01");
  setHasta(hastaProp || todayStr);
  // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [tipoProp, fechaProp, mesProp, qProp, desdeProp, hastaProp]);
+ }, [tipoProp, fechaProp, mesProp, qProp, desdeProp, hastaProp, reporte]);
 
  // Construir URL de búsqueda
  const buildUrl = (overrides: Record<string, string> = {}) => {
@@ -109,7 +109,9 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  { key: "dinero-recibido", label: "Dinero Recibido",    cv: "var(--report-tab-dinero,      #22c55e)" },
  ].filter(r => !(soloMovimientos && r.key !== "movimientos")).map(r => (
  <a key={r.key}
- href={buildUrl({ reporte: r.key })}
+ href={r.key === "movimientos"
+   ? buildUrl({ reporte: r.key, tipo: "dia", fecha: todayStr })
+   : buildUrl({ reporte: r.key })}
  style={reporte === r.key
    ? { backgroundColor: `color-mix(in oklch, ${r.cv} 12%, transparent)`, color: r.cv, borderColor: r.cv }
    : { color: r.cv, borderColor: `color-mix(in oklch, ${r.cv} 35%, transparent)`, backgroundColor: "transparent" }
