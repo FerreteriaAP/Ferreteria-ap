@@ -109,9 +109,13 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  { key: "dinero-recibido", label: "Dinero Recibido",    cv: "var(--report-tab-dinero,      #22c55e)" },
  ].filter(r => !(soloMovimientos && r.key !== "movimientos")).map(r => (
  <a key={r.key}
- href={r.key === "movimientos"
-   ? buildUrl({ reporte: r.key, tipo: "dia", fecha: todayStr })
-   : buildUrl({ reporte: r.key })}
+ href={
+   r.key === "movimientos"
+     ? buildUrl({ reporte: r.key, tipo: "dia", fecha: todayStr })
+     : r.key === "cierres"
+     ? buildUrl({ reporte: r.key, tipo: "mes", mes: mesStr })
+     : buildUrl({ reporte: r.key })
+ }
  style={reporte === r.key
    ? { backgroundColor: `color-mix(in oklch, ${r.cv} 12%, transparent)`, color: r.cv, borderColor: r.cv }
    : { color: r.cv, borderColor: `color-mix(in oklch, ${r.cv} 35%, transparent)`, backgroundColor: "transparent" }
