@@ -3,6 +3,7 @@ import { getConsumidorFinal } from "@/actions/pdv";
 import { AbrirTurnoForm } from "@/components/caja/abrir-turno-form";
 import { CajaDashboard } from "@/components/caja/caja-dashboard";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
 
 export const metadata = { title: "Caja — Ferretería AP" };
 
@@ -18,7 +19,9 @@ function fmtDate(d: Date | string) {
 }
 
 export default async function CajaPage() {
-  const turnoActivo = await getTurnoActivo();
+  const [turnoActivo, session] = await Promise.all([getTurnoActivo(), auth()]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const esAdmin = ((session?.user) as any)?.rol === "ADMINISTRADOR";
 
   const [facturas, empleados, consumidorFinal] = turnoActivo
     ? await Promise.all([getFacturasPendientesCaja(), getEmpleadosActivos(), getConsumidorFinal()])
@@ -112,6 +115,7 @@ export default async function CajaPage() {
             }))}
             empleados={empleados}
             consumidorFinalId={consumidorFinal.id}
+            esAdmin={esAdmin}
           />
         </>
       ) : (

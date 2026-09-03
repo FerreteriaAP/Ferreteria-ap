@@ -60,6 +60,7 @@ interface Props {
  facturas: FacturaPendiente[];
  empleados: Empleado[];
  consumidorFinalId: string;
+ esAdmin?: boolean;
 }
 
 // Helpers
@@ -1090,7 +1091,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
 
 type ModalType = "pago" | "gasto" | "compra" | "prestamo" | "cobro_cxc" | "nota_credito" | null;
 
-export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, consumidorFinalId }: Props) {
+export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, consumidorFinalId, esAdmin = false }: Props) {
  const router = useRouter();
  const [isPending, startTransition] = useTransition();
 
@@ -1251,6 +1252,14 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
            className="text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition-colors shadow-sm">
            Cobrar
           </button>
+          {esAdmin && (
+           <button
+            onClick={() => handleEliminar(f.id)}
+            disabled={isPending}
+            className="text-xs px-3 py-1.5 rounded-lg border border-red-300 text-red-600 font-medium hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50">
+            Cancelar
+           </button>
+          )}
          </div>
         </div>
        </div>
