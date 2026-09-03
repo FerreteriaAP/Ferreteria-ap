@@ -94,8 +94,9 @@ export default async function ImprimirPrestamosPdfPage({ searchParams }: PagePro
  .print-btn { position: fixed; top: 16px; right: 16px; background: #F47717; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
  .print-btn:hover { background: #e06615; }
  `}</style> {/* Botón imprimir — solo visible en pantalla */}
- <button className="print-btn no-print" onClick={() => window.print()}> Imprimir / PDF
- </button> {/* Contenido imprimible */}
+ <button className="print-btn no-print" onClick={undefined} data-print-trigger> Imprimir / PDF
+ </button>
+ <script dangerouslySetInnerHTML={{ __html: `document.querySelector('[data-print-trigger]').onclick=function(){window.print()};` }} /> {/* Contenido imprimible */}
  <div style={{ maxWidth: 740, margin: "0 auto", padding: "24px 24px 0" }}> {/* Encabezado */}
  <div className="header"> <div> <div className="empresa-nombre">{empresaNombre}</div> {empresaRnc && <div className="meta">RNC: {empresaRnc}</div>}
  {empresaTel && <div className="meta">Tel: {empresaTel}</div>}
