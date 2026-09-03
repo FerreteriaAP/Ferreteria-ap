@@ -192,40 +192,45 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
               ⎙ Imprimir {TIPO_LABEL[venta.tipo]}
             </Link>
           )}
-          {["ORDEN_VENTA","CONDUCE","FACTURADA"].includes(venta.tipo) && (
-            <Link
-              href={`/ventas/${id}/imprimir/cotizacion`}
-              target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
-              style={{ borderColor: "var(--border)" }}
-            >
-              Cotización
-            </Link>
+          {/* Botones adicionales solo para ventas del módulo (no PDV) */}
+          {!venta.turnoId && (
+            <>
+              {["ORDEN_VENTA","CONDUCE","FACTURADA"].includes(venta.tipo) && (
+                <Link
+                  href={`/ventas/${id}/imprimir/cotizacion`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  Cotización
+                </Link>
+              )}
+              {["CONDUCE","FACTURADA"].includes(venta.tipo) && (
+                <Link
+                  href={`/ventas/${id}/imprimir/conduce`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  Conduce
+                </Link>
+              )}
+              {venta.cliente.reglaPrecio === "MARGEN_COSTO" &&
+                !["FACTURADA","CANCELADA"].includes(venta.tipo) && (
+                <RecalcularKolmenBtn
+                  ventaId={id}
+                  margen={Number(venta.cliente.margenPrecio ?? 15)}
+                />
+              )}
+              <Link
+                href="/ventas/nueva"
+                className="inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
+                style={{ borderColor: "var(--border)" }}
+              >
+                + Nueva
+              </Link>
+            </>
           )}
-          {["CONDUCE","FACTURADA"].includes(venta.tipo) && (
-            <Link
-              href={`/ventas/${id}/imprimir/conduce`}
-              target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
-              style={{ borderColor: "var(--border)" }}
-            >
-              Conduce
-            </Link>
-          )}
-          {venta.cliente.reglaPrecio === "MARGEN_COSTO" &&
-            !["FACTURADA","CANCELADA"].includes(venta.tipo) && (
-            <RecalcularKolmenBtn
-              ventaId={id}
-              margen={Number(venta.cliente.margenPrecio ?? 15)}
-            />
-          )}
-          <Link
-            href="/ventas/nueva"
-            className="inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
-            style={{ borderColor: "var(--border)" }}
-          >
-            + Nueva
-          </Link>
         </div>
       </div>
 

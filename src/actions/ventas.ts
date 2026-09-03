@@ -103,11 +103,14 @@ export async function getVentas(opts: {
  pageSize?: number;
  sortBy?: string;
  sortDir?: "asc" | "desc";
+ pdv?: boolean; // true = solo ventas PDV; false/undefined = excluir ventas PDV
 }) {
- const { tipo, busqueda = "", page = 1, pageSize = 25, sortBy, sortDir = "desc" } = opts;
+ const { tipo, busqueda = "", page = 1, pageSize = 25, sortBy, sortDir = "desc", pdv } = opts;
  const skip = (page - 1) * pageSize;
 
  const where: Prisma.VentaWhereInput = {
+ // Filtrar por origen: PDV (turnoId != null) o módulo de ventas (turnoId null)
+ ...(pdv === true ? { turnoId: { not: null } } : { turnoId: null }),
  ...(tipo && tipo !== "" ? { tipo: tipo as EstadoVenta } : {}),
  ...(busqueda ? {
  OR: [

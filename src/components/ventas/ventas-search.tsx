@@ -10,11 +10,12 @@ interface Props {
   tipo?: string;
   sortBy?: string;
   sortDir?: string;
+  pdv?: boolean;
 }
 
 type Sugerencia = { label: string; sublabel?: string; value: string };
 
-export function VentasSearch({ defaultValue = "", tipo = "", sortBy = "", sortDir = "desc" }: Props) {
+export function VentasSearch({ defaultValue = "", tipo = "", sortBy = "", sortDir = "desc", pdv = false }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState(defaultValue);
   const [sugerencias, setSugerencias] = useState<Sugerencia[]>([]);
@@ -30,6 +31,7 @@ export function VentasSearch({ defaultValue = "", tipo = "", sortBy = "", sortDi
     if (tipo) params.set("tipo", tipo);
     if (sortBy) params.set("sortBy", sortBy);
     if (sortDir) params.set("sortDir", sortDir);
+    if (pdv) params.set("pdv", "1");
     params.set("q", valor);
     params.set("page", "1");
     router.push(`/ventas?${params.toString()}`);

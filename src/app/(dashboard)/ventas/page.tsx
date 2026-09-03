@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { VentasSearch } from "@/components/ventas/ventas-search";
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; tipo?: string; page?: string; sortBy?: string; sortDir?: string }>;
+  searchParams: Promise<{ q?: string; tipo?: string; page?: string; sortBy?: string; sortDir?: string; pdv?: string }>;
 }
 
 const tipoLabel: Record<string, string> = {
@@ -81,6 +81,7 @@ export default async function VentasPage({ searchParams }: PageProps) {
   const page     = Number(params.page ?? 1);
   const sortBy   = params.sortBy ?? "";
   const sortDir  = (params.sortDir === "asc" ? "asc" : "desc") as "asc" | "desc";
+  const esPDV    = params.pdv === "1";
 
   const { ventas, total, pages } = await getVentas({
     tipo: tipo || undefined,
@@ -88,30 +89,35 @@ export default async function VentasPage({ searchParams }: PageProps) {
     page,
     sortBy: sortBy || undefined,
     sortDir,
+    pdv: esPDV,
   });
 
   const formatDOP = (n: unknown) =>
     `RD$ ${Number(n).toLocaleString("es-DO", { minimumFractionDigits: 2 })}`;
 
-  const tabs = [
-    { key: "",            label: "Todas"        },
-    { key: "COTIZACION",  label: "Cotizaciones" },
-    { key: "ORDEN_VENTA", label: "Órdenes"      },
-    { key: "CONDUCE",     label: "Conduces"     },
-    { key: "FACTURADA",   label: "Facturas"     },
-  ];
+  const tabs = esPDV
+    ? [{ key: "", label: "Todas" }, { key: "FACTURADA", label: "Facturas" }]
+    : [
+        { key: "",            label: "Todas"        },
+        { key: "COTIZACION",  label: "Cotizaciones" },
+        { key: "ORDEN_VENTA", label: "Órdenes"      },
+        { key: "CONDUCE",     label: "Conduces"     },
+        { key: "FACTURADA",   label: "Facturas"     },
+      ];
+
+  const pdvParam = esPDV ? "&pdv=1" : "";
 
   /** Genera el href conservando tipo/q/page y aplicando la nueva columna+dirección */
   const sortHref = (col: string, d: "asc" | "desc") =>
-    `/ventas?tipo=${tipo}&q=${busqueda}&page=1&sortBy=${col}&sortDir=${d}`;
+    `/ventas?tipo=${tipo}&q=${busqueda}&page=1&sortBy=${col}&sortDir=${d}${pdvParam}`;
 
   return (
     <div className="space-y-5">
       {/* Encabezado */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Ventas</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{total} documentos</p>
+          <h1 className="text-2xl font-bold">{esPDV ? "Ventas PDV" : "Ventas"}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{total} documentos{esPDV ? " del punto de venta" : ""}</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
@@ -121,9 +127,27 @@ export default async function VentasPage({ searchParams }: PageProps) {
           >
             Despachos PDV
           </Link>
+          {esPDV ? (
+            <Link
+              href="/ventas"
+              className={cn(buttonVariants({ variant: "outline" }))}
+            >
+              ← Ventas
+            </Link>
+          ) : (
+            <Link
+              href="/ventas?pdv=1"
+              className={cn(buttonVariants({ variant: "outline" }))}
+              style={{ borderColor: "#6366f1", color: "#6366f1" }}
+            >
+              Ventas PDV
+            </Link>
+          )}
+          {!esPDV && (
           <Link href="/ventas/nueva" className={buttonVariants()}>
             + Nueva cotización
           </Link>
+          )}
         </div>
       </div>
 
@@ -135,13 +159,14 @@ export default async function VentasPage({ searchParams }: PageProps) {
             tipo={tipo}
             sortBy={sortBy}
             sortDir={sortDir}
+            pdv={esPDV}
           />
         </div>
         <div className="flex flex-wrap gap-1">
           {tabs.map((t) => (
             <Link
               key={t.key}
-              href={`/ventas?tipo=${t.key}&q=${busqueda}&sortBy=${sortBy}&sortDir=${sortDir}`}
+              href={`/ventas?tipo=${t.key}&q=${busqueda}&sortBy=${sortBy}&sortDir=${sortDir}${pdvParam}`}
               className={cn(buttonVariants({ variant: tipo === t.key ? "default" : "outline", size: "sm" }))}
             >
               {t.label}
@@ -149,7 +174,7 @@ export default async function VentasPage({ searchParams }: PageProps) {
           ))}
           {sortBy && (
             <Link
-              href={`/ventas?tipo=${tipo}&q=${busqueda}`}
+              href={`/ventas?tipo=${tipo}&q=${busqueda}${pdvParam}`}
               className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-muted-foreground")}
             >
               ✕ Quitar orden
@@ -232,7 +257,7 @@ export default async function VentasPage({ searchParams }: PageProps) {
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
-              href={`/ventas?tipo=${tipo}&q=${busqueda}&sortBy=${sortBy}&sortDir=${sortDir}&page=${p}`}
+              href={`/ventas?tipo=${tipo}&q=${busqueda}&sortBy=${sortBy}&sortDir=${sortDir}&page=${p}${pdvParam}`}
               className={cn(buttonVariants({ variant: p === page ? "default" : "outline", size: "sm" }))}
             >
               {p}
