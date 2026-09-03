@@ -442,7 +442,80 @@ export async function procesarPagoCaja(
  }
 }
 
-// Eliminar (cancelar) factura pendiente desde caja 
+// Eliminar factura FACTURADA del PDV — solo ADMINISTRADOR
+// Revierte stock, cancela CxC y marca la venta como CANCELADA.
+
+export async function eliminarFacturaPDV(ventaId: string) {
+  const session = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rol = ((session?.user) as any)?.rol ?? "";
+  if (rol !== "ADMINISTRADOR") return { error: "Solo el administrador puede eliminar facturas" };
+
+  const venta = await prisma.venta.findUnique({
+    where: { id: ventaId },
+    include: {
+      detalles: { include: { producto: true } },
+      cuentasPorCobrar: true,
+    },
+  });
+  if (!venta) return { error: "Venta no encontrada" };
+  if (venta.tipo !== "FACTURADA") return { error: "Solo se pueden eliminar facturas confirmadas" };
+  if (!venta.turnoId) return { error: "Esta factura no es de caja (PDV)" };
+
+  const userId = session!.user!.id!;
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Revertir stock
+    for (const d of venta.detalles) {
+      const p = d.producto;
+      const cantidadReal =
+        p.esFraccionable && p.factorFraccion && Number(p.factorFraccion) > 0
+          ? Number(d.cantidad) / Number(p.factorFraccion)
+          : Number(d.cantidad);
+
+      const stockAntes = Number(p.stockActual);
+      const stockDespues = stockAntes + cantidadReal;
+
+      await tx.producto.update({
+        where: { id: p.id },
+        data: { stockActual: stockDespues },
+      });
+      await tx.movimientoInventario.create({
+        data: {
+          productoId: p.id,
+          tipo: "ENTRADA_AJUSTE",
+          cantidad: cantidadReal,
+          stockAntes,
+          stockDespues,
+          costo: Number(d.costoAlVender ?? p.costoPromedio),
+          referencia: venta.numero,
+          tipoRef: "CANCELACION",
+          usuarioId: userId,
+        },
+      });
+    }
+
+    // 2. Cancelar CxC asociada
+    if (venta.cuentasPorCobrar.length > 0) {
+      await tx.cuentaPorCobrar.updateMany({
+        where: { ventaId },
+        data: { estado: "CANCELADO" },
+      });
+    }
+
+    // 3. Marcar venta como CANCELADA
+    await tx.venta.update({
+      where: { id: ventaId },
+      data: { tipo: "CANCELADA" },
+    });
+  });
+
+  revalidatePath("/caja");
+  revalidatePath(`/caja/${venta.turnoId}`);
+  return { ok: true };
+}
+
+// Eliminar (cancelar) factura pendiente desde caja
 
 export async function eliminarFacturaPendiente(ventaId: string) {
  const venta = await prisma.venta.findUnique({ where: { id: ventaId } });

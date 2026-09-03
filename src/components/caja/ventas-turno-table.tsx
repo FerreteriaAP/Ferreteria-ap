@@ -3,9 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { generarConduceDespacho } from "@/actions/ventas";
+import { eliminarFacturaPDV } from "@/actions/caja";
 import { cn } from "@/lib/utils";
 
-// Tipos 
+// Tipos
 
 interface ConduceInfo {
  id: string;
@@ -26,16 +27,17 @@ interface Props {
  ventas: VentaRow[];
  /** "simple" = vista caja: solo "Generar conduce" / "Conduce generado". Sin opciones de entrega. */
  modo?: "simple" | "completo";
+ esAdmin?: boolean;
 }
 
-// Helpers 
+// Helpers
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fmt(n: any) {
  return `RD$ ${Number(n).toLocaleString("es-DO", { minimumFractionDigits: 2 })}`;
 }
 
-// Botón simple (solo para cajera) 
+// Botón simple (solo para cajera)
 
 function BtnConduceCajera({ ventaId, conduceId }: {
  ventaId: string;
@@ -73,9 +75,58 @@ function BtnConduceCajera({ ventaId, conduceId }: {
  </div> );
 }
 
-// 
+// Botón eliminar factura PDV (solo admin)
 
-export function VentasTurnoTable({ ventas, modo = "simple" }: Props) {
+function BtnEliminarFactura({ ventaId }: { ventaId: string }) {
+  const router = useRouter();
+  const [isPending, start] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+  const [confirmando, setConfirmando] = useState(false);
+
+  if (confirmando) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs text-muted-foreground">¿Confirmar?</span>
+        <button
+          onClick={() => {
+            start(async () => {
+              const res = await eliminarFacturaPDV(ventaId);
+              if ("error" in res && res.error) { setErr(res.error); setConfirmando(false); return; }
+              router.refresh();
+            });
+          }}
+          disabled={isPending}
+          className="text-xs px-2 py-0.5 rounded border font-medium transition-colors border-red-400 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950/30 disabled:opacity-50"
+        >
+          {isPending ? "Eliminando…" : "Sí, eliminar"}
+        </button>
+        <button
+          onClick={() => setConfirmando(false)}
+          disabled={isPending}
+          className="text-xs px-2 py-0.5 rounded border font-medium border-muted-foreground/30 text-muted-foreground hover:bg-muted/40"
+        >
+          No
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5 items-start">
+      <button
+        onClick={() => setConfirmando(true)}
+        className="text-xs px-2 py-0.5 rounded border font-medium transition-colors border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
+      >
+        Eliminar
+      </button>
+      {err && <p className="text-[10px] text-destructive">{err}</p>}
+    </div>
+  );
+}
+
+//
+
+export function VentasTurnoTable({ ventas, modo = "simple", esAdmin = false }: Props) {
  if (ventas.length === 0) {
  return (
  <p className="px-4 py-6 text-center text-sm text-muted-foreground"> No hay ventas en este turno
@@ -83,17 +134,60 @@ export function VentasTurnoTable({ ventas, modo = "simple" }: Props) {
  }
 
  return (
- <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="bg-muted/30 text-xs text-muted-foreground border-b"> <th className="text-left px-4 py-2">Factura</th> <th className="text-left px-3 py-2">Hora</th> <th className="text-left px-3 py-2">Método</th> <th className="text-right px-4 py-2">Total</th> <th className="text-left px-4 py-2">Despacho</th> </tr> </thead> <tbody> {ventas.map(v => {
- const conduce = v.conduces?.[0] ?? null;
- return (
- <tr key={v.id} className="border-b hover:bg-muted/20"> <td className="px-4 py-2 font-mono font-medium"> <span className="hover:text-primary hover:underline cursor-default">{v.numero}</span> </td> <td className="px-3 py-2 text-muted-foreground"> {new Date(v.createdAt).toLocaleTimeString("es-DO", { hour: "2-digit", minute: "2-digit" })}
- </td> <td className="px-3 py-2"> <div className="flex flex-wrap gap-1"> {v.pagosRecibidos.map((p, i) => (
- <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground"> {p.metodo}
- </span> ))}
- </div> </td> <td className="px-4 py-2 text-right font-mono font-medium"> {fmt(v.total)}
- </td> <td className="px-4 py-2"> {/* En modo simple (caja) solo muestra generar/generado, sin opciones de entrega */}
- <BtnConduceCajera ventaId={v.id} conduceId={conduce?.id} /> </td> </tr> );
- })}
- </tbody> <tfoot> <tr className="border-t bg-muted/30"> <td colSpan={3} className="px-4 py-2 text-sm font-semibold">Total</td> <td className="px-4 py-2 text-right font-mono font-bold"> {fmt(ventas.reduce((s, v) => s + Number(v.total), 0))}
- </td> <td /> </tr> </tfoot> </table> </div> );
+ <div className="overflow-x-auto">
+   <table className="w-full text-sm">
+     <thead>
+       <tr className="bg-muted/30 text-xs text-muted-foreground border-b">
+         <th className="text-left px-4 py-2">Factura</th>
+         <th className="text-left px-3 py-2">Hora</th>
+         <th className="text-left px-3 py-2">Método</th>
+         <th className="text-right px-4 py-2">Total</th>
+         <th className="text-left px-4 py-2">Despacho</th>
+         {esAdmin && <th className="text-left px-4 py-2">Admin</th>}
+       </tr>
+     </thead>
+     <tbody>
+       {ventas.map(v => {
+         const conduce = v.conduces?.[0] ?? null;
+         return (
+           <tr key={v.id} className="border-b hover:bg-muted/20">
+             <td className="px-4 py-2 font-mono font-medium">
+               <span className="hover:text-primary hover:underline cursor-default">{v.numero}</span>
+             </td>
+             <td className="px-3 py-2 text-muted-foreground">
+               {new Date(v.createdAt).toLocaleTimeString("es-DO", { hour: "2-digit", minute: "2-digit" })}
+             </td>
+             <td className="px-3 py-2">
+               <div className="flex flex-wrap gap-1">
+                 {v.pagosRecibidos.map((p, i) => (
+                   <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{p.metodo}</span>
+                 ))}
+               </div>
+             </td>
+             <td className="px-4 py-2 text-right font-mono font-medium">{fmt(v.total)}</td>
+             <td className="px-4 py-2">
+               <BtnConduceCajera ventaId={v.id} conduceId={conduce?.id} />
+             </td>
+             {esAdmin && (
+               <td className="px-4 py-2">
+                 <BtnEliminarFactura ventaId={v.id} />
+               </td>
+             )}
+           </tr>
+         );
+       })}
+     </tbody>
+     <tfoot>
+       <tr className="border-t bg-muted/30">
+         <td colSpan={esAdmin ? 3 : 3} className="px-4 py-2 text-sm font-semibold">Total</td>
+         <td className="px-4 py-2 text-right font-mono font-bold">
+           {fmt(ventas.reduce((s, v) => s + Number(v.total), 0))}
+         </td>
+         <td />
+         {esAdmin && <td />}
+       </tr>
+     </tfoot>
+   </table>
+ </div>
+ );
 }

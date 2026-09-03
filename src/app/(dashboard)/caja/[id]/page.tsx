@@ -4,6 +4,7 @@ import { MovimientoForm } from "@/components/caja/movimiento-form";
 import { VentasTurnoTable } from "@/components/caja/ventas-turno-table";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 export const metadata = { title: "Detalle de Turno — Ferretería AP" };
 
@@ -20,10 +21,13 @@ function fmtDate(d: Date | string | null | undefined) {
 
 export default async function TurnoDetallePage({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
- const [turno, resumen] = await Promise.all([
+ const [turno, resumen, session] = await Promise.all([
  getTurno(id),
  getResumenTurno(id).catch(() => null),
+ auth(),
  ]);
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ const esAdmin = ((session?.user) as any)?.rol === "ADMINISTRADOR";
 
  if (!turno) notFound();
 
@@ -55,11 +59,14 @@ export default async function TurnoDetallePage({ params }: { params: Promise<{ i
  </tbody> </table> )}
  </div> {/* Ventas del turno — con botón de despacho por fila */}
  <div className="rounded-xl border bg-card overflow-hidden"> <div className="px-4 py-3 border-b"> <h2 className="font-semibold" style={{ color: "var(--accent-hex)" }}> Facturas cobradas{" "}
- <span className="text-muted-foreground font-normal text-sm">({turno.ventas.length})</span> </h2> </div> <VentasTurnoTable ventas={turno.ventas.map(v => ({
- ...v,
- total: Number(v.total),
- pagosRecibidos: v.pagosRecibidos.map(p => ({ ...p, monto: Number(p.monto) })),
- }))} /> </div> {/* Cerrar turno */}
+ <span className="text-muted-foreground font-normal text-sm">({turno.ventas.length})</span> </h2> </div> <VentasTurnoTable
+   esAdmin={esAdmin}
+   ventas={turno.ventas.map(v => ({
+     ...v,
+     total: Number(v.total),
+     pagosRecibidos: v.pagosRecibidos.map(p => ({ ...p, monto: Number(p.monto) })),
+   }))}
+ /> </div> {/* Cerrar turno */}
  {estaAbierto && resumen && (
  <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5 space-y-3"> <h2 className="font-semibold text-destructive/80">Cerrar turno</h2> <p className="text-sm text-muted-foreground"> Ingresa el monto físico que hay en la caja para hacer el arqueo. El sistema calculará la diferencia.
  </p> <p className="text-sm font-medium">Efectivo esperado: <span className="font-mono">{fmt(resumen.montoEsperado)}</span></p> <CierreTurnoForm turnoId={turno.id} /> </div> )}
