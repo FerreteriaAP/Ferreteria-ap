@@ -308,7 +308,7 @@ export function DineroRecibidoTabla({ filas: initialFilas, resumen }: Props) {
               </tr>
             </thead>
             <tbody>
-              {[...filas].reverse().map(f => (
+              {filas.map(f => (
                 <FilaRegistro key={f.turnoId} fila={f} onGuardado={recargar} />
               ))}
             </tbody>
