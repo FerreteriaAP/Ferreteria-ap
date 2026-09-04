@@ -780,7 +780,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
       {/* ── Diálogo sin stock ─────────────────────────────────────────────── */}
       {dialogSinStock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl border shadow-2xl p-6 w-80 space-y-4">
+          <div className="rounded-2xl border shadow-2xl p-6 w-80 space-y-4" style={{ backgroundColor: CARD_BG }}>
             <div className="flex items-start gap-3">
               <span className="text-2xl">📦</span>
               <div>
