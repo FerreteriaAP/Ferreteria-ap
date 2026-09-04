@@ -37,7 +37,7 @@ async function main() {
 
   console.log(`\n📋 Empleados encontrados: ${empleados.length}`);
   empleados.forEach(e => {
-    const u = (e as any).usuario;
+    const u = e.usuario;
     console.log(`   • ${e.nombre} ${e.apellido}  usuario: ${u ? u.email : "❌ sin usuario"}`);
   });
 
@@ -51,7 +51,7 @@ async function main() {
     }
 
     // Buscar empleado con nombre+apellido similar
-    const match = (empleados as any[]).find(e =>
+    const match = empleados.find(e =>
       normalizar(e.nombre) === normalizar(v.nombre) &&
       normalizar(e.apellido) === normalizar(v.apellido)
     );
@@ -62,8 +62,8 @@ async function main() {
     }
 
     // Verificar que ese empleado no tenga ya otro usuario enlazado
-    if ((match as any).usuario && (match as any).usuario.id !== v.id) {
-      console.log(`   ⚠️  ${v.nombre} ${v.apellido} — el empleado ya tiene otro usuario enlazado (${(match as any).usuario.email})`);
+    if (match.usuario && match.usuario.id !== v.id) {
+      console.log(`   ⚠️  ${v.nombre} ${v.apellido} — el empleado ya tiene otro usuario enlazado (${match.usuario.email})`);
       continue;
     }
 
