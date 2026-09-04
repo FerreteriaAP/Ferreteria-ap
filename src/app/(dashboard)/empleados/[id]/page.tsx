@@ -102,7 +102,45 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
         </Link>
       </div>
 
-      {/* Cuadro de actividad — solo admin + empleados de comisión */}
+      {/* Tarjetas de datos del empleado */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <Card>
+          <CardHeader><CardTitle className="text-sm text-muted-foreground">Datos personales</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            <Row label="Cédula" value={empleado.cedula} />
+            <Row label="Teléfono" value={empleado.telefono} />
+            <Row label="Email" value={empleado.email} />
+            <Row label="Fecha ingreso" value={new Date(empleado.fechaIngreso).toLocaleDateString("es-DO")} />
+            <Row label="Nacimiento" value={empleado.fechaNacimiento ? new Date(empleado.fechaNacimiento).toLocaleDateString("es-DO") : null} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-sm text-muted-foreground">Salario</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            <Row label="Salario mensual" value={fmt(empleado.salarioBase)} />
+            <Row label="Salario quincenal" value={fmt(salarioQuincenal)} />
+            <Row label="AFP" value={empleado.afp} />
+            <Row label="SFS" value={empleado.sfs} />
+            <Row label="NSS" value={empleado.nss} />
+          </CardContent>
+        </Card>
+
+        {empleado.bancoCuenta && (
+          <Card>
+            <CardHeader><CardTitle className="text-sm text-muted-foreground">Datos bancarios</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              <Row label="Banco" value={empleado.bancoCuenta} />
+              <Row label="Cuenta" value={empleado.cuentaBancaria} />
+              <Row label="Tipo" value={empleado.tipoCuenta} />
+            </CardContent>
+          </Card>
+        )}
+
+      </div>
+
+      {/* Cuadro de actividad — solo admin + empleado VENDEDOR */}
       {mostrarActividad && stats && (
         <div className="rounded-xl border overflow-hidden">
           {/* Header */}
@@ -116,7 +154,7 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
                 Actividad · {filtroLabel}
               </h2>
             </div>
-            <MesFiltroEmpleado empleadoId={id} filtroActual={sp.filtro} />
+            <MesFiltroEmpleado empleadoId={id} filtroActual={sp.filtro} mesDefault={mesDefault} />
           </div>
 
           <div className="p-5 space-y-5">
@@ -158,62 +196,6 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        <Card>
-          <CardHeader><CardTitle className="text-sm text-muted-foreground">Datos personales</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <Row label="Cédula" value={empleado.cedula} />
-            <Row label="Teléfono" value={empleado.telefono} />
-            <Row label="Email" value={empleado.email} />
-            <Row label="Fecha ingreso" value={new Date(empleado.fechaIngreso).toLocaleDateString("es-DO")} />
-            <Row label="Nacimiento" value={empleado.fechaNacimiento ? new Date(empleado.fechaNacimiento).toLocaleDateString("es-DO") : null} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-sm text-muted-foreground">Salario</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <Row label="Salario mensual" value={fmt(empleado.salarioBase)} />
-            <Row label="Salario quincenal" value={fmt(salarioQuincenal)} />
-            <Row label="AFP" value={empleado.afp} />
-            <Row label="SFS" value={empleado.sfs} />
-            <Row label="NSS" value={empleado.nss} />
-          </CardContent>
-        </Card>
-
-        {empleado.bancoCuenta && (
-          <Card>
-            <CardHeader><CardTitle className="text-sm text-muted-foreground">Datos bancarios</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <Row label="Banco" value={empleado.bancoCuenta} />
-              <Row label="Cuenta" value={empleado.cuentaBancaria} />
-              <Row label="Tipo" value={empleado.tipoCuenta} />
-            </CardContent>
-          </Card>
-        )}
-
-        {empleado.usuario && (
-          <Card>
-            <CardHeader><CardTitle className="text-sm text-muted-foreground">Acceso al sistema</CardTitle></CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Email</span>
-                <span>{empleado.usuario.email}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Rol</span>
-                <Badge variant="outline">{empleado.usuario.rol}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Activo</span>
-                <span>{empleado.usuario.activo ? "Sí" : "No"}</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-      </div>
     </div>
   );
 }
