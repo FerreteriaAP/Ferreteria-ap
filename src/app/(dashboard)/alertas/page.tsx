@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChequeEntregadoBtn, DismissAlertaBtn } from "@/components/cheques/cheque-btn";
+import { SolicitudStockBtns } from "@/components/alertas/solicitud-stock-btn";
+import { getSolicitudesSinStockPendientes } from "@/actions/solicitudes-sin-stock";
 
 async function getAlertas() {
  const hoy = new Date();
@@ -20,6 +22,7 @@ async function getAlertas() {
  turnosAbiertos,
  chequesListos,
  alertasChequeEntregado,
+ solicitudesSinStock,
  ] = await Promise.all([
  // Productos bajo stock mínimo
  prisma.producto.findMany({
@@ -91,6 +94,9 @@ async function getAlertas() {
  },
  orderBy: { entregadoAt: "desc" },
  }).catch(() => [] as never[]),
+
+ // Solicitudes de venta sin stock pendientes de aprobación
+ getSolicitudesSinStockPendientes().catch(() => [] as never[]),
  ]);
 
  return {
@@ -103,6 +109,7 @@ async function getAlertas() {
  turnosAbiertos,
  chequesListos,
  alertasChequeEntregado,
+ solicitudesSinStock,
  };
 }
 
@@ -171,6 +178,13 @@ export default async function AlertasPage() {
  type ChequeRow = { id: string; nombre: string; fechaChequeListo: Date | null };
  const chequesListos = a.chequesListos as ChequeRow[];
 
+ type SolicitudRow = {
+   id: string; createdAt: Date;
+   producto: { id: string; codigo: string; nombre: string; stockActual: unknown };
+   solicitadoPor: { nombre: string; apellido: string };
+ };
+ const solicitudesSinStock = a.solicitudesSinStock as SolicitudRow[];
+
  const totalAlertas = soloStock
  ? a.stockBajoItems.length + a.chequesListos.length
  : a.stockBajoItems.length +
@@ -181,7 +195,8 @@ export default async function AlertasPage() {
  a.nominasBorrador.length +
  a.turnosAbiertos.length +
  a.chequesListos.length +
- a.alertasChequeEntregado.length;
+ a.alertasChequeEntregado.length +
+ solicitudesSinStock.length;
 
  return (
  <div className="max-w-4xl mx-auto space-y-6"> {/* Encabezado */}
@@ -241,6 +256,37 @@ export default async function AlertasPage() {
  </div> </AlertCard> )}
 
  </div>
+
+ {/* ── Ventas sin stock — solicitudes PDV ── */}
+ {esAdmin && solicitudesSinStock.length > 0 && (
+   <div className="space-y-4">
+     <div className="flex items-center gap-3">
+       <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
+       <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-2">
+         Ventas Sin Stock
+       </span>
+       <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
+     </div>
+     <AlertCard titulo="📦 Aprobación requerida — PDV sin stock" color="red" count={solicitudesSinStock.length}>
+       <div className="space-y-2">
+         {solicitudesSinStock.map(s => (
+           <div key={s.id} className="flex items-center justify-between text-xs gap-2">
+             <div className="truncate">
+               <span className="font-semibold">{s.producto.nombre}</span>
+               <span className="text-muted-foreground ml-1">({s.producto.codigo})</span>
+               <p className="text-muted-foreground text-[11px] mt-0.5">
+                 Solicita: {s.solicitadoPor.nombre} {s.solicitadoPor.apellido}
+                 {" · "}Stock actual: {Number(s.producto.stockActual)}
+                 {" · "}{new Date(s.createdAt).toLocaleTimeString("es-DO", { hour: "2-digit", minute: "2-digit" })}
+               </p>
+             </div>
+             <SolicitudStockBtns solicitudId={s.id} />
+           </div>
+         ))}
+       </div>
+     </AlertCard>
+   </div>
+ )}
 
  {/* ── Pagos Suplidores ── */}
  {(a.chequesListos.length > 0 || (esAdmin && a.alertasChequeEntregado.length > 0)) && (

@@ -8,6 +8,10 @@ import {
   crearVentaPendiente,
   guardarDireccionEntrega,
 } from "@/actions/pdv";
+import {
+  crearSolicitudSinStock,
+  getEstadoSolicitud,
+} from "@/actions/solicitudes-sin-stock";
 import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import type { LineaPDV } from "@/actions/pdv";
 import { ClienteRapidoModal } from "./cliente-rapido-modal";
@@ -123,6 +127,57 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
   const searchRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Sin stock: diálogo + polling ──────────────────────────────────────────
+  // Producto que espera aprobación del admin (muestra el diálogo)
+  const [dialogSinStock, setDialogSinStock] = useState<{ producto: Producto; fraccionado: boolean } | null>(null);
+  // Solicitudes en vuelo: productoId → { solicitudId, producto, fraccionado }
+  const [pendingSolicitudes, setPendingSolicitudes] = useState<Record<string, { solicitudId: string; producto: Producto; fraccionado: boolean }>>({});
+  // Productos aprobados en esta sesión (no vuelven a pedir aprobación)
+  const [productosAprobados, setProductosAprobados] = useState<Set<string>>(new Set());
+  // Mensaje de rechazo temporal
+  const [rechazadoMsg, setRechazadoMsg] = useState<string | null>(null);
+
+  // Polling: cada 3 s verifica si alguna solicitud fue aprobada/rechazada
+  useEffect(() => {
+    const ids = Object.keys(pendingSolicitudes);
+    if (ids.length === 0) return;
+    const interval = setInterval(async () => {
+      for (const productoId of ids) {
+        const data = pendingSolicitudes[productoId];
+        if (!data) continue;
+        const { estado } = await getEstadoSolicitud(data.solicitudId);
+        if (estado === "APROBADO") {
+          setProductosAprobados(prev => new Set(prev).add(productoId));
+          setPendingSolicitudes(prev => { const n = { ...prev }; delete n[productoId]; return n; });
+          // Agregar al carrito sin pasar por la validación de stock
+          const p = data.producto;
+          const fraccionado = data.fraccionado;
+          const factor = Number(p.factorFraccion ?? 1);
+          const unidad = fraccionado && p.unidadFraccion ? p.unidadFraccion : p.unidadMedida;
+          const precioFinal = fraccionado && factor > 0
+            ? (p.precioFraccion != null ? Number(p.precioFraccion) : p.precioVenta / factor)
+            : p.precioVenta;
+          const costoUltimo = fraccionado && factor > 0 ? p.costoUltimo / factor : p.costoUltimo;
+          const { precio, subtotal, itbis } = calcLinea(precioFinal, 0, p.exentoItbis);
+          setCarrito(prev => {
+            if (prev.some(i => i.productoId === p.id && i.unidad === unidad)) return prev;
+            return [...prev, {
+              key: uid(), productoId: p.id, nombre: p.nombre, codigo: p.codigo,
+              unidad, cantidad: 0, cantidadStr: "", precioFinal, precio,
+              exentoItbis: p.exentoItbis, itbis, subtotal, costoUltimo,
+              categoriaCode: p.categoria.codigo, esServicio: p.esServicio, esFraccionable: p.esFraccionable,
+            }];
+          });
+        } else if (estado === "RECHAZADO") {
+          setPendingSolicitudes(prev => { const n = { ...prev }; delete n[productoId]; return n; });
+          setRechazadoMsg(`Solicitud rechazada: ${data.producto.nombre}`);
+          setTimeout(() => setRechazadoMsg(null), 4000);
+        }
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [pendingSolicitudes]);
+
   const productosVisibles = queryProd.trim() ? resultados : topProductos;
 
   const [cliente, setCliente] = useState<Cliente>({
@@ -184,6 +239,17 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
   const agregarProducto = useCallback((p: Producto, fraccionado = false) => {
     setQueryProd(""); setResultados([]);
     searchRef.current?.focus();
+
+    // Si el producto no tiene stock Y no fue aprobado en esta sesión → solicitar autorización
+    if (Number(p.stockActual) <= 0 && !productosAprobados.has(p.id)) {
+      if (pendingSolicitudes[p.id]) {
+        // Ya hay una solicitud en vuelo — no abrir otro diálogo
+        setError("Ya enviaste una solicitud de aprobación para este producto. Espera la respuesta del administrador.");
+        return;
+      }
+      setDialogSinStock({ producto: p, fraccionado });
+      return;
+    }
 
     const factor     = Number(p.factorFraccion ?? 1);
     const unidad     = fraccionado && p.unidadFraccion ? p.unidadFraccion : p.unidadMedida;
@@ -711,6 +777,74 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
           </div>
         </div>
       </div>
+      {/* ── Diálogo sin stock ─────────────────────────────────────────────── */}
+      {dialogSinStock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card rounded-2xl border shadow-2xl p-6 w-80 space-y-4">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">📦</span>
+              <div>
+                <h3 className="font-bold text-sm">Sin stock disponible</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{dialogSinStock.producto.nombre}</p>
+                <p className="text-xs text-muted-foreground">
+                  Stock actual: <span className="font-semibold text-red-500">{Number(dialogSinStock.producto.stockActual)}</span>
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Este producto no tiene unidades disponibles. Puedes solicitar autorización al administrador para incluirlo en la venta.
+            </p>
+            <div className="flex gap-2 pt-1">
+              <button
+                className="flex-1 text-xs py-2 rounded-lg border hover:bg-muted/50 transition-colors font-medium"
+                onClick={() => setDialogSinStock(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="flex-1 text-xs py-2 rounded-lg font-semibold transition-colors text-white"
+                style={{ backgroundColor: "var(--accent-hex)" }}
+                onClick={async () => {
+                  const p = dialogSinStock.producto;
+                  const fraccionado = dialogSinStock.fraccionado;
+                  setDialogSinStock(null);
+                  const result = await crearSolicitudSinStock(p.id);
+                  if ("error" in result) {
+                    setError(result.error ?? "Error al enviar solicitud");
+                    return;
+                  }
+                  setPendingSolicitudes(prev => ({
+                    ...prev,
+                    [p.id]: { solicitudId: result.id, producto: p, fraccionado },
+                  }));
+                }}
+              >
+                Solicitar aprobación
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Indicador solicitudes en espera ──────────────────────��─────────── */}
+      {Object.keys(pendingSolicitudes).length > 0 && (
+        <div
+          className="fixed bottom-4 right-4 z-40 rounded-xl border shadow-lg px-4 py-2.5 text-xs font-medium flex items-center gap-2"
+          style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 12%, var(--card))", borderColor: "color-mix(in oklch, var(--accent-hex) 40%, transparent)", color: "var(--accent-hex)" }}
+        >
+          <span className="animate-pulse">⏳</span>
+          {Object.keys(pendingSolicitudes).length === 1
+            ? `Esperando aprobación: ${Object.values(pendingSolicitudes)[0].producto.nombre}`
+            : `${Object.keys(pendingSolicitudes).length} solicitudes pendientes de aprobación`}
+        </div>
+      )}
+
+      {/* ── Toast rechazo ────────────────────────────────��──────────────────── */}
+      {rechazadoMsg && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-xl border border-red-300 bg-red-50 dark:bg-red-950/80 shadow-lg px-4 py-2.5 text-xs font-medium text-red-700 dark:text-red-300">
+          ✗ {rechazadoMsg}
+        </div>
+      )}
     </>
   );
 }

@@ -186,8 +186,10 @@ model Usuario {
   gastos         Gasto[]
   turnos         TurnoCaja[]
   notasCredito      NotaCredito[]
-  alertasCheque     AlertaChequePago[]
-  registrosDinero   RegistroDineroRecibido[] @relation("RegistrosDinero")
+  alertasCheque           AlertaChequePago[]
+  registrosDinero         RegistroDineroRecibido[] @relation("RegistrosDinero")
+  solicitudesRealizadas   SolicitudSinStock[]      @relation("SolicitudSolicitante")
+  solicitudesRespondidas  SolicitudSinStock[]      @relation("SolicitudResponsable")
 
   @@map("usuarios")
 }
@@ -338,13 +340,14 @@ model Producto {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  categoria         Categoria              @relation(fields: [categoriaId], references: [id])
+  categoria           Categoria              @relation(fields: [categoriaId], references: [id])
   movimientos         MovimientoInventario[]
   detallesCompra      DetalleCompra[]
   detallesVenta       DetalleVenta[]
   detallesOrdenCompra DetalleOrdenCompra[]
   preciosEspeciales   PrecioEspecial[]
   alertas             AlertaInventario[]
+  solicitudesSinStock SolicitudSinStock[]
 
   @@index([nombre])
   @@index([codigoBarras])
@@ -1001,4 +1004,21 @@ model AlertaChequePago {
 
   @@index([vistoPorAdmin])
   @@map("alertas_cheque_pago")
+}
+
+model SolicitudSinStock {
+  id              String    @id @default(cuid())
+  productoId      String
+  solicitadoPorId String
+  estado          String    @default("PENDIENTE") // PENDIENTE | APROBADO | RECHAZADO
+  createdAt       DateTime  @default(now())
+  respondidoAt    DateTime?
+  respondidoPorId String?
+
+  producto      Producto @relation(fields: [productoId],      references: [id])
+  solicitadoPor Usuario  @relation("SolicitudSolicitante",   fields: [solicitadoPorId], references: [id])
+  respondidoPor Usuario? @relation("SolicitudResponsable",   fields: [respondidoPorId], references: [id])
+
+  @@index([estado])
+  @@map("solicitudes_sin_stock")
 }
