@@ -909,7 +909,7 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
 // Agrupa los pagos recibidos por tipo de medio: EFECTIVO, TARJETA,
 // TRANSFERENCIA, CHEQUE. Para TARJETA descuenta la comisión bancaria
 // configurada en la clave "comision_tarjeta" de la tabla Configuracion
-// (por defecto 3.0 %).
+// (por defecto 5.92 %: 3.92% cargo Verifon + 2% retención ITBIS).
 //
 export async function getResumenPagos(opts: { año: number; mes?: number }) {
  const { año, mes } = opts;
@@ -927,7 +927,7 @@ export async function getResumenPagos(opts: { año: number; mes?: number }) {
  prisma.configuracion.findUnique({ where: { clave: "comision_tarjeta" } }),
  ]);
 
- const comisionPct = comisionConfig ? parseFloat(comisionConfig.valor) : 3.0;
+ const comisionPct = comisionConfig ? parseFloat(comisionConfig.valor) : 5.92; // 3.92% Verifon + 2% retención ITBIS
 
  // Agrupar por método
  const mapa = new Map<string, number>();
