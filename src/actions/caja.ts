@@ -108,6 +108,7 @@ export interface ResumenTurno {
  tarjeta: number;
  transferencia: number;
  cheque: number;
+ nc: number; // monto cubierto por notas de crédito (no es efectivo)
  entradasMov: number;
  salidasMov: number;
  montoEsperado: number;
@@ -122,6 +123,7 @@ export async function getResumenTurno(id: string): Promise<ResumenTurno> {
  const tarjeta = pagos.filter(p => p.metodo === "TARJETA").reduce((s, p) => s + Number(p.monto), 0);
  const transferencia = pagos.filter(p => p.metodo === "TRANSFERENCIA").reduce((s, p) => s + Number(p.monto), 0);
  const cheque = pagos.filter(p => p.metodo === "CHEQUE").reduce((s, p) => s + Number(p.monto), 0);
+ const nc = pagos.filter(p => p.metodo === "NC").reduce((s, p) => s + Number(p.monto), 0);
  const totalVentas = turno.ventas.reduce((s, v) => s + Number(v.total), 0);
 
  const entradasMov = turno.movimientos
@@ -138,7 +140,7 @@ export async function getResumenTurno(id: string): Promise<ResumenTurno> {
 
  const montoEsperado = Number(turno.montoApertura) + efectivo + entradasMov + entradasCxC - salidasMov;
 
- return { totalVentas, efectivo, tarjeta, transferencia, cheque, entradasMov, salidasMov, montoEsperado };
+ return { totalVentas, efectivo, tarjeta, transferencia, cheque, nc, entradasMov, salidasMov, montoEsperado };
 }
 
 // Abrir turno 
@@ -412,9 +414,9 @@ export async function procesarPagoCaja(
  // 6. Aplicar nota de crédito si se indicó
  if (opciones?.ncAplicacion && montoNC > 0) {
  const { ncId, montoAplicar } = opciones.ncAplicacion;
- const nc = await tx.notaCredito.findUnique({ where: { id: ncId } });
- if (!nc) throw new Error("NC no encontrada");
- const restanteActual = Number(nc.montoRestante);
+ const ncReg = await tx.notaCredito.findUnique({ where: { id: ncId } });
+ if (!ncReg) throw new Error("NC no encontrada");
+ const restanteActual = Number(ncReg.montoRestante);
  if (restanteActual < montoAplicar - 0.01) throw new Error("Saldo insuficiente en la NC");
  const nuevoRestante = Math.max(0, restanteActual - montoAplicar);
  await tx.notaCredito.update({
@@ -423,6 +425,15 @@ export async function procesarPagoCaja(
  montoRestante: nuevoRestante,
  estado: nuevoRestante < 0.01 ? "APLICADA" : "PENDIENTE",
  },
+ });
+ // Registrar pago con método "NC" para que aparezca en el resumen del turno
+ await tx.pagoVenta.create({
+   data: {
+     ventaId,
+     monto: montoAplicar,
+     metodo: "NC",
+     notas: `NC ${ncReg.numero}`,
+   },
  });
  // Rebajar saldoFavor del cliente (fue acreditado al crear la NC)
  await tx.contacto.update({
