@@ -22,14 +22,16 @@ interface PageProps {
   }>;
 }
 
-const ROLES_SOLO_LECTURA = ["VENDEDOR", "CAJA"];
+const ROLES_SOLO_LECTURA  = ["VENDEDOR", "CAJA"];
+const ROLES_VER_ARCHIVADOS = ["ADMINISTRADOR", "ASISTENTE_ADMINISTRATIVO"];
 
 export default async function ProductosPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const session = await auth();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rol = ((session?.user) as any)?.rol ?? "";
-  const puedeCrear = !ROLES_SOLO_LECTURA.includes(rol);
+  const puedeCrear        = !ROLES_SOLO_LECTURA.includes(rol);
+  const puedeVerArchivados = ROLES_VER_ARCHIVADOS.includes(rol);
   const busqueda = params.q ?? "";
   const categoriaId = params.categoria ?? "";
   const stockBajo = params.stockBajo === "1";
@@ -108,12 +110,14 @@ export default async function ProductosPage({ searchParams }: PageProps) {
           >
             Stock bajo
           </Link>
-          <Link
-            href={verArchivados ? `/productos?q=${busqueda}${vistaQS}` : `/productos?archivados=1&q=${busqueda}${vistaQS}`}
-            className={cn(buttonVariants({ variant: verArchivados ? "secondary" : "outline", size: "sm" }))}
-          >
-            Archivados
-          </Link>
+          {puedeVerArchivados && (
+            <Link
+              href={verArchivados ? `/productos?q=${busqueda}${vistaQS}` : `/productos?archivados=1&q=${busqueda}${vistaQS}`}
+              className={cn(buttonVariants({ variant: verArchivados ? "secondary" : "outline", size: "sm" }))}
+            >
+              Archivados
+            </Link>
+          )}
         </div>
       </div>
 
