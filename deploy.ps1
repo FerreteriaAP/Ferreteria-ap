@@ -1,5 +1,12 @@
 Set-Location C:\Users\Administrator\ferreteria-ap
 
+# KILLSWITCH: si existe este archivo, el auto-deploy queda bloqueado
+if (Test-Path "C:\KILLSWITCH_ACTIVE") {
+    $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    Add-Content C:\deploy.log "[$ts] KILLSWITCH activo — deploy bloqueado."
+    exit 0
+}
+
 # Verificar si hay cambios nuevos en GitHub
 git fetch origin main 2>&1 | Out-Null
 $local  = git rev-parse HEAD
