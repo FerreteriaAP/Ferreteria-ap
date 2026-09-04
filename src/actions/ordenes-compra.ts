@@ -133,6 +133,10 @@ export async function crearOrdenCompra(data: OcInput) {
  const session = await auth();
  if (!session?.user?.id) return { error: "No autenticado" };
 
+ // Atribuir al vendedor seleccionado (si opera desde ventas@); si no, al usuario de sesión
+ const { getVendedorActivoId } = await import("@/actions/vendedor-activo");
+ const ocUsuarioId = (await getVendedorActivoId()) ?? session.user.id;
+
  const parsed = OcSchema.safeParse(data);
  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
@@ -151,7 +155,7 @@ export async function crearOrdenCompra(data: OcInput) {
  data: {
  numero,
  suplidorId,
- usuarioId: session.user!.id,
+ usuarioId: ocUsuarioId,
  estado: "BORRADOR",
  fechaEntrega: fechaEntrega ? new Date(fechaEntrega) : null,
  notas: notas || null,

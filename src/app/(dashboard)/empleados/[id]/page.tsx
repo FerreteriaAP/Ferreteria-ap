@@ -154,7 +154,7 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
                 Actividad · {filtroLabel}
               </h2>
             </div>
-            <MesFiltroEmpleado empleadoId={id} filtroActual={sp.filtro} mesDefault={mesDefault} />
+            <MesFiltroEmpleado empleadoId={id} filtroActual={sp.filtro} mesDefault={mesDefault}  />
           </div>
 
           <div className="p-5 space-y-5">

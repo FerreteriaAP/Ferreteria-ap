@@ -102,8 +102,11 @@ export async function getCompra(id: string) {
 
 export async function crearCompra(data: CompraInput) {
  const session = await auth();
- const usuarioId = session?.user?.id;
- if (!usuarioId) return { error: { _: ["No autenticado. Inicia sesión e intenta de nuevo."] } };
+ const sessionUserId = session?.user?.id;
+ if (!sessionUserId) return { error: { _: ["No autenticado. Inicia sesión e intenta de nuevo."] } };
+ // Atribuir al vendedor seleccionado (si opera desde ventas@); si no, al usuario de sesión
+ const { getVendedorActivoId } = await import("@/actions/vendedor-activo");
+ const usuarioId = (await getVendedorActivoId()) ?? sessionUserId;
 
  const parsed = CompraSchema.safeParse(data);
  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { TipoComprobante } from "@/generated/prisma";
+import { getVendedorActivoId } from "@/actions/vendedor-activo";
 
 // Select compartido para productos PDV
 const PRODUCTO_SELECT = {
@@ -241,7 +242,8 @@ export async function crearVentaPendiente(input: VentaPDVInput) {
         tipo: "PDV_PENDIENTE",
         clienteId: input.clienteId,
         creadorId: userId,
-        vendedorId: userId,
+        // Usar el vendedor seleccionado (cookie) para atribuir correctamente si opera desde ventas@
+        vendedorId: (await getVendedorActivoId()) ?? userId,
         turnoId: input.turnoId ?? null,
         direccionId: input.direccionId ?? null,
         tipoNcf: input.tipoNcf as TipoComprobante,
