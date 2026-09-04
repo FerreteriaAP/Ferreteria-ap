@@ -39,6 +39,7 @@ interface ItemCarrito extends LineaPDV {
   categoriaCode: string;
   cantidadStr: string; // valor como string para el input (vacío = placeholder "0")
   esServicio: boolean;   // servicio = precio editable para todos los roles
+  esFraccionable: boolean;
 }
 
 // ─── MARGEN ───────────────────────────────────────────────────────────────────
@@ -212,13 +213,28 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
       costoUltimo,
       categoriaCode: p.categoria.codigo,
       esServicio: p.esServicio,
+      esFraccionable: p.esFraccionable,
     }]);
   }, [carrito]);
+
+  const [cantidadErrores, setCantidadErrores] = useState<Set<string>>(new Set());
+
+  // Tubo no fraccionable → solo múltiplos de 0.5 (0.5, 1, 1.5, 2, 2.5, …)
+  const esTuboRestringido = (item: ItemCarrito) =>
+    item.nombre.toLowerCase().startsWith("tubo") && !item.esFraccionable;
 
   const updateCantidad = useCallback((key: string, cantidadStr: string) => {
     const cantidad = parseFloat(cantidadStr) || 0;
     setCarrito(prev => prev.map(item => {
       if (item.key !== key) return item;
+
+      // Validar tubos no fraccionables: solo enteros o medios (múltiplos de 0.5)
+      if (esTuboRestringido(item) && cantidad > 0 && Math.round(cantidad * 2) !== cantidad * 2) {
+        setCantidadErrores(e => new Set(e).add(key));
+        return { ...item, cantidadStr }; // guarda el string pero no actualiza la cantidad
+      }
+      setCantidadErrores(e => { const s = new Set(e); s.delete(key); return s; });
+
       const { precio, subtotal, itbis } = calcLinea(item.precioFinal, cantidad, item.exentoItbis);
       return { ...item, cantidad, cantidadStr, precio, subtotal, itbis };
     }));
@@ -257,6 +273,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
     if (!carrito.length) { setError("Agrega al menos un producto"); return; }
     const lineas = carrito.filter(i => i.cantidad > 0);
     if (!lineas.length) { setError("Ingresa la cantidad de cada producto antes de enviar"); return; }
+    if (cantidadErrores.size > 0) { setError("Corrige las cantidades marcadas en rojo antes de continuar"); return; }
 
     // Advertencia de margen para el cajero antes de enviar
     const itemsNegativos = lineas.filter(i => nivelAlerta(i) === "negativo");
@@ -580,15 +597,21 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                       </td>
                       <td className="px-1 py-2">
                         <input
-                          type="number" min="0" step="0.001"
+                          type="number" min="0"
+                          step={esTuboRestringido(item) ? "0.5" : "0.001"}
                           value={item.cantidadStr}
                           placeholder="0"
                           onChange={e => updateCantidad(item.key, e.target.value)}
+                          title={esTuboRestringido(item) ? "Solo unidades completas o medios tubos (0.5, 1, 1.5, 2…)" : undefined}
                           className={cn(
                             "w-full text-center h-7 rounded border bg-background px-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60",
-                            item.cantidad === 0 && "border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-950/20"
+                            cantidadErrores.has(item.key) && "border-red-500 bg-red-50 dark:bg-red-950/20",
+                            !cantidadErrores.has(item.key) && item.cantidad === 0 && "border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-950/20"
                           )}
                         />
+                        {cantidadErrores.has(item.key) && (
+                          <p className="text-[9px] text-red-500 mt-0.5 leading-tight">Solo 0.5 o enteros</p>
+                        )}
                       </td>
                       <td className="px-2 py-2">
                         {(puedeEditarPrecio || item.esServicio) ? (
