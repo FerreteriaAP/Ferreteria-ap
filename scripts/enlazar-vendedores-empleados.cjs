@@ -26,7 +26,6 @@ async function main() {
 
   // 2. Todos los empleados
   const empleados = await prisma.empleado.findMany({
-    select: { id: true, nombre: true, apellido: true },
     include: { usuario: { select: { id: true, email: true } } },
   });
 
