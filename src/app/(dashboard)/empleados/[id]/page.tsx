@@ -11,7 +11,7 @@ import { MesFiltroEmpleado } from "@/components/empleados/mes-filtro-empleado";
 
 interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ mes?: string }>;
+  searchParams: Promise<{ filtro?: string }>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,25 +52,29 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
   if (!empleado) notFound();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rol = ((session?.user) as any)?.rol ?? "";
-  const esAdmin = rol === "ADMINISTRADOR";
-  const mostrarActividad = esAdmin && !!empleado.usuario;
+  const rolAdmin = ((session?.user) as any)?.rol ?? "";
+  const esAdmin = rolAdmin === "ADMINISTRADOR";
 
-  const mes = sp.mes;
+  // Solo mostrar actividad para empleados VENDEDOR vistos por el admin
+  const esVendedor = empleado.usuario?.rol === "VENDEDOR";
+  const mostrarActividad = esAdmin && esVendedor;
+
+  // Filtro: mes (YYYY-MM) o año (YYYY). Default: mes en curso
+  const mesDefault = new Date().toISOString().slice(0, 7);
+  const filtro = sp.filtro ?? mesDefault;
 
   const stats = mostrarActividad
-    ? await getEstadisticasEmpleado(
-        // usuario id — necesitamos buscarlo por empleadoId
-        empleado.id,
-        mes,
-      )
+    ? await getEstadisticasEmpleado(empleado.id, filtro)
     : null;
 
   const salarioQuincenal = Number(empleado.salarioBase) / 2;
 
-  const mesLabel = mes
-    ? new Date(`${mes}-15`).toLocaleDateString("es-DO", { month: "long", year: "numeric" })
-    : "Todo el tiempo";
+  const filtroLabel = (() => {
+    if (!sp.filtro) return new Date(`${mesDefault}-15`).toLocaleDateString("es-DO", { month: "long", year: "numeric" });
+    if (/^\d{4}-\d{2}$/.test(filtro)) return new Date(`${filtro}-15`).toLocaleDateString("es-DO", { month: "long", year: "numeric" });
+    if (/^\d{4}$/.test(filtro)) return `Año ${filtro}`;
+    return "Todo el tiempo";
+  })();
 
   return (
     <div className="space-y-5 max-w-4xl">
@@ -109,10 +113,10 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
             <div className="flex items-center gap-2">
               <div className="w-1 h-4 rounded-full" style={{ backgroundColor: "var(--accent-hex)" }} />
               <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Actividad · {mesLabel}
+                Actividad · {filtroLabel}
               </h2>
             </div>
-            <MesFiltroEmpleado empleadoId={id} mesActual={mes} />
+            <MesFiltroEmpleado empleadoId={id} filtroActual={sp.filtro} />
           </div>
 
           <div className="p-5 space-y-5">

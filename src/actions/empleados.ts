@@ -152,43 +152,53 @@ export async function actualizarEmpleado(id: string, data: Partial<{
 
 // Estadísticas de actividad — para comisiones por desempeño
 
-export async function getEstadisticasEmpleado(empleadoId: string, mes?: string) {
- // Resolver el usuarioId a partir del empleadoId
- const usuario = await prisma.usuario.findFirst({ where: { empleadoId }, select: { id: true } });
- if (!usuario) return { pdvTotal: 0, cotizaciones: 0, ordenes: 0, conduces: 0, facturas: 0, ordenesCompra: 0 };
- const usuarioId = usuario.id;
+export async function getEstadisticasEmpleado(empleadoId: string, filtro?: string) {
+  // Resolver el usuarioId a partir del empleadoId
+  const usuario = await prisma.usuario.findFirst({ where: { empleadoId }, select: { id: true } });
+  if (!usuario) return { pdvTotal: 0, cotizaciones: 0, ordenes: 0, conduces: 0, facturas: 0, ordenesCompra: 0 };
+  const uid = usuario.id;
 
- // Rango de fechas si se filtra por mes (YYYY-MM)
- let desde: Date | undefined;
- let hasta: Date | undefined;
- if (mes) {
-  const [y, m] = mes.split("-").map(Number);
-  desde = new Date(y, m - 1, 1, 0, 0, 0, 0);
-  hasta = new Date(y, m, 0, 23, 59, 59, 999);
- }
+  // filtro puede ser "YYYY-MM" (mes) o "YYYY" (año completo)
+  let desde: Date | undefined;
+  let hasta: Date | undefined;
 
- const fechaWhere = desde && hasta
-  ? { createdAt: { gte: desde, lte: hasta } }
-  : {};
+  if (filtro) {
+    if (/^\d{4}-\d{2}$/.test(filtro)) {
+      // mes
+      const [y, m] = filtro.split("-").map(Number);
+      desde = new Date(y, m - 1, 1, 0, 0, 0, 0);
+      hasta = new Date(y, m, 0, 23, 59, 59, 999);
+    } else if (/^\d{4}$/.test(filtro)) {
+      // año completo
+      const y = Number(filtro);
+      desde = new Date(y, 0, 1, 0, 0, 0, 0);
+      hasta = new Date(y, 11, 31, 23, 59, 59, 999);
+    }
+  }
 
- const [
-  pdvTotal,
-  cotizaciones,
-  ordenes,
-  conduces,
-  facturas,
-  ordenesCompra,
- ] = await Promise.all([
-  // Ventas PDV: turnoId != null, creador = este usuario
-  prisma.venta.count({ where: { creadorId: usuarioId, turnoId: { not: null }, ...fechaWhere } }),
-  // Módulo ventas por tipo, vendedor = este usuario
-  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "COTIZACION", ...fechaWhere } }),
-  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "ORDEN_VENTA", ...fechaWhere } }),
-  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "CONDUCE", ...fechaWhere } }),
-  prisma.venta.count({ where: { vendedorId: usuarioId, turnoId: null, tipo: "FACTURADA", ...fechaWhere } }),
-  // Órdenes de compra
-  prisma.ordenCompra.count({ where: { usuarioId, ...fechaWhere } }),
- ]);
+  // Usamos fechaEmision para ventas (igual que el selector de vendedores)
+  const ventaFecha = desde && hasta ? { fechaEmision: { gte: desde, lte: hasta } } : {};
+  const ocFecha   = desde && hasta ? { fechaEmision: { gte: desde, lte: hasta } } : {};
 
- return { pdvTotal, cotizaciones, ordenes, conduces, facturas, ordenesCompra };
+  // Para cada tipo de venta: el usuario puede ser vendedorId O creadorId
+  // (ventas@ es el login compartido, pero vendedorId guarda quién realmente la hizo)
+  const ventaBase = (extra: object) => ({
+    OR: [{ vendedorId: uid }, { creadorId: uid }] as object[],
+    ...ventaFecha,
+    ...extra,
+  });
+
+  const [pdvTotal, cotizaciones, ordenes, conduces, facturas, ordenesCompra] = await Promise.all([
+    // PDV: ventas ligadas a un turno de caja
+    prisma.venta.count({ where: ventaBase({ turnoId: { not: null } }) }),
+    // Módulo ventas por tipo (sin turno de caja)
+    prisma.venta.count({ where: ventaBase({ turnoId: null, tipo: "COTIZACION" }) }),
+    prisma.venta.count({ where: ventaBase({ turnoId: null, tipo: "ORDEN_VENTA" }) }),
+    prisma.venta.count({ where: ventaBase({ turnoId: null, tipo: "CONDUCE" }) }),
+    prisma.venta.count({ where: ventaBase({ turnoId: null, tipo: "FACTURADA" }) }),
+    // Órdenes de compra
+    prisma.ordenCompra.count({ where: { usuarioId: uid, ...ocFecha } }),
+  ]);
+
+  return { pdvTotal, cotizaciones, ordenes, conduces, facturas, ordenesCompra };
 }
