@@ -24,6 +24,7 @@ export function cap(s?: string | null): string {
   if (!s) return "";
 
   const capWord = (word: string): string => {
+    if (!word) return word;
     // Siglas técnicas fijas → siempre en mayúsculas (ppr, PPR, Ppr → PPR)
     if (SIGLAS_FIJAS.has(word.toUpperCase()) && /^[A-Za-z]+$/.test(word)) return word.toUpperCase();
     // Siglas ALL-CAPS de 2–4 letras, con dígitos opcionales al final (PN20, SCH40, CPVC…)
