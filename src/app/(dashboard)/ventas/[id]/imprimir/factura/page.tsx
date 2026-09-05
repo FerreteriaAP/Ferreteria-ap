@@ -3,6 +3,7 @@ import { getVenta } from "@/actions/ventas";
 import { PrintButtons } from "@/components/nominas/print-buttons";
 import { PrintLogo } from "@/components/print/logo";
 import { EMPRESA, getBancosEmpresa, CREDITO_LABEL, NCF_LABEL } from "@/lib/empresa";
+import { auth } from "@/lib/auth";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -15,11 +16,13 @@ const fmtN = (n: any) => {
 export default async function ImprimirFacturaPage({ params }: PageProps) {
   const { id } = await params;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [v, bancos] = await Promise.all([
+  const [v, bancos, session] = await Promise.all([
     getVenta(id) as Promise<any>,
     getBancosEmpresa(),
+    auth(),
   ]);
   if (!v || v.tipo !== "FACTURADA") notFound();
+  const isAdmin = (session?.user as { rol?: string } | undefined)?.rol === "ADMINISTRADOR";
 
   const fecha = new Date(v.fechaEmision).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
   const vence = v.fechaVencimiento
@@ -172,6 +175,14 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
             <div className="notas-box"><strong>Notas:</strong> {v.notas}</div>
           )}
 
+          {/* CÓDIGO DE SEGURIDAD — solo visible para ADMINISTRADOR */}
+          {isAdmin && v.codigoSeguridad && (
+            <div className="admin-codigo-box">
+              <span className="admin-codigo-lbl">Código de seguridad:</span>
+              <span className="admin-codigo-val">{v.codigoSeguridad}</span>
+            </div>
+          )}
+
           {/* INFORMACIÓN DE PAGO + FOOTER — flujo normal, última página */}
           <div className="footer-area">
             <div className="banco-tit">INFORMACIÓN DE PAGO</div>
@@ -266,6 +277,11 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         .banco-item { font-size: 11px; line-height: 1.9; display: flex; gap: 5px; }
         .bico { color: #f5821f; font-weight: 700; }
         .footer-line { font-size: 10px; color: #777; text-align: center; padding-top: 10px; margin-top: 10px; border-top: 1px solid #e8e8e8; }
+
+        /* Código de seguridad — solo admin */
+        .admin-codigo-box { margin-bottom: 14px; display: flex; align-items: baseline; gap: 8px; }
+        .admin-codigo-lbl { font-size: 10px; color: #999; }
+        .admin-codigo-val { font-size: 13px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 0.12em; color: #555; }
 
         /* Impresión */
         @media print {

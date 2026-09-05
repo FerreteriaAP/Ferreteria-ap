@@ -155,14 +155,15 @@ export async function buscarFacturasParaNC(q: string) {
 }
 
 /** Busca una factura por número EXACTO para nota de crédito.
- *  La cajera debe ingresar el serial completo (ej. FAC/2026/0071).
- *  No permite búsqueda por nombre ni keywords — requiere el documento físico.
+ *  La cajera debe ingresar el código de seguridad impreso en la factura física (formato XXXX-XXXX).
+ *  No permite búsqueda por número de factura — requiere el documento físico.
  */
-export async function buscarFacturaPorNumeroExacto(numero: string) {
- if (!numero?.trim()) return null;
+export async function buscarFacturaPorNumeroExacto(codigo: string) {
+ if (!codigo?.trim()) return null;
+ const codigoNorm = codigo.trim().toUpperCase();
 
  const venta = await prisma.venta.findFirst({
- where: { tipo: "FACTURADA", numero: numero.trim() },
+ where: { tipo: "FACTURADA", codigoSeguridad: codigoNorm },
  include: {
   cliente: { select: { nombre: true, rnc: true, saldoFavor: true } },
   detalles: {

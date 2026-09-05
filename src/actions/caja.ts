@@ -23,6 +23,13 @@ async function siguienteNumeroFactura(): Promise<string> {
   return generarNumero("FACTURA", "FAC");
 }
 
+/** Genera un código de seguridad único en formato XXXX-XXXX (letras mayúsculas + dígitos) */
+function generarCodigoSeguridad(): string {
+  const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin O/0/I/1 para evitar confusiones
+  const bloque = () => Array.from({ length: 4 }, () => CHARS[Math.floor(Math.random() * CHARS.length)]).join("");
+  return `${bloque()}-${bloque()}`;
+}
+
 // Turno abierto (cualquier usuario) 
 // La cajera abre el turno; vendedores y admin operan sobre el mismo turno abierto.
 
@@ -288,8 +295,9 @@ export async function procesarPagoCaja(
  estadoPago = montoCredito >= totalVenta ? "PENDIENTE" : "PAGADO_PARCIAL";
  }
 
- // Número de factura
+ // Número de factura y código de seguridad anti-fraude
  const numFactura = await siguienteNumeroFactura();
+ const codigoSeguridad = generarCodigoSeguridad();
 
  // Fecha de vencimiento para crédito
  // Prioridad: (1) fecha enviada por caja, (2) días en condición de crédito de la venta, (3) 30 días por defecto
@@ -310,7 +318,7 @@ export async function procesarPagoCaja(
 
  try {
  await prisma.$transaction(async (tx) => {
- // 1. Actualizar la venta a FACTURADA
+ // 1. Actualizar la venta a FACTURADA (con código de seguridad)
  await tx.venta.update({
  where: { id: ventaId },
  data: {
@@ -321,6 +329,7 @@ export async function procesarPagoCaja(
  ncf: opciones?.ncf ?? null,
  fechaVencimiento: fechaVencimiento ?? null,
  diasCredito: diasCredito ?? null,
+ codigoSeguridad,
  },
  });
 

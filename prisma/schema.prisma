@@ -548,6 +548,9 @@ model Venta {
   estadoPago       EstadoPago       @default(PENDIENTE)
   turnoId          String?          // turno de caja en que se realizó la venta (PDV)
   notas            String?          @db.Text
+  // Código de seguridad anti-fraude para devoluciones (formato XXXX-XXXX)
+  // Solo visible para ADMINISTRADOR en el sistema; se imprime en el ticket/factura física
+  codigoSeguridad  String?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 

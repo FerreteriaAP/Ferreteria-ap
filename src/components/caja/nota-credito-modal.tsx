@@ -52,7 +52,11 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
 
   const buscarFactura = async () => {
     const num = serial.trim();
-    if (!num) { setBusquedaError("Ingresa el número de factura"); return; }
+    if (!num) { setBusquedaError("Ingresa el código de seguridad de la factura"); return; }
+    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(num)) {
+      setBusquedaError("El código debe tener el formato exacto XXXX-XXXX (4 caracteres, guion, 4 caracteres)");
+      return;
+    }
     setBuscando(true);
     setBusquedaError(null);
     setFactura(null);
@@ -187,10 +191,10 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl">✕</button>
         </div>
 
-        {/* Buscador por número EXACTO — sin keywords ni dropdown */}
+        {/* Buscador por código de seguridad XXXX-XXXX — requiere factura física */}
         <div className="px-5 shrink-0">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1">
-            Número de factura
+            Código de seguridad de la factura
           </label>
           {!factura ? (
             <div className="flex gap-2">
@@ -198,10 +202,25 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
                 autoFocus
                 type="text"
                 value={serial}
-                onChange={e => { setSerial(e.target.value.toUpperCase()); setBusquedaError(null); }}
+                maxLength={9}
+                onChange={e => {
+                  // Auto-formato XXXX-XXXX: solo letras y números, guion automático en posición 4
+                  let val = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+                  // Insertar guion automáticamente después de 4 caracteres
+                  if (val.length > 4 && !val.includes("-")) {
+                    val = val.slice(0, 4) + "-" + val.slice(4);
+                  }
+                  // No permitir más de un guion
+                  const parts = val.split("-");
+                  if (parts.length > 2) val = parts[0] + "-" + parts.slice(1).join("");
+                  // Limitar a XXXX-XXXX
+                  if (parts[0]?.length > 4) val = parts[0].slice(0, 4) + (parts[1] !== undefined ? "-" + parts[1].slice(0, 4) : "");
+                  setSerial(val);
+                  setBusquedaError(null);
+                }}
                 onKeyDown={e => e.key === "Enter" && buscarFactura()}
-                placeholder="Ej: FAC/2026/0071"
-                className={INPUT + " font-mono flex-1"}
+                placeholder="Ej: A3B7-K9QX"
+                className={INPUT + " font-mono flex-1 tracking-widest"}
               />
               <button
                 type="button"
@@ -229,7 +248,7 @@ export function NotaCreditoModal({ turnoId, onClose, onOk }: Props) {
           )}
           {!factura && (
             <p className="text-[11px] text-muted-foreground mt-1.5">
-              Requiere el número exacto de la factura física del cliente.
+              Código impreso en la factura física del cliente. Formato: XXXX-XXXX
             </p>
           )}
         </div>

@@ -173,6 +173,24 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
         <div className="dbl"></div>
 
+        {/* NO. DE TICKET — código de seguridad para devoluciones */}
+        {v.codigoSeguridad && (
+          <>
+            <div className="centro">
+              <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "2px" }}>
+                NO. DE TICKET
+              </div>
+              <div style={{ fontSize: "18px", fontWeight: 900, letterSpacing: "0.15em", fontFamily: "monospace" }}>
+                {v.codigoSeguridad}
+              </div>
+              <div style={{ fontSize: "8px", marginTop: "2px" }}>
+                Conserve esta factura para solicitar devoluciones.
+              </div>
+            </div>
+            <div className="guion"></div>
+          </>
+        )}
+
         {/* FOOTER */}
         <div className="centro">
           <div className="gracias">Gracias por su compra!</div>
