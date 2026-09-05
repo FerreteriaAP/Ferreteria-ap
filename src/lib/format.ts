@@ -28,8 +28,8 @@ export function cap(s?: string | null): string {
     if (SIGLAS_FIJAS.has(word.toUpperCase()) && /^[A-Za-z]+$/.test(word)) return word.toUpperCase();
     // Siglas ALL-CAPS de 2–4 letras, con dígitos opcionales al final (PN20, SCH40, CPVC…)
     if (/^[A-Z]{2,4}\d*$/.test(word)) return word;
-    // Número + letras → letras siempre en MAYÚSCULAS (1GL, 5gl, 2LB, 16MM → 1GL, 5GL, 2LB, 16MM)
-    const mNumLetra = word.match(/^(\d+)([A-Za-z]+)$/);
+    // Número (entero o decimal) + letras → letras siempre en MAYÚSCULAS (1GL, 5gl, 0.5GL → 1GL, 5GL, 0.5GL)
+    const mNumLetra = word.match(/^([\d.]+)([A-Za-z]+)$/);
     if (mNumLetra) return mNumLetra[1] + mNumLetra[2].toUpperCase();
     // "x" como separador de dimensiones → siempre minúscula (1 x 2 x 8)
     if (word.toLowerCase() === "x") return "x";
