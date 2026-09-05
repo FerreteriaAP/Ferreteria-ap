@@ -4,18 +4,33 @@
  */
 
 /** Primera letra de cada palabra en mayúscula, resto en minúscula.
- *  Preserva siglas de 2–3 letras mayúsculas (STD, PVC, LED, SRL, GE…).
+ *  Preserva siglas de 2–4 letras mayúsculas (STD, PVC, LED, SRL, CPVC…).
+ *  Siglas técnicas conocidas siempre en mayúsculas sin importar cómo lleguen (ppr → PPR).
+ *  Tokens número + letras → letras siempre en mayúsculas (1GL, 5gl → 1GL, 5GL).
  *  Palabras con '/' se capitalizan parte por parte: "T/Sayco" → "T/Sayco", "PVC/STD" → "PVC/STD"
- *  "CEMENTO GRIS 2LB"           → "Cemento Gris 2lb"
- *  "consultora kolmen srl"      → "Consultora Kolmen Srl"
+ *  "consultora kolmen srl"        → "Consultora Kolmen Srl"
  *  "Mezcladora Fregadero T/Sayco" → "Mezcladora Fregadero T/Sayco"
+ *  "tubo ppr pn20"                → "Tubo PPR PN20"
+ *  "TUBO 1gl 5GL"                 → "Tubo 1GL 5GL"
  */
+
+/** Siglas técnicas que siempre deben ir en mayúsculas sin importar su forma de entrada */
+const SIGLAS_FIJAS = new Set([
+  "PPR","PVC","CPVC","SDR","SCH","EMT","IMC","RGS","LED","STD","SRL","SA",
+  "GL","GLL","MM","CM","MT","KG","LB","LT","UND","GRS","RNC",
+]);
+
 export function cap(s?: string | null): string {
   if (!s) return "";
 
   const capWord = (word: string): string => {
-    // Siglas: 2–3 letras mayúsculas, con dígitos opcionales al final (STD, PVC, PN20, SCH40…)
-    if (/^[A-Z]{2,3}\d*$/.test(word)) return word;
+    // Siglas técnicas fijas → siempre en mayúsculas (ppr, PPR, Ppr → PPR)
+    if (SIGLAS_FIJAS.has(word.toUpperCase()) && /^[A-Za-z]+$/.test(word)) return word.toUpperCase();
+    // Siglas ALL-CAPS de 2–4 letras, con dígitos opcionales al final (PN20, SCH40, CPVC…)
+    if (/^[A-Z]{2,4}\d*$/.test(word)) return word;
+    // Número + letras → letras siempre en MAYÚSCULAS (1GL, 5gl, 2LB, 16MM → 1GL, 5GL, 2LB, 16MM)
+    const mNumLetra = word.match(/^(\d+)([A-Za-z]+)$/);
+    if (mNumLetra) return mNumLetra[1] + mNumLetra[2].toUpperCase();
     // "x" como separador de dimensiones → siempre minúscula (1 x 2 x 8)
     if (word.toLowerCase() === "x") return "x";
     // Caso normal: primera letra mayúscula, resto minúscula
