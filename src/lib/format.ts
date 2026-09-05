@@ -38,9 +38,13 @@ export function cap(s?: string | null): string {
   };
 
   return s.trim().replace(/\S+/g, (token) => {
-    // Tokens con '/' → capitalizar cada segmento por separado
+    // Tokens con '/' → capitalizar cada segmento por separado (T/Sayco, PVC/STD)
     if (token.includes("/")) {
       return token.split("/").map(capWord).join("/");
+    }
+    // Tokens con '-' → capitalizar cada parte por separado (CB-610, W-Max, SCH-40)
+    if (token.includes("-")) {
+      return token.split("-").map(capWord).join("-");
     }
     return capWord(token);
   });
