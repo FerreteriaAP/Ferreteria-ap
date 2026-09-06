@@ -2,14 +2,13 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getProductos, getCategorias } from "@/actions/productos";
-import { buttonVariants } from "@/components/ui/button";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ProductosGrid } from "@/components/productos/productos-grid";
 import { ProductosTableBody } from "@/components/productos/productos-table";
 import { ViewToggle } from "@/components/ui/view-toggle";
-import { cn } from "@/lib/utils";
 import { Paginacion } from "@/components/ui/paginacion";
 import { ProductoBusqueda } from "@/components/productos/producto-busqueda";
+import { CategoriaFiltro } from "@/components/productos/categoria-filtro";
 
 interface PageProps {
   searchParams: Promise<{
@@ -22,7 +21,7 @@ interface PageProps {
   }>;
 }
 
-const ROLES_SOLO_LECTURA  = ["VENDEDOR", "CAJA"];
+const ROLES_SOLO_LECTURA   = ["VENDEDOR", "CAJA"];
 const ROLES_VER_ARCHIVADOS = ["ADMINISTRADOR", "ASISTENTE_ADMINISTRATIVO"];
 
 export default async function ProductosPage({ searchParams }: PageProps) {
@@ -30,26 +29,31 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   const session = await auth();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rol = ((session?.user) as any)?.rol ?? "";
-  const puedeCrear        = !ROLES_SOLO_LECTURA.includes(rol);
+  const puedeCrear         = !ROLES_SOLO_LECTURA.includes(rol);
   const puedeVerArchivados = ROLES_VER_ARCHIVADOS.includes(rol);
-  const busqueda = params.q ?? "";
-  const categoriaId = params.categoria ?? "";
-  const stockBajo = params.stockBajo === "1";
+
+  const busqueda     = params.q ?? "";
+  const categoriaId  = params.categoria ?? "";
+  const stockBajo    = params.stockBajo === "1";
   const verArchivados = params.archivados === "1";
   const page = Number(params.page ?? 1);
-  const jar = await cookies();
+
+  const jar        = await cookies();
   const cookieVista = jar.get("vista-preferida")?.value;
   const vista = (params.vista ?? cookieVista) === "grid" ? "grid" : "lista";
 
   const [{ productos, total, pages }, categorias] = await Promise.all([
-    getProductos({ busqueda, categoriaId: categoriaId || undefined, stockBajo, page, soloArchivados: verArchivados }),
+    getProductos({
+      busqueda,
+      categoriaId: categoriaId || undefined,
+      stockBajo,
+      page,
+      soloArchivados: verArchivados,
+    }),
     getCategorias(),
   ]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const formatDOP = (n: any) => `RD$ ${Number(n).toLocaleString("es-DO", { minimumFractionDigits: 2 })}`;
-
-  const vistaQS = vista === "grid" ? "&vista=grid" : "";
+  const vistaQS     = vista === "grid" ? "&vista=grid" : "";
   const archivadosQS = verArchivados ? "&archivados=1" : "";
 
   return (
@@ -59,10 +63,23 @@ export default async function ProductosPage({ searchParams }: PageProps) {
         <div>
           <h1 className="text-2xl font-bold">Productos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {total} producto{total !== 1 ? "s" : ""} {verArchivados ? "archivados" : stockBajo ? "con stock bajo" : "en catálogo"}
+            {total} producto{total !== 1 ? "s" : ""}{" "}
+            {verArchivados
+              ? "archivados"
+              : stockBajo
+              ? "con stock bajo"
+              : "en catálogo"}
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Tabla de precios */}
+          <Link
+            href="/productos/tabla-precios"
+            className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-muted/30"
+            style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
+          >
+            Tabla de Precios
+          </Link>
           {puedeCrear && (
             <Link
               href="/productos/nuevo"
@@ -88,37 +105,15 @@ export default async function ProductosPage({ searchParams }: PageProps) {
           stockBajo={stockBajo}
           vista={vista}
         />
-        <div className="ml-auto flex gap-2 flex-wrap justify-end">
-          <Link
-            href={`/productos?q=${busqueda}${vistaQS}`}
-            className={cn(buttonVariants({ variant: !categoriaId && !stockBajo ? "default" : "outline", size: "sm" }))}
-          >
-            Todas
-          </Link>
-          {categorias.map((c) => (
-            <Link
-              key={c.id}
-              href={`/productos?categoria=${c.id}&q=${busqueda}${vistaQS}`}
-              className={cn(buttonVariants({ variant: categoriaId === c.id ? "default" : "outline", size: "sm" }))}
-            >
-              {c.codigo} — {c.nombre}
-            </Link>
-          ))}
-          <Link
-            href={stockBajo ? `/productos?q=${busqueda}${vistaQS}` : `/productos?stockBajo=1${vistaQS}`}
-            className={cn(buttonVariants({ variant: stockBajo ? "destructive" : "outline", size: "sm" }))}
-          >
-            Stock bajo
-          </Link>
-          {puedeVerArchivados && (
-            <Link
-              href={verArchivados ? `/productos?q=${busqueda}${vistaQS}` : `/productos?archivados=1&q=${busqueda}${vistaQS}`}
-              className={cn(buttonVariants({ variant: verArchivados ? "secondary" : "outline", size: "sm" }))}
-            >
-              Archivados
-            </Link>
-          )}
-        </div>
+        <CategoriaFiltro
+          categorias={categorias}
+          categoriaId={categoriaId}
+          stockBajo={stockBajo}
+          archivados={verArchivados}
+          puedeVerArchivados={puedeVerArchivados}
+          busqueda={busqueda}
+          vista={vista}
+        />
       </div>
 
       {/* Contenido */}
