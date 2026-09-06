@@ -15,6 +15,8 @@ export default async function proxy(request: NextRequest) {
  if (
  pathname.startsWith("/_next") ||
  pathname.startsWith("/favicon.ico") ||
+ pathname.startsWith("/icon") ||
+ pathname.startsWith("/apple-icon") ||
  pathname.includes(".")
  ) {
  return NextResponse.next();
