@@ -352,14 +352,20 @@ export async function procesarPagoCaja(
  const producto = await tx.producto.findUnique({ where: { id: detalle.productoId } });
  if (!producto) continue;
 
- // Productos fraccionables: la cantidad en detalles_venta está en unidades de
- // fracción (ej. pies), pero el stock se lleva en unidades enteras (ej. barras).
- // Convertir igual que lo hace crearConduce.
+ // Productos fraccionables: solo convertir si la venta fue en unidad de fracción
+ // (ej. "Pie"), NO cuando se vendió en la unidad base del producto (ej. "UND").
+ // Si dv.unidad === producto.unidadMedida → venta entera → cantidad real = cantidad
+ // Si dv.unidad !== producto.unidadMedida → venta fraccionada → dividir por factor
  const cantidadDetalle = Number(detalle.cantidad);
- const cantidadReal =
- producto.esFraccionable && producto.factorFraccion && Number(producto.factorFraccion) > 0
- ? cantidadDetalle / Number(producto.factorFraccion)
- : cantidadDetalle;
+ const unidadDetalle = detalle.unidad ?? producto.unidadMedida;
+ const esVentaFraccionada =
+   producto.esFraccionable &&
+   producto.factorFraccion &&
+   Number(producto.factorFraccion) > 0 &&
+   unidadDetalle !== producto.unidadMedida;
+ const cantidadReal = esVentaFraccionada
+   ? cantidadDetalle / Number(producto.factorFraccion)
+   : cantidadDetalle;
 
  const stockAntes = Number(producto.stockActual);
  const stockDespues = stockAntes - cantidadReal;

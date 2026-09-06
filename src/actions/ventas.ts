@@ -392,7 +392,7 @@ export async function confirmarRecepcionConduce(
  // Obtener el detalle de venta para recalcular precios
  const detalle = await tx.detalleVenta.findFirst({
  where: { ventaId: conduce.ventaId, productoId: item.productoId },
- include: { producto: { select: { esFraccionable: true, factorFraccion: true, stockActual: true } } },
+ include: { producto: { select: { esFraccionable: true, factorFraccion: true, stockActual: true, unidadMedida: true } } },
  });
  if (!detalle) continue;
 
@@ -423,11 +423,17 @@ export async function confirmarRecepcionConduce(
  });
  }
 
- // Devolver stock (diferencia en unidades de fracción si aplica)
+ // Devolver stock (solo convertir si la venta original fue en unidad fraccionada)
  const prod = detalle.producto;
- const difReal = prod.esFraccionable && prod.factorFraccion
- ? diferencia / Number(prod.factorFraccion)
- : diferencia;
+ const unidadDetalleDev = detalle.unidad ?? prod.unidadMedida;
+ const esFraccionadaDev =
+   prod.esFraccionable &&
+   prod.factorFraccion &&
+   Number(prod.factorFraccion) > 0 &&
+   unidadDetalleDev !== prod.unidadMedida;
+ const difReal = esFraccionadaDev
+   ? diferencia / Number(prod.factorFraccion)
+   : diferencia;
 
  if (difReal > 0) {
  const stockAntes = Number(prod.stockActual);
@@ -644,13 +650,18 @@ export async function crearConduce(ventaId: string, data: {
  where: { id: ventaId },
  include: {
  detalles: {
- include: {
+ select: {
+ id: true,
+ productoId: true,
+ unidad: true,
+ cantidad: true,
  producto: {
  select: {
  stockActual: true,
  costoUltimo: true,
  esFraccionable: true,
  factorFraccion: true,
+ unidadMedida: true,
  },
  },
  },
@@ -678,11 +689,17 @@ export async function crearConduce(ventaId: string, data: {
 
  for (const d of venta.detalles) {
  const prod = d.producto;
- // Para productos fraccionables la cantidad almacenada está en unidades fracción (ej. pies)
- // Debemos convertir a unidades reales (ej. tubos) para descontar el stock
- const cantidadReal = prod.esFraccionable && prod.factorFraccion
- ? Number(d.cantidad) / Number(prod.factorFraccion)
- : Number(d.cantidad);
+ // Solo dividir por factorFraccion si la venta fue en unidad fraccionada (ej. "Pie").
+ // Si se vendió en la unidad base (ej. "UND"), la cantidad ya es en tubos.
+ const unidadDetalle = d.unidad ?? prod.unidadMedida;
+ const esVentaFraccionada =
+   prod.esFraccionable &&
+   prod.factorFraccion &&
+   Number(prod.factorFraccion) > 0 &&
+   unidadDetalle !== prod.unidadMedida;
+ const cantidadReal = esVentaFraccionada
+   ? Number(d.cantidad) / Number(prod.factorFraccion)
+   : Number(d.cantidad);
 
  const stockAntes = Number(prod.stockActual);
  const stockDespues = stockAntes - cantidadReal;
