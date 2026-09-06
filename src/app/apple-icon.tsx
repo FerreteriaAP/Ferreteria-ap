@@ -6,23 +6,23 @@ export const contentType = 'image/png'
 export default function AppleIcon() {
   return new ImageResponse(
     (
-      // Fondo blanco
+      // Fondo negro
       <div
         style={{
           width: '100%',
           height: '100%',
-          background: 'white',
+          background: '#1C1C1C',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        {/* Octágono exterior — borde negro grueso */}
+        {/* Octágono exterior — borde blanco grueso */}
         <div
           style={{
-            width: 166,
-            height: 166,
-            background: '#1C1C1C',
+            width: 168,
+            height: 168,
+            background: 'white',
             clipPath:
               'polygon(33.5% 5%, 66.5% 5%, 95% 33.5%, 95% 66.5%, 66.5% 95%, 33.5% 95%, 5% 66.5%, 5% 33.5%)',
             display: 'flex',
@@ -30,12 +30,12 @@ export default function AppleIcon() {
             justifyContent: 'center',
           }}
         >
-          {/* Interior blanco del octágono */}
+          {/* Relleno negro interior */}
           <div
             style={{
-              width: 148,
-              height: 148,
-              background: 'white',
+              width: 154,
+              height: 154,
+              background: '#1C1C1C',
               clipPath:
                 'polygon(33.5% 5%, 66.5% 5%, 95% 33.5%, 95% 66.5%, 66.5% 95%, 33.5% 95%, 5% 66.5%, 5% 33.5%)',
               display: 'flex',
@@ -43,12 +43,12 @@ export default function AppleIcon() {
               justifyContent: 'center',
             }}
           >
-            {/* Segundo anillo negro fino */}
+            {/* Segundo anillo blanco fino */}
             <div
               style={{
-                width: 140,
-                height: 140,
-                background: '#1C1C1C',
+                width: 146,
+                height: 146,
+                background: 'white',
                 clipPath:
                   'polygon(33.5% 5%, 66.5% 5%, 95% 33.5%, 95% 66.5%, 66.5% 95%, 33.5% 95%, 5% 66.5%, 5% 33.5%)',
                 display: 'flex',
@@ -56,12 +56,12 @@ export default function AppleIcon() {
                 justifyContent: 'center',
               }}
             >
-              {/* Relleno blanco interior */}
+              {/* Relleno negro interior final */}
               <div
                 style={{
-                  width: 134,
-                  height: 134,
-                  background: 'white',
+                  width: 138,
+                  height: 138,
+                  background: '#1C1C1C',
                   clipPath:
                     'polygon(33.5% 5%, 66.5% 5%, 95% 33.5%, 95% 66.5%, 66.5% 95%, 33.5% 95%, 5% 66.5%, 5% 33.5%)',
                   display: 'flex',
@@ -69,10 +69,10 @@ export default function AppleIcon() {
                   justifyContent: 'center',
                 }}
               >
-                {/* AP en naranja — bien grueso */}
+                {/* AP en blanco — bien grueso */}
                 <span
                   style={{
-                    color: '#EC6E00',
+                    color: 'white',
                     fontSize: 62,
                     fontWeight: 900,
                     fontFamily: 'Arial Black, Arial, sans-serif',
