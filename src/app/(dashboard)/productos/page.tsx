@@ -89,30 +89,32 @@ export default async function ProductosPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Filtros — buscador + categoría + tabla de precios en una sola línea */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* Filtros — buscador izq, categoría + tabla de precios der */}
+      <div className="flex items-center gap-2">
         <ProductoBusqueda
           defaultValue={busqueda}
           categoriaId={categoriaId}
           stockBajo={stockBajo}
           vista={vista}
         />
-        <CategoriaFiltro
-          categorias={categorias}
-          categoriaId={categoriaId}
-          stockBajo={stockBajo}
-          archivados={verArchivados}
-          puedeVerArchivados={puedeVerArchivados}
-          busqueda={busqueda}
-          vista={vista}
-        />
-        <Link
-          href="/productos/tabla-precios"
-          className="h-9 inline-flex items-center px-3 rounded-md border text-sm transition-colors hover:bg-muted/30 whitespace-nowrap"
-          style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
-        >
-          Tabla de Precios
-        </Link>
+        <div className="ml-auto flex items-center gap-2">
+          <CategoriaFiltro
+            categorias={categorias}
+            categoriaId={categoriaId}
+            stockBajo={stockBajo}
+            archivados={verArchivados}
+            puedeVerArchivados={puedeVerArchivados}
+            busqueda={busqueda}
+            vista={vista}
+          />
+          <Link
+            href="/productos/tabla-precios"
+            className="h-9 inline-flex items-center px-3 rounded-md border-2 text-sm font-medium transition-colors hover:bg-muted/30 whitespace-nowrap"
+            style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
+          >
+            Tabla de Precios
+          </Link>
+        </div>
       </div>
 
       {/* Contenido */}
