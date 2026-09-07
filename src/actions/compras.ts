@@ -23,6 +23,13 @@ const AjustePrecioSchema = z.object({
  nuevoPrecioVenta: z.coerce.number().positive(),
 });
 
+const PagoContadoSchema = z.object({
+ metodo:     z.enum(["EFECTIVO", "CHEQUE", "TRANSFERENCIA"]),
+ referencia: z.string().optional(),
+ cuentaId:   z.string().optional(),
+ notas:      z.string().optional(),
+});
+
 const CompraSchema = z.object({
  suplidorId: z.string().min(1, "Suplidor requerido"),
  noFacturaSuplidor: z.string().optional(),
@@ -34,7 +41,17 @@ const CompraSchema = z.object({
  notas: z.string().optional(),
  detalles: z.array(DetalleSchema).min(1, "Agrega al menos un producto"),
  ajustesPrecio: z.array(AjustePrecioSchema).optional(), // ajustes de precioVenta al guardar
+ pagoContado: PagoContadoSchema.optional(),             // solo cuando credito=CONTADO
 });
+
+/**
+ * Convierte una fecha "YYYY-MM-DD" a Date al mediodía UTC para evitar el
+ * desfase de -1 día que ocurre cuando UTC+0 (servidor) guarda medianoche
+ * y la zona horaria local (DR = UTC-4) lo interpreta como el día anterior.
+ */
+function parseFechaLocal(str: string): Date {
+ return new Date(str + "T12:00:00.000Z");
+}
 
 export type CompraInput = z.infer<typeof CompraSchema>;
 
@@ -111,7 +128,7 @@ export async function crearCompra(data: CompraInput) {
  const parsed = CompraSchema.safeParse(data);
  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
- const { suplidorId, noFacturaSuplidor, ncf, tipoNcfCompra, ncfCodigoSeguridad, fechaFactura, fechaVencimiento, notas, detalles, ajustesPrecio } = parsed.data;
+ const { suplidorId, noFacturaSuplidor, ncf, tipoNcfCompra, ncfCodigoSeguridad, fechaFactura, fechaVencimiento, notas, detalles, ajustesPrecio, pagoContado } = parsed.data;
 
  // Validar unicidad del NCF (comprobante fiscal único por compra)
  if (ncf) {
@@ -134,6 +151,9 @@ export async function crearCompra(data: CompraInput) {
  const compra = await prisma.$transaction(async (tx) => {
  const numero = await siguienteNumero("COMPRA");
 
+ // Si viene pagoContado, la compra se marca directamente como PAGADO
+ const estadoInicial = pagoContado ? "PAGADO" : "PENDIENTE";
+
  const compra = await tx.compra.create({
  data: {
  numero,
@@ -142,14 +162,14 @@ export async function crearCompra(data: CompraInput) {
  ncf: ncf || null,
  tipoNcfCompra: tipoNcfCompra || null,
  ncfCodigoSeguridad: ncfCodigoSeguridad || null,
- fechaFactura: new Date(fechaFactura),
- fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : null,
+ fechaFactura: parseFechaLocal(fechaFactura),
+ fechaVencimiento: fechaVencimiento ? parseFechaLocal(fechaVencimiento) : null,
  subtotal,
  itbis: totalItbis,
  total,
  notas: notas || null,
  usuarioId,
- estadoPago: "PENDIENTE",
+ estadoPago: estadoInicial,
  detalles: {
  create: detalles.map((d) => ({
  productoId: d.productoId,
@@ -228,8 +248,22 @@ export async function crearCompra(data: CompraInput) {
  }
  }
 
- // Crear CxP si hay fecha de vencimiento
- if (fechaVencimiento) {
+ // Pago contado: registrar el pago automáticamente
+ if (pagoContado) {
+ await tx.pagoCompra.create({
+ data: {
+ compraId: compra.id,
+ monto: total,
+ fecha: parseFechaLocal(fechaFactura),
+ metodo: pagoContado.metodo,
+ referencia: pagoContado.referencia || null,
+ cuentaId: pagoContado.cuentaId || null,
+ notas: pagoContado.notas || null,
+ },
+ });
+ // Con pago contado no se crea CxP (ya está pagada)
+ } else if (fechaVencimiento) {
+ // Crear CxP solo si hay crédito (no contado)
  await tx.cuentaPorPagar.create({
  data: {
  compraId: compra.id,
@@ -237,8 +271,8 @@ export async function crearCompra(data: CompraInput) {
  monto: total,
  montoPagado: 0,
  saldo: total,
- fechaEmision: new Date(fechaFactura),
- fechaVencimiento: new Date(fechaVencimiento),
+ fechaEmision: parseFechaLocal(fechaFactura),
+ fechaVencimiento: parseFechaLocal(fechaVencimiento),
  estado: "PENDIENTE",
  },
  });

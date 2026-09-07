@@ -12,9 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { crearCompra, verificarNcfUnico, type CompraInput } from "@/actions/compras";
+import { DialogDescription } from "@/components/ui/dialog";
 import { getProductoPorCodigo, buscarProductosPorKeyword, siguienteCodigoPorCategoria, crearProducto } from "@/actions/productos";
 import { cn } from "@/lib/utils";
-import { Search, RotateCcw, AlertCircle, PackagePlus, X, ShoppingCart, FileWarning } from "lucide-react";
+import { Search, RotateCcw, AlertCircle, PackagePlus, X, ShoppingCart, FileWarning, CreditCard } from "lucide-react";
 
 // ── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,7 @@ const DIAS_CREDITO: Record<string, number> = {
   CONTADO: 0, DIAS_10: 10, DIAS_15: 15, DIAS_30: 30, DIAS_45: 45, DIAS_60: 60, DIAS_90: 90,
 };
 type Categoria    = { id: string; codigo: string; nombre: string };
+type CuentaBancaria = { id: string; banco: string; nombre: string };
 type ProductoSim  = { id: string; nombre: string; codigo: string; costoUltimo: number; stockActual: number; precioVenta: number; porcentajeGanancia: number };
 type AlertaPrecio = { productoId: string; nombre: string; costoAnterior: number; nuevoCosto: number; precioVentaActual: number; nuevoPrecioVenta: number; aplicar: boolean };
 
@@ -126,9 +128,16 @@ const INPUT_CLS = "w-full h-9 rounded-lg border bg-background px-3 text-sm focus
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-interface CompraFormProps { suplidores: Suplidor[]; categorias: Categoria[]; rol?: string }
+type MetodoPago = "EFECTIVO" | "CHEQUE" | "TRANSFERENCIA";
 
-export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
+interface CompraFormProps {
+  suplidores: Suplidor[];
+  categorias: Categoria[];
+  cuentasBancarias: CuentaBancaria[];
+  rol?: string;
+}
+
+export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: CompraFormProps) {
   // rol solo se recibe para referencia; todas las funciones de compra están habilitadas
   // para ADMINISTRADOR y ASISTENTE_ADMINISTRATIVO por igual.
   void rol;
@@ -151,6 +160,15 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
   const [costoInicial,  setCostoInicial]  = useState(0);
   const [draftDisponible, setDraftDisponible] = useState(false);
   const [ncfDupError, setNcfDupError] = useState<string | null>(null);
+
+  // ── Modal pago contado ──────────────────────────────────────────────────────
+  const [showPagoModal, setShowPagoModal]     = useState(false);
+  const [pagoMetodo, setPagoMetodo]           = useState<MetodoPago>("EFECTIVO");
+  const [pagoReferencia, setPagoReferencia]   = useState("");
+  const [pagoCuentaId, setPagoCuentaId]       = useState("");
+  const [pagoNotas, setPagoNotas]             = useState("");
+  const [pagoGuardando, setPagoGuardando]     = useState(false);
+  const pendingValuesRef = useRef<import("react-hook-form").FieldValues | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<FormValues>({ resolver: zodResolver(FormSchema) as any, defaultValues: { suplidorId: "", fechaFactura: hoy, detalles: [] } });
@@ -277,32 +295,65 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
   }, 0);
   const total = subtotal + totalItbis;
 
-  // Submit
-  const onSubmit: SubmitHandler<FormValues> = async (values) => {
-    if (ncfDupError) { setServerError(ncfDupError); return; }
+  // ── Lógica de envío ───────────────────────────────────────────────────────
+  const buildPayload = (values: FormValues, pagoContado?: { metodo: MetodoPago; referencia?: string; cuentaId?: string; notas?: string }) => {
+    const ajustesPrecio = alertaPrecios.filter(a => a.aplicar && a.nuevoPrecioVenta > 0).map(a => ({ productoId: a.productoId, nuevoPrecioVenta: a.nuevoPrecioVenta }));
+    const detallesTransformados = values.detalles.map(d => {
+      const pct = d.itbisPct ?? 0;
+      const desc = d.descuento ?? 0;
+      const netoConDesc = costoNetoFn(d.costo, pct) * (1 - desc / 100);
+      const itbisTotal = d.cantidad * netoConDesc * ITBIS_RATE;
+      return { productoId: d.productoId, cantidad: d.cantidad, costo: netoConDesc, itbis: itbisTotal };
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return { ...values, detalles: detallesTransformados, ajustesPrecio, pagoContado } as any;
+  };
+
+  const submitFinal = async (values: FormValues, pagoContado?: { metodo: MetodoPago; referencia?: string; cuentaId?: string; notas?: string }) => {
     setServerError(null);
     try {
-      const ajustesPrecio = alertaPrecios.filter(a => a.aplicar && a.nuevoPrecioVenta > 0).map(a => ({ productoId: a.productoId, nuevoPrecioVenta: a.nuevoPrecioVenta }));
-      // Normalizar costos antes de enviar al servidor:
-      // costoNeto = costo ingresado ÷ 1.18 cuando itbisPct=0 (precio incluía ITBIS)
-      // costoNeto = costo ingresado           cuando itbisPct=18 (precio sin ITBIS)
-      // costoUltimo en BD siempre se guarda SIN ITBIS.
-      const detallesTransformados = values.detalles.map(d => {
-        const pct = d.itbisPct ?? 0;
-        const desc = d.descuento ?? 0;
-        // costoNeto = precio sin ITBIS; con descuento aplicado al neto
-        const netoConDesc = costoNetoFn(d.costo, pct) * (1 - desc / 100);
-        const itbisTotal = d.cantidad * netoConDesc * ITBIS_RATE;
-        return { productoId: d.productoId, cantidad: d.cantidad, costo: netoConDesc, itbis: itbisTotal };
-      });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await crearCompra({ ...values, detalles: detallesTransformados, ajustesPrecio } as any);
+      const result = await crearCompra(buildPayload(values, pagoContado) as CompraInput);
       if ("error" in result && result.error) { const errs = result.error as Record<string, string[]>; setServerError(Object.values(errs).flat()[0] ?? "Error al guardar"); return; }
       const id = "id" in result ? result.id : "";
       if (!id) { setServerError("La compra se guardó pero no se recibió el ID."); return; }
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* */ }
       router.push(`/compras/${id}`);
     } catch { setServerError("Error inesperado al guardar."); }
+  };
+
+  // Submit
+  const onSubmit: SubmitHandler<FormValues> = async (values) => {
+    if (ncfDupError) { setServerError(ncfDupError); return; }
+    const sup = suplidores.find(s => s.id === values.suplidorId);
+    const esContado = sup?.credito === "CONTADO";
+
+    if (esContado) {
+      // Guardar valores y mostrar modal de forma de pago
+      pendingValuesRef.current = values;
+      setPagoMetodo("EFECTIVO");
+      setPagoReferencia("");
+      setPagoCuentaId("");
+      setPagoNotas("");
+      setShowPagoModal(true);
+      return;
+    }
+
+    await submitFinal(values);
+  };
+
+  // Confirmar pago desde el modal
+  const handleConfirmarPago = async () => {
+    if (!pendingValuesRef.current) return;
+    setPagoGuardando(true);
+    setShowPagoModal(false);
+    await submitFinal(pendingValuesRef.current as FormValues, {
+      metodo:     pagoMetodo,
+      referencia: pagoReferencia || undefined,
+      cuentaId:   pagoCuentaId  || undefined,
+      notas:      pagoNotas     || undefined,
+    });
+    pendingValuesRef.current = null;
+    setPagoGuardando(false);
   };
 
   const onValidationError = (errs: Record<string, unknown>) => {
@@ -320,6 +371,113 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
         nombreInicial={nombreInicial} costoInicial={costoInicial} categorias={categorias}
         onProductoCreado={prod => { setModalAbierto(false); agregarProducto(prod); }}
       />
+
+      {/* ── Modal: forma de pago contado ── */}
+      <Dialog open={showPagoModal} onOpenChange={open => { if (!open) setShowPagoModal(false); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard size={18} style={{ color: ACCENT }} />
+              Registrar pago — Contado
+            </DialogTitle>
+            <DialogDescription>
+              Esta factura es de contado. Selecciona cómo se realizó el pago para registrarla como pagada automáticamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Método de pago */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
+                Forma de pago *
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["EFECTIVO", "CHEQUE", "TRANSFERENCIA"] as MetodoPago[]).map(m => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setPagoMetodo(m)}
+                    className={cn(
+                      "h-10 rounded-lg border text-sm font-medium transition-all",
+                      pagoMetodo === m
+                        ? "border-[2px] font-bold"
+                        : "hover:bg-muted/30"
+                    )}
+                    style={pagoMetodo === m ? { borderColor: ACCENT, color: ACCENT } : {}}
+                  >
+                    {m === "EFECTIVO" ? "Efectivo" : m === "CHEQUE" ? "Cheque" : "Transferencia"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Cuenta bancaria (cheque/transferencia) */}
+            {(pagoMetodo === "CHEQUE" || pagoMetodo === "TRANSFERENCIA") && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
+                  Cuenta bancaria
+                </label>
+                <select
+                  value={pagoCuentaId}
+                  onChange={e => setPagoCuentaId(e.target.value)}
+                  className={INPUT_CLS}
+                >
+                  <option value="">— Sin especificar —</option>
+                  {cuentasBancarias.map(c => (
+                    <option key={c.id} value={c.id}>{c.banco} — {c.nombre}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Referencia */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
+                Referencia / N° cheque / N° transacción
+                <span className="font-normal normal-case ml-1">(opcional)</span>
+              </label>
+              <input
+                className={INPUT_CLS}
+                value={pagoReferencia}
+                onChange={e => setPagoReferencia(e.target.value)}
+                placeholder="Ej. CHQ-001234 o TRF-56789"
+              />
+            </div>
+
+            {/* Notas */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
+                Notas <span className="font-normal normal-case">(opcional)</span>
+              </label>
+              <textarea
+                className={INPUT_CLS + " resize-none h-14"}
+                value={pagoNotas}
+                onChange={e => setPagoNotas(e.target.value)}
+                placeholder="Observaciones sobre el pago…"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPagoModal(false)}
+              className="h-9 px-4 rounded-lg border text-sm font-medium hover:bg-muted/40 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmarPago}
+              disabled={pagoGuardando}
+              className={cn("h-9 px-5 rounded-lg text-sm font-bold text-white transition-all", pagoGuardando && "opacity-60 pointer-events-none")}
+              style={{ backgroundColor: ACCENT }}
+            >
+              {pagoGuardando ? "Guardando…" : "Confirmar y guardar"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <form onSubmit={form.handleSubmit(onSubmit as any, onValidationError as any)} className="space-y-5 max-w-4xl pb-24">
@@ -757,10 +915,10 @@ export function CompraForm({ suplidores, categorias, rol }: CompraFormProps) {
             className="h-9 px-5 rounded-lg border text-sm font-medium hover:bg-muted/40 transition-colors">
             Cancelar
           </button>
-          <button type="submit" disabled={isSubmitting}
-            className={cn("h-9 px-6 rounded-lg text-sm font-bold text-white transition-all", isSubmitting && "opacity-60 pointer-events-none")}
+          <button type="submit" disabled={isSubmitting || pagoGuardando}
+            className={cn("h-9 px-6 rounded-lg text-sm font-bold text-white transition-all", (isSubmitting || pagoGuardando) && "opacity-60 pointer-events-none")}
             style={{ backgroundColor: ACCENT }}>
-            {isSubmitting ? "Guardando…" : "Registrar compra"}
+            {isSubmitting || pagoGuardando ? "Guardando…" : "Registrar compra"}
           </button>
         </div>
       </form>
