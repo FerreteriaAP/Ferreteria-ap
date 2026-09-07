@@ -202,17 +202,17 @@ export default async function CompraPage({ params, searchParams }: PageProps) {
               <tr className="border-t bg-muted/10">
                 <td colSpan={4} />
                 <td className="px-4 py-2 text-right text-xs text-muted-foreground font-semibold uppercase tracking-wide">Subtotal</td>
-                <td className="px-4 py-2 text-right font-mono text-sm">{fmt(compra.subtotal)}</td>
+                <td className="px-4 py-2 text-right font-mono text-sm whitespace-nowrap">{fmt(compra.subtotal)}</td>
               </tr>
               <tr className="bg-muted/10">
                 <td colSpan={4} />
                 <td className="px-4 py-2 text-right text-xs text-muted-foreground font-semibold uppercase tracking-wide">ITBIS</td>
-                <td className="px-4 py-2 text-right font-mono text-sm">{fmt(compra.itbis)}</td>
+                <td className="px-4 py-2 text-right font-mono text-sm whitespace-nowrap">{fmt(compra.itbis)}</td>
               </tr>
               <tr className="border-t-2 bg-muted/10">
                 <td colSpan={4} />
                 <td className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide">Total factura</td>
-                <td className="px-4 py-3 text-right font-mono font-bold text-base" style={{ color: ACCENT }}>{fmt(compra.total)}</td>
+                <td className="px-4 py-3 text-right font-mono font-bold text-base whitespace-nowrap" style={{ color: ACCENT }}>{fmt(compra.total)}</td>
               </tr>
             </tfoot>
           </table>
