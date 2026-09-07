@@ -257,6 +257,7 @@ export async function getCxPPorSuplidor(opts: {
  estado: string;
  diasVencida: number;
  diasRestantes: number;
+ esContado?: boolean;
  }>;
  }>();
 
@@ -292,7 +293,67 @@ export async function getCxPPorSuplidor(opts: {
  estado: c.estado,
  diasVencida: dias,
  diasRestantes: diasRestantesP,
+ esContado: false,
  });
+ }
+
+ // Cuando se muestran todas, incluir también las compras de contado
+ // (estadoPago = PAGADO pero sin registro en CuentaPorPagar)
+ if (mostrarTodas) {
+ // IDs de compras que YA tienen CxP (para no duplicar)
+ const compraIdsConCxP = new Set(cxps.map(c => c.compraId));
+
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ const whereContado: any = {
+ estadoPago: "PAGADO",
+ cuentasPorPagar: { none: {} },
+ ...(busqueda
+  ? {
+   OR: [
+   { suplidor: { nombre: { contains: busqueda, mode: "insensitive" } } },
+   { numero: { contains: busqueda, mode: "insensitive" } },
+   ],
+  }
+  : {}),
+ };
+
+ const comprasContado = await prisma.compra.findMany({
+ where: whereContado,
+ include: {
+  suplidor: { select: { id: true, nombre: true, rnc: true } },
+ },
+ orderBy: { fechaFactura: "desc" },
+ });
+
+ for (const comp of comprasContado) {
+  if (compraIdsConCxP.has(comp.id)) continue; // seguridad extra
+  const key = comp.suplidorId;
+  if (!mapa.has(key)) {
+  mapa.set(key, {
+   suplidor: comp.suplidor,
+   totalSaldo: 0,
+   totalVencido: 0,
+   compras: [],
+  });
+  }
+  const grupo = mapa.get(key)!;
+  const fecha = comp.fechaFactura ?? new Date();
+  grupo.compras.push({
+  id: "contado_" + comp.id,
+  compraId: comp.id,
+  numero: comp.numero,
+  monto: Number(comp.total),
+  saldo: 0,
+  fechaVencimiento: fecha,
+  fechaFactura: comp.fechaFactura ?? null,
+  ncf: comp.ncf ?? null,
+  noFacturaSuplidor: comp.noFacturaSuplidor ?? null,
+  estado: "PAGADO",
+  diasVencida: 0,
+  diasRestantes: 0,
+  esContado: true,
+  });
+ }
  }
 
  return Array.from(mapa.values()).sort((a, b) => b.totalSaldo - a.totalSaldo);

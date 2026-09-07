@@ -24,6 +24,7 @@ interface Compra {
   estado: string;
   diasVencida: number;
   diasRestantes: number;
+  esContado?: boolean;
 }
 
 interface Grupo {
@@ -364,39 +365,64 @@ export function CxPMultiSelect({ grupos }: Props) {
 
                     {/* Fecha de vencimiento */}
                     <div className="w-[76px] shrink-0 text-right">
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(c.fechaVencimiento).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "2-digit" })}
-                      </span>
+                      {c.esContado ? (
+                        <span className="text-[10px] text-muted-foreground/50 italic">—</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(c.fechaVencimiento).toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                        </span>
+                      )}
                     </div>
 
                     {/* Días restantes / vencida */}
                     <div className="w-[96px] shrink-0 text-right">
-                      <span className={cn(
-                        "text-xs font-semibold whitespace-nowrap",
-                        c.diasRestantes < 0 ? "text-destructive" : "text-muted-foreground"
-                      )}>
-                        {c.diasRestantes === 0
-                          ? "Vence hoy"
-                          : c.diasRestantes < 0
-                            ? `${Math.abs(c.diasRestantes)} Días vencida`
-                            : `${c.diasRestantes} Días`}
-                      </span>
+                      {c.esContado ? (
+                        <span className="text-[10px] text-muted-foreground/50 italic">—</span>
+                      ) : (
+                        <span className={cn(
+                          "text-xs font-semibold whitespace-nowrap",
+                          c.diasRestantes < 0 ? "text-destructive" : "text-muted-foreground"
+                        )}>
+                          {c.diasRestantes === 0
+                            ? "Vence hoy"
+                            : c.diasRestantes < 0
+                              ? `${Math.abs(c.diasRestantes)} Días vencida`
+                              : `${c.diasRestantes} Días`}
+                        </span>
+                      )}
                     </div>
 
                     {/* Estado */}
                     <div className="w-[80px] shrink-0 flex justify-center">
-                      <Badge variant="outline" className={cn("text-xs", agingBadgeClass(c.diasVencida))}>
-                        {agingLabel(c.diasVencida)}
-                      </Badge>
+                      {c.esContado ? (
+                        <Badge variant="outline" className="text-xs border-blue-400/60 text-blue-500 dark:text-blue-400">
+                          Contado
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className={cn("text-xs", agingBadgeClass(c.diasVencida))}>
+                          {agingLabel(c.diasVencida)}
+                        </Badge>
+                      )}
                     </div>
 
-                    {/* Saldo */}
+                    {/* Saldo / Total */}
                     <div className="w-[130px] shrink-0 text-right">
-                      <p className={cn("font-mono text-sm font-bold whitespace-nowrap", agingColor(c.diasVencida))}>
-                        {fmt(c.saldo)}
-                      </p>
-                      {c.monto !== c.saldo && (
-                        <p className="text-[10px] text-muted-foreground font-mono whitespace-nowrap">de {fmt(c.monto)}</p>
+                      {c.esContado ? (
+                        <>
+                          <p className="font-mono text-sm font-bold whitespace-nowrap text-green-600 dark:text-green-400">
+                            {fmt(0)}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-mono whitespace-nowrap">total {fmt(c.monto)}</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className={cn("font-mono text-sm font-bold whitespace-nowrap", agingColor(c.diasVencida))}>
+                            {fmt(c.saldo)}
+                          </p>
+                          {c.monto !== c.saldo && (
+                            <p className="text-[10px] text-muted-foreground font-mono whitespace-nowrap">de {fmt(c.monto)}</p>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
