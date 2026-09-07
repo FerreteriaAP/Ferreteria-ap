@@ -197,25 +197,23 @@ export default async function CompraPage({ params, searchParams }: PageProps) {
               })}
             </tbody>
 
-            {/* Pie — Subtotal / ITBIS / Total */}
-            <tfoot>
-              <tr className="border-t bg-muted/10">
-                <td colSpan={3} />
-                <td className="px-4 py-2 text-right text-xs text-muted-foreground font-semibold uppercase tracking-wide whitespace-nowrap">Subtotal</td>
-                <td className="px-4 py-2 text-right font-mono text-sm whitespace-nowrap" colSpan={2}>{fmt(compra.subtotal)}</td>
-              </tr>
-              <tr className="bg-muted/10">
-                <td colSpan={3} />
-                <td className="px-4 py-2 text-right text-xs text-muted-foreground font-semibold uppercase tracking-wide whitespace-nowrap">ITBIS</td>
-                <td className="px-4 py-2 text-right font-mono text-sm whitespace-nowrap" colSpan={2}>{fmt(compra.itbis)}</td>
-              </tr>
-              <tr className="border-t-2 bg-muted/10">
-                <td colSpan={3} />
-                <td className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total factura</td>
-                <td className="px-4 py-3 text-right font-mono font-bold text-base whitespace-nowrap" colSpan={2} style={{ color: ACCENT }}>{fmt(compra.total)}</td>
-              </tr>
-            </tfoot>
           </table>
+
+          {/* Pie de totales — fuera de la tabla para evitar colapso de columnas */}
+          <div className="border-t" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 3%, var(--card))" }}>
+            <div className="flex justify-end items-center gap-6 px-4 py-2">
+              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Subtotal</span>
+              <span className="font-mono text-sm w-36 text-right">{fmt(compra.subtotal)}</span>
+            </div>
+            <div className="flex justify-end items-center gap-6 px-4 py-2">
+              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">ITBIS</span>
+              <span className="font-mono text-sm w-36 text-right">{fmt(compra.itbis)}</span>
+            </div>
+            <div className="flex justify-end items-center gap-6 px-4 py-3 border-t-2">
+              <span className="text-xs font-bold uppercase tracking-wide">Total factura</span>
+              <span className="font-mono font-bold text-base w-36 text-right" style={{ color: ACCENT }}>{fmt(compra.total)}</span>
+            </div>
+          </div>
         </div>
       </Section>
 
