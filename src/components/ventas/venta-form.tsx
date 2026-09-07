@@ -154,6 +154,7 @@ export function VentaForm({
 
   // Encabezado
   const [clienteId,    setClienteId]    = useState(initialClienteId);
+  const prevClienteIdRef = useRef(initialClienteId); // detectar cambio real (no mount)
   const [direccionId,  setDireccionId]  = useState(initialDireccionId);
   const [credito,      setCredito]      = useState<"CONTADO"|"DIAS_10"|"DIAS_15"|"DIAS_30"|"DIAS_45"|"DIAS_60"|"DIAS_90">(initialCredito);
   const [fechaEntrega, setFechaEntrega] = useState(initialFechaEntrega ?? new Date().toISOString().slice(0, 10));
@@ -196,6 +197,9 @@ export function VentaForm({
   const hayFaltantes = faltaTel || faltaRnc || faltaEmail;
 
   useEffect(() => {
+    const prevId = prevClienteIdRef.current;
+    prevClienteIdRef.current = clienteId;
+
     setDireccionId("");
     setDatosFrescos(null);
     setCompletarTel(""); setCompletarRnc(""); setCompletarEmail("");
@@ -203,6 +207,25 @@ export function VentaForm({
     setDatosGuardados(false);
     if (cliente?.credito && cliente.credito !== "CONTADO") setCredito(cliente.credito as typeof credito);
     else setCredito("CONTADO");
+
+    // Re-precio automático al cambiar a un cliente con regla Kolmen (MARGEN_COSTO)
+    // Solo cuando el cliente cambia de verdad (no en el primer render del form de edición)
+    if (prevId !== clienteId && clienteId) {
+      const nuevoCli = clientes.find(c => c.id === clienteId);
+      const esKolmen = nuevoCli?.reglaPrecio === "MARGEN_COSTO" && nuevoCli.margenPrecio != null;
+      if (esKolmen) {
+        const margen = Number(nuevoCli!.margenPrecio) / 100;
+        setDetalles(prev => {
+          if (!prev.length) return prev;
+          return prev.map(d => {
+            if (!d.costoUltimo || Number(d.costoUltimo) <= 0) return d;
+            const pventa = calcPrecioKolmen(Number(d.costoUltimo), margen, d.exentoItbis);
+            const { itbis } = calcItbisLinea(pventa, d.cantidad, d.descuento, d.exentoItbis);
+            return { ...d, precio: pventa, precioCompleto: pventa, itbis };
+          });
+        });
+      }
+    }
 
     // Verificar datos actuales desde la API (no los del caché de la página)
     if (clienteId) {

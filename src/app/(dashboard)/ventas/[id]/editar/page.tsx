@@ -26,6 +26,7 @@ export default async function EditarCotizacionPage({ params }: Props) {
   const clientes = rawClientes.map(c => ({
     ...c,
     limiteCredito: c.limiteCredito ? Number(c.limiteCredito) : null,
+    margenPrecio:  c.margenPrecio  ? Number(c.margenPrecio)  : null,
   }));
 
   // Mapear detalles de la BD → DetalleRowInit para VentaForm

@@ -8,6 +8,7 @@ export default async function NuevaVentaPage() {
  const clientes = rawClientes.map((c) => ({
  ...c,
  limiteCredito: c.limiteCredito ? Number(c.limiteCredito) : null,
+ margenPrecio:  c.margenPrecio  ? Number(c.margenPrecio)  : null,
  }));
 
  return (
