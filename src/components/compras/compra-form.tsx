@@ -374,20 +374,36 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
 
       {/* ── Modal: forma de pago contado ── */}
       <Dialog open={showPagoModal} onOpenChange={open => { if (!open) setShowPagoModal(false); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CreditCard size={18} style={{ color: ACCENT }} />
-              Registrar pago — Contado
-            </DialogTitle>
-            <DialogDescription>
-              Esta factura es de contado. Selecciona cómo se realizó el pago para registrarla como pagada automáticamente.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent
+          className="max-w-md p-0 overflow-hidden"
+          style={{
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+            boxShadow: "0 32px 64px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
+          }}
+        >
+          {/* Header con franja de color */}
+          <div
+            className="px-5 py-4 border-b"
+            style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "color-mix(in srgb, var(--accent-hex) 15%, transparent)" }}>
+                <CreditCard size={16} style={{ color: ACCENT }} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>Pago al contado</p>
+                <p className="text-sm font-semibold text-foreground leading-tight">Registrar forma de pago</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              Esta factura es de contado. Indica cómo se realizó el pago para registrarla automáticamente como pagada.
+            </p>
+          </div>
 
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 p-5">
             {/* Método de pago */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
                 Forma de pago *
               </label>
@@ -398,14 +414,16 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
                     type="button"
                     onClick={() => setPagoMetodo(m)}
                     className={cn(
-                      "h-10 rounded-lg border text-sm font-medium transition-all",
+                      "h-10 rounded-lg border-2 text-sm font-medium transition-all",
                       pagoMetodo === m
-                        ? "border-[2px] font-bold"
-                        : "hover:bg-muted/30"
+                        ? "font-bold"
+                        : "border-border hover:bg-muted/30"
                     )}
-                    style={pagoMetodo === m ? { borderColor: ACCENT, color: ACCENT } : {}}
+                    style={pagoMetodo === m
+                      ? { borderColor: ACCENT, color: ACCENT, backgroundColor: "color-mix(in srgb, var(--accent-hex) 8%, transparent)" }
+                      : {}}
                   >
-                    {m === "EFECTIVO" ? "Efectivo" : m === "CHEQUE" ? "Cheque" : "Transferencia"}
+                    {m === "EFECTIVO" ? "Efectivo" : m === "CHEQUE" ? "Cheque" : "Transf."}
                   </button>
                 ))}
               </div>
@@ -434,7 +452,7 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
                 Referencia / N° cheque / N° transacción
-                <span className="font-normal normal-case ml-1">(opcional)</span>
+                <span className="font-normal normal-case ml-1 text-muted-foreground/70">(opcional)</span>
               </label>
               <input
                 className={INPUT_CLS}
@@ -447,7 +465,7 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
             {/* Notas */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
-                Notas <span className="font-normal normal-case">(opcional)</span>
+                Notas <span className="font-normal normal-case text-muted-foreground/70">(opcional)</span>
               </label>
               <textarea
                 className={INPUT_CLS + " resize-none h-14"}
@@ -458,7 +476,11 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          {/* Footer */}
+          <div
+            className="flex justify-end gap-2 px-5 py-4 border-t"
+            style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 2%, var(--card))" }}
+          >
             <button
               type="button"
               onClick={() => setShowPagoModal(false)}
@@ -475,7 +497,7 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
             >
               {pagoGuardando ? "Guardando…" : "Confirmar y guardar"}
             </button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
