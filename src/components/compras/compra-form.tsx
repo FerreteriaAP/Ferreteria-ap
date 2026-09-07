@@ -128,7 +128,7 @@ const INPUT_CLS = "w-full h-9 rounded-lg border bg-background px-3 text-sm focus
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-type MetodoPago = "EFECTIVO" | "CHEQUE" | "TRANSFERENCIA";
+type MetodoPago = "EFECTIVO" | "CHEQUE" | "TRANSFERENCIA" | "TARJETA";
 
 interface CompraFormProps {
   suplidores: Suplidor[];
@@ -407,8 +407,8 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
                 Forma de pago *
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["EFECTIVO", "CHEQUE", "TRANSFERENCIA"] as MetodoPago[]).map(m => (
+              <div className="grid grid-cols-4 gap-2">
+                {(["EFECTIVO", "CHEQUE", "TRANSFERENCIA", "TARJETA"] as MetodoPago[]).map(m => (
                   <button
                     key={m}
                     type="button"
@@ -423,7 +423,7 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
                       ? { borderColor: ACCENT, color: ACCENT, backgroundColor: "color-mix(in srgb, var(--accent-hex) 8%, transparent)" }
                       : {}}
                   >
-                    {m === "EFECTIVO" ? "Efectivo" : m === "CHEQUE" ? "Cheque" : "Transf."}
+                    {m === "EFECTIVO" ? "Efectivo" : m === "CHEQUE" ? "Cheque" : m === "TRANSFERENCIA" ? "Transf." : "Tarjeta"}
                   </button>
                 ))}
               </div>

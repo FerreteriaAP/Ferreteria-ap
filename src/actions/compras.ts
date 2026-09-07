@@ -24,7 +24,7 @@ const AjustePrecioSchema = z.object({
 });
 
 const PagoContadoSchema = z.object({
- metodo:     z.enum(["EFECTIVO", "CHEQUE", "TRANSFERENCIA"]),
+ metodo:     z.enum(["EFECTIVO", "CHEQUE", "TRANSFERENCIA", "TARJETA"]),
  referencia: z.string().optional(),
  cuentaId:   z.string().optional(),
  notas:      z.string().optional(),
@@ -297,7 +297,7 @@ export async function crearCompra(data: CompraInput) {
 const PagoSchema = z.object({
  monto: z.coerce.number().positive("Monto inválido"),
  fecha: z.string().min(1),
- metodo: z.enum(["EFECTIVO", "CHEQUE", "TRANSFERENCIA"]),
+ metodo: z.enum(["EFECTIVO", "CHEQUE", "TRANSFERENCIA", "TARJETA"]),
  referencia: z.string().optional(),
  cuentaId: z.string().optional(),
  notas: z.string().optional(),

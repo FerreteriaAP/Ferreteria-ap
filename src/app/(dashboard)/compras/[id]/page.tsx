@@ -119,18 +119,18 @@ export default async function CompraPage({ params, searchParams }: PageProps) {
       {/* ── Datos de la factura ── */}
       <Section title="Datos de la factura">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2.5">
-          <KV label="Suplidor" value={compra.suplidor.nombre} />
-          {compra.suplidor.rnc && <KV label="RNC" value={compra.suplidor.rnc} mono />}
+          <KV label="Suplidor"        value={compra.suplidor.nombre} />
+          {compra.suplidor.rnc
+            ? <KV label="RNC"         value={compra.suplidor.rnc} mono />
+            : <div />}
           <KV label="Fecha de factura" value={fmtDate(compra.fechaFactura)} />
-          <KV label="Vencimiento" value={fmtDate(compra.fechaVencimiento)} />
-          {compra.tipoNcfCompra && compra.tipoNcfCompra !== "none" && (
-            <KV label="Tipo NCF" value={compra.tipoNcfCompra} mono />
-          )}
-          {compra.ncf && <KV label="NCF" value={compra.ncf} mono />}
-          <div className="col-span-2 border-t my-1" />
-          <KV label="Subtotal (sin ITBIS)" value={fmt(compra.subtotal)} mono />
-          <KV label="ITBIS" value={fmt(compra.itbis)} mono />
-          <KV label="Total" value={fmt(compra.total)} bold mono />
+          <KV label="Vencimiento"      value={fmtDate(compra.fechaVencimiento)} />
+          {(compra.tipoNcfCompra && compra.tipoNcfCompra !== "none")
+            ? <KV label="Tipo NCF"    value={compra.tipoNcfCompra} mono />
+            : <div />}
+          {compra.ncf
+            ? <KV label="NCF"         value={compra.ncf} mono />
+            : <div />}
           {compra.notas && (
             <div className="col-span-2 mt-1 rounded-lg border p-3 text-sm text-muted-foreground"
               style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 3%, var(--card))" }}>
@@ -143,40 +143,79 @@ export default async function CompraPage({ params, searchParams }: PageProps) {
       {/* ── Productos ── */}
       <Section title="Productos comprados">
         <div className="rounded-xl border overflow-hidden overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/20">
-                <TableHead className="text-xs">Código</TableHead>
-                <TableHead className="text-xs">Producto</TableHead>
-                <TableHead className="text-xs text-right">Cantidad</TableHead>
-                <TableHead className="text-xs text-right">Costo unit.</TableHead>
-                <TableHead className="text-xs text-right">ITBIS</TableHead>
-                <TableHead className="text-xs text-right">Subtotal</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {compra.detalles.map(d => (
-                <TableRow key={d.id} className="hover:bg-muted/10">
-                  <TableCell className="font-mono text-xs text-muted-foreground">{d.producto.codigo}</TableCell>
-                  <TableCell>
-                    <Link href={`/productos/${d.producto.id}`} className="font-medium text-sm hover:underline">
-                      {d.producto.nombre}
-                    </Link>
-                    {d.costoAnterior && Number(d.costoAnterior) !== Number(d.costo) && (
-                      <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                        style={{ backgroundColor: "color-mix(in oklch, var(--destructive) 12%, var(--card))", color: "var(--destructive)" }}>
-                        Antes: {fmt(d.costoAnterior)}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-sm">{Number(d.cantidad).toLocaleString("es-DO")}</TableCell>
-                  <TableCell className="text-right font-mono text-sm">{fmt(d.costo)}</TableCell>
-                  <TableCell className="text-right font-mono text-sm">{fmt(d.itbis)}</TableCell>
-                  <TableCell className="text-right font-mono font-semibold text-sm">{fmt(d.subtotal)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <table className="w-full text-sm min-w-[640px]">
+            {/* Cabecera */}
+            <thead>
+              <tr className="border-b text-[11px] font-bold uppercase tracking-wide text-muted-foreground"
+                style={{ backgroundColor: HEADER_BG }}>
+                <th className="px-4 py-2.5 text-left  w-[110px]">Código</th>
+                <th className="px-4 py-2.5 text-left">Producto</th>
+                <th className="px-4 py-2.5 text-right w-[80px]">Cant.</th>
+                <th className="px-4 py-2.5 text-right w-[130px]">Costo unit.</th>
+                <th className="px-4 py-2.5 text-right w-[120px]">ITBIS</th>
+                <th className="px-4 py-2.5 text-right w-[140px]">Total</th>
+              </tr>
+            </thead>
+
+            {/* Filas */}
+            <tbody>
+              {compra.detalles.map(d => {
+                const cant       = Number(d.cantidad);
+                const costoUnit  = Number(d.costo);
+                const itbisLinea = Number(d.itbis);
+                const totalLinea = Number(d.subtotal) + itbisLinea;
+                return (
+                  <tr key={d.id} className="border-b last:border-0 hover:bg-muted/10 transition-colors">
+                    <td className="px-4 py-3 w-[110px]">
+                      <span className="font-mono text-xs text-muted-foreground">{d.producto.codigo}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link href={`/productos/${d.producto.id}`} className="font-medium hover:underline">
+                        {d.producto.nombre}
+                      </Link>
+                      {d.costoAnterior && Number(d.costoAnterior) !== costoUnit && (
+                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                          style={{ backgroundColor: "color-mix(in oklch, var(--destructive) 12%, var(--card))", color: "var(--destructive)" }}>
+                          Antes: {fmt(d.costoAnterior)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right w-[80px]">
+                      <span className="font-mono">{cant.toLocaleString("es-DO")}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right w-[130px]">
+                      <span className="font-mono">{fmt(costoUnit)}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right w-[120px]">
+                      <span className="font-mono text-muted-foreground">{fmt(itbisLinea)}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right w-[140px]">
+                      <span className="font-mono font-bold">{fmt(totalLinea)}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+
+            {/* Pie — Subtotal / ITBIS / Total */}
+            <tfoot>
+              <tr className="border-t bg-muted/10">
+                <td colSpan={4} />
+                <td className="px-4 py-2 text-right text-xs text-muted-foreground font-semibold uppercase tracking-wide">Subtotal</td>
+                <td className="px-4 py-2 text-right font-mono text-sm">{fmt(compra.subtotal)}</td>
+              </tr>
+              <tr className="bg-muted/10">
+                <td colSpan={4} />
+                <td className="px-4 py-2 text-right text-xs text-muted-foreground font-semibold uppercase tracking-wide">ITBIS</td>
+                <td className="px-4 py-2 text-right font-mono text-sm">{fmt(compra.itbis)}</td>
+              </tr>
+              <tr className="border-t-2 bg-muted/10">
+                <td colSpan={4} />
+                <td className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide">Total factura</td>
+                <td className="px-4 py-3 text-right font-mono font-bold text-base" style={{ color: ACCENT }}>{fmt(compra.total)}</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </Section>
 
