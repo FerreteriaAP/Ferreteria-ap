@@ -72,22 +72,24 @@ export default async function ProductosPage({ searchParams }: PageProps) {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Tabla de precios */}
-          <Link
-            href="/productos/tabla-precios"
-            className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-muted/30"
-            style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
-          >
-            Tabla de Precios
-          </Link>
+          {/* Nuevo producto + Tabla de precios apilados */}
           {puedeCrear && (
-            <Link
-              href="/productos/nuevo"
-              className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-orange-500/10"
-              style={{ borderColor: "#f97316", color: "#f97316" }}
-            >
-              + Nuevo producto
-            </Link>
+            <div className="flex flex-col items-end gap-1.5">
+              <Link
+                href="/productos/nuevo"
+                className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-orange-500/10"
+                style={{ borderColor: "#f97316", color: "#f97316" }}
+              >
+                + Nuevo producto
+              </Link>
+              <Link
+                href="/productos/tabla-precios"
+                className="inline-flex items-center gap-1.5 rounded-full border px-5 py-1.5 text-xs font-medium transition-colors hover:bg-muted/30"
+                style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}
+              >
+                Tabla de Precios
+              </Link>
+            </div>
           )}
           <ViewToggle
             vista={vista}

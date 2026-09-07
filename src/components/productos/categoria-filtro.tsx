@@ -71,7 +71,7 @@ export function CategoriaFiltro({
         ))}
         <option value="stock-bajo">⚠ Stock bajo</option>
         {puedeVerArchivados && (
-          <option value="archivados">📦 Archivados</option>
+          <option value="archivados">Archivados</option>
         )}
       </select>
       <ChevronDown
