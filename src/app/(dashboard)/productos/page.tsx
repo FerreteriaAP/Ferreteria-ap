@@ -59,7 +59,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-5">
       {/* Encabezado */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Productos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -71,10 +71,10 @@ export default async function ProductosPage({ searchParams }: PageProps) {
               : "en catálogo"}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Nuevo producto + Tabla de precios apilados */}
-          {puedeCrear && (
-            <div className="flex flex-col items-end gap-1.5">
+        <div className="flex flex-col items-end gap-2">
+          {/* Fila 1: Nuevo producto + toggle de vista */}
+          <div className="flex items-center gap-3">
+            {puedeCrear && (
               <Link
                 href="/productos/nuevo"
                 className="inline-flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition-colors hover:bg-orange-500/10"
@@ -82,20 +82,32 @@ export default async function ProductosPage({ searchParams }: PageProps) {
               >
                 + Nuevo producto
               </Link>
-              <Link
-                href="/productos/tabla-precios"
-                className="inline-flex items-center gap-1.5 rounded-full border px-5 py-1.5 text-xs font-medium transition-colors hover:bg-muted/30"
-                style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}
-              >
-                Tabla de Precios
-              </Link>
-            </div>
-          )}
-          <ViewToggle
-            vista={vista}
-            listaHref={`/productos?q=${busqueda}${categoriaId ? `&categoria=${categoriaId}` : ""}${stockBajo ? "&stockBajo=1" : ""}`}
-            gridHref={`/productos?q=${busqueda}${categoriaId ? `&categoria=${categoriaId}` : ""}${stockBajo ? "&stockBajo=1" : ""}&vista=grid`}
-          />
+            )}
+            <ViewToggle
+              vista={vista}
+              listaHref={`/productos?q=${busqueda}${categoriaId ? `&categoria=${categoriaId}` : ""}${stockBajo ? "&stockBajo=1" : ""}`}
+              gridHref={`/productos?q=${busqueda}${categoriaId ? `&categoria=${categoriaId}` : ""}${stockBajo ? "&stockBajo=1" : ""}&vista=grid`}
+            />
+          </div>
+          {/* Fila 2: Categoría + Tabla de Precios — mismo estilo */}
+          <div className="flex items-center gap-2">
+            <CategoriaFiltro
+              categorias={categorias}
+              categoriaId={categoriaId}
+              stockBajo={stockBajo}
+              archivados={verArchivados}
+              puedeVerArchivados={puedeVerArchivados}
+              busqueda={busqueda}
+              vista={vista}
+            />
+            <Link
+              href="/productos/tabla-precios"
+              className="h-9 inline-flex items-center px-3 rounded-md border text-sm transition-colors hover:bg-muted/30 whitespace-nowrap"
+              style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
+            >
+              Tabla de Precios
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -105,15 +117,6 @@ export default async function ProductosPage({ searchParams }: PageProps) {
           defaultValue={busqueda}
           categoriaId={categoriaId}
           stockBajo={stockBajo}
-          vista={vista}
-        />
-        <CategoriaFiltro
-          categorias={categorias}
-          categoriaId={categoriaId}
-          stockBajo={stockBajo}
-          archivados={verArchivados}
-          puedeVerArchivados={puedeVerArchivados}
-          busqueda={busqueda}
           vista={vista}
         />
       </div>
