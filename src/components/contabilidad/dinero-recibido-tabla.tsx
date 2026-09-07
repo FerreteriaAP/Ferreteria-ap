@@ -95,24 +95,24 @@ function FilaRegistro({ fila, onGuardado }: { fila: Fila; onGuardado: () => void
       </td>
 
       {/* Cierre en caja */}
-      <td className="px-4 py-3 text-right font-mono text-sm font-semibold">
+      <td className="px-4 py-3 text-right font-mono text-sm font-semibold w-36">
         {fmt(fila.montoCierre)}
       </td>
 
       {/* Apertura siguiente */}
-      <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground">
+      <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground w-36">
         {fila.montoAperturaSig !== null ? fmt(fila.montoAperturaSig) : (
           <span className="italic text-[10px]">sin turno</span>
         )}
       </td>
 
       {/* Esperado a recibir */}
-      <td className="px-4 py-3 text-right font-mono text-sm font-bold">
+      <td className="px-4 py-3 text-right font-mono text-sm font-bold w-36">
         {fmt(fila.efectivoEsperado)}
       </td>
 
       {/* Recibido + form inline */}
-      <td className="px-4 py-3 text-right min-w-[180px]">
+      <td className="px-4 py-3 text-right w-44">
         {editando ? (
           <div className="flex flex-col items-end gap-1.5">
             <div className="flex items-center gap-1.5">
@@ -172,7 +172,7 @@ function FilaRegistro({ fila, onGuardado }: { fila: Fila; onGuardado: () => void
       </td>
 
       {/* Diferencia */}
-      <td className="px-4 py-3 text-right">
+      <td className="px-4 py-3 text-right w-40">
         {difActual !== null ? (
           <span
             className={cn(
@@ -294,17 +294,17 @@ export function DineroRecibidoTabla({ filas: initialFilas, resumen }: Props) {
                 className="border-b text-[11px] text-muted-foreground uppercase tracking-wide"
                 style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}
               >
-                <th className="text-left px-4 py-3">Turno</th>
-                <th className="text-left px-4 py-3">Cajero</th>
-                <th className="text-left px-4 py-3">Fecha cierre</th>
-                <th className="text-right px-4 py-3">Cierre caja</th>
-                <th className="text-right px-4 py-3">− Apertura sig.</th>
-                <th className="text-right px-4 py-3 font-bold" style={{ color: "var(--foreground)" }}>
+                <th className="text-left px-4 py-3 w-16">Turno</th>
+                <th className="text-left px-4 py-3 w-32">Cajero</th>
+                <th className="text-left px-4 py-3 w-40 whitespace-nowrap">Fecha cierre</th>
+                <th className="text-right px-4 py-3 w-36 whitespace-nowrap">Cierre caja</th>
+                <th className="text-right px-4 py-3 w-36 whitespace-nowrap">− Apertura sig.</th>
+                <th className="text-right px-4 py-3 w-36 whitespace-nowrap font-bold" style={{ color: "var(--foreground)" }}>
                   = Esperado
                 </th>
-                <th className="text-right px-4 py-3">Recibido</th>
-                <th className="text-right px-4 py-3">Diferencia</th>
-                <th className="text-left px-4 py-3">Notas</th>
+                <th className="text-right px-4 py-3 w-44 whitespace-nowrap">Recibido</th>
+                <th className="text-right px-4 py-3 w-40 whitespace-nowrap">Diferencia</th>
+                <th className="text-left px-4 py-3 w-40">Notas</th>
               </tr>
             </thead>
             <tbody>
