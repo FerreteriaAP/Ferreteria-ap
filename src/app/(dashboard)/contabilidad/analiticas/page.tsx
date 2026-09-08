@@ -21,13 +21,13 @@ function pct(n: number) {
 }
 
 function colorMargen(m: number) {
- if (m >= 30) return "text-green-700 dark:text-green-400";
- if (m >= 15) return "text-yellow-600 dark:text-yellow-400";
+ if (m >= 25) return "text-green-700 dark:text-green-400";
+ if (m >= 12) return "text-yellow-600 dark:text-yellow-400";
  return "text-destructive";
 }
 function bgMargen(m: number) {
- if (m >= 30) return "bg-green-500";
- if (m >= 15) return "bg-yellow-500";
+ if (m >= 25) return "bg-green-500";
+ if (m >= 12) return "bg-yellow-500";
  return "bg-red-500";
 }
 
@@ -95,7 +95,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  const catVentas = porCategoria.reduce((s, c) => s + c.ventas, 0);
  const catCogs = porCategoria.reduce((s, c) => s + c.cogs, 0);
  const catGanancia = catVentas - catCogs;
- const catMargen = catVentas > 0 ? (catGanancia / catVentas) * 100 : 0;
+ const catMargen = catCogs > 0 ? (catGanancia / catCogs) * 100 : 0;
 
  // Variación vs mes anterior
  const mesAnteriorIdx = mes ? (mes === 1 ? 12 : mes - 1) : null;
@@ -148,7 +148,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Estado de resultados — {etiquetaPeriodo}</h2> </div> <div className="p-5 space-y-0 divide-y"> {/* Ventas */}
  <div className="flex items-center justify-between py-3"> <div> <p className="font-semibold text-sm">Ventas totales</p> <p className="text-xs text-muted-foreground">Total facturado al cliente (ITBIS incluido)</p> </div> <div className="text-right"> <p className="font-bold text-lg font-mono">{fmt(plVentas, 2)}</p> {varVentas !== null && <Chip v={varVentas} />}
  </div> </div> {/* COGS */}
- <div className="flex items-center justify-between py-3"> <div> <p className="font-medium text-sm text-muted-foreground">− Costo de lo vendido (COGS)</p> <p className="text-xs text-muted-foreground">Costo promedio × cantidad vendida por línea</p> </div> <p className="font-mono text-sm font-medium text-muted-foreground"> ({fmt(plCogs, 2)})
+ <div className="flex items-center justify-between py-3"> <div> <p className="font-medium text-sm text-muted-foreground">− Costo de lo vendido (COGS)</p> <p className="text-xs text-muted-foreground">Costo de compra + ITBIS del costo, por unidad vendida</p> </div> <p className="font-mono text-sm font-medium text-muted-foreground"> ({fmt(plCogs, 2)})
  </p> </div> {/* Ganancia bruta */}
  <div className="flex items-center justify-between py-3 bg-green-50 dark:bg-green-950/20 -mx-5 px-5"> <div> <p className="font-semibold text-sm">Ganancia bruta</p> <p className="text-xs text-muted-foreground">Ventas − COGS</p> </div> <div className="text-right"> <p className={cn("font-bold text-lg font-mono", plGananciaBruta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaBruta, 2)}
  </p> <p className="text-xs text-muted-foreground">{pct(plMargenBruto)} de margen bruto</p> </div> </div> {/* Gastos */}
@@ -208,7 +208,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </h2> <p className="text-xs text-muted-foreground">{porCategoria.length} categorías</p> </div> {porCategoria.length === 0 ? (
  <p className="text-sm text-muted-foreground py-10 text-center"> Sin ventas en el período seleccionado
  </p> ) : (
- <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ventas netas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ganancia bruta</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Margen</th> <th className="w-32 px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Peso en ventas</th> </tr> </thead> <tbody className="divide-y"> {porCategoria.map((c) => (
+ <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ventas netas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ganancia bruta</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">% s/Costo</th> <th className="w-32 px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Peso en ventas</th> </tr> </thead> <tbody className="divide-y"> {porCategoria.map((c) => (
  <tr key={c.categoria} className="hover:bg-muted/20 transition-colors"> <td className="px-5 py-3 font-medium">{c.categoria}</td> <td className="px-4 py-3 text-right font-mono text-xs">{fmt(c.ventas, 2)}</td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(c.cogs, 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono text-xs font-semibold",
  c.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(c.ganancia, 2)}
@@ -310,9 +310,9 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </p> )}
  </div> )}
  </div> {/* Leyenda */}
- <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pb-2"> <span className="flex items-center gap-1.5"> <span className="inline-block w-3 h-3 rounded-full bg-green-500" /> Margen bruto ≥ 30% — Saludable
- </span> <span className="flex items-center gap-1.5"> <span className="inline-block w-3 h-3 rounded-full bg-yellow-500" /> 15–29% — Aceptable
- </span> <span className="flex items-center gap-1.5"> <span className="inline-block w-3 h-3 rounded-full bg-red-500" /> &lt; 15% — Revisar precios
- </span> <span className="flex items-center gap-1.5 ml-auto opacity-60"> COGS = costo promedio × cantidad vendida (ajustado por fracción)
+ <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pb-2"> <span className="flex items-center gap-1.5"> <span className="inline-block w-3 h-3 rounded-full bg-green-500" /> % s/costo ≥ 25% — Saludable
+ </span> <span className="flex items-center gap-1.5"> <span className="inline-block w-3 h-3 rounded-full bg-yellow-500" /> 12–24% — Aceptable
+ </span> <span className="flex items-center gap-1.5"> <span className="inline-block w-3 h-3 rounded-full bg-red-500" /> &lt; 12% — Revisar precios
+ </span> <span className="flex items-center gap-1.5 ml-auto opacity-60"> COGS = (costo + ITBIS costo) × cant · % = markup s/costo total
  </span> </div> </div> );
 }

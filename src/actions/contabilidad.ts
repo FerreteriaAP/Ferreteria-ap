@@ -399,7 +399,9 @@ export async function getResumenMensualPL(año: number) {
  (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+      * CASE WHEN dv."exentoItbis" = true THEN 1.0 ELSE 1.18 END
  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+      * CASE WHEN dv."exentoItbis" = true THEN 1.0 ELSE 1.18 END
  END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS num
@@ -525,6 +527,8 @@ export async function getVentasPorCategoria(opts: {
  precioFinal: true,
  cantidad: true,
  descuento: true,
+ costoAlVender: true,
+ exentoItbis: true,
  producto: {
  select: {
  costoPromedio: true,
@@ -555,9 +559,11 @@ export async function getVentasPorCategoria(opts: {
  // Revenue = total facturado al cliente (subtotal + ITBIS).
  const ventas = Number(d.subtotal) + Number(d.itbis);
 
- // COGS: costoPromedio (snapshot histórico).
+ // COGS: costoAlVender (snapshot al facturar) con fallback a costoPromedio.
+ // Incluye ITBIS del costo para productos no exentos: costo × 1.18.
  const cantidad = Number(d.cantidad);
- const costo = Number(d.producto.costoPromedio);
+ const costo = Number(d.costoAlVender ?? d.producto.costoPromedio);
+ const itbisMultiplier = d.exentoItbis ? 1.0 : 1.18;
 
  const factor = d.producto.factorFraccion != null ? Number(d.producto.factorFraccion) : 0;
  const precioFinal = Number(d.precioFinal);
@@ -574,9 +580,9 @@ export async function getVentasPorCategoria(opts: {
  (d.unidad == null && precioVenta > 0 && precioFinal < precioVenta)
  );
 
- const cogs = isFraccionada
+ const cogs = (isFraccionada
  ? cantidad * costo / factor
- : cantidad * costo;
+ : cantidad * costo) * itbisMultiplier;
 
  if (!mapa.has(key)) {
  mapa.set(key, {
@@ -597,7 +603,8 @@ export async function getVentasPorCategoria(opts: {
  .map((g) => ({
  ...g,
  ganancia: g.ventas - g.cogs,
- margen: g.ventas > 0 ? ((g.ventas - g.cogs) / g.ventas) * 100 : 0,
+ // % markup sobre costo total (costo + ITBIS): 13% para Kolmen
+ margen: g.cogs > 0 ? ((g.ventas - g.cogs) / g.cogs) * 100 : 0,
  }))
  .sort((a, b) => b.ventas - a.ventas);
 }
@@ -849,7 +856,9 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+      * CASE WHEN dv."exentoItbis" = true THEN 1.0 ELSE 1.18 END
  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+      * CASE WHEN dv."exentoItbis" = true THEN 1.0 ELSE 1.18 END
  END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS facturas
@@ -863,10 +872,10 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  `;
 
  return rows.map((r) => {
- const ventasSinItbis = Number(r.ventas);          // subtotal sin ITBIS — base para markup
- const totalFacturado = Number(r.totalFacturado);   // con ITBIS — para mostrar en UI
- const cogs = Number(r.cogs);
- const ganancia = ventasSinItbis - cogs;
+ const ventasSinItbis = Number(r.ventas);          // subtotal sin ITBIS
+ const totalFacturado = Number(r.totalFacturado);   // con ITBIS — total facturado al cliente
+ const cogs = Number(r.cogs);                       // costo + ITBIS del costo
+ const ganancia = totalFacturado - cogs;            // ganancia = total facturado − costo total
  return {
  clienteId: r.clienteId,
  nombre: r.nombre,
@@ -875,7 +884,7 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  totalFacturado,
  cogs,
  ganancia,
- // Markup % sobre el costo (no sobre el precio): 13% para Kolmen = costo × 1.13
+ // % markup sobre costo total (con ITBIS): Kolmen 13% → costo×1.18×1.13 → markup=13%
  margen: cogs > 0 ? (ganancia / cogs) * 100 : 0,
  facturas: Number(r.facturas),
  };
@@ -922,7 +931,9 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+      * CASE WHEN dv."exentoItbis" = true THEN 1.0 ELSE 1.18 END
  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+      * CASE WHEN dv."exentoItbis" = true THEN 1.0 ELSE 1.18 END
  END
  )::text AS cogs,
  SUM(
@@ -948,10 +959,10 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  `;
 
  return rows.map((r) => {
- const ventasSinItbis = Number(r.ventas);          // subtotal sin ITBIS — base del markup
- const totalFacturado = Number(r.totalFacturado);   // con ITBIS — para mostrar en UI
- const cogs = Number(r.cogs);
- const ganancia = ventasSinItbis - cogs;  // ganancia real = subtotal − costo
+ const ventasSinItbis = Number(r.ventas);          // subtotal sin ITBIS
+ const totalFacturado = Number(r.totalFacturado);   // con ITBIS — total facturado al cliente
+ const cogs = Number(r.cogs);                       // costo + ITBIS del costo
+ const ganancia = totalFacturado - cogs;            // ganancia = total facturado − costo total
  return {
  productoId: r.productoId,
  codigo: r.codigo,
@@ -962,8 +973,7 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  totalFacturado,
  cogs,
  ganancia,
- // Markup % sobre el costo: (subtotal − costo) / costo × 100
- // Kolmen: costo × 1.13 → markup = 13%
+ // % markup sobre costo total (con ITBIS): Kolmen 13% → costo×1.18×1.13 → markup=13%
  margen: cogs > 0 ? (ganancia / cogs) * 100 : 0,
  cantidad: Number(r.cantidad),
  facturas: Number(r.facturas),
