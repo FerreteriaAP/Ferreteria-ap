@@ -384,7 +384,65 @@ export async function marcarOrdenEnviadaAlImprimir(id: string) {
  revalidatePath("/ordenes-compra");
 }
 
-// Eliminar orden de compra (admin) 
+// Agregar artículos a OC enviada / parcialmente recibida
+
+const AgregarItemsSchema = z.array(z.object({
+ productoId:  z.string().min(1),
+ cantidad:    z.coerce.number().positive(),
+ costo:       z.coerce.number().min(0),
+ exentoItbis: z.boolean().default(false),
+})).min(1);
+
+export async function agregarItemsOC(
+ ocId: string,
+ items: Array<{ productoId: string; cantidad: number; costo: number; exentoItbis: boolean }>,
+) {
+ const session = await auth();
+ if (!session?.user?.id) return { error: "No autenticado" };
+
+ const parsed = AgregarItemsSchema.safeParse(items);
+ if (!parsed.success) return { error: "Datos inválidos" };
+
+ const oc = await prisma.ordenCompra.findUnique({ where: { id: ocId } });
+ if (!oc) return { error: "Orden no encontrada" };
+ if (!["ENVIADA", "RECIBIDA_PARCIAL"].includes(oc.estado)) {
+  return { error: "Solo se pueden agregar artículos a órdenes enviadas o con recepción parcial" };
+ }
+
+ await prisma.$transaction(async (tx) => {
+  // 1. Insertar nuevos detalles
+  for (const item of parsed.data) {
+   await tx.detalleOrdenCompra.create({
+    data: {
+     ordenId:   ocId,
+     productoId: item.productoId,
+     cantidad:   item.cantidad,
+     costo:      item.costo,
+     subtotal:   item.cantidad * item.costo,
+    },
+   });
+  }
+
+  // 2. Recalcular totales de la OC uniendo con productos para exentoItbis
+  const detalles = await tx.detalleOrdenCompra.findMany({
+   where: { ordenId: ocId },
+   include: { producto: { select: { exentoItbis: true } } },
+  });
+  const subtotal   = detalles.reduce((s, d) => s + Number(d.cantidad) * Number(d.costo), 0);
+  const itbisTotal = detalles.reduce((s, d) =>
+   s + (d.producto.exentoItbis ? 0 : Number(d.cantidad) * Number(d.costo) * 0.18), 0);
+
+  await tx.ordenCompra.update({
+   where: { id: ocId },
+   data: { subtotal, itbis: itbisTotal, total: subtotal + itbisTotal },
+  });
+ });
+
+ revalidatePath(`/ordenes-compra/${ocId}`);
+ return { ok: true };
+}
+
+// Eliminar orden de compra (admin)
 // Solo BORRADOR (antes de enviar al suplidor)
 
 export async function eliminarOrdenCompra(id: string) {

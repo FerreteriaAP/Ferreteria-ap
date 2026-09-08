@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getOrdenCompra } from "@/actions/ordenes-compra";
 import { OcActions } from "@/components/ordenes-compra/oc-actions";
+import { AgregarItemsOcBtn } from "@/components/ordenes-compra/agregar-items-oc-btn";
 import { BtnEliminarDocumento } from "@/components/shared/btn-eliminar-documento";
 import { eliminarOrdenCompra } from "@/actions/ordenes-compra";
 import { auth } from "@/lib/auth";
@@ -80,6 +81,7 @@ export default async function OrdenCompraPage({ params }: { params: Promise<{ id
             🖨 Imprimir OC
           </Link>
           <OcActions id={oc.id} canSend={canSend} canReceive={canReceive} canCancel={canCancel} />
+          {canReceive && <AgregarItemsOcBtn ocId={oc.id} />}
           {rolUsuario === "ADMINISTRADOR" && oc.estado === "BORRADOR" && (
             <BtnEliminarDocumento
               id={oc.id}
