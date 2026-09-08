@@ -790,16 +790,18 @@ export async function facturarVenta(ventaId: string, data: {
  },
  });
 
- // Snapshot costoAlVender: congela el costoPromedio de cada producto al momento de facturar
+ // Snapshot costoAlVender: congela el costoUltimo de cada producto al momento de facturar.
+ // Se usa costoUltimo (no costoPromedio) porque el precio de venta se calcula sobre costoUltimo,
+ // por lo que el COGS debe reflejar el mismo costo para que el margen sea coherente.
  {
    const detallesConCosto = await tx.detalleVenta.findMany({
      where: { ventaId },
-     include: { producto: { select: { costoPromedio: true } } },
+     include: { producto: { select: { costoUltimo: true } } },
    });
    for (const d of detallesConCosto) {
      await tx.detalleVenta.update({
        where: { id: d.id },
-       data: { costoAlVender: d.producto.costoPromedio },
+       data: { costoAlVender: d.producto.costoUltimo },
      });
    }
  }

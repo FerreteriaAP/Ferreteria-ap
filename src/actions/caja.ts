@@ -375,10 +375,12 @@ export async function procesarPagoCaja(
  data: { stockActual: stockDespues },
  });
 
- // Snapshot costoAlVender: congela el costo al momento de facturar
+ // Snapshot costoAlVender: congela el costoUltimo al momento de facturar.
+ // Se usa costoUltimo porque el precio se calcula sobre ese valor; así el margen
+ // en analíticas refleja la realidad económica de cada venta.
  await tx.detalleVenta.update({
    where: { id: detalle.id },
-   data: { costoAlVender: producto.costoPromedio },
+   data: { costoAlVender: producto.costoUltimo ?? producto.costoPromedio },
  });
 
  await tx.movimientoInventario.create({
@@ -388,7 +390,7 @@ export async function procesarPagoCaja(
  cantidad: cantidadReal,   // unidades reales del producto
  stockAntes,
  stockDespues,
- costo: Number(producto.costoPromedio), // snapshot del costo al vender
+ costo: Number(producto.costoUltimo ?? producto.costoPromedio), // snapshot del costo al vender
  referencia: numFactura,
  tipoRef: "VENTA",
  usuarioId: userId,
