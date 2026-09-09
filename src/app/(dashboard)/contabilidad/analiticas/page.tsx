@@ -82,8 +82,8 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  const plCogs = periodoMeses.reduce((s, m) => s + m.cogs, 0);
  const totalFacturas = periodoMeses.reduce((s, m) => s + m.num, 0);
 
- const plMargenBruto = plVentas > 0 ? (plGananciaBruta / plVentas) * 100 : 0;
- const plMargenNeto = plVentas > 0 ? (plGananciaNeta / plVentas) * 100 : 0;
+ const plMargenBruto = plCogs > 0 ? (plGananciaBruta / plCogs) * 100 : 0;
+ const plMargenNeto = plCogs > 0 ? (plGananciaNeta / plCogs) * 100 : 0;
 
  // Margen neto promedio mensual (solo meses con ventas)
  const mesesConVentas = periodoMeses.filter((m) => m.ventas > 0);
@@ -154,7 +154,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </p> <p className="text-xs text-muted-foreground">{pct(plMargenBruto)} de margen bruto</p> </div> </div> {/* Gastos */}
  <div className="flex items-center justify-between py-3"> <div> <p className="font-medium text-sm text-muted-foreground">− Gastos operativos</p> <p className="text-xs text-muted-foreground">Gastos registrados en el período</p> </div> <p className="font-mono text-sm font-medium text-muted-foreground"> ({fmt(plGastos, 2)})
  </p> </div> {/* Barra de beneficio neto promedio */}
- <div className="py-4 -mx-5 px-5 bg-muted/20"> <div className="flex items-center justify-between mb-2"> <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"> % Beneficio sobre ventas
+ <div className="py-4 -mx-5 px-5 bg-muted/20"> <div className="flex items-center justify-between mb-2"> <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"> % Beneficio sobre costo
  {!mes && mesesConVentas.length > 1 && (
  <span className="ml-1 font-normal">(promedio mensual)</span> )}
  </p> <span className={cn("text-sm font-bold tabular-nums", colorMargen(margenPromMensual))}> {pct(margenPromMensual)}
@@ -163,7 +163,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  color={bgMargen(margenPromMensual)}
  /> <span className="text-[10px] text-muted-foreground shrink-0 w-16 text-right"> de cada RD$100
  </span> </div> <p className="text-[10px] text-muted-foreground mt-1.5"> {plVentas > 0
- ? <>De cada <strong>RD$100</strong> vendido quedan <strong className={colorMargen(margenPromMensual)}>{fmt(margenPromMensual, 1)}</strong> de ganancia neta</> : "Sin ventas en el período"}
+ ? <>Por cada <strong>RD$100</strong> de costo quedan <strong className={colorMargen(margenPromMensual)}>{fmt(margenPromMensual, 1)}</strong> de ganancia neta</> : "Sin ventas en el período"}
  </p> </div> {/* Ganancia neta */}
  <div className="flex items-center justify-between py-4 -mx-5 px-5" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 3%, var(--card))" }}> <div> <p className="font-bold">Ganancia neta</p> <p className="text-xs text-muted-foreground">Ganancia bruta − gastos operativos</p> </div> <div className="text-right"> <p className={cn("font-bold text-2xl font-mono", plGananciaNeta >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(plGananciaNeta, 2)}
  </p> <p className="text-xs text-muted-foreground">{pct(plMargenNeto)} de margen neto</p> </div> </div> </div> </div> {/* Tabla mensual (solo vista anual) */}
