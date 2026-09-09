@@ -51,6 +51,16 @@ interface ItemCarrito extends LineaPDV {
 // Categorías con umbral de 15% (CTC solo alerta en negativo)
 const CATS_UMBRAL_15 = ["FT", "ET", "PL"];
 
+// Productos que siempre se venden bajo pedido — se compran al momento de la orden.
+// Exentos de la solicitud de aprobación por stock = 0.
+const CODIGOS_BAJO_PEDIDO = new Set([
+  "CTC-0015",
+  "CTC-0016",
+  "CTC-0017",
+  "CTC-0018",
+  "FT-01322",
+]);
+
 /** Calcula % margen sobre costo. precioFinal viene CON ITBIS (o sin si exento). */
 function calcMargen(precioFinal: number, costoUltimo: number, exentoItbis: boolean): number {
   if (costoUltimo <= 0) return 0;
@@ -240,8 +250,9 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
     setQueryProd(""); setResultados([]);
     searchRef.current?.focus();
 
-    // Si el producto no tiene stock Y no fue aprobado en esta sesión → solicitar autorización
-    if (Number(p.stockActual) <= 0 && !productosAprobados.has(p.id)) {
+    // Si el producto no tiene stock Y no fue aprobado en esta sesión → solicitar autorización.
+    // Los productos en CODIGOS_BAJO_PEDIDO siempre se venden bajo pedido y quedan exentos.
+    if (Number(p.stockActual) <= 0 && !productosAprobados.has(p.id) && !CODIGOS_BAJO_PEDIDO.has(p.codigo)) {
       if (pendingSolicitudes[p.id]) {
         // Ya hay una solicitud en vuelo — no abrir otro diálogo
         setError("Ya enviaste una solicitud de aprobación para este producto. Espera la respuesta del administrador.");
