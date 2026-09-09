@@ -384,24 +384,12 @@ export async function getResumenMensualPL(año: number) {
  SUM(
  CASE
  WHEN p."esFraccionable" = true
- AND p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
+ AND p."factorFraccion" IS NOT NULL
+ AND p."factorFraccion" > 0
  AND (
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- AND dv."costoAlVender" IS NOT NULL
- THEN dv.cantidad * dv."costoAlVender"
-      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- WHEN p."esFraccionable" = true
- AND p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
- AND (
- (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
- OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
- )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
-      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- WHEN p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
- AND dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida"
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
@@ -571,26 +559,20 @@ export async function getVentasPorCategoria(opts: {
  const precioFinal = Number(d.precioFinal);
  const precioVenta = Number(d.producto.precioVenta);
 
- // Detectar si la línea fue vendida en unidad fraccionada
- const vendidaEnFraccion =
-   factor > 0 &&
-   (
-     (d.unidad != null && d.unidad !== d.producto.unidadMedida) ||
-     (d.unidad == null && precioVenta > 0 && precioFinal < precioVenta)
-   );
+ const isFraccionada =
+ d.producto.esFraccionable &&
+ factor > 0 &&
+ (
+ // Datos nuevos: unidad explícita diferente a la base
+ (d.unidad != null && d.unidad !== d.producto.unidadMedida)
+ ||
+ // Datos viejos (unidad null): fraccionado si precioFinal < precioVenta
+ (d.unidad == null && precioVenta > 0 && precioFinal < precioVenta)
+ );
 
- let cogs: number;
- if (vendidaEnFraccion) {
-   if (d.producto.esFraccionable && d.costoAlVender != null) {
-     // costoAlVender capturado al vender: ya es costo-por-fracción, no dividir
-     cogs = cantidad * costo * itbisMultiplier;
-   } else {
-     // Sin costoAlVender o no fraccionable marcado: dividir entre factor
-     cogs = cantidad * costo / factor * itbisMultiplier;
-   }
- } else {
-   cogs = cantidad * costo * itbisMultiplier;
- }
+ const cogs = isFraccionada
+ ? cantidad * costo / factor * itbisMultiplier
+ : cantidad * costo * itbisMultiplier;
 
  if (!mapa.has(key)) {
  mapa.set(key, {
@@ -856,24 +838,12 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  SUM(
  CASE
  WHEN p."esFraccionable" = true
- AND p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
+ AND p."factorFraccion" IS NOT NULL
+ AND p."factorFraccion" > 0
  AND (
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- AND dv."costoAlVender" IS NOT NULL
- THEN dv.cantidad * dv."costoAlVender"
-      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- WHEN p."esFraccionable" = true
- AND p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
- AND (
- (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
- OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
- )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
-      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- WHEN p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
- AND dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida"
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
@@ -943,24 +913,12 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  SUM(
  CASE
  WHEN p."esFraccionable" = true
- AND p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
+ AND p."factorFraccion" IS NOT NULL
+ AND p."factorFraccion" > 0
  AND (
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- AND dv."costoAlVender" IS NOT NULL
- THEN dv.cantidad * dv."costoAlVender"
-      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- WHEN p."esFraccionable" = true
- AND p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
- AND (
- (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
- OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
- )
- THEN dv.cantidad * p."costoPromedio" / p."factorFraccion"
-      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- WHEN p."factorFraccion" IS NOT NULL AND p."factorFraccion" > 0
- AND dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida"
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
