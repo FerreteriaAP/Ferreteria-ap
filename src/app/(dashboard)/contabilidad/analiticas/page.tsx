@@ -9,7 +9,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface PageProps {
- searchParams: Promise<{ año?: string; mes?: string }>;
+ searchParams: Promise<{ año?: string; mes?: string; todosClientes?: string; todosProductos?: string }>;
 }
 
 const MESES_COMPLETOS = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -60,6 +60,19 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  const año = Number(params.año ?? now.getFullYear());
  // Default: mes actual (no "año completo")
  const mes = params.mes !== undefined ? Number(params.mes) : (now.getMonth() + 1);
+ const todosClientes   = params.todosClientes === "1";
+ const todosProductos  = params.todosProductos === "1";
+
+ // Helper: construye URL de esta misma página preservando los params actuales
+ const buildUrl = (extra: Record<string, string | undefined>) => {
+   const p = new URLSearchParams();
+   if (params.año)  p.set("año",  params.año);
+   if (params.mes)  p.set("mes",  params.mes);
+   if (todosClientes)  p.set("todosClientes",  "1");
+   if (todosProductos) p.set("todosProductos", "1");
+   Object.entries(extra).forEach(([k, v]) => { if (v === undefined) p.delete(k); else p.set(k, v); });
+   return `/contabilidad/analiticas?${p.toString()}`;
+ };
 
  // Años disponibles (2023  año actual)
  const añosDisp = Array.from({ length: now.getFullYear() - 2022 }, (_, i) => 2023 + i);
@@ -67,8 +80,8 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  const [mesesPL, porCategoria, porCliente, topProductos, pagos] = await Promise.all([
  getResumenMensualPL(año),
  getVentasPorCategoria({ año, mes }),
- getVentasPorCliente({ año, mes, limit: 10 }),
- getTopProductos({ año, mes, limit: 10 }),
+ getVentasPorCliente({ año, mes, limit: todosClientes  ? 9999 : 10 }),
+ getTopProductos({ año, mes, limit: todosProductos ? 9999 : 10 }),
  getResumenPagos({ año, mes }),
  ]);
 
@@ -226,7 +239,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </div> {/* 
  VENTAS POR CLIENTE 
  */}
- <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b flex items-center justify-between" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Top 10 clientes — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground">Por volumen de ventas</p> </div> {porCliente.length === 0 ? (
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b flex items-center justify-between" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">{todosClientes ? "Todos los clientes" : "Top 10 clientes"} — {etiquetaPeriodo}</h2> <a href={buildUrl({ todosClientes: todosClientes ? undefined : "1" })} className="text-xs px-2.5 py-1 rounded-md border font-medium transition-colors hover:bg-muted/40" style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 40%, var(--border))", color: "var(--accent-hex)" }}> {todosClientes ? "Ver top 10" : "Ver todos"} </a> </div> {porCliente.length === 0 ? (
  <p className="text-sm text-muted-foreground py-10 text-center">Sin ventas en el período</p> ) : (
  <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">#</th> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Cliente</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Facturas</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Total facturado</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ganancia</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">% sobre costo</th> <th className="w-28 px-4 py-2.5" /> </tr> </thead> <tbody className="divide-y"> {porCliente.map((c, idx) => (
  <tr key={c.clienteId} className="hover:bg-muted/20 transition-colors"> <td className="px-5 py-3 text-xs text-muted-foreground font-mono"> {String(idx + 1).padStart(2, "0")}
@@ -247,7 +260,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  value={c.totalFacturado}
  max={Math.max(...porCliente.map((x) => x.totalFacturado), 1)}
  color="bg-orange-500/50" /> </td> </tr> ))}
- </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={3} className="px-5 py-3 font-bold text-sm">Total</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(porCliente.reduce((s, c) => s + c.totalFacturado, 0), 2)}
+ </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={3} className="px-5 py-3 font-bold text-sm">{todosClientes ? "Total general" : "Total top 10"}</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(porCliente.reduce((s, c) => s + c.totalFacturado, 0), 2)}
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(porCliente.reduce((s, c) => s + c.cogs, 0), 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-xs",
  porCliente.reduce((s, c) => s + c.ganancia, 0) >= 0
@@ -256,7 +269,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  </div> {/* 
  TOP 10 PRODUCTOS 
  */}
- <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b flex items-center justify-between" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">Top 10 productos — {etiquetaPeriodo}</h2> <p className="text-xs text-muted-foreground">Por volumen de ventas</p> </div> {topProductos.length === 0 ? (
+ <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}> <div className="px-5 py-3 border-b flex items-center justify-between" style={{ backgroundColor: HEADER_BG }}> <h2 className="font-semibold text-sm">{todosProductos ? "Todos los productos" : "Top 10 productos"} — {etiquetaPeriodo}</h2> <a href={buildUrl({ todosProductos: todosProductos ? undefined : "1" })} className="text-xs px-2.5 py-1 rounded-md border font-medium transition-colors hover:bg-muted/40" style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 40%, var(--border))", color: "var(--accent-hex)" }}> {todosProductos ? "Ver top 10" : "Ver todos"} </a> </div> {topProductos.length === 0 ? (
  <p className="text-sm text-muted-foreground py-10 text-center">Sin ventas en el período</p> ) : (
  <div className="overflow-x-auto"> <table className="w-full text-sm"> <thead> <tr className="border-b"> <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">#</th> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Producto</th> <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Cantidad</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Total facturado</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">COGS</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Ganancia</th> <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">% sobre costo</th> </tr> </thead> <tbody className="divide-y"> {topProductos.map((p, idx) => (
  <tr key={p.productoId} className="hover:bg-muted/20 transition-colors"> <td className="px-5 py-3 text-xs text-muted-foreground font-mono"> {String(idx + 1).padStart(2, "0")}
@@ -270,7 +283,7 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  p.ganancia >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive")}> {fmt(p.ganancia, 2)}
  </td> <td className={cn("px-4 py-3 text-right text-xs font-bold", colorMargen(p.margen))}> {pct(p.margen)}
  </td> </tr> ))}
- </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={4} className="px-5 py-3 font-bold text-sm">Total top 10</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(topProductos.reduce((s, p) => s + p.totalFacturado, 0), 2)}
+ </tbody> <tfoot> <tr className="border-t-2 bg-muted/30"> <td colSpan={4} className="px-5 py-3 font-bold text-sm">{todosProductos ? "Total general" : "Total top 10"}</td> <td className="px-4 py-3 text-right font-mono font-bold text-xs"> {fmt(topProductos.reduce((s, p) => s + p.totalFacturado, 0), 2)}
  </td> <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground"> ({fmt(topProductos.reduce((s, p) => s + p.cogs, 0), 2)})
  </td> <td className={cn("px-4 py-3 text-right font-mono font-bold text-xs",
  topProductos.reduce((s, p) => s + p.ganancia, 0) >= 0
