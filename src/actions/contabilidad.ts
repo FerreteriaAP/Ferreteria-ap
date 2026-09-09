@@ -388,7 +388,12 @@ export async function getResumenMensualPL(año: number) {
  // pagó por la mercancía; el ITBIS es un pasivo fiscal, no parte del costo real.
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
- SUM(dv.subtotal + dv.itbis)::text AS ventas,
+ SUM(
+   CASE WHEN p."exentoItbis" = true
+        THEN dv.subtotal + dv.itbis  -- exento: precio directo sin split ITBIS
+        ELSE dv.subtotal              -- no exento: revenue neto (sin ITBIS)
+   END
+ )::text AS ventas,
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -535,6 +540,7 @@ export async function getVentasPorCategoria(opts: {
  esFraccionable: true,
  factorFraccion: true,
  unidadMedida: true,
+ exentoItbis: true,
  categoria: {
  select: { nombre: true, codigo: true },
  },
@@ -555,8 +561,11 @@ export async function getVentasPorCategoria(opts: {
  const cat = d.producto.categoria.nombre;
  const key = cat;
 
- // Revenue = total facturado al cliente (subtotal + ITBIS).
- const ventas = Number(d.subtotal) + Number(d.itbis);
+ // Revenue: exentos → totalFacturado (precio directo, inmune al split ITBIS histórico)
+ //          no exentos → subtotal (neto sin ITBIS cobrado al cliente)
+ const ventas = d.producto.exentoItbis
+   ? Number(d.subtotal) + Number(d.itbis)  // exento: total cobrado
+   : Number(d.subtotal);                    // no exento: neto sin ITBIS
 
  // COGS = costoAlVender × cantidad, SIN ×1.18 (el ITBIS no es parte del costo real).
  const cantidad = Number(d.cantidad);
@@ -841,7 +850,12 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  c.id AS "clienteId",
  c.nombre,
  c.rnc,
- SUM(dv.subtotal)::text AS ventas,
+ SUM(
+   CASE WHEN p."exentoItbis" = true
+        THEN dv.subtotal + dv.itbis
+        ELSE dv.subtotal
+   END
+ )::text AS ventas,
  SUM(dv.subtotal + dv.itbis)::text AS "totalFacturado",
  SUM(
  CASE
@@ -867,15 +881,15 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  `;
 
  return rows.map((r) => {
- const ventasSinItbis = Number(r.ventas);          // subtotal sin ITBIS
- const totalFacturado = Number(r.totalFacturado);   // con ITBIS — total facturado al cliente
- const cogs = Number(r.cogs);                       // costo real de lo vendido
- const ganancia = totalFacturado - cogs;            // ganancia = total facturado − costo total
+ const revenue = Number(r.ventas);
+ const totalFacturado = Number(r.totalFacturado);
+ const cogs = Number(r.cogs);
+ const ganancia = revenue - cogs;
  return {
  clienteId: r.clienteId,
  nombre: r.nombre,
  rnc: r.rnc,
- ventas: ventasSinItbis,
+ ventas: revenue,
  totalFacturado,
  cogs,
  ganancia,
@@ -914,7 +928,12 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  p.nombre,
  cat.nombre AS categoria,
  p."unidadMedida" AS unidad,
- SUM(dv.subtotal)::text AS ventas,
+ SUM(
+   CASE WHEN p."exentoItbis" = true
+        THEN dv.subtotal + dv.itbis
+        ELSE dv.subtotal
+   END
+ )::text AS ventas,
  SUM(dv.subtotal + dv.itbis)::text AS "totalFacturado",
  SUM(
  CASE
@@ -952,17 +971,17 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  `;
 
  return rows.map((r) => {
- const ventasSinItbis = Number(r.ventas);          // subtotal sin ITBIS
- const totalFacturado = Number(r.totalFacturado);   // con ITBIS — total facturado al cliente
- const cogs = Number(r.cogs);                       // costo real de lo vendido
- const ganancia = totalFacturado - cogs;            // ganancia = total facturado − costo total
+ const revenue = Number(r.ventas);
+ const totalFacturado = Number(r.totalFacturado);
+ const cogs = Number(r.cogs);
+ const ganancia = revenue - cogs;
  return {
  productoId: r.productoId,
  codigo: r.codigo,
  nombre: r.nombre,
  categoria: r.categoria,
  unidad: r.unidad,
- ventas: ventasSinItbis,
+ ventas: revenue,
  totalFacturado,
  cogs,
  ganancia,
