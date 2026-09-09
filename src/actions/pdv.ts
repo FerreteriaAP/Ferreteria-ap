@@ -199,6 +199,10 @@ export interface LineaPDV {
   exentoItbis: boolean;
   itbis: number;
   subtotal: number;
+  /** Snapshot del costoUltimo al momento de agregar el producto al carrito PDV.
+   *  Capturado en el cliente para garantizar que reflete el costo en el momento de la venta,
+   *  no el costo al facturar (que puede cambiar si llega una compra antes de finalizar). */
+  costoAlVender: number | null;
 }
 
 // Crear venta pendiente
@@ -265,6 +269,7 @@ export async function crearVentaPendiente(input: VentaPDVInput) {
             descuento: 0,
             itbis: l.itbis,
             subtotal: l.subtotal,
+            costoAlVender: l.costoAlVender ?? null, // snapshot al agregar al carrito
           })),
         },
       },

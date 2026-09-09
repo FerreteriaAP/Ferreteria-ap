@@ -493,6 +493,16 @@ export async function crearCotizacion(input: VentaInput) {
  const totalItbis = input.detalles.reduce((s, d) => s + d.itbis, 0);
  const total = subtotal + totalItbis;
 
+ // Capturar costoUltimo de cada producto AHORA, al crear la cotización.
+ // Así el margen en analíticas refleja el costo en el momento de la venta,
+ // no el costo al momento de facturar (que puede haber cambiado).
+ const productIds = input.detalles.map(d => d.productoId);
+ const costoSnapshot = await prisma.producto.findMany({
+   where: { id: { in: productIds } },
+   select: { id: true, costoUltimo: true, costoPromedio: true },
+ });
+ const costoMap = new Map(costoSnapshot.map(p => [p.id, p.costoUltimo ?? p.costoPromedio]));
+
  try {
  const venta = await prisma.venta.create({
  data: {
@@ -527,6 +537,7 @@ export async function crearCotizacion(input: VentaInput) {
  itbis: d.itbis,
  subtotal: base,
  orden: i,
+ costoAlVender: costoMap.get(d.productoId) ?? null, // snapshot al crear
  };
  }),
  },
@@ -564,6 +575,14 @@ export async function actualizarCotizacion(id: string, input: VentaInput) {
  const totalItbis = input.detalles.reduce((s, d) => s + d.itbis, 0);
  const total = subtotal + totalItbis;
 
+ // Snapshot de costo al EDITAR la cotización (recaptura el costo actual al modificar)
+ const productIdsAct = input.detalles.map(d => d.productoId);
+ const costoSnapshotAct = await prisma.producto.findMany({
+   where: { id: { in: productIdsAct } },
+   select: { id: true, costoUltimo: true, costoPromedio: true },
+ });
+ const costoMapAct = new Map(costoSnapshotAct.map(p => [p.id, p.costoUltimo ?? p.costoPromedio]));
+
  try {
  await prisma.$transaction(async (tx) => {
  // Eliminar detalles anteriores
@@ -597,6 +616,7 @@ export async function actualizarCotizacion(id: string, input: VentaInput) {
  itbis: d.itbis,
  subtotal: base,
  orden: i,
+ costoAlVender: costoMapAct.get(d.productoId) ?? null, // snapshot al editar
  };
  }),
  },
@@ -790,18 +810,18 @@ export async function facturarVenta(ventaId: string, data: {
  },
  });
 
- // Snapshot costoAlVender: congela el costoUltimo de cada producto al momento de facturar.
- // Se usa costoUltimo (no costoPromedio) porque el precio de venta se calcula sobre costoUltimo,
- // por lo que el COGS debe reflejar el mismo costo para que el margen sea coherente.
+ // costoAlVender ya debería estar capturado al crear/editar la cotización.
+ // Solo actualizamos las líneas donde aún sea NULL (registros históricos o flujos alternativos).
+ // Esto evita que un cambio de costo entre la cotización y la factura distorsione el margen.
  {
    const detallesConCosto = await tx.detalleVenta.findMany({
-     where: { ventaId },
-     include: { producto: { select: { costoUltimo: true } } },
+     where: { ventaId, costoAlVender: null },
+     include: { producto: { select: { costoUltimo: true, costoPromedio: true } } },
    });
    for (const d of detallesConCosto) {
      await tx.detalleVenta.update({
        where: { id: d.id },
-       data: { costoAlVender: d.producto.costoUltimo },
+       data: { costoAlVender: d.producto.costoUltimo ?? d.producto.costoPromedio },
      });
    }
  }

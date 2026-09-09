@@ -375,13 +375,15 @@ export async function procesarPagoCaja(
  data: { stockActual: stockDespues },
  });
 
- // Snapshot costoAlVender: congela el costoUltimo al momento de facturar.
- // Se usa costoUltimo porque el precio se calcula sobre ese valor; así el margen
- // en analíticas refleja la realidad económica de cada venta.
- await tx.detalleVenta.update({
-   where: { id: detalle.id },
-   data: { costoAlVender: producto.costoUltimo ?? producto.costoPromedio },
- });
+ // costoAlVender: solo actualizar si aún es NULL.
+ // Para PDV, la venta pendiente debería haberlo capturado ya al momento de agregar al carrito.
+ // Solo fallback para registros históricos o flujos alternativos sin snapshot previo.
+ if (detalle.costoAlVender === null) {
+   await tx.detalleVenta.update({
+     where: { id: detalle.id },
+     data: { costoAlVender: producto.costoUltimo ?? producto.costoPromedio },
+   });
+ }
 
  await tx.movimientoInventario.create({
  data: {

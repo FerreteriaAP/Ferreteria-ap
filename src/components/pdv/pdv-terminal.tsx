@@ -175,6 +175,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
               key: uid(), productoId: p.id, nombre: p.nombre, codigo: p.codigo,
               unidad, cantidad: 0, cantidadStr: "", precioFinal, precio,
               exentoItbis: p.exentoItbis, itbis, subtotal, costoUltimo,
+              costoAlVender: costoUltimo,
               categoriaCode: p.categoria.codigo, esServicio: p.esServicio, esFraccionable: p.esFraccionable,
             }];
           });
@@ -288,6 +289,9 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
       unidad, cantidad: 0, cantidadStr: "", precioFinal, precio, exentoItbis: p.exentoItbis,
       itbis, subtotal,
       costoUltimo,
+      // Snapshot del costo al agregar al carrito. Se envía al servidor para que
+      // costoAlVender refleje el costo en el momento de la venta, no al facturar.
+      costoAlVender: costoUltimo,
       categoriaCode: p.categoria.codigo,
       esServicio: p.esServicio,
       esFraccionable: p.esFraccionable,
