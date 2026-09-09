@@ -361,15 +361,10 @@ export async function getCxPPorSuplidor(opts: {
 
 // ANALÍTICAS — P&L MENSUAL
 //
-// Devuelve por mes: ventas netas SIN ITBIS (subtotal — el ITBIS es un pasivo
-// fiscal recaudado para la DGII, no ingreso propio), costo de lo vendido,
-// ganancia bruta, gastos operativos y ganancia neta.
-//
-// Revenue = SUM(dv.subtotal) — base sin ITBIS (lo que realmente le pertenece al negocio)
-// COGS = cantidad × COALESCE(costoAlVender, costoPromedio)
-//        costoAlVender es el snapshot del costo en el momento de facturar (inmutable).
-//        Si no existe (ventas anteriores), se usa costoPromedio actual como fallback.
-//        Si el producto es fraccionado, se divide entre factorFraccion.
+// Ventas = subtotal + itbis (total cobrado al cliente, para todos los productos)
+// COGS   = costoAlVender × (1.18 si no-exento, 1.0 si exento) × cantidad
+//          para fraccionables se divide entre factorFraccion antes de multiplicar
+// % Ganancia = ganancia / COGS × 100 (base en costo)
 //
 export async function getResumenMensualPL(año: number) {
  type VRow = { mes: number; ventas: string; cogs: string; num: string };
@@ -383,17 +378,9 @@ export async function getResumenMensualPL(año: number) {
  const diaActual = drNow.getUTCDate();
 
  const [ventaRows, gastoRows, gastosFijos] = await Promise.all([
- // Ventas brutas = total facturado al cliente (subtotal + itbis).
- // COGS = costoAlVender × cantidad, SIN ×1.18. El costo es lo que el negocio
- // pagó por la mercancía; el ITBIS es un pasivo fiscal, no parte del costo real.
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
- SUM(
-   CASE WHEN p."exentoItbis" = true
-        THEN dv.subtotal + dv.itbis  -- exento: precio directo sin split ITBIS
-        ELSE dv.subtotal              -- no exento: revenue neto (sin ITBIS)
-   END
- )::text AS ventas,
+ SUM(dv.subtotal + dv.itbis)::text AS ventas,
  SUM(
  CASE
  WHEN p."esFraccionable" = true
@@ -405,8 +392,10 @@ export async function getResumenMensualPL(año: number) {
  (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
-  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
-  END
+      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
+ END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS num
  FROM ventas v
@@ -493,20 +482,18 @@ export async function getResumenMensualPL(año: number) {
  gastosModulo, // desglose para reportes
  gananciaBruta,
  gananciaNeta,
- margenBruto: ventas > 0 ? (gananciaBruta / ventas) * 100 : 0,
- margenNeto: ventas > 0 ? (gananciaNeta / ventas) * 100 : 0,
+ margenBruto: cogs > 0 ? (gananciaBruta / cogs) * 100 : 0,
+ margenNeto: cogs > 0 ? (gananciaNeta / cogs) * 100 : 0,
  num,
  };
  });
 }
 
-// ANALÍTICAS — VENTAS POR CATEGORÍA CON MÁRGENES 
+// ANALÍTICAS — VENTAS POR CATEGORÍA CON MÁRGENES
 //
-// Revenue = subtotal + itbis (total cobrado al cliente, igual que en factura)
-// COGS = cantidad × costoPromedio; si la venta es en fracción (dv.unidad ≠
-// p.unidadMedida) se divide entre factorFraccion.
-// Esto hace que comprar a 490 y vender a 560 muestre margen 12.5%
-// sin importar el ITBIS ni el tipo de unidad.
+// Ventas = subtotal + itbis (total cobrado al cliente, para todos los productos)
+// COGS   = costoAlVender × (1.18 si no-exento, 1.0 si exento) × cantidad
+// % margen = ganancia / COGS × 100 (base en costo)
 //
 export async function getVentasPorCategoria(opts: {
  año: number;
@@ -561,15 +548,13 @@ export async function getVentasPorCategoria(opts: {
  const cat = d.producto.categoria.nombre;
  const key = cat;
 
- // Revenue: exentos → totalFacturado (precio directo, inmune al split ITBIS histórico)
- //          no exentos → subtotal (neto sin ITBIS cobrado al cliente)
- const ventas = d.producto.exentoItbis
-   ? Number(d.subtotal) + Number(d.itbis)  // exento: total cobrado
-   : Number(d.subtotal);                    // no exento: neto sin ITBIS
+ // Ventas = total cobrado al cliente (subtotal + itbis), para todos los productos
+ const ventas = Number(d.subtotal) + Number(d.itbis);
 
- // COGS = costoAlVender × cantidad, SIN ×1.18 (el ITBIS no es parte del costo real).
+ // COGS = costoAlVender × (1.18 si no-exento, 1.0 si exento) × cantidad
  const cantidad = Number(d.cantidad);
  const costo = Number(d.costoAlVender ?? d.producto.costoPromedio);
+ const itbisMultiplier = d.producto.exentoItbis ? 1.0 : 1.18;
 
  const factor = d.producto.factorFraccion != null ? Number(d.producto.factorFraccion) : 0;
  const precioFinal = Number(d.precioFinal);
@@ -587,8 +572,8 @@ export async function getVentasPorCategoria(opts: {
  );
 
  const cogs = isFraccionada
- ? cantidad * costo / factor
- : cantidad * costo;
+ ? cantidad * costo / factor * itbisMultiplier
+ : cantidad * costo * itbisMultiplier;
 
  if (!mapa.has(key)) {
  mapa.set(key, {
@@ -826,10 +811,9 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
  };
 }
 
-// ANALÍTICAS — VENTAS POR CLIENTE 
+// ANALÍTICAS — VENTAS POR CLIENTE
 //
-// Por cada cliente: totalFacturado (subtotal+itbis), COGS sin ×1.18,
-// productos fraccionables ÷ factorFraccion. Ganancia = facturado − costo real.
+// Ventas = subtotal + itbis (total cobrado), COGS con ITBIS de compra incluido.
 //
 export async function getVentasPorCliente(opts: { año: number; mes?: number; limit?: number }) {
  const { año, mes, limit = 10 } = opts;
@@ -850,12 +834,7 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  c.id AS "clienteId",
  c.nombre,
  c.rnc,
- SUM(
-   CASE WHEN p."exentoItbis" = true
-        THEN dv.subtotal + dv.itbis
-        ELSE dv.subtotal
-   END
- )::text AS ventas,
+ SUM(dv.subtotal + dv.itbis)::text AS ventas,
  SUM(dv.subtotal + dv.itbis)::text AS "totalFacturado",
  SUM(
  CASE
@@ -867,8 +846,10 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
-  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
-  END
+      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
+ END
  )::text AS cogs,
  COUNT(DISTINCT v.id)::text AS facturas
  FROM ventas v
@@ -928,12 +909,7 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  p.nombre,
  cat.nombre AS categoria,
  p."unidadMedida" AS unidad,
- SUM(
-   CASE WHEN p."exentoItbis" = true
-        THEN dv.subtotal + dv.itbis
-        ELSE dv.subtotal
-   END
- )::text AS ventas,
+ SUM(dv.subtotal + dv.itbis)::text AS ventas,
  SUM(dv.subtotal + dv.itbis)::text AS "totalFacturado",
  SUM(
  CASE
@@ -945,8 +921,10 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
  THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
-  ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
-  END
+      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
+ ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+      * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
+ END
  )::text AS cogs,
  SUM(
  CASE
