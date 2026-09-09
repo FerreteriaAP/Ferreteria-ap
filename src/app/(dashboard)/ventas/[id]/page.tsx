@@ -9,6 +9,7 @@ import { NuevoConduceBtn } from "@/components/caja/conduce-despacho-btn";
 import { BtnEliminarDocumento } from "@/components/shared/btn-eliminar-documento";
 import { BtnVolverVentas } from "@/components/ventas/btn-volver-ventas";
 import { eliminarVenta } from "@/actions/ventas";
+import { AdminEditarDetalles } from "@/components/ventas/admin-editar-detalles";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -363,6 +364,26 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
               </div>
             </div>
           </div>
+
+          {/* Panel edición admin */}
+          {rolUsuario === "ADMINISTRADOR" && (
+            <AdminEditarDetalles
+              ventaId={id}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              detalles={venta.detalles.map((d: any) => ({
+                id: d.id,
+                productoId: d.productoId,
+                descripcion: d.descripcion,
+                producto: { nombre: d.producto.nombre, codigo: d.producto.codigo, unidadMedida: d.producto.unidadMedida },
+                cantidad: d.cantidad,
+                precioFinal: d.precioFinal ?? d.precio,
+                descuento: d.descuento ?? 0,
+                subtotal: d.subtotal,
+                itbis: d.itbis,
+                unidad: d.unidad,
+              }))}
+            />
+          )}
 
           {/* Conduces (FACTURADA) */}
           {venta.tipo === "FACTURADA" && (

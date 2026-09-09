@@ -1292,3 +1292,149 @@ export async function recalcularPreciosKolmen(ventaId: string) {
  revalidatePath(`/ventas/${ventaId}`);
  return { ok: true, recalculados: nuevosPrecios.length };
 }
+
+// ─── ADMIN: editar línea de cualquier documento ───────────────────────────────
+// Solo ADMINISTRADOR. Modifica cantidad y/o precioFinal de un detalleVenta
+// y recalcula subtotal/itbis en la línea y los totales de la venta.
+
+export async function adminEditarDetalle(input: {
+  detalleId: string;
+  cantidad: number;
+  precioFinal: number;
+  descuento?: number;
+}) {
+  const session = await auth();
+  const rol = ((session?.user) as { rol?: string })?.rol ?? "";
+  if (rol !== "ADMINISTRADOR") return { error: "Acceso restringido a administrador" };
+
+  const { detalleId, cantidad, precioFinal, descuento = 0 } = input;
+  if (cantidad <= 0)    return { error: "Cantidad debe ser mayor a 0" };
+  if (precioFinal < 0) return { error: "Precio inválido" };
+
+  const detalle = await prisma.detalleVenta.findUnique({
+    where: { id: detalleId },
+    include: { producto: { select: { exentoItbis: true } }, venta: { select: { id: true } } },
+  });
+  if (!detalle) return { error: "Línea no encontrada" };
+
+  const ventaId = detalle.venta.id;
+  const exento  = detalle.producto.exentoItbis;
+
+  // precio = base sin ITBIS; subtotal = precio × cantidad × (1 - descuento%)
+  const precio   = exento ? precioFinal : +(precioFinal / 1.18).toFixed(4);
+  const subtotal = +(precio * cantidad * (1 - descuento / 100)).toFixed(2);
+  const itbis    = exento ? 0 : +(subtotal * 0.18).toFixed(2);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.detalleVenta.update({
+      where: { id: detalleId },
+      data: { cantidad, precio, precioFinal, descuento, subtotal, itbis },
+    });
+
+    // Recalcular totales de la venta
+    const lineas = await tx.detalleVenta.findMany({ where: { ventaId } });
+    const vSubtotal = +lineas.reduce((s, l) => s + Number(l.subtotal), 0).toFixed(2);
+    const vItbis    = +lineas.reduce((s, l) => s + Number(l.itbis),    0).toFixed(2);
+    const vTotal    = +(vSubtotal + vItbis).toFixed(2);
+
+    await tx.venta.update({
+      where: { id: ventaId },
+      data: { subtotal: vSubtotal, itbis: vItbis, total: vTotal },
+    });
+  });
+
+  revalidatePath(`/ventas/${ventaId}`);
+  return { ok: true };
+}
+
+// ─── ADMIN: agregar línea a cualquier documento ───────────────────────────────
+
+export async function adminAgregarDetalle(input: {
+  ventaId: string;
+  productoId: string;
+  cantidad: number;
+  precioFinal: number;
+  descuento?: number;
+  unidad?: string;
+}) {
+  const session = await auth();
+  const rol = ((session?.user) as { rol?: string })?.rol ?? "";
+  if (rol !== "ADMINISTRADOR") return { error: "Acceso restringido a administrador" };
+
+  const { ventaId, productoId, cantidad, precioFinal, descuento = 0, unidad } = input;
+  if (cantidad <= 0)    return { error: "Cantidad debe ser mayor a 0" };
+  if (precioFinal < 0) return { error: "Precio inválido" };
+
+  const producto = await prisma.producto.findUnique({
+    where: { id: productoId },
+    select: { exentoItbis: true, costoUltimo: true, costoPromedio: true, nombre: true },
+  });
+  if (!producto) return { error: "Producto no encontrado" };
+
+  // precio = base sin ITBIS (precioFinal/1.18 para no-exentos, precioFinal para exentos)
+  const precio       = producto.exentoItbis ? precioFinal : +(precioFinal / 1.18).toFixed(4);
+  const subtotal     = +(precio * cantidad * (1 - descuento / 100)).toFixed(2);
+  const itbis        = producto.exentoItbis ? 0 : +(subtotal * 0.18).toFixed(2);
+  const costoAlVender = Number(producto.costoUltimo ?? producto.costoPromedio ?? 0);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.detalleVenta.create({
+      data: {
+        ventaId,
+        productoId,
+        cantidad,
+        precio,
+        precioFinal,
+        descuento,
+        subtotal,
+        itbis,
+        unidad: unidad || null,
+        costoAlVender,
+        exentoItbis: producto.exentoItbis,
+      },
+    });
+
+    // Recalcular totales
+    const lineas = await tx.detalleVenta.findMany({ where: { ventaId } });
+    const vSubtotal = +lineas.reduce((s, l) => s + Number(l.subtotal), 0).toFixed(2);
+    const vItbis    = +lineas.reduce((s, l) => s + Number(l.itbis),    0).toFixed(2);
+    await tx.venta.update({
+      where: { id: ventaId },
+      data: { subtotal: vSubtotal, itbis: vItbis, total: +(vSubtotal + vItbis).toFixed(2) },
+    });
+  });
+
+  revalidatePath(`/ventas/${ventaId}`);
+  return { ok: true };
+}
+
+// ─── ADMIN: eliminar línea de cualquier documento ────────────────────────────
+
+export async function adminEliminarDetalle(detalleId: string) {
+  const session = await auth();
+  const rol = ((session?.user) as { rol?: string })?.rol ?? "";
+  if (rol !== "ADMINISTRADOR") return { error: "Acceso restringido a administrador" };
+
+  const detalle = await prisma.detalleVenta.findUnique({
+    where: { id: detalleId },
+    select: { venta: { select: { id: true } } },
+  });
+  if (!detalle) return { error: "Línea no encontrada" };
+
+  const ventaId = detalle.venta.id;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.detalleVenta.delete({ where: { id: detalleId } });
+
+    const lineas = await tx.detalleVenta.findMany({ where: { ventaId } });
+    const vSubtotal = +lineas.reduce((s, l) => s + Number(l.subtotal), 0).toFixed(2);
+    const vItbis    = +lineas.reduce((s, l) => s + Number(l.itbis),    0).toFixed(2);
+    await tx.venta.update({
+      where: { id: ventaId },
+      data: { subtotal: vSubtotal, itbis: vItbis, total: +(vSubtotal + vItbis).toFixed(2) },
+    });
+  });
+
+  revalidatePath(`/ventas/${ventaId}`);
+  return { ok: true };
+}
