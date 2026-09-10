@@ -2,11 +2,7 @@ import Link from "next/link";
 import { getCuentas, getTransacciones } from "@/actions/bancos";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import dynamic from "next/dynamic";
-const BankCardDownload = dynamic(
-  () => import("@/components/bancos/bank-card-download").then((m) => m.BankCardDownload),
-  { ssr: false }
-);
+import { BankCardDownload } from "@/components/bancos/bank-card-client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
