@@ -128,60 +128,43 @@ function drawCard(cuenta: CuentaCard, rnc?: string): void {
   roundedRect(ctx, 0, 0, 5, H, R);
   ctx.fill();
 
-  // ── Logo + wordmark (top-left) ────────────────────────────────────────────
-  const LOGO_CX = 68, LOGO_CY = 68, LOGO_R = 46;
-  drawOctagonLogo(ctx, LOGO_CX, LOGO_CY, LOGO_R);
+  // ── Logo (solo ícono, top-left) ──────────────────────────────────────────
+  drawOctagonLogo(ctx, 70, 72, 48);
 
-  // "FERRETERÍA" en blanco + "AP" en naranja
-  const NAME_X = LOGO_CX + LOGO_R + 18;
-  const NAME_Y = 56;
+  // ── RNC (debajo del logo) ─────────────────────────────────────────────────
+  if (rnc) {
+    ctx.font = "13px Arial, sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillText(`RNC ${rnc}`, 54, 148);
+  }
 
-  ctx.font = `bold 27px "Arial Black", Arial, sans-serif`;
-  ctx.fillStyle = "#FFFFFF";
-  const ferr = "FERRETERÍA ";
-  ctx.fillText(ferr, NAME_X, NAME_Y);
-  const ferrW = ctx.measureText(ferr).width;
-
-  ctx.fillStyle = "#F47717";
-  ctx.fillText("AP", NAME_X + ferrW, NAME_Y);
-
-
-  // ── Separador superior ───────────────────────────────────────────────────
+  // ── Separador ────────────────────────────────────────────────────────────
   ctx.strokeStyle = "rgba(255,255,255,0.07)";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(40, 132);
-  ctx.lineTo(W - 40, 132);
+  ctx.moveTo(40, 170);
+  ctx.lineTo(W - 40, 170);
   ctx.stroke();
 
-  // ── Banco ────────────────────────────────────────────────────────────────
-  ctx.font = `bold 46px Arial, sans-serif`;
+  // ── Banco ─────────────────────────────────────────────────────────────────
+  ctx.font = `bold 40px Arial, sans-serif`;
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(cuenta.banco.toUpperCase(), 54, 215);
+  ctx.fillText(cuenta.banco.toUpperCase(), 54, 238);
 
-  // ── No. de Cuenta ────────────────────────────────────────────────────────
+  // ── No. de Cuenta ─────────────────────────────────────────────────────────
   ctx.font = "11px Arial, sans-serif";
   ctx.fillStyle = "rgba(255,255,255,0.45)";
   ctx.letterSpacing = "2px";
-  ctx.fillText("No. DE CUENTA", 54, 262);
+  ctx.fillText("No. DE CUENTA", 54, 278);
   ctx.letterSpacing = "0px";
 
-  ctx.font = `bold 38px "Courier New", monospace`;
+  ctx.font = `bold 36px "Courier New", monospace`;
   ctx.fillStyle = "#FFFFFF";
-  ctx.letterSpacing = "4px";
-  ctx.fillText(formatAccountNumber(cuenta.numero), 54, 308);
+  ctx.letterSpacing = "3px";
+  ctx.fillText(formatAccountNumber(cuenta.numero), 54, 322);
   ctx.letterSpacing = "0px";
 
-  // RNC debajo del número de cuenta
-  if (rnc) {
-    ctx.font = "12px Arial, sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.40)";
-    ctx.letterSpacing = "1.5px";
-    ctx.fillText(`RNC: ${rnc}`, 54, 338);
-    ctx.letterSpacing = "0px";
-  }
-
-  // ── Separador inferior ───────────────────────────────────────────────────
+  // ── Separador inferior ────────────────────────────────────────────────────
   ctx.strokeStyle = "rgba(255,255,255,0.07)";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -189,27 +172,27 @@ function drawCard(cuenta: CuentaCard, rnc?: string): void {
   ctx.lineTo(W - 40, 375);
   ctx.stroke();
 
-  // ── Titular ──────────────────────────────────────────────────────────────
+  // ── Titular ───────────────────────────────────────────────────────────────
   ctx.font = "11px Arial, sans-serif";
   ctx.fillStyle = "rgba(255,255,255,0.45)";
   ctx.letterSpacing = "2px";
-  ctx.fillText("TITULAR", 54, 412);
+  ctx.fillText("TITULAR", 54, 410);
   ctx.letterSpacing = "0px";
 
   ctx.font = `bold 22px Arial, sans-serif`;
   ctx.fillStyle = "#FFFFFF";
   ctx.fillText(cuenta.nombre.toUpperCase(), 54, 442);
 
-  // ── Tipo de cuenta ───────────────────────────────────────────────────────
+  // ── Tipo de cuenta ────────────────────────────────────────────────────────
   ctx.font = "11px Arial, sans-serif";
   ctx.fillStyle = "rgba(255,255,255,0.45)";
   ctx.letterSpacing = "2px";
-  ctx.fillText("TIPO", 520, 412);
+  ctx.fillText("TIPO DE CUENTA", 500, 410);
   ctx.letterSpacing = "0px";
 
   ctx.font = `bold 22px Arial, sans-serif`;
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(cuenta.tipo, 520, 442);
+  ctx.fillText(cuenta.tipo, 500, 442);
 
   // ── Borde sutil ──────────────────────────────────────────────────────────
   ctx.save();
