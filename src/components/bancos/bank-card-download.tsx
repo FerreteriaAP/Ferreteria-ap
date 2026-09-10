@@ -145,21 +145,6 @@ function drawCard(cuenta: CuentaCard, rnc?: string): void {
   ctx.fillStyle = "#F47717";
   ctx.fillText("AP", NAME_X + ferrW, NAME_Y);
 
-  // Subtítulo empresa
-  ctx.font = "12px Arial, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.40)";
-  ctx.letterSpacing = "2.5px";
-  ctx.fillText("HARDWARE & SUPPLIES", NAME_X + 1, NAME_Y + 22);
-  ctx.letterSpacing = "0px";
-
-  // RNC (si existe)
-  if (rnc) {
-    ctx.font = "11px Arial, sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.40)";
-    ctx.letterSpacing = "1px";
-    ctx.fillText(`RNC: ${rnc}`, NAME_X + 1, NAME_Y + 42);
-    ctx.letterSpacing = "0px";
-  }
 
   // ── Separador superior ───────────────────────────────────────────────────
   ctx.strokeStyle = "rgba(255,255,255,0.07)";
@@ -186,6 +171,15 @@ function drawCard(cuenta: CuentaCard, rnc?: string): void {
   ctx.letterSpacing = "4px";
   ctx.fillText(formatAccountNumber(cuenta.numero), 54, 308);
   ctx.letterSpacing = "0px";
+
+  // RNC debajo del número de cuenta
+  if (rnc) {
+    ctx.font = "12px Arial, sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.40)";
+    ctx.letterSpacing = "1.5px";
+    ctx.fillText(`RNC: ${rnc}`, 54, 338);
+    ctx.letterSpacing = "0px";
+  }
 
   // ── Separador inferior ───────────────────────────────────────────────────
   ctx.strokeStyle = "rgba(255,255,255,0.07)";
