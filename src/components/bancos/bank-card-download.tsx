@@ -31,25 +31,17 @@ function roundedRect(
   ctx.closePath();
 }
 
-function formatAccountNumber(numero: string): string {
-  const digits = numero.replace(/\D/g, "");
-  if (digits.length >= 8) {
-    return digits.replace(/(.{4})/g, "$1 ").trim();
-  }
-  return numero;
-}
-
-// Dibuja el octágono con "AP" — idéntico al logo del sistema
 function drawOctagonLogo(
   ctx: CanvasRenderingContext2D,
-  cx: number, cy: number, r: number
+  cx: number, cy: number, r: number,
+  bgColor: string
 ) {
   const pts = 8;
   const angles = Array.from({ length: pts }, (_, i) =>
     ((i * 360) / pts - 22.5) * (Math.PI / 180)
   );
 
-  // Octágono exterior (blanco)
+  // Fondo del octágono = mismo color que la tarjeta (se funde)
   ctx.beginPath();
   for (let i = 0; i < pts; i++) {
     const x = cx + r * Math.cos(angles[i]);
@@ -57,13 +49,13 @@ function drawOctagonLogo(
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = "#FFFFFF";
+  ctx.fillStyle = bgColor;
   ctx.fill();
-  ctx.strokeStyle = "#111827";
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = "rgba(255,255,255,0.75)";
+  ctx.lineWidth = 1.8;
   ctx.stroke();
 
-  // Anillo interior
+  // Anillo interior sutil
   const r2 = r * 0.82;
   ctx.beginPath();
   for (let i = 0; i < pts; i++) {
@@ -72,132 +64,170 @@ function drawOctagonLogo(
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.strokeStyle = "#111827";
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(255,255,255,0.22)";
+  ctx.lineWidth = 1;
   ctx.stroke();
 
-  // "AP" centrado en naranja
-  ctx.font = `bold ${Math.round(r * 0.88)}px "Arial Black", Arial, sans-serif`;
-  ctx.fillStyle = "#EC6E00";
+  // "AP" naranja centrado
+  ctx.font = `bold ${Math.round(r * 0.85)}px Arial, sans-serif`;
+  ctx.fillStyle = "#F47717";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("AP", cx, cy + 2);
-
-  // Reset
+  ctx.fillText("AP", cx, cy + 1.5);
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
 }
 
-// ── Dibuja y descarga la tarjeta ──────────────────────────────────────────────
+// ── Separador ─────────────────────────────────────────────────────────────────
+
+function drawSep(ctx: CanvasRenderingContext2D, y: number, pad: number, w: number) {
+  ctx.save();
+  ctx.strokeStyle = "rgba(255,255,255,0.38)";
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(pad, y);
+  ctx.lineTo(w - pad, y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ── Dibujar y descargar ───────────────────────────────────────────────────────
 
 function drawCard(cuenta: CuentaCard, rnc?: string): void {
-  const W = 856, H = 540, R = 28;
+  const PAD    = 36;
+  const W      = 640;
+  const R      = 16;
+  const BG     = "#222222";
+  const ACCENT = "#F47717";
+  const FG     = "#F0F0F0";
+  const LABEL  = "rgba(255,255,255,0.65)";
+
+  const LOGO_R = 26;
+
+  // ── Layout Y ─────────────────────────────────────────────────────────────
+  const HEADER_Y     = PAD + 22;
+  const SEP1_Y       = HEADER_Y + 20;
+  const LOGO_CY      = SEP1_Y + 22 + LOGO_R;
+  const SEP2_Y       = LOGO_CY + LOGO_R + 24;
+  const RNC_Y        = SEP2_Y + 26;
+  const SEP3_Y       = RNC_Y + 22;
+  const BANCO_Y      = SEP3_Y + 38;
+  const CUENTA_LBL_Y = BANCO_Y + 38;
+  const CUENTA_NUM_Y = CUENTA_LBL_Y + 22;
+  const SEP4_Y       = CUENTA_NUM_Y + 26;
+  const TIT_LBL_Y    = SEP4_Y + 28;
+  const TIT_VAL_Y    = TIT_LBL_Y + 20;
+  const H            = TIT_VAL_Y + PAD + 8;
 
   const canvas = document.createElement("canvas");
-  canvas.width = W;
+  canvas.width  = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d")!;
 
-  // ── Fondo: degradado oscuro azul-pizarra ──────────────────────────────────
-  const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, "#0F1629");
-  bg.addColorStop(1, "#1A2340");
-  ctx.fillStyle = bg;
+  // ── Fondo ─────────────────────────────────────────────────────────────────
+  ctx.fillStyle = BG;
   roundedRect(ctx, 0, 0, W, H, R);
   ctx.fill();
 
-  // Textura sutil (grid de puntos muy leve)
-  ctx.save();
-  ctx.globalAlpha = 0.025;
-  ctx.fillStyle = "#FFFFFF";
-  for (let x = 20; x < W; x += 30) {
-    for (let y = 20; y < H; y += 30) {
-      ctx.beginPath();
-      ctx.arc(x, y, 1, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  ctx.restore();
-
-  // Acento izquierdo naranja (delgado)
+  // Stripe naranja izquierda
   const stripe = ctx.createLinearGradient(0, 0, 0, H);
-  stripe.addColorStop(0, "#F47717");
-  stripe.addColorStop(0.6, "#F47717");
-  stripe.addColorStop(1, "rgba(244,119,23,0)");
+  stripe.addColorStop(0,   ACCENT);
+  stripe.addColorStop(0.6, ACCENT);
+  stripe.addColorStop(1,   "rgba(244,119,23,0)");
   ctx.fillStyle = stripe;
-  roundedRect(ctx, 0, 0, 5, H, R);
+  roundedRect(ctx, 0, 0, 4, H, R);
   ctx.fill();
 
-  // ── Logo (solo ícono, top-left) ──────────────────────────────────────────
-  drawOctagonLogo(ctx, 70, 72, 48);
+  // ── DATOS BANCARIOS ───────────────────────────────────────────────────────
+  ctx.font = "bold 24px Arial, sans-serif";
+  ctx.fillStyle = ACCENT;
+  ctx.textAlign = "center";
+  ctx.letterSpacing = "3px";
+  ctx.fillText("DATOS BANCARIOS", W / 2, HEADER_Y);
+  ctx.letterSpacing = "0px";
+  ctx.textAlign = "left";
 
-  // ── RNC (debajo del logo) ─────────────────────────────────────────────────
+  drawSep(ctx, SEP1_Y, PAD, W);
+
+  // ── Logo + FERRETERÍA AP (izquierda) ──────────────────────────────────────
+  const LOGO_CX = PAD + LOGO_R;
+  drawOctagonLogo(ctx, LOGO_CX, LOGO_CY, LOGO_R, BG);
+
+  const TX = LOGO_CX + LOGO_R + 13;
+  const TY = LOGO_CY + 7;
+  ctx.font = "bold 22px Arial, sans-serif";
+
+  ctx.fillStyle = ACCENT;
+  ctx.fillText("F", TX, TY);
+  const wF = ctx.measureText("F").width;
+
+  ctx.fillStyle = FG;
+  ctx.fillText("ERRETERÍA ", TX + wF, TY);
+  const wR = ctx.measureText("ERRETERÍA ").width;
+
+  ctx.fillStyle = ACCENT;
+  ctx.fillText("AP", TX + wF + wR, TY);
+
+  drawSep(ctx, SEP2_Y, PAD, W);
+
+  // ── RNC (sección propia entre dos separadores) ────────────────────────────
   if (rnc) {
-    ctx.font = "13px Arial, sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    ctx.fillText(`RNC ${rnc}`, 54, 148);
+    ctx.font = "bold 11px Arial, sans-serif";
+    ctx.fillStyle = LABEL;
+    ctx.letterSpacing = "1.5px";
+    ctx.fillText("RNC", PAD, RNC_Y);
+    ctx.letterSpacing = "0px";
+
+    ctx.font = "12px Arial, sans-serif";
+    ctx.fillStyle = FG;
+    ctx.fillText(rnc, PAD + 38, RNC_Y);
   }
 
-  // ── Separador ────────────────────────────────────────────────────────────
-  ctx.strokeStyle = "rgba(255,255,255,0.07)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(40, 170);
-  ctx.lineTo(W - 40, 170);
-  ctx.stroke();
+  drawSep(ctx, SEP3_Y, PAD, W);
 
   // ── Banco ─────────────────────────────────────────────────────────────────
-  ctx.font = `bold 40px Arial, sans-serif`;
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(cuenta.banco.toUpperCase(), 54, 238);
+  ctx.font = "bold 14px Arial, sans-serif";
+  ctx.fillStyle = FG;
+  ctx.fillText(cuenta.banco.toUpperCase(), PAD, BANCO_Y);
 
   // ── No. de Cuenta ─────────────────────────────────────────────────────────
-  ctx.font = "11px Arial, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.45)";
-  ctx.letterSpacing = "2px";
-  ctx.fillText("No. DE CUENTA", 54, 278);
+  ctx.font = "bold 11px Arial, sans-serif";
+  ctx.fillStyle = LABEL;
+  ctx.letterSpacing = "1.5px";
+  ctx.fillText("No. DE CUENTA", PAD, CUENTA_LBL_Y);
   ctx.letterSpacing = "0px";
 
-  ctx.font = `bold 36px "Courier New", monospace`;
-  ctx.fillStyle = "#FFFFFF";
-  ctx.letterSpacing = "3px";
-  ctx.fillText(formatAccountNumber(cuenta.numero), 54, 322);
+  ctx.font = `bold 16px "Courier New", monospace`;
+  ctx.fillStyle = FG;
+  ctx.letterSpacing = "1px";
+  ctx.fillText(cuenta.numero.replace(/\D/g, ""), PAD, CUENTA_NUM_Y);
   ctx.letterSpacing = "0px";
 
-  // ── Separador inferior ────────────────────────────────────────────────────
-  ctx.strokeStyle = "rgba(255,255,255,0.07)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(40, 375);
-  ctx.lineTo(W - 40, 375);
-  ctx.stroke();
+  drawSep(ctx, SEP4_Y, PAD, W);
 
-  // ── Titular ───────────────────────────────────────────────────────────────
-  ctx.font = "11px Arial, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.45)";
-  ctx.letterSpacing = "2px";
-  ctx.fillText("TITULAR", 54, 410);
+  // ── Titular / Tipo ────────────────────────────────────────────────────────
+  const COL2 = W / 2 + 10;
+
+  ctx.font = "bold 11px Arial, sans-serif";
+  ctx.fillStyle = LABEL;
+  ctx.letterSpacing = "1.5px";
+  ctx.fillText("TITULAR", PAD, TIT_LBL_Y);
+  ctx.fillText("TIPO DE CUENTA", COL2, TIT_LBL_Y);
   ctx.letterSpacing = "0px";
 
-  ctx.font = `bold 22px Arial, sans-serif`;
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(cuenta.nombre.toUpperCase(), 54, 442);
-
-  // ── Tipo de cuenta ────────────────────────────────────────────────────────
-  ctx.font = "11px Arial, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.45)";
-  ctx.letterSpacing = "2px";
-  ctx.fillText("TIPO DE CUENTA", 500, 410);
-  ctx.letterSpacing = "0px";
-
-  ctx.font = `bold 22px Arial, sans-serif`;
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(cuenta.tipo, 500, 442);
+  ctx.font = "12px Arial, sans-serif";
+  ctx.fillStyle = FG;
+  ctx.fillText(cuenta.nombre.toUpperCase(), PAD, TIT_VAL_Y);
+  ctx.fillText(
+    cuenta.tipo.charAt(0).toUpperCase() + cuenta.tipo.slice(1).toLowerCase(),
+    COL2,
+    TIT_VAL_Y
+  );
 
   // ── Borde sutil ──────────────────────────────────────────────────────────
   ctx.save();
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(255,255,255,0.10)";
+  ctx.lineWidth = 1;
   roundedRect(ctx, 0, 0, W, H, R);
   ctx.stroke();
   ctx.restore();
