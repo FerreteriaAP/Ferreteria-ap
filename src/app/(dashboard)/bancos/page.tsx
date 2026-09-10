@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getCuentas, getTransacciones } from "@/actions/bancos";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BankCardDownload } from "@/components/bancos/bank-card-download";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +42,7 @@ export default async function BancosPage({ searchParams }: PageProps) {
  return (
  <div className="space-y-5"> <div> <h1 className="text-2xl font-bold">Bancos</h1> <p className="text-sm text-muted-foreground mt-0.5">Saldo total: {fmt(totalSaldo)}</p> </div> {/* Cuentas */}
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"> {cuentas.map((c) => (
- <Card key={c.id}> <CardContent className="pt-4 pb-3"> <div className="flex justify-between items-start"> <div> <p className="font-semibold">{c.banco}</p> <p className="text-xs text-muted-foreground">{c.nombre} — {c.tipo}</p> </div> <div className="text-right"> <p className="text-xl font-bold">{fmt(c.saldo)}</p> <p className="text-xs text-muted-foreground">cuenta {c.numero}</p> </div> </div> </CardContent> </Card> ))}
+ <Card key={c.id}> <CardContent className="pt-4 pb-3"> <div className="flex justify-between items-start"> <div> <p className="font-semibold">{c.banco}</p> <p className="text-xs text-muted-foreground">{c.nombre} — {c.tipo}</p> </div> <div className="text-right"> <p className="text-xl font-bold">{fmt(c.saldo)}</p> <p className="text-xs text-muted-foreground mb-2">cuenta {c.numero}</p> <BankCardDownload cuenta={c} /> </div> </div> </CardContent> </Card> ))}
  </div> <div className="grid grid-cols-1 lg:grid-cols-3 gap-6"> {/* Registrar movimiento */}
  <Card className="lg:col-span-1"> <CardHeader className="pb-2"> <CardTitle className="text-base">Registrar movimiento</CardTitle> </CardHeader> <CardContent> <TransaccionForm cuentas={cuentas} /> </CardContent> </Card> {/* Historial */}
  <div className="lg:col-span-2 space-y-4"> <Card> <CardHeader className="pb-3 pt-4 px-4"> <form method="GET" className="flex flex-col sm:flex-row gap-2"> <select name="cuentaId" defaultValue={cuentaId}
