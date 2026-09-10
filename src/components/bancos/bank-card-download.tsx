@@ -9,6 +9,7 @@ interface CuentaCard {
 
 interface Props {
   cuenta: CuentaCard;
+  rnc?: string;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -89,7 +90,7 @@ function drawOctagonLogo(
 
 // ── Dibuja y descarga la tarjeta ──────────────────────────────────────────────
 
-function drawCard(cuenta: CuentaCard): void {
+function drawCard(cuenta: CuentaCard, rnc?: string): void {
   const W = 856, H = 540, R = 28;
 
   const canvas = document.createElement("canvas");
@@ -150,6 +151,15 @@ function drawCard(cuenta: CuentaCard): void {
   ctx.letterSpacing = "2.5px";
   ctx.fillText("HARDWARE & SUPPLIES", NAME_X + 1, NAME_Y + 22);
   ctx.letterSpacing = "0px";
+
+  // RNC (si existe)
+  if (rnc) {
+    ctx.font = "11px Arial, sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.40)";
+    ctx.letterSpacing = "1px";
+    ctx.fillText(`RNC: ${rnc}`, NAME_X + 1, NAME_Y + 42);
+    ctx.letterSpacing = "0px";
+  }
 
   // ── Separador superior ───────────────────────────────────────────────────
   ctx.strokeStyle = "rgba(255,255,255,0.07)";
@@ -229,10 +239,10 @@ function drawCard(cuenta: CuentaCard): void {
 
 // ── Botón ─────────────────────────────────────────────────────────────────────
 
-export function BankCardDownload({ cuenta }: Props) {
+export function BankCardDownload({ cuenta, rnc }: Props) {
   return (
     <button
-      onClick={() => drawCard(cuenta)}
+      onClick={() => drawCard(cuenta, rnc)}
       title="Descargar tarjeta de cuenta como PNG"
       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all hover:brightness-110 active:scale-95"
       style={{

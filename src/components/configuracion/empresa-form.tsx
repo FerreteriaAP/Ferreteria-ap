@@ -301,8 +301,10 @@ export function EmpresaForm({ datos }: Props) {
 
 export function CuentasBancariasPanel({
   cuentasIniciales,
+  rnc,
 }: {
   cuentasIniciales: CuentaBancaria[];
+  rnc?: string;
 }) {
   const [cuentas, setCuentas] = useState<CuentaBancaria[]>(cuentasIniciales);
   const [showCuentaForm, setShowCuentaForm] = useState(false);
@@ -378,7 +380,7 @@ export function CuentasBancariasPanel({
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <BankCardDownload cuenta={c} />
+                <BankCardDownload cuenta={c} rnc={rnc} />
                 <button
                   type="button"
                   onClick={() => setEditandoCuenta(c)}

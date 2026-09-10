@@ -69,6 +69,7 @@ export default async function ConfiguracionPage() {
         <div className="border-t mt-6 pt-6">
           <CuentasBancariasPanel
             cuentasIniciales={cuentasBancarias.map(c => ({ ...c, saldo: Number(c.saldo) }))}
+            rnc={datosEmpresa.EMPRESA_RNC}
           />
         </div>
       </div>
