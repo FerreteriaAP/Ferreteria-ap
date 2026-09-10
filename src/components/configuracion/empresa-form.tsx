@@ -7,6 +7,7 @@ import {
   toggleCuentaBancaria,
   type DatosEmpresa,
 } from "@/actions/empresa";
+import { BankCardDownload } from "@/components/bancos/bank-card-download";
 
 interface CuentaBancaria {
   id: string;
@@ -377,6 +378,7 @@ export function CuentasBancariasPanel({
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                <BankCardDownload cuenta={c} />
                 <button
                   type="button"
                   onClick={() => setEditandoCuenta(c)}
