@@ -1035,16 +1035,13 @@ export async function getResumenPagos(opts: { año: number; mes?: number }) {
 
 // GASTOS — RESUMEN POR CATEGORÍA 
 
-export async function getResumenGastos(opts: { año: number; mes?: number; tipo?: "FIJO" | "VARIABLE" }) {
- const { año, mes, tipo } = opts;
+export async function getResumenGastos(opts: { año: number; mes?: number }) {
+ const { año, mes } = opts;
  const inicio = mes ? inicioMes(año, mes) : new Date(año, 0, 1);
  const fin = mes ? finMes(año, mes) : new Date(año, 11, 31, 23, 59, 59);
 
  const gastos = await prisma.gasto.findMany({
- where: {
-   fecha: { gte: inicio, lte: fin },
-   ...(tipo ? { categoria: { tipo } } : {}),
- },
+ where: { fecha: { gte: inicio, lte: fin } },
  include: { categoria: true },
  orderBy: { fecha: "desc" },
  });
@@ -1068,13 +1065,6 @@ export async function getResumenGastos(opts: { año: number; mes?: number; tipo?
  type MRow = { mes: number; total: string };
  const mensual = mes
  ? []
- : tipo
- ? await prisma.$queryRaw<MRow[]>` SELECT EXTRACT(MONTH FROM g.fecha)::int AS mes, SUM(g.monto)::text AS total
-   FROM gastos g
-   JOIN categorias_gasto cg ON cg.id = g."categoriaId"
-   WHERE EXTRACT(YEAR FROM g.fecha) = ${año}
-     AND cg.tipo = ${tipo}::"TipoGasto"
-   GROUP BY mes ORDER BY mes `
  : await prisma.$queryRaw<MRow[]>` SELECT EXTRACT(MONTH FROM fecha)::int AS mes, SUM(monto)::text AS total
  FROM gastos
  WHERE EXTRACT(YEAR FROM fecha) = ${año}

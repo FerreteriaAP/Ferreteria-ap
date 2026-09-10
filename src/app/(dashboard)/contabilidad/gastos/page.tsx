@@ -3,7 +3,7 @@ import { getResumenGastos } from "@/actions/contabilidad";
 import { cn } from "@/lib/utils";
 
 interface PageProps {
-  searchParams: Promise<{ año?: string; mes?: string; tipo?: string }>;
+  searchParams: Promise<{ año?: string; mes?: string }>;
 }
 
 const MESES = ["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
@@ -24,17 +24,13 @@ export default async function GastosPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const año = Number(params.año ?? now.getFullYear());
   const mes = params.mes ? Number(params.mes) : undefined;
-  const tipoRaw = params.tipo;
-  const tipo = tipoRaw === "FIJO" || tipoRaw === "VARIABLE" ? tipoRaw : undefined;
 
-  const data = await getResumenGastos({ año, mes, tipo });
+  const data = await getResumenGastos({ año, mes });
 
   const añosDisp = Array.from({ length: now.getFullYear() - 2022 }, (_, i) => 2023 + i);
   const maxMensual = Math.max(...data.mensual.map((m) => m.total), 1);
 
-  const mesStr = mes ?? "";
   const etiqueta = mes ? `${MESES_COMPLETOS[mes]} ${año}` : `Año ${año}`;
-  const tipoLabel = tipo === "FIJO" ? " · Gastos fijos" : tipo === "VARIABLE" ? " · Gastos variables" : "";
 
   return (
     <div className="space-y-5">
@@ -54,47 +50,24 @@ export default async function GastosPage({ searchParams }: PageProps) {
             ← Contabilidad
           </Link>
           <h1 className="text-2xl font-bold mt-1">Reporte de Gastos</h1>
-          <p className="text-sm text-muted-foreground">{etiqueta}{tipoLabel}</p>
+          <p className="text-sm text-muted-foreground">{etiqueta}</p>
         </div>
-        <div className="flex flex-col gap-2 items-end">
-          {/* Botones tipo */}
-          <div className="flex gap-1.5">
-            {(["", "FIJO", "VARIABLE"] as const).map((t) => {
-              const label = t === "" ? "Ver todos" : t === "FIJO" ? "Fijos" : "Variables";
-              const active = (tipo ?? "") === t;
-              const href = `?año=${año}&mes=${mesStr}${t ? `&tipo=${t}` : ""}`;
-              return (
-                <a key={t} href={href}
-                  className="h-7 px-3 rounded-full text-xs font-semibold transition-all"
-                  style={active
-                    ? { backgroundColor: "#F47717", color: "#fff" }
-                    : { backgroundColor: "color-mix(in oklch, var(--accent-hex) 12%, transparent)", color: "var(--muted-foreground)", border: "1px solid color-mix(in oklch, var(--accent-hex) 20%, transparent)" }
-                  }
-                >
-                  {label}
-                </a>
-              );
-            })}
-          </div>
-          {/* Filtro período */}
-          <form method="GET" className="flex gap-2 flex-wrap">
-            {tipo && <input type="hidden" name="tipo" value={tipo} />}
-            <select name="año" defaultValue={año}
-              className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
-              {añosDisp.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select>
-            <select name="mes" defaultValue={mes ?? ""}
-              className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
-              <option value="">Año completo</option>
-              {MESES_COMPLETOS.slice(1).map((m, i) => (
-                <option key={i + 1} value={i + 1}>{m}</option>
-              ))}
-            </select>
-            <button type="submit" className="h-8 px-3 rounded-md border bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90">
-              Filtrar
-            </button>
-          </form>
-        </div>
+        <form method="GET" className="flex gap-2 flex-wrap">
+          <select name="año" defaultValue={año}
+            className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
+            {añosDisp.map((a) => <option key={a} value={a}>{a}</option>)}
+          </select>
+          <select name="mes" defaultValue={mes ?? ""}
+            className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
+            <option value="">Año completo</option>
+            {MESES_COMPLETOS.slice(1).map((m, i) => (
+              <option key={i + 1} value={i + 1}>{m}</option>
+            ))}
+          </select>
+          <button type="submit" className="h-8 px-3 rounded-md border bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90">
+            Filtrar
+          </button>
+        </form>
       </div>
 
       {/* KPIs */}
