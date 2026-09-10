@@ -368,7 +368,6 @@ export async function getCxPPorSuplidor(opts: {
 //
 export async function getResumenMensualPL(año: number) {
  type VRow = { mes: number; ventas: string; cogs: string; num: string };
- type GRow = { mes: number; gastos: string };
  type NRow = { mes: number; nomina: string };
 
  // Fecha DR actual (UTC-4)
@@ -377,7 +376,11 @@ export async function getResumenMensualPL(año: number) {
  const añoActual = drNow.getUTCFullYear();
  const diaActual = drNow.getUTCDate();
 
- const [ventaRows, gastoRows, gastosFijos] = await Promise.all([
+ // Rango del año en hora local del servidor (UTC-4, RD) — consistente con inicioMes/finMes
+ const yearStart = inicioMes(año, 1);
+ const yearEnd   = finMes(año, 12);
+
+ const [ventaRows, rawGastosAño, gastosFijos] = await Promise.all([
  prisma.$queryRaw<VRow[]>` SELECT
  EXTRACT(MONTH FROM v."createdAt")::int AS mes,
  SUM(dv.subtotal + dv.itbis)::text AS ventas,
@@ -404,15 +407,12 @@ export async function getResumenMensualPL(año: number) {
  GROUP BY mes
  ORDER BY mes
  `,
- // Gastos operativos registrados en el módulo de gastos (NO de caja)
- prisma.$queryRaw<GRow[]>` SELECT
- EXTRACT(MONTH FROM fecha)::int AS mes,
- SUM(monto)::text AS gastos
- FROM gastos
- WHERE EXTRACT(YEAR FROM fecha) = ${año}
- GROUP BY mes
- ORDER BY mes
- `,
+ // Gastos operativos: usar Prisma con fecha local (igual que getResumenGastos)
+ // Evita desfase UTC vs hora RD al usar EXTRACT(MONTH) directo en SQL
+ prisma.gasto.findMany({
+   where: { fecha: { gte: yearStart, lte: yearEnd } },
+   select: { fecha: true, monto: true },
+ }),
  // Gastos fijos activos
  prisma.$queryRaw<{ total: string }[]>`
  SELECT SUM(monto)::text AS total FROM gastos_fijos WHERE activo = true
@@ -437,15 +437,22 @@ export async function getResumenMensualPL(año: number) {
 
  const totalGastosFijos = Number(gastosFijos[0]?.total ?? 0);
 
+ // Agrupar gastos por mes usando hora local (getMonth() usa tz del proceso = UTC-4 en producción RD)
+ // Esto es consistente con inicioMes/finMes y con getResumenGastos
+ const gastosPorMes = new Map<number, number>();
+ for (const g of rawGastosAño) {
+   const mes = g.fecha.getMonth() + 1; // getMonth() devuelve 0-11, añadir 1
+   gastosPorMes.set(mes, (gastosPorMes.get(mes) ?? 0) + Number(g.monto));
+ }
+
  return Array.from({ length: 12 }, (_, i) => {
  const m = i + 1;
  const vr = ventaRows.find((r) => r.mes === m);
- const gr = gastoRows.find((r) => r.mes === m);
  const nr = nominaRows.find((r) => r.mes === m);
 
  const ventas = Number(vr?.ventas ?? 0);
  const cogs = Number(vr?.cogs ?? 0);
- const gastosModulo = Number(gr?.gastos ?? 0);
+ const gastosModulo = gastosPorMes.get(m) ?? 0;
  const num = Number(vr?.num ?? 0);
 
  // Agosto 2026: excepción — solo ventas, sin gastos (2 días de arranque)
