@@ -122,7 +122,7 @@ export default async function ConfiguracionPage() {
  <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}>
    <div className="px-6 py-4 border-b flex items-center gap-3" style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 4%, var(--card))" }}>
      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "color-mix(in oklch, var(--accent-hex) 12%, transparent)" }}>
-       <span style={{ color: "var(--accent-hex)", fontSize: 16 }}>📋</span>
+       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-hex)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
      </div>
      <div className="flex-1">
        <h2 className="font-semibold text-sm" style={{ color: "var(--foreground)" }}>Gastos Fijos Mensuales</h2>
