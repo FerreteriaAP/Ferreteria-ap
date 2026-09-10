@@ -23,7 +23,10 @@ export default async function GastosPage({ searchParams }: PageProps) {
   const now = new Date();
   const params = await searchParams;
   const año = Number(params.año ?? now.getFullYear());
-  const mes = params.mes ? Number(params.mes) : undefined;
+  // Defaults to current month when no filter is set; "" means "año completo"
+  const mes = (params.mes !== undefined && params.mes !== "")
+    ? Number(params.mes)
+    : (params.mes === "" ? undefined : now.getMonth() + 1);
 
   const data = await getResumenGastos({ año, mes });
 
@@ -57,7 +60,7 @@ export default async function GastosPage({ searchParams }: PageProps) {
             className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
             {añosDisp.map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
-          <select name="mes" defaultValue={mes ?? ""}
+          <select name="mes" defaultValue={mes ?? now.getMonth() + 1}
             className="h-8 rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
             <option value="">Año completo</option>
             {MESES_COMPLETOS.slice(1).map((m, i) => (
