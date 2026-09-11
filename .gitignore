@@ -47,3 +47,5 @@ next-env.d.ts
 
 # Archivos generados por Prisma
 /src/generated/
+scripts/import-saldo-anterior.ts
+scripts/buscar-clientes.ts

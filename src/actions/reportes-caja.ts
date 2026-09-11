@@ -132,7 +132,7 @@ export async function getReporteMovimientos(desde: Date, hasta: Date) {
  ]);
 
  const empMap = new Map(empleados.map(e => [e.id, `${e.nombre} ${e.apellido}`]));
- const cxcMap = new Map(cxcs.map(c => [c.id, { factura: c.venta.numero, cliente: c.cliente.nombre }]));
+ const cxcMap = new Map(cxcs.map(c => [c.id, { factura: c.venta?.numero ?? c.referencia ?? c.id, cliente: c.cliente.nombre }]));
 
  const filas = movimientos.map(m => ({
  id: m.id,
@@ -349,7 +349,7 @@ async function buildDetalleTurno(turnoId: string) {
   ]);
 
   // NCs aplicadas a las ventas de esas CxCs
-  const ventaIds = cxcs.map(c => c.venta.id);
+  const ventaIds = cxcs.map(c => c.venta?.id).filter((id): id is string => !!id);
   const ncsAplicadasRaw = ventaIds.length
     ? await prisma.notaCredito.findMany({
         where: { ventaId: { in: ventaIds }, estado: "APLICADA" },
@@ -365,11 +365,15 @@ async function buildDetalleTurno(turnoId: string) {
   }
 
   const empMap = new Map(empleados.map(e => [e.id, `${e.nombre} ${e.apellido}`]));
-  const cxcMap = new Map(cxcs.map(c => [c.id, {
-    factura:    c.venta.numero,
-    cliente:    c.cliente.nombre,
-    ncsAplicadas: ncsPorVenta.get(c.venta.id) ?? [],
-  }]));
+  const cxcMap = new Map(cxcs.map(c => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cx = c as any;
+    return [c.id, {
+      factura:      c.venta?.numero ?? cx.referencia ?? c.id,
+      cliente:      c.cliente.nombre,
+      ncsAplicadas: ncsPorVenta.get(c.venta?.id ?? '') ?? [],
+    }];
+  }));
 
   // Pagos por método
   const porMetodo: Record<string, number> = {};
@@ -413,7 +417,7 @@ async function buildDetalleTurno(turnoId: string) {
   // NC emitidas en este turno
   const ncsEmitidas = turno.notasCredito.map(nc => ({
     numero:          nc.numero,
-    facturaOriginal: nc.venta.numero,
+    facturaOriginal: nc.venta?.numero ?? nc.id,
     cliente:         nc.cliente.nombre,
     monto:           Number(nc.monto),
     motivo:          nc.motivo,

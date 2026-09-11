@@ -87,7 +87,7 @@ export default async function CxCContabilidadPage({ searchParams }: PageProps) {
                   <div className="flex items-center gap-2 flex-wrap">
                     {c.cxcInfo ? (
                       <span className="font-mono text-sm font-bold" style={{ color: "var(--accent-hex)" }}>
-                        {c.cxcInfo.venta.numero}
+                        {c.cxcInfo.venta?.numero ?? c.cxcInfo.referencia ?? c.cxcInfo.id}
                       </span>
                     ) : (
                       <span className="text-sm text-muted-foreground">{c.concepto}</span>

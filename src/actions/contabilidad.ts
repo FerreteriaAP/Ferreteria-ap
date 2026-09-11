@@ -158,7 +158,7 @@ export async function getCxCPorCliente(opts: {
  totalVencido: number;
  facturas: Array<{
  id: string;
- ventaId: string;
+ ventaId: string | null;
  numero: string;
  monto: number;
  saldo: number;
@@ -193,13 +193,14 @@ export async function getCxCPorCliente(opts: {
  const diasRestantes = Math.round(diffMs / 86400000);
  grupo.facturas.push({
  id: c.id,
- ventaId: c.ventaId,
- numero: c.venta.numero,
+ ventaId: c.ventaId ?? null,
+ // Para SALDO_ANTERIOR usa referencia; para ventas del sistema usa el número
+ numero: c.venta?.numero ?? c.referencia ?? c.id,
  monto: Number(c.monto),
  saldo,
  fechaVencimiento: c.fechaVencimiento,
- fechaEmision: c.venta.fechaEmision ?? null,
- ncf: c.venta.ncf ?? null,
+ fechaEmision: c.venta?.fechaEmision ?? null,
+ ncf: c.ncf ?? c.venta?.ncf ?? null,
  estado: c.estado,
  diasVencida: dias,
  diasRestantes,
@@ -769,11 +770,11 @@ export async function getEstadoCuenta(clienteId: string, incluirPagadas = false)
 
  return {
  id: c.id,
- ventaId: c.ventaId,
- numero: c.venta.numero,
- ncf: c.venta.ncf ?? null,
- tipoNcf: c.venta.tipoNcf ?? null,
- fechaFactura: c.venta.createdAt,
+ ventaId: c.ventaId ?? null,
+ numero: c.venta?.numero ?? c.referencia ?? c.id,
+ ncf: c.ncf ?? c.venta?.ncf ?? null,
+ tipoNcf: c.venta?.tipoNcf ?? null,
+ fechaFactura: c.venta?.createdAt ?? c.fechaEmision,
  fechaEmision: c.fechaEmision,
  fechaVencimiento: c.fechaVencimiento,
  monto: Number(c.monto),
@@ -1102,7 +1103,7 @@ export async function getResumenGastos(opts: { año: number; mes?: number }) {
 
 export interface PagoMasivoCxCItem {
  cxcId: string;
- ventaId: string;
+ ventaId?: string | null; // null/undefined para SALDO_ANTERIOR
  monto: number; // saldo a pagar
 }
 
@@ -1121,24 +1122,27 @@ export async function pagarMultiplesCxC(
 
  for (const p of pagos) {
  await prisma.$transaction(async (tx) => {
- // Registrar pago en la venta
- await tx.pagoVenta.create({
- data: { ventaId: p.ventaId, monto: p.monto, fecha: fechaDate, metodo, referencia: referencia || null },
- });
+ // Solo para ventas del sistema (no aplica a SALDO_ANTERIOR)
+ if (p.ventaId) {
+   // Registrar pago en la venta
+   await tx.pagoVenta.create({
+   data: { ventaId: p.ventaId, monto: p.monto, fecha: fechaDate, metodo, referencia: referencia || null },
+   });
 
- // Actualizar estadoPago de la venta
- const venta = await tx.venta.findUnique({
- where: { id: p.ventaId },
- select: { total: true, pagosRecibidos: { select: { monto: true } } },
- });
- if (venta) {
- const totalPagado = venta.pagosRecibidos.reduce((s, pv) => s + Number(pv.monto), 0);
- const saldoFinal = Number(venta.total) - totalPagado;
- const estadoPago = saldoFinal <= 0 ? "PAGADO" : totalPagado > 0 ? "PAGADO_PARCIAL" : "PENDIENTE";
- await tx.venta.update({ where: { id: p.ventaId }, data: { estadoPago: estadoPago as never } });
+   // Actualizar estadoPago de la venta
+   const venta = await tx.venta.findUnique({
+   where: { id: p.ventaId },
+   select: { total: true, pagosRecibidos: { select: { monto: true } } },
+   });
+   if (venta) {
+   const totalPagado = venta.pagosRecibidos.reduce((s, pv) => s + Number(pv.monto), 0);
+   const saldoFinal = Number(venta.total) - totalPagado;
+   const estadoPago = saldoFinal <= 0 ? "PAGADO" : totalPagado > 0 ? "PAGADO_PARCIAL" : "PENDIENTE";
+   await tx.venta.update({ where: { id: p.ventaId }, data: { estadoPago: estadoPago as never } });
+   }
  }
 
- // Actualizar CxC
+ // Actualizar CxC (aplica siempre — VENTA y SALDO_ANTERIOR)
  const cxc = await tx.cuentaPorCobrar.findUnique({ where: { id: p.cxcId } });
  if (cxc) {
  const nuevoPagado = Number(cxc.montoPagado) + p.monto;
@@ -1154,7 +1158,7 @@ export async function pagarMultiplesCxC(
  }
  });
 
- revalidatePath(`/ventas/${p.ventaId}`);
+ if (p.ventaId) revalidatePath(`/ventas/${p.ventaId}`);
  }
 
  revalidatePath("/contabilidad/cxc");

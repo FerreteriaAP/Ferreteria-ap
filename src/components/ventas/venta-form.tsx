@@ -32,7 +32,7 @@ type ProductoSugerido = {
 interface DetalleRow {
   productoId: string; nombre: string; codigo: string;
   unidad: string; unidadOriginal: string; unidadFraccion: string | null;
-  cantidad: number; precio: number; precioCompleto: number;
+  cantidad: number; cantidadStr: string; precio: number; precioCompleto: number;
   descuento: number; itbis: number; exentoItbis: boolean; esServicio: boolean;
   stockActual: number; esFraccionable: boolean; factorFraccion: number | null;
   precioFraccion: number | null;
@@ -162,7 +162,7 @@ export function VentaForm({
 
   // Productos
   const [detalles,    setDetalles]    = useState<DetalleRow[]>(
-    initialDetalles.map(d => ({ ...d, esServicio: d.esServicio ?? false }))
+    initialDetalles.map(d => ({ ...d, esServicio: d.esServicio ?? false, cantidadStr: String(d.cantidad) }))
   );
   const [busqueda,    setBusqueda]    = useState("");
   const [buscando,    setBuscando]    = useState(false);
@@ -281,12 +281,12 @@ export function VentaForm({
       pventa = calcPrecioKolmen(Number(prod.costoUltimo), margen, esExento);
     }
     const idx = detalles.findIndex(d => d.productoId === prod.id);
-    if (idx >= 0) { setDetalles(prev => prev.map((d, i) => i === idx ? { ...d, cantidad: d.cantidad + 1 } : d)); return; }
+    if (idx >= 0) { setDetalles(prev => prev.map((d, i) => { if (i !== idx) return d; const nq = d.cantidad + 1; return { ...d, cantidad: nq, cantidadStr: String(nq) }; })); return; }
     const { itbis: itbisInicial } = calcItbisLinea(pventa, 1, 0, esExento);
     setDetalles(prev => [...prev, {
       productoId: prod.id, nombre: prod.nombre, codigo: prod.codigo,
       unidad: prod.unidadMedida, unidadOriginal: prod.unidadMedida,
-      unidadFraccion: prod.unidadFraccion ?? null, cantidad: 1,
+      unidadFraccion: prod.unidadFraccion ?? null, cantidad: 1, cantidadStr: "1",
       precio: pventa, precioCompleto: pventa, descuento: 0,
       itbis: itbisInicial, exentoItbis: esExento, esServicio: prod.esServicio ?? false,
       stockActual: Number(prod.stockActual), esFraccionable: prod.esFraccionable,
@@ -307,7 +307,7 @@ export function VentaForm({
         : d.precioCompleto;
       const nuevaUnidad = nuevoModo ? (d.unidadFraccion ?? d.unidadOriginal) : d.unidadOriginal;
       const { itbis } = calcItbisLinea(nuevoPrecio, 1, 0, d.exentoItbis);
-      return { ...d, modoFraccionar: nuevoModo, precio: nuevoPrecio, unidad: nuevaUnidad, cantidad: 1, itbis };
+      return { ...d, modoFraccionar: nuevoModo, precio: nuevoPrecio, unidad: nuevaUnidad, cantidad: 1, cantidadStr: "1", itbis };
     }));
   };
 
@@ -681,8 +681,15 @@ export function VentaForm({
                         {/* Cantidad */}
                         <TableCell>
                           <input type="text" inputMode="decimal"
-                            value={d.cantidad === 0 ? "" : String(d.cantidad)}
-                            onChange={e => { const v = parseFloat(e.target.value.replace(",", ".")); if (!isNaN(v) && v >= 0) actualizarDetalle(i, "cantidad", v); else if (e.target.value === "") actualizarDetalle(i, "cantidad", 0); }}
+                            value={d.cantidadStr ?? (d.cantidad === 0 ? "" : String(d.cantidad))}
+                            onChange={e => {
+                              const raw = e.target.value.replace(",", ".");
+                              // Actualizar el string siempre (permite escribir "0.5", "1.5", etc.)
+                              actualizarDetalle(i, "cantidadStr", raw);
+                              const v = parseFloat(raw);
+                              if (!isNaN(v) && v >= 0) actualizarDetalle(i, "cantidad", v);
+                              else if (raw === "") actualizarDetalle(i, "cantidad", 0);
+                            }}
                             className="w-24 h-8 rounded-lg border bg-background px-2 text-right text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40" />
                         </TableCell>
 

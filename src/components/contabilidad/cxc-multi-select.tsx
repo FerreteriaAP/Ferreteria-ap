@@ -15,7 +15,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 interface Factura {
  id: string; // cxcId
- ventaId: string;
+ ventaId?: string | null; // null para SALDO_ANTERIOR
  numero: string;
  monto: number;
  saldo: number;
@@ -108,8 +108,8 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  monto: f.saldo,
  }));
  // Capturar el primer cliente (si todas son del mismo grupo)
- const primerCliente = facturas[0] ? getCliente(facturas[0].ventaId) : "—";
- const primerGrupo = grupos.find(g => g.facturas.some(f => f.ventaId === facturas[0]?.ventaId));
+ const primerCliente = facturas[0] ? getCliente(facturas[0].ventaId ?? "") : "—";
+ const primerGrupo = grupos.find(g => g.facturas.some(f => f.ventaId != null && f.ventaId === facturas[0]?.ventaId));
  const clienteRnc = primerGrupo?.cliente.rnc ?? null;
 
  start(async () => {
@@ -180,7 +180,7 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"> <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto"> {/* Header */}
  <div className="flex items-center justify-between px-5 py-4 border-b"> <h2 className="font-bold text-base"> Planilla de pago CxC</h2> <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button> </div> <div className="px-5 py-4 space-y-4"> {/* Lista de facturas a pagar */}
  <div className="border rounded-lg overflow-hidden"> <table className="w-full text-sm"> <thead> <tr className="bg-muted text-muted-foreground text-xs uppercase tracking-wide"> <th className="px-3 py-2 text-left">Factura</th> <th className="px-3 py-2 text-left">Cliente</th> <th className="px-3 py-2 text-right">Monto</th> </tr> </thead> <tbody> {facturas.map((f, i) => (
- <tr key={f.id} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}> <td className="px-3 py-2 font-mono text-xs font-medium" style={{ color: "var(--accent-hex)" }}>{f.numero}</td> <td className="px-3 py-2 text-xs">{getCliente(f.ventaId)}</td> <td className="px-3 py-2 text-right tabular-nums font-medium text-sm">{fmt(f.saldo)}</td> </tr> ))}
+ <tr key={f.id} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}> <td className="px-3 py-2 font-mono text-xs font-medium" style={{ color: "var(--accent-hex)" }}>{f.numero}</td> <td className="px-3 py-2 text-xs">{getCliente(f.ventaId ?? "")}</td> <td className="px-3 py-2 text-right tabular-nums font-medium text-sm">{fmt(f.saldo)}</td> </tr> ))}
  <tr className="bg-muted/40 border-t font-bold"> <td className="px-3 py-2 text-xs" colSpan={2}>Total a pagar</td> <td className="px-3 py-2 text-right tabular-nums text-base" style={{ color: "var(--accent-hex)" }}>{fmt(total)}</td> </tr> </tbody> </table> </div> {/* Forma de pago */}
  <div> <label className="text-xs font-medium text-muted-foreground block mb-1.5">Forma de pago</label> <div className="grid grid-cols-2 gap-2"> {METODOS.map(m => (
  <button

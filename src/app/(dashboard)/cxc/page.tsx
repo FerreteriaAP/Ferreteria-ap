@@ -75,8 +75,11 @@ export default async function CxCPage({ searchParams }: PageProps) {
  <Table> <TableHeader> <TableRow> <TableHead>Factura</TableHead> <TableHead>Cliente</TableHead> <TableHead>Vencimiento</TableHead> <TableHead>Vencida (días)</TableHead> <TableHead className="text-right">Monto</TableHead> <TableHead className="text-right">Pagado</TableHead> <TableHead className="text-right">Saldo</TableHead> <TableHead>Estado</TableHead> </TableRow> </TableHeader> <TableBody> {cxcs.map((c) => {
  const dias = diasVencida(c.fechaVencimiento);
  return (
- <TableRow key={c.id}> <TableCell className="font-mono text-xs"> <Link href={`/ventas/${c.ventaId}`} className="hover:underline font-medium"> {c.venta.numero}
- </Link> </TableCell> <TableCell className="text-sm">{c.cliente.nombre}</TableCell> <TableCell className="text-sm"> {new Date(c.fechaVencimiento).toLocaleDateString("es-DO")}
+ <TableRow key={c.id}> <TableCell className="font-mono text-xs"> {c.ventaId ? (
+ <Link href={`/ventas/${c.ventaId}`} className="hover:underline font-medium">{c.venta?.numero ?? c.referencia ?? "—"}</Link>
+ ) : (
+ <span className="font-medium text-muted-foreground">{c.referencia ?? "—"}</span>
+ )} </TableCell> <TableCell className="text-sm">{c.cliente.nombre}</TableCell> <TableCell className="text-sm"> {new Date(c.fechaVencimiento).toLocaleDateString("es-DO")}
  </TableCell> <TableCell className="text-sm"> {dias > 0 ? (
  <span className={dias > 60 ? "text-destructive font-medium" : dias > 30 ? "text-orange-600" : "text-yellow-600"}> {dias} días
  </span> ) : (

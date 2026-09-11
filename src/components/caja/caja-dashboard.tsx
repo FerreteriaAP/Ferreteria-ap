@@ -678,7 +678,8 @@ interface CxCResultado {
  saldo: number;
  fechaVencimiento: Date | string;
  estado: string;
- venta: { numero: string };
+ venta: { numero: string } | null;
+ referencia?: string | null;
  cliente: { nombre: string; rnc: string | null };
 }
 
@@ -837,8 +838,8 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   if (!lineas.length) { setError("Agrega al menos una factura al cobro"); return; }
   for (const l of lineas) {
    const m = parseFloat(l.monto);
-   if (!m || m <= 0) { setError(`Ingresa un monto válido para ${l.cxc.venta.numero}`); return; }
-   if (m > l.cxc.saldo) { setError(`El monto de ${l.cxc.venta.numero} supera el saldo (${fmtMoney(l.cxc.saldo)})`); return; }
+   if (!m || m <= 0) { setError(`Ingresa un monto válido para ${l.cxc.venta?.numero ?? l.cxc.referencia ?? l.cxc.id}`); return; }
+   if (m > l.cxc.saldo) { setError(`El monto de ${l.cxc.venta?.numero ?? l.cxc.referencia ?? l.cxc.id} supera el saldo (${fmtMoney(l.cxc.saldo)})`); return; }
   }
   if (ncSeleccionada && montoNCNum > 0) {
    if (montoNCNum > ncSeleccionada.montoRestante + 0.01) {
@@ -925,7 +926,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
           className="w-full text-left px-3 py-2.5 hover:bg-accent transition-colors border-b last:border-0">
           <div className="flex items-center justify-between gap-3">
            <div>
-            <p className="text-sm font-bold font-mono" style={{ color: "var(--accent-hex)" }}>{c.venta.numero}</p>
+            <p className="text-sm font-bold font-mono" style={{ color: "var(--accent-hex)" }}>{c.venta?.numero ?? c.referencia ?? c.id}</p>
             <p className="text-xs font-medium">{c.cliente.nombre}</p>
             {c.cliente.rnc && <p className="text-xs text-muted-foreground">{c.cliente.rnc}</p>}
            </div>
@@ -1019,7 +1020,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
        return (
        <div key={l.cxcId} className="px-3 py-2.5 border-b last:border-0 flex items-center gap-3">
         <div className="flex-1 min-w-0">
-         <p className="text-sm font-mono font-bold truncate" style={{ color: "var(--accent-hex)" }}>{l.cxc.venta.numero}</p>
+         <p className="text-sm font-mono font-bold truncate" style={{ color: "var(--accent-hex)" }}>{l.cxc.venta?.numero ?? l.cxc.referencia ?? l.cxc.id}</p>
          <p className="text-xs text-muted-foreground truncate">{l.cxc.cliente.nombre}</p>
          <p className="text-[10px] text-muted-foreground">Saldo: {fmtMoney(l.cxc.saldo)}</p>
          {ncEstaLinea > 0.01 && (

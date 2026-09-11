@@ -942,6 +942,7 @@ export async function getCxC(opts: {
  OR: [
  { cliente: { nombre: { contains: busqueda, mode: "insensitive" } } },
  { venta: { numero: { contains: busqueda, mode: "insensitive" } } },
+ { referencia: { contains: busqueda, mode: "insensitive" } },
  ],
  } : {}),
  };

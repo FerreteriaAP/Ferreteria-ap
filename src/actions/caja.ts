@@ -708,9 +708,9 @@ export async function registrarCobrosMultiplesCxC(input: {
  for (const linea of input.lineas) {
  const cxc = cxcMap.get(linea.cxcId);
  if (!cxc) return { error: `CxC no encontrada: ${linea.cxcId}` };
- if (cxc.estado === "PAGADO") return { error: `Factura ${cxc.venta.numero} ya está pagada` };
+ if (cxc.estado === "PAGADO") return { error: `Factura ${cxc.venta?.numero ?? cxc.referencia ?? cxc.id} ya está pagada` };
  if (linea.monto > Number(cxc.saldo)) {
- return { error: `El monto de ${cxc.venta.numero} supera el saldo pendiente (${Number(cxc.saldo).toFixed(2)})` };
+ return { error: `El monto de ${cxc.venta?.numero ?? cxc.referencia ?? cxc.id} supera el saldo pendiente (${Number(cxc.saldo).toFixed(2)})` };
  }
  }
 
@@ -748,7 +748,7 @@ export async function registrarCobrosMultiplesCxC(input: {
  turnoId: input.turnoId,
  tipo: "ENTRADA",
  subTipo: "COBRO_CXC",
- concepto: `Cobro CxC [NC] – ${cxc.cliente.nombre} / Fact. ${cxc.venta.numero}`,
+ concepto: `Cobro CxC [NC] – ${cxc.cliente.nombre} / Fact. ${cxc.venta?.numero ?? cxc.referencia ?? cxc.id}`,
  monto: montoNcEstaLinea,
  metodo: "NC",
  notas: `Pagado con NC ${ncNumero}`,
@@ -768,19 +768,20 @@ export async function registrarCobrosMultiplesCxC(input: {
  data: { montoPagado: nuevoPagado, saldo: nuevoSaldo, estado: nuevoEstado },
  });
 
- // Registrar en PagoVenta
- await tx.pagoVenta.create({
- data: {
- ventaId: cxc.ventaId,
- monto: montoNcEstaLinea,
- metodo: "NC",
- referencia: `NC ${ncNumero}`,
- notas: null,
- },
- });
-
- if (nuevoEstado === "PAGADO") {
- await tx.venta.update({ where: { id: cxc.ventaId }, data: { estadoPago: "PAGADO" } });
+ // Registrar en PagoVenta (solo si tiene venta del sistema)
+ if (cxc.ventaId) {
+   await tx.pagoVenta.create({
+   data: {
+   ventaId: cxc.ventaId,
+   monto: montoNcEstaLinea,
+   metodo: "NC",
+   referencia: `NC ${ncNumero}`,
+   notas: null,
+   },
+   });
+   if (nuevoEstado === "PAGADO") {
+   await tx.venta.update({ where: { id: cxc.ventaId }, data: { estadoPago: "PAGADO" } });
+   }
  }
  ncRestante -= montoNcEstaLinea;
  }
@@ -818,7 +819,7 @@ export async function registrarCobrosMultiplesCxC(input: {
  turnoId: input.turnoId,
  tipo: "ENTRADA",
  subTipo: "COBRO_CXC",
- concepto: `Cobro CxC [${metodoLabel[input.metodo]}] – ${cxc.cliente.nombre} / Fact. ${cxc.venta.numero}`,
+ concepto: `Cobro CxC [${metodoLabel[input.metodo]}] – ${cxc.cliente.nombre} / Fact. ${cxc.venta?.numero ?? cxc.referencia ?? cxc.id}`,
  monto: montoEfectivo,
  metodo: input.metodo,
  notas: input.notas ?? null,
@@ -861,7 +862,7 @@ export async function registrarCobroEnCaja(input: CoboCxCInput) {
  turnoId: input.turnoId,
  tipo: "ENTRADA",
  subTipo: "COBRO_CXC",
- concepto: `Cobro CxC [${metodoLabel[input.metodo]}] – ${cxc.cliente.nombre} / Fact. ${cxc.venta.numero}`,
+ concepto: `Cobro CxC [${metodoLabel[input.metodo]}] – ${cxc.cliente.nombre} / Fact. ${cxc.venta?.numero ?? cxc.referencia ?? cxc.id}`,
  monto: input.monto,
  metodo: input.metodo,
  notas: input.notas ?? null,
@@ -924,23 +925,23 @@ export async function confirmarCobro(movimientoId: string) {
  },
  });
 
- // Registrar el pago en la venta
- await tx.pagoVenta.create({
- data: {
- ventaId: cxc.ventaId,
- monto: movimiento.monto,
- metodo: "EFECTIVO",
- referencia: `Cobro CxC confirmado por admin`,
- notas: movimiento.notas,
- },
- });
-
- // Actualizar estado de pago de la venta
- if (nuevoEstado === "PAGADO") {
- await tx.venta.update({
- where: { id: cxc.ventaId },
- data: { estadoPago: "PAGADO" },
- });
+ // Registrar el pago en la venta (solo si tiene venta del sistema)
+ if (cxc.ventaId) {
+   await tx.pagoVenta.create({
+   data: {
+   ventaId: cxc.ventaId,
+   monto: movimiento.monto,
+   metodo: "EFECTIVO",
+   referencia: `Cobro CxC confirmado por admin`,
+   notas: movimiento.notas,
+   },
+   });
+   if (nuevoEstado === "PAGADO") {
+   await tx.venta.update({
+   where: { id: cxc.ventaId },
+   data: { estadoPago: "PAGADO" },
+   });
+   }
  }
  });
 
@@ -996,23 +997,23 @@ export async function confirmarCobrosCliente(movimientoIds: string[]) {
  data: { montoPagado: nuevoPagado, saldo: Math.max(0, nuevoSaldo), estado: nuevoEstado },
  });
 
- // Registrar pago en la venta
- await tx.pagoVenta.create({
- data: {
- ventaId: cxc.ventaId,
- monto: mov.monto,
- metodo: mov.metodo ?? "EFECTIVO",
- referencia: "Cobro CxC confirmado (masivo)",
- notas: mov.notas,
- },
- });
-
- // Actualizar estado de pago de la venta si quedó en cero
- if (nuevoEstado === "PAGADO") {
- await tx.venta.update({
- where: { id: cxc.ventaId },
- data: { estadoPago: "PAGADO" },
- });
+ // Registrar pago en la venta (solo si tiene venta del sistema)
+ if (cxc.ventaId) {
+   await tx.pagoVenta.create({
+   data: {
+   ventaId: cxc.ventaId,
+   monto: mov.monto,
+   metodo: mov.metodo ?? "EFECTIVO",
+   referencia: "Cobro CxC confirmado (masivo)",
+   notas: mov.notas,
+   },
+   });
+   if (nuevoEstado === "PAGADO") {
+   await tx.venta.update({
+   where: { id: cxc.ventaId },
+   data: { estadoPago: "PAGADO" },
+   });
+   }
  }
 
  // Actualizar el saldo acumulado en el mapa para el próximo movimiento de la misma CxC
