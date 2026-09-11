@@ -193,7 +193,7 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
@@ -204,8 +204,8 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
         <div className="px-5 py-4 space-y-4">
 
           {/* Tabla de facturas con monto editable */}
-          <div className="border rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="border rounded-lg overflow-x-auto">
+            <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="bg-muted text-muted-foreground text-xs uppercase tracking-wide">
                   <th className="px-3 py-2 text-left">Factura</th>
@@ -263,9 +263,11 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
                   );
                 })}
                 <tr className="bg-muted/40 border-t font-bold">
-                  <td className="px-3 py-2.5 text-xs" colSpan={3}>Total a cobrar</td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-base pr-3" style={{ color: "var(--accent-hex)" }}>
-                    {fmt(total)}
+                  <td className="px-3 py-2.5" colSpan={4}>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-xs">Total a cobrar</span>
+                      <span className="tabular-nums text-base" style={{ color: "var(--accent-hex)" }}>{fmt(total)}</span>
+                    </div>
                   </td>
                 </tr>
               </tbody>
