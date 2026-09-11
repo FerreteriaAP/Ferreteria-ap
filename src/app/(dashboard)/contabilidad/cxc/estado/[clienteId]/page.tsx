@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getEstadoCuenta } from "@/actions/contabilidad";
 import { PdfButton } from "@/components/contabilidad/pdf-button";
+import { CobrarCxcBtn } from "@/components/contabilidad/cobrar-cxc-btn";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Estado de cuenta" };
@@ -186,6 +187,7 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                   <th className="text-center px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Días</th>
                   <th className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Saldo</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Estado</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap"></th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -193,9 +195,13 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                   <tr key={f.id} className={cn("transition-colors", f.vencida ? "hover:bg-destructive/5" : "hover:bg-muted/20")}>
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{fmtFecha(f.fechaFactura)}</td>
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <Link href={`/ventas/${f.ventaId}`} className="font-mono text-xs font-semibold hover:underline" style={{ color: "var(--accent-hex)" }}>
-                        {f.numero}
-                      </Link>
+                      {f.ventaId ? (
+                        <Link href={`/ventas/${f.ventaId}`} className="font-mono text-xs font-semibold hover:underline" style={{ color: "var(--accent-hex)" }}>
+                          {f.numero}
+                        </Link>
+                      ) : (
+                        <span className="font-mono text-xs font-semibold text-muted-foreground">{f.numero}</span>
+                      )}
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
                       {f.ncf
@@ -231,6 +237,17 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                         <span className="inline-flex items-center text-[11px] font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">Vigente</span>
                       )}
                     </td>
+                    <td className="px-3 py-2.5 text-right whitespace-nowrap">
+                      {f.saldo > 0 && f.estado !== "PAGADO" && (
+                        <CobrarCxcBtn
+                          cxcId={f.id}
+                          ventaId={f.ventaId}
+                          numero={f.numero}
+                          saldo={f.saldo}
+                          cliente={cliente.nombre}
+                        />
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -254,6 +271,7 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                       ? <span className="text-destructive font-medium">Vencido: {fmt(totales.vencido)}</span>
                       : <span className="text-green-700 dark:text-green-400 font-medium">Al día ✓</span>}
                   </td>
+                  <td />
                 </tr>
               </tfoot>
             </table>
