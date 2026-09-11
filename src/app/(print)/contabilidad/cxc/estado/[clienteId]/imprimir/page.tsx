@@ -46,7 +46,7 @@ const TD: React.CSSProperties = {
   fontSize: 9.5,
   verticalAlign: "middle",
 };
-const TD_R: React.CSSProperties = { ...TD, textAlign: "right" };
+const TD_R: React.CSSProperties = { ...TD, textAlign: "right", whiteSpace: "nowrap" };
 const TD_C: React.CSSProperties = { ...TD, textAlign: "center" };
 
 const TF: React.CSSProperties = {
@@ -54,6 +54,7 @@ const TF: React.CSSProperties = {
   fontSize: 10,
   borderTop: "2px solid #d1d5db",
   background: "#f3f4f6",
+  whiteSpace: "nowrap",
 };
 const TF_R: React.CSSProperties = { ...TF, textAlign: "right" };
 
@@ -212,14 +213,14 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", fontSize: 9.5, marginBottom: 16 }}>
             <colgroup>
-              <col style={{ width: "10%" }} /> {/* Fecha */}
-              <col style={{ width: "14%" }} /> {/* No. Factura */}
-              <col style={{ width: "14%" }} /> {/* NCF */}
-              <col style={{ width: "13%" }} /> {/* Monto */}
-              <col style={{ width: "13%" }} /> {/* Crédito */}
-              <col style={{ width: "8%" }}  /> {/* Días */}
-              <col style={{ width: "13%" }} /> {/* Saldo */}
-              <col style={{ width: "15%" }} /> {/* Estado */}
+              <col style={{ width: "9%"  }} /> {/* Fecha */}
+              <col style={{ width: "17%" }} /> {/* No. Factura */}
+              <col style={{ width: "13%" }} /> {/* NCF */}
+              <col style={{ width: "15%" }} /> {/* Monto */}
+              <col style={{ width: "12%" }} /> {/* Crédito */}
+              <col style={{ width: "8%"  }} /> {/* Días */}
+              <col style={{ width: "15%" }} /> {/* Saldo */}
+              <col style={{ width: "11%" }} /> {/* Estado */}
             </colgroup>
             <thead>
               <tr>
