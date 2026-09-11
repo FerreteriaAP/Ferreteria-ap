@@ -81,52 +81,67 @@ interface PagoExitoso {
 }
 
 function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
- const [isPending, start] = useTransition();
- const [error, setError] = useState<string | null>(null);
- const [metodo, setMetodo] = useState("EFECTIVO");
- const [referencia, setRef] = useState("");
- const [notas, setNotas] = useState("");
- const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
- const [pagoExitoso, setPagoExitoso] = useState<PagoExitoso | null>(null);
+  const [isPending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [metodo, setMetodo] = useState("EFECTIVO");
+  const [referencia, setRef] = useState("");
+  const [notas, setNotas] = useState("");
+  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
+  const [pagoExitoso, setPagoExitoso] = useState<PagoExitoso | null>(null);
 
- const total = facturas.reduce((s, f) => s + f.saldo, 0);
+  // Monto editable por factura (inicializa con el saldo completo)
+  const [montos, setMontos] = useState<Record<string, string>>(
+    () => Object.fromEntries(facturas.map(f => [f.id, f.saldo.toFixed(2)]))
+  );
 
- // Obtener nombre de cliente para cada factura
- const getCliente = (ventaId: string) => {
- for (const g of grupos) {
- if (g.facturas.some(f => f.ventaId === ventaId)) return g.cliente.nombre;
- }
- return "—";
- };
+  const montoNum = (id: string) => parseFloat((montos[id] ?? "0").replace(",", ".")) || 0;
+  const total = facturas.reduce((s, f) => s + montoNum(f.id), 0);
 
- const handleSubmit = () => {
- if (!metodo) { setError("Selecciona la forma de pago"); return; }
- setError(null);
- const pagos: PagoMasivoCxCItem[] = facturas.map(f => ({
- cxcId: f.id,
- ventaId: f.ventaId,
- monto: f.saldo,
- }));
- // Capturar el primer cliente (si todas son del mismo grupo)
- const primerCliente = facturas[0] ? getCliente(facturas[0].ventaId ?? "") : "—";
- const primerGrupo = grupos.find(g => g.facturas.some(f => f.ventaId != null && f.ventaId === facturas[0]?.ventaId));
- const clienteRnc = primerGrupo?.cliente.rnc ?? null;
+  // Buscar cliente por cxcId (funciona también con SALDO_ANTERIOR donde ventaId es null)
+  const getCliente = (cxcId: string) => {
+    for (const g of grupos) {
+      if (g.facturas.some(f => f.id === cxcId)) return g.cliente.nombre;
+    }
+    return "—";
+  };
+  const getGrupo = (cxcId: string) =>
+    grupos.find(g => g.facturas.some(f => f.id === cxcId));
 
- start(async () => {
- const res = await pagarMultiplesCxC(pagos, metodo, fecha, referencia || undefined, notas || undefined);
- if ("error" in res && res.error) { setError(res.error); return; }
- setPagoExitoso({
-  cliente: primerCliente,
-  rnc: clienteRnc,
-  monto: facturas.reduce((s, f) => s + f.saldo, 0),
-  metodo,
-  fecha,
-  ref: referencia,
-  facturas: facturas.map(f => ({ numero: f.numero, monto: f.saldo })),
-  notas,
- });
- });
- };
+  const handleSubmit = () => {
+    if (!metodo) { setError("Selecciona la forma de pago"); return; }
+    for (const f of facturas) {
+      const m = montoNum(f.id);
+      if (m <= 0) { setError(`Ingresa un monto válido para ${f.numero}`); return; }
+      if (m > f.saldo + 0.01) { setError(`El monto de ${f.numero} supera el saldo (${fmt(f.saldo)})`); return; }
+    }
+    setError(null);
+
+    const pagos: PagoMasivoCxCItem[] = facturas.map(f => ({
+      cxcId: f.id,
+      ventaId: f.ventaId,
+      monto: montoNum(f.id),
+    }));
+
+    const primerCxcId = facturas[0]?.id ?? "";
+    const primerCliente = getCliente(primerCxcId);
+    const primerGrupo = getGrupo(primerCxcId);
+    const clienteRnc = primerGrupo?.cliente.rnc ?? null;
+
+    start(async () => {
+      const res = await pagarMultiplesCxC(pagos, metodo, fecha, referencia || undefined, notas || undefined);
+      if ("error" in res && res.error) { setError(res.error); return; }
+      setPagoExitoso({
+        cliente: primerCliente,
+        rnc: clienteRnc,
+        monto: total,
+        metodo,
+        fecha,
+        ref: referencia,
+        facturas: facturas.map(f => ({ numero: f.numero, monto: montoNum(f.id) })),
+        notas,
+      });
+    });
+  };
 
  // ── PANTALLA DE ÉXITO ────────────────────────────────────────────────────
  if (pagoExitoso) {
@@ -176,51 +191,174 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
   );
  }
 
- return (
- <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"> <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto"> {/* Header */}
- <div className="flex items-center justify-between px-5 py-4 border-b"> <h2 className="font-bold text-base"> Planilla de pago CxC</h2> <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button> </div> <div className="px-5 py-4 space-y-4"> {/* Lista de facturas a pagar */}
- <div className="border rounded-lg overflow-hidden"> <table className="w-full text-sm"> <thead> <tr className="bg-muted text-muted-foreground text-xs uppercase tracking-wide"> <th className="px-3 py-2 text-left">Factura</th> <th className="px-3 py-2 text-left">Cliente</th> <th className="px-3 py-2 text-right">Monto</th> </tr> </thead> <tbody> {facturas.map((f, i) => (
- <tr key={f.id} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}> <td className="px-3 py-2 font-mono text-xs font-medium" style={{ color: "var(--accent-hex)" }}>{f.numero}</td> <td className="px-3 py-2 text-xs">{getCliente(f.ventaId ?? "")}</td> <td className="px-3 py-2 text-right tabular-nums font-medium text-sm">{fmt(f.saldo)}</td> </tr> ))}
- <tr className="bg-muted/40 border-t font-bold"> <td className="px-3 py-2 text-xs" colSpan={2}>Total a pagar</td> <td className="px-3 py-2 text-right tabular-nums text-base" style={{ color: "var(--accent-hex)" }}>{fmt(total)}</td> </tr> </tbody> </table> </div> {/* Forma de pago */}
- <div> <label className="text-xs font-medium text-muted-foreground block mb-1.5">Forma de pago</label> <div className="grid grid-cols-2 gap-2"> {METODOS.map(m => (
- <button
- key={m.value}
- type="button" onClick={() => setMetodo(m.value)}
- className={cn(
- "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
- metodo === m.value
- ? "border-orange-400 text-orange-500 font-semibold"
- : "border-border hover:bg-accent text-muted-foreground hover:text-foreground" )}
- > {m.label}
- </button> ))}
- </div> </div> {/* Fecha */}
- <div> <label className="text-xs font-medium text-muted-foreground block mb-1">Fecha de pago</label> <input
- type="date" value={fecha}
- onChange={e => setFecha(e.target.value)}
- className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-primary" /> </div> {/* Referencia */}
- <div> <label className="text-xs font-medium text-muted-foreground block mb-1"> Referencia <span className="text-muted-foreground/60">(No. cheque, transferencia…)</span> </label> <input
- type="text" value={referencia}
- onChange={e => setRef(e.target.value)}
- placeholder="Ej: CHQ-001234 o TRF-567890" className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-primary" /> </div> {/* Notas */}
- <div> <label className="text-xs font-medium text-muted-foreground block mb-1">Notas</label> <textarea
- value={notas}
- onChange={e => setNotas(e.target.value)}
- rows={2}
- placeholder="Observaciones adicionales…" className="w-full border rounded-lg px-3 py-2 text-sm resize-none bg-background focus:outline-none focus:ring-1 focus:ring-primary" /> </div> {error && (
- <p className="text-xs text-destructive bg-destructive/10 rounded px-3 py-2">{error}</p> )}
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
 
- <div className="flex gap-2 justify-end pt-1"> <button
- onClick={onClose}
- className="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-accent transition-colors" > Cancelar
- </button> <button
- onClick={handleSubmit}
- disabled={isPending}
- className={cn(
- "px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium",
- "hover:bg-orange-600 transition-colors",
- isPending && "opacity-50 cursor-not-allowed" )}
- > {isPending ? "Registrando…" : "Registrar pagos"}
- </button> </div> </div> </div> </div> );
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b">
+          <h2 className="font-bold text-base">Planilla de pago CxC</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button>
+        </div>
+
+        <div className="px-5 py-4 space-y-4">
+
+          {/* Tabla de facturas con monto editable */}
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-muted text-muted-foreground text-xs uppercase tracking-wide">
+                  <th className="px-3 py-2 text-left">Factura</th>
+                  <th className="px-3 py-2 text-left">Cliente</th>
+                  <th className="px-3 py-2 text-right">Saldo</th>
+                  <th className="px-3 py-2 text-right">A cobrar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {facturas.map((f, i) => {
+                  const m = montoNum(f.id);
+                  const esAbono = m > 0 && m < f.saldo - 0.01;
+                  return (
+                    <tr key={f.id} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                      <td className="px-3 py-2 font-mono text-xs font-medium whitespace-nowrap" style={{ color: "var(--accent-hex)" }}>
+                        {f.numero}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">
+                        {getCliente(f.id)}
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums text-xs text-muted-foreground whitespace-nowrap">
+                        {fmt(f.saldo)}
+                      </td>
+                      <td className="px-3 py-2 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {esAbono && (
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium hidden sm:block">
+                              abono
+                            </span>
+                          )}
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              value={montos[f.id] ?? ""}
+                              onChange={e => setMontos(prev => ({ ...prev, [f.id]: e.target.value }))}
+                              className="w-28 h-7 rounded border bg-background px-2 text-right font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary tabular-nums"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setMontos(prev => ({ ...prev, [f.id]: f.saldo.toFixed(2) }))}
+                              className="h-7 px-2 rounded text-[10px] font-bold border transition-all hover:brightness-110 whitespace-nowrap"
+                              style={{
+                                background: "color-mix(in oklch, var(--accent-hex) 15%, transparent)",
+                                color: "var(--accent-hex)",
+                                borderColor: "color-mix(in oklch, var(--accent-hex) 30%, transparent)",
+                              }}
+                            >
+                              Exacto
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                <tr className="bg-muted/40 border-t font-bold">
+                  <td className="px-3 py-2.5 text-xs" colSpan={3}>Total a cobrar</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums text-base pr-3" style={{ color: "var(--accent-hex)" }}>
+                    {fmt(total)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Forma de pago */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">Forma de pago</label>
+            <div className="grid grid-cols-2 gap-2">
+              {METODOS.map(m => (
+                <button
+                  key={m.value}
+                  type="button"
+                  onClick={() => setMetodo(m.value)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
+                    metodo === m.value
+                      ? "border-orange-400 text-orange-500 font-semibold"
+                      : "border-border hover:bg-accent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Fecha */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1">Fecha de pago</label>
+            <input
+              type="date"
+              value={fecha}
+              onChange={e => setFecha(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          {/* Referencia */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1">
+              Referencia <span className="text-muted-foreground/60">(No. cheque, transferencia…)</span>
+            </label>
+            <input
+              type="text"
+              value={referencia}
+              onChange={e => setRef(e.target.value)}
+              placeholder="Ej: CHQ-001234 o TRF-567890"
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          {/* Notas */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1">Notas</label>
+            <textarea
+              value={notas}
+              onChange={e => setNotas(e.target.value)}
+              rows={2}
+              placeholder="Observaciones adicionales…"
+              className="w-full border rounded-lg px-3 py-2 text-sm resize-none bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          {error && (
+            <p className="text-xs text-destructive bg-destructive/10 rounded px-3 py-2">{error}</p>
+          )}
+
+          <div className="flex gap-2 justify-end pt-1">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-accent transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={isPending || total <= 0}
+              className={cn(
+                "px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium",
+                "hover:bg-orange-600 transition-colors",
+                (isPending || total <= 0) && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {isPending ? "Registrando…" : `Registrar ${fmt(total)}`}
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Componente principal 
@@ -325,11 +463,17 @@ export function CxCMultiSelect({ grupos }: Props) {
  </div>
  {/* Número factura — 150px (FAC/2026/XXXX cabe completo) */}
  <div className="w-[150px] shrink-0">
- <Link href={`/ventas/${f.ventaId}?from=cxc`}
- className="font-mono text-xs font-semibold hover:underline block"
- style={{ color: "var(--accent-hex)" }}>
- {f.numero}
- </Link>
+ {f.ventaId ? (
+   <Link href={`/ventas/${f.ventaId}?from=cxc`}
+   className="font-mono text-xs font-semibold hover:underline block"
+   style={{ color: "var(--accent-hex)" }}>
+   {f.numero}
+   </Link>
+ ) : (
+   <span className="font-mono text-xs font-semibold block" style={{ color: "var(--accent-hex)" }}>
+   {f.numero}
+   </span>
+ )}
  </div>
  {/* Fecha — 62px */}
  <div className="w-[62px] shrink-0">
