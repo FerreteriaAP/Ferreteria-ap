@@ -267,9 +267,9 @@ export default async function EstadoCuentaPage({ params, searchParams }: Props) 
                     {fmt(totales.total)}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
-                    {totales.vencido > 0
-                      ? <span className="text-destructive font-medium">Vencido: {fmt(totales.vencido)}</span>
-                      : <span className="text-green-700 dark:text-green-400 font-medium">Al día ✓</span>}
+                    {totales.vencido === 0 && (
+                      <span className="text-green-700 dark:text-green-400 font-medium">Al día ✓</span>
+                    )}
                   </td>
                   <td />
                 </tr>
