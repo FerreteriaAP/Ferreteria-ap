@@ -307,11 +307,7 @@ export default async function ImprimirEstadoCuentaPage({ params, searchParams }:
                 <td style={{ ...TF_R, fontFamily: "monospace", fontSize: 11, fontWeight: 900, color: totales.vencido > 0 ? "#991b1b" : "#f5821f" }}>
                   {fmt(totales.total)}
                 </td>
-                <td style={{ ...TF, fontSize: 8.5 }}>
-                  {totales.vencido > 0 && (
-                    <span style={{ color: "#991b1b", fontWeight: 700 }}>Vencido: {fmt(totales.vencido)}</span>
-                  )}
-                </td>
+                <td style={TF} />
               </tr>
             </tfoot>
           </table>
