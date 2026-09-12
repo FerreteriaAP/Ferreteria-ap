@@ -204,7 +204,11 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className={LABEL}>Código interno</label>
-                <input className={INPUT} {...form.register("codigo")} />
+                <input
+                  className={INPUT}
+                  {...form.register("codigo")}
+                  onChange={e => form.setValue("codigo", e.target.value.toUpperCase(), { shouldValidate: true })}
+                />
               </div>
               <div className="space-y-1">
                 <label className={LABEL}>Código de barras</label>
