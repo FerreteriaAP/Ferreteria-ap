@@ -214,7 +214,23 @@ export async function cerrarTurno(_prev: { error?: string; ok?: boolean } | null
  return { ok: true };
 }
 
-// Movimiento genérico (mantener compatibilidad) 
+// Eliminar movimiento de caja — solo ADMINISTRADOR
+export async function eliminarMovimientoCaja(movimientoId: string): Promise<{ error?: string; ok?: boolean }> {
+  const sess = await getSession();
+  if (!sess) return { error: "No autenticado" };
+  if (sess.rol !== "ADMINISTRADOR") return { error: "Solo el administrador puede eliminar movimientos" };
+
+  const mov = await prisma.movimientoCaja.findUnique({ where: { id: movimientoId } });
+  if (!mov) return { error: "Movimiento no encontrado" };
+
+  await prisma.movimientoCaja.delete({ where: { id: movimientoId } });
+  revalidatePath("/caja");
+  revalidatePath(`/caja/${mov.turnoId}`);
+  revalidatePath(`/caja/${mov.turnoId}/movimientos`);
+  return { ok: true };
+}
+
+// Movimiento genérico (mantener compatibilidad)
 
 export async function registrarMovimiento(_prev: { error?: string; ok?: boolean } | null, formData: FormData) {
  const turnoId = formData.get("turnoId") as string;

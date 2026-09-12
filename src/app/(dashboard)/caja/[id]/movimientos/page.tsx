@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getTurno } from "@/actions/caja";
+import { auth } from "@/lib/auth";
+import { EliminarMovimientoBtn } from "@/components/caja/eliminar-movimiento-btn";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -40,8 +42,11 @@ const SUBTIPO_COLOR: Record<string, string> = {
 
 export default async function MovimientosPage({ params }: Props) {
  const { id } = await params;
- const turno = await getTurno(id);
+ const [turno, session] = await Promise.all([getTurno(id), auth()]);
  if (!turno) notFound();
+
+ const rol = ((session?.user) as { rol?: string } | undefined)?.rol ?? "";
+ const esAdmin = rol === "ADMINISTRADOR";
 
  // getTurno ya filtra subTipo NOT NULL — pagos de facturas no aparecen aquí
  const movimientos = turno.movimientos;
@@ -82,17 +87,21 @@ export default async function MovimientosPage({ params }: Props) {
  <span className="text-red-600 font-medium">−{fmt(totalSalidas)}</span> )}
  </div> )}
  </div> {movimientos.length === 0 ? (
- <div className="px-4 py-12 text-center text-muted-foreground"> <p className="text-2xl mb-2"></p> <p className="text-sm">Sin movimientos registrados en este turno</p> </div> ) : (
+ <div className="px-4 py-12 text-center text-muted-foreground"> <p className="text-2xl mb-2">📭</p> <p className="text-sm">Sin movimientos registrados en este turno</p> </div> ) : (
  <div className="divide-y"> {movimientos.map(m => (
- <div key={m.id} className="px-4 py-3 flex items-start justify-between gap-3"> <div className="min-w-0"> <div className="flex items-center gap-2 flex-wrap"> <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${SUBTIPO_COLOR[m.subTipo ?? ""] ?? "bg-muted text-muted-foreground"}`}> {SUBTIPO_LABEL[m.subTipo ?? ""] ?? m.subTipo}
+ <div key={m.id} className="px-4 py-3 flex items-start justify-between gap-3"> <div className="min-w-0 flex-1"> <div className="flex items-center gap-2 flex-wrap"> <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${SUBTIPO_COLOR[m.subTipo ?? ""] ?? "bg-muted text-muted-foreground"}`}> {SUBTIPO_LABEL[m.subTipo ?? ""] ?? m.subTipo}
  </span> {/* Método de pago — solo para COBRO_CXC */}
  {m.subTipo === "COBRO_CXC" && m.metodo && (
- <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"> {m.metodo === "EFECTIVO" ? " Efectivo" : m.metodo === "TARJETA" ? " Tarjeta" : m.metodo === "TRANSFERENCIA" ? " Transferencia" : m.metodo === "CHEQUE" ? " Cheque" : m.metodo}
+ <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"> {m.metodo === "EFECTIVO" ? "💵 Efectivo" : m.metodo === "TARJETA" ? "💳 Tarjeta" : m.metodo === "TRANSFERENCIA" ? "🏦 Transferencia" : m.metodo === "CHEQUE" ? "📄 Cheque" : m.metodo}
  </span> )}
  <span className="text-xs text-muted-foreground">{fmtDateTime(m.fecha)}</span> </div> <p className="text-sm mt-0.5 font-medium">{m.concepto}</p> {m.notas && (
  <p className="text-xs text-muted-foreground mt-0.5">{m.notas}</p> )}
- </div> <div className="text-right shrink-0"> <p className={`font-mono font-bold text-sm ${m.tipo === "ENTRADA" ? "text-green-600" : "text-red-600"}`}> {m.tipo === "SALIDA" ? "−" : "+"}{fmt(m.monto)}
- </p> </div> </div> ))}
+ </div> <div className="flex items-center gap-1 shrink-0"> <p className={`font-mono font-bold text-sm ${m.tipo === "ENTRADA" ? "text-green-600" : "text-red-600"}`}> {m.tipo === "SALIDA" ? "−" : "+"}{fmt(m.monto)}
+ </p>
+ {esAdmin && (
+   <EliminarMovimientoBtn movimientoId={m.id} concepto={m.concepto} />
+ )}
+ </div> </div> ))}
  </div> )}
  </div> </div> );
 }
