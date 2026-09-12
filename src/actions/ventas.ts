@@ -111,7 +111,7 @@ export async function getVentas(opts: {
  const where: Prisma.VentaWhereInput = {
  // Filtrar por origen: PDV (turnoId != null) o módulo de ventas (turnoId null)
  ...(pdv === true ? { turnoId: { not: null } } : { turnoId: null }),
- ...(tipo && tipo !== "" ? { tipo: tipo as EstadoVenta } : {}),
+ ...(tipo && tipo !== "" ? { tipo: tipo as EstadoVenta } : { tipo: { not: "CANCELADA" } }),
  ...(busqueda ? {
  OR: [
  { numero: { contains: busqueda, mode: "insensitive" } },
