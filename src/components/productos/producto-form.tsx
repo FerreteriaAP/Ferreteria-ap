@@ -220,7 +220,12 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className={LABEL}>Código interno *</label>
-            <input className={INPUT} placeholder="PROD-00001" {...form.register("codigo")} />
+            <input
+              className={INPUT}
+              placeholder="PROD-00001"
+              {...form.register("codigo")}
+              onChange={e => form.setValue("codigo", e.target.value.toUpperCase(), { shouldValidate: true })}
+            />
             {errors.codigo && <p className="text-xs text-destructive">{errors.codigo.message}</p>}
           </div>
           <div className="space-y-1">
