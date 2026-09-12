@@ -1,17 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 235 235" fill="none">
   <!-- Fondo negro -->
-  <rect width="360" height="360" fill="#000000"/>
-  <!-- Contenido centrado con margen para squircle macOS -->
-  <g transform="translate(80,80)">
-    <!-- Octágono exterior — trazo naranja -->
+  <rect width="235" height="235" fill="#000000"/>
+  <!-- Octágono al 85% del icono -->
+  <g transform="translate(17.5,17.5)">
     <polygon
       points="133.7,10 181.3,57.6 181.3,142.4 133.7,190 66.3,190 18.7,142.4 18.7,57.6 66.3,10"
       fill="none" stroke="#F47717" stroke-width="6" stroke-linejoin="round"/>
-    <!-- Octágono interior — trazo naranja fino -->
     <polygon
       points="127,23 170,66 170,134 127,177 73,177 30,134 30,66 73,23"
       fill="none" stroke="#F47717" stroke-width="2.5" stroke-linejoin="round"/>
-    <!-- Letras AP — centradas exactamente en (100,100) -->
     <text
       x="100" y="100"
       text-anchor="middle"
