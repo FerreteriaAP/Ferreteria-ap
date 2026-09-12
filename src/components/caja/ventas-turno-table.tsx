@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { generarConduceDespacho } from "@/actions/ventas";
-import { eliminarFacturaPDV } from "@/actions/caja";
 import { cn } from "@/lib/utils";
 
 // Tipos
@@ -75,55 +74,6 @@ function BtnConduceCajera({ ventaId, conduceId }: {
  </div> );
 }
 
-// Botón eliminar factura PDV (solo admin)
-
-function BtnEliminarFactura({ ventaId }: { ventaId: string }) {
-  const router = useRouter();
-  const [isPending, start] = useTransition();
-  const [err, setErr] = useState<string | null>(null);
-  const [confirmando, setConfirmando] = useState(false);
-
-  if (confirmando) {
-    return (
-      <div className="flex items-center gap-1.5">
-        <span className="text-xs text-muted-foreground">¿Confirmar?</span>
-        <button
-          onClick={() => {
-            start(async () => {
-              const res = await eliminarFacturaPDV(ventaId);
-              if ("error" in res && res.error) { setErr(res.error); setConfirmando(false); return; }
-              router.refresh();
-            });
-          }}
-          disabled={isPending}
-          className="text-xs px-2 py-0.5 rounded border font-medium transition-colors border-red-400 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950/30 disabled:opacity-50"
-        >
-          {isPending ? "Eliminando…" : "Sí, eliminar"}
-        </button>
-        <button
-          onClick={() => setConfirmando(false)}
-          disabled={isPending}
-          className="text-xs px-2 py-0.5 rounded border font-medium border-muted-foreground/30 text-muted-foreground hover:bg-muted/40"
-        >
-          No
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-0.5 items-start">
-      <button
-        onClick={() => setConfirmando(true)}
-        className="text-xs px-2 py-0.5 rounded border font-medium transition-colors border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
-      >
-        Eliminar
-      </button>
-      {err && <p className="text-[10px] text-destructive">{err}</p>}
-    </div>
-  );
-}
-
 //
 
 export function VentasTurnoTable({ ventas, modo = "simple", esAdmin = false }: Props) {
@@ -143,7 +93,6 @@ export function VentasTurnoTable({ ventas, modo = "simple", esAdmin = false }: P
          <th className="text-left px-3 py-2">Método</th>
          <th className="text-right px-4 py-2">Total</th>
          <th className="text-left px-4 py-2">Despacho</th>
-         {esAdmin && <th className="text-left px-4 py-2">Admin</th>}
        </tr>
      </thead>
      <tbody>
@@ -168,18 +117,13 @@ export function VentasTurnoTable({ ventas, modo = "simple", esAdmin = false }: P
              <td className="px-4 py-2">
                <BtnConduceCajera ventaId={v.id} conduceId={conduce?.id} />
              </td>
-             {esAdmin && (
-               <td className="px-4 py-2">
-                 <BtnEliminarFactura ventaId={v.id} />
-               </td>
-             )}
            </tr>
          );
        })}
      </tbody>
      <tfoot>
        <tr className="border-t bg-muted/30">
-         <td colSpan={esAdmin ? 3 : 3} className="px-4 py-2 text-sm font-semibold">Total</td>
+         <td colSpan={3} className="px-4 py-2 text-sm font-semibold">Total</td>
          <td className="px-4 py-2 text-right font-mono font-bold">
            {fmt(ventas.reduce((s, v) => s + Number(v.total), 0))}
          </td>
