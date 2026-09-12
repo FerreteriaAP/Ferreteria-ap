@@ -196,6 +196,9 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
               <label className={LABEL}>Nombre del producto</label>
               <input
                 className="w-full h-11 rounded-lg border bg-background px-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
                 {...form.register("nombre")}
               />
               {errors.nombre && <p className="text-xs text-destructive">{errors.nombre.message}</p>}

@@ -200,6 +200,9 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
           <input
             className="w-full h-11 rounded-lg border bg-background px-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"
             placeholder="Cable #12 THHN Negro"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
             {...form.register("nombre", { onChange: handleNombreChange })}
           />
           {errors.nombre && <p className="text-xs text-destructive">{errors.nombre.message}</p>}
