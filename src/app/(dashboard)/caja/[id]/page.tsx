@@ -2,6 +2,7 @@ import { getTurno, getResumenTurno } from "@/actions/caja";
 import { CierreTurnoForm } from "@/components/caja/cierre-turno-form";
 import { MovimientoForm } from "@/components/caja/movimiento-form";
 import { VentasTurnoTable } from "@/components/caja/ventas-turno-table";
+import { EliminarMovimientoBtn } from "@/components/caja/eliminar-movimiento-btn";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -52,10 +53,10 @@ export default async function TurnoDetallePage({ params }: { params: Promise<{ i
  <MovimientoForm turnoId={turno.id} /> )}
  </div> {turno.movimientos.length === 0 ? (
  <p className="px-4 py-6 text-center text-sm text-muted-foreground">Sin movimientos manuales</p> ) : (
- <table className="w-full text-sm"> <thead> <tr className="bg-muted/30 text-xs text-muted-foreground border-b"> <th className="text-left px-4 py-2">Fecha</th> <th className="text-left px-3 py-2">Tipo</th> <th className="text-left px-3 py-2">Concepto</th> <th className="text-right px-4 py-2">Monto</th> </tr> </thead> <tbody> {turno.movimientos.map(m => (
+ <table className="w-full text-sm"> <thead> <tr className="bg-muted/30 text-xs text-muted-foreground border-b"> <th className="text-left px-4 py-2">Fecha</th> <th className="text-left px-3 py-2">Tipo</th> <th className="text-left px-3 py-2">Concepto</th> <th className="text-right px-4 py-2">Monto</th> {esAdmin && <th className="px-2 py-2" />} </tr> </thead> <tbody> {turno.movimientos.map(m => (
  <tr key={m.id} className="border-b hover:bg-muted/20"> <td className="px-4 py-2 text-muted-foreground">{fmtDate(m.fecha)}</td> <td className="px-3 py-2"> <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${m.tipo === "ENTRADA" ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"}`}> {m.tipo}
  </span> </td> <td className="px-3 py-2">{m.concepto}{m.notas ? <span className="text-muted-foreground ml-1">· {m.notas}</span> : null}</td> <td className={`px-4 py-2 text-right font-mono font-medium ${m.tipo === "ENTRADA" ? "text-green-600" : "text-red-600"}`}> {m.tipo === "SALIDA" ? "-" : "+"}{fmt(m.monto)}
- </td> </tr> ))}
+ </td> {esAdmin && <td className="px-2 py-2 text-center"><EliminarMovimientoBtn movimientoId={m.id} concepto={m.concepto} /></td>} </tr> ))}
  </tbody> </table> )}
  </div> {/* Ventas del turno — con botón de despacho por fila */}
  <div className="rounded-xl border bg-card overflow-hidden"> <div className="px-4 py-3 border-b"> <h2 className="font-semibold" style={{ color: "var(--accent-hex)" }}> Facturas cobradas{" "}
