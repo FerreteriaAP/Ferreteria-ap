@@ -223,8 +223,9 @@ export function ProductoForm({ productoId, categorias, defaultValues, nextCodigo
             <input
               className={INPUT}
               placeholder="PROD-00001"
-              {...form.register("codigo")}
-              onChange={e => form.setValue("codigo", e.target.value.toUpperCase(), { shouldValidate: true })}
+              {...form.register("codigo", {
+                onChange: e => { e.target.value = e.target.value.toUpperCase(); },
+              })}
             />
             {errors.codigo && <p className="text-xs text-destructive">{errors.codigo.message}</p>}
           </div>

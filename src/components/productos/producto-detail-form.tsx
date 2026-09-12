@@ -206,8 +206,9 @@ export function ProductoDetailForm({ productoId, categorias, defaultValues, solo
                 <label className={LABEL}>Código interno</label>
                 <input
                   className={INPUT}
-                  {...form.register("codigo")}
-                  onChange={e => form.setValue("codigo", e.target.value.toUpperCase(), { shouldValidate: true })}
+                  {...form.register("codigo", {
+                    onChange: e => { e.target.value = e.target.value.toUpperCase(); },
+                  })}
                 />
               </div>
               <div className="space-y-1">
