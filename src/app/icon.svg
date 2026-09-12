@@ -1,16 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- Fondo negro sólido -->
-  <rect width="512" height="512" fill="#111111"/>
-  <!-- Barra naranja inferior -->
-  <rect x="0" y="448" width="512" height="64" fill="#F5821F"/>
-  <!-- AP bold, centrado -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Fondo negro -->
+  <rect width="200" height="200" fill="#1C1C1C"/>
+  <!-- Octágono exterior — trazo blanco grueso -->
+  <polygon
+    points="133.7,10 181.3,57.6 181.3,142.4 133.7,190 66.3,190 18.7,142.4 18.7,57.6 66.3,10"
+    fill="#1C1C1C" stroke="white" stroke-width="14" stroke-linejoin="round"/>
+  <!-- Octágono interior — trazo blanco -->
+  <polygon
+    points="127,23 170,66 170,134 127,177 73,177 30,134 30,66 73,23"
+    fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Letras AP en blanco -->
   <text
-    x="256" y="390"
+    x="100" y="140"
     text-anchor="middle"
     dominant-baseline="auto"
     font-family="'Arial Black','Arial Bold',Impact,sans-serif"
     font-weight="900"
-    font-size="260"
-    letter-spacing="-8"
+    font-size="88"
+    letter-spacing="-4"
     fill="white">AP</text>
 </svg>
