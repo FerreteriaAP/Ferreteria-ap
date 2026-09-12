@@ -32,6 +32,9 @@ export function cap(s?: string | null): string {
     // Número (entero o decimal) + letras → letras siempre en MAYÚSCULAS (1GL, 5gl, 0.5GL → 1GL, 5GL, 0.5GL)
     const mNumLetra = word.match(/^([\d.]+)([A-Za-z]+)$/);
     if (mNumLetra) return mNumLetra[1] + mNumLetra[2].toUpperCase();
+    // Código alfanumérico (letras + dígitos mezclados) → letras en MAYÚSCULAS (BS211B3, Bs211b3 → BS211B3)
+    if (/^[A-Za-z0-9]+$/.test(word) && /[A-Za-z]/.test(word) && /[0-9]/.test(word))
+      return word.toUpperCase();
     // "x" como separador de dimensiones → siempre minúscula (1 x 2 x 8)
     if (word.toLowerCase() === "x") return "x";
     // Caso normal: primera letra mayúscula, resto minúscula
