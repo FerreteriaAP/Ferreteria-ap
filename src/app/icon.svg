@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 267 267" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" fill="none">
   <!-- Fondo dark-ops -->
-  <rect width="267" height="267" fill="#111923"/>
-  <!-- Contenido centrado con padding para squircle macOS -->
-  <g transform="translate(33.5,33.5)">
+  <rect width="360" height="360" fill="#000000"/>
+  <!-- Contenido al 55% del icono — margen generoso para squircle macOS -->
+  <g transform="translate(80,80)">
     <!-- Octágono exterior — trazo naranja -->
     <polygon
       points="133.7,10 181.3,57.6 181.3,142.4 133.7,190 66.3,190 18.7,142.4 18.7,57.6 66.3,10"
