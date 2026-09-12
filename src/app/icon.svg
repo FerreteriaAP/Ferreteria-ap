@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" fill="none">
-  <!-- Fondo dark-ops -->
+  <!-- Fondo negro -->
   <rect width="360" height="360" fill="#000000"/>
-  <!-- Contenido al 55% del icono — margen generoso para squircle macOS -->
+  <!-- Contenido centrado con margen para squircle macOS -->
   <g transform="translate(80,80)">
     <!-- Octágono exterior — trazo naranja -->
     <polygon
@@ -11,15 +11,15 @@
     <polygon
       points="127,23 170,66 170,134 127,177 73,177 30,134 30,66 73,23"
       fill="none" stroke="#F47717" stroke-width="2.5" stroke-linejoin="round"/>
-    <!-- Letras AP centradas -->
+    <!-- Letras AP — centradas exactamente en (100,100) -->
     <text
-      x="100" y="96"
+      x="100" y="100"
       text-anchor="middle"
       dominant-baseline="central"
       font-family="'Arial Black','Arial Bold',Impact,sans-serif"
       font-weight="900"
       font-size="88"
       letter-spacing="-4"
-      fill="#F5F7FA">AP</text>
+      fill="#FFFFFF">AP</text>
   </g>
 </svg>
