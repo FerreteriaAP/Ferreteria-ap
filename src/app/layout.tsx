@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "AP",
   },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
   other: {
     "mobile-web-app-capable": "yes",
   },
