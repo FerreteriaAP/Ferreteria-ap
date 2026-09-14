@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { VentasSearch } from "@/components/ventas/ventas-search";
+import { auth } from "@/lib/auth";
 
 interface PageProps {
   searchParams: Promise<{ q?: string; tipo?: string; page?: string; sortBy?: string; sortDir?: string; pdv?: string }>;
@@ -83,6 +84,9 @@ export default async function VentasPage({ searchParams }: PageProps) {
   const sortDir  = (params.sortDir === "asc" ? "asc" : "desc") as "asc" | "desc";
   const esPDV    = params.pdv === "1";
 
+  const session  = await auth();
+  const esAdmin  = ((session?.user) as { rol?: string })?.rol === "ADMINISTRADOR";
+
   const { ventas, total, pages } = await getVentas({
     tipo: tipo || undefined,
     busqueda,
@@ -120,6 +124,15 @@ export default async function VentasPage({ searchParams }: PageProps) {
           <p className="text-sm text-muted-foreground mt-0.5">{total} documentos{esPDV ? " del punto de venta" : ""}</p>
         </div>
         <div className="flex items-center gap-2">
+          {esAdmin && (
+            <Link
+              href="/ventas/vdp"
+              className={cn(buttonVariants({ variant: "outline" }))}
+              style={{ borderColor: "#F47717", color: "#F47717" }}
+            >
+              Cálculo VDP
+            </Link>
+          )}
           <Link
             href="/ventas/despachos"
             className={cn(buttonVariants({ variant: "outline" }))}

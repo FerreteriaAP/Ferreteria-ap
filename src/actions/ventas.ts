@@ -1439,3 +1439,135 @@ export async function adminEliminarDetalle(detalleId: string) {
   revalidatePath(`/ventas/${ventaId}`);
   return { ok: true };
 }
+
+// ─── VDP: Cálculo Verificación de Precios ────────────────────────────────────
+
+export type VDPDetalle = {
+  id: string;
+  descripcion: string | null;
+  codigo: string;
+  nombre: string;
+  unidad: string | null;
+  unidadMedida: string;
+  cantidad: number;
+  precio: number;       // sin ITBIS
+  precioFinal: number;  // con ITBIS (o sin si exento)
+  exentoItbis: boolean;
+  descuento: number;
+  subtotal: number;
+  itbis: number;
+  costo: number | null; // costoAlVender ?? costoPromedio
+};
+
+export type VDPVenta = {
+  id: string;
+  numero: string;
+  tipo: string;
+  cliente: string;
+  subtotal: number;
+  itbis: number;
+  total: number;
+  detalles: VDPDetalle[];
+};
+
+export async function getVentaParaVDP(numero: string): Promise<{ venta?: VDPVenta; error?: string }> {
+  const session = await auth();
+  const rol = ((session?.user) as { rol?: string })?.rol ?? "";
+  if (rol !== "ADMINISTRADOR") return { error: "Solo el administrador puede usar Cálculo VDP" };
+
+  const venta = await prisma.venta.findUnique({
+    where: { numero: numero.trim().toUpperCase() },
+    include: {
+      cliente: { select: { nombre: true } },
+      detalles: {
+        include: {
+          producto: {
+            select: {
+              codigo: true,
+              nombre: true,
+              unidadMedida: true,
+              costoPromedio: true,
+              costoUltimo: true,
+            },
+          },
+        },
+        orderBy: { orden: "asc" },
+      },
+    },
+  });
+
+  if (!venta) return { error: `No se encontró el documento "${numero}"` };
+
+  return {
+    venta: {
+      id: venta.id,
+      numero: venta.numero,
+      tipo: venta.tipo,
+      cliente: venta.cliente.nombre,
+      subtotal: Number(venta.subtotal),
+      itbis: Number(venta.itbis),
+      total: Number(venta.total),
+      detalles: venta.detalles.map((d) => ({
+        id: d.id,
+        descripcion: d.descripcion,
+        codigo: d.producto.codigo,
+        nombre: d.descripcion ?? d.producto.nombre,
+        unidad: d.unidad,
+        unidadMedida: d.producto.unidadMedida,
+        cantidad: Number(d.cantidad),
+        precio: Number(d.precio),
+        precioFinal: Number(d.precioFinal),
+        exentoItbis: d.exentoItbis,
+        descuento: Number(d.descuento),
+        subtotal: Number(d.subtotal),
+        itbis: Number(d.itbis),
+        costo: d.costoAlVender
+          ? Number(d.costoAlVender)
+          : d.producto.costoPromedio
+          ? Number(d.producto.costoPromedio)
+          : null,
+      })),
+    },
+  };
+}
+
+export async function guardarPreciosVDP(
+  ventaId: string,
+  items: { detalleId: string; nuevoPrecioFinal: number }[]
+): Promise<{ ok?: boolean; error?: string }> {
+  const session = await auth();
+  const rol = ((session?.user) as { rol?: string })?.rol ?? "";
+  if (rol !== "ADMINISTRADOR") return { error: "Solo el administrador puede usar Cálculo VDP" };
+
+  await prisma.$transaction(async (tx) => {
+    for (const item of items) {
+      const d = await tx.detalleVenta.findUnique({ where: { id: item.detalleId } });
+      if (!d || d.ventaId !== ventaId) continue;
+
+      const pf = item.nuevoPrecioFinal;
+      const exento = d.exentoItbis;
+      const precio = exento ? pf : +(pf / 1.18).toFixed(4);
+      const desc = Number(d.descuento) / 100;
+      const cant = Number(d.cantidad);
+      const subtotal = +(cant * precio * (1 - desc)).toFixed(2);
+      const itbis = exento ? 0 : +(subtotal * 0.18).toFixed(2);
+
+      await tx.detalleVenta.update({
+        where: { id: item.detalleId },
+        data: { precio, precioFinal: +pf.toFixed(4), subtotal, itbis },
+      });
+    }
+
+    // Recalcular totales de la venta
+    const lineas = await tx.detalleVenta.findMany({ where: { ventaId } });
+    const vSubtotal = +lineas.reduce((s, l) => s + Number(l.subtotal), 0).toFixed(2);
+    const vItbis    = +lineas.reduce((s, l) => s + Number(l.itbis),    0).toFixed(2);
+    await tx.venta.update({
+      where: { id: ventaId },
+      data: { subtotal: vSubtotal, itbis: vItbis, total: +(vSubtotal + vItbis).toFixed(2) },
+    });
+  });
+
+  revalidatePath("/ventas");
+  return { ok: true };
+}
