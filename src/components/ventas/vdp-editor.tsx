@@ -10,11 +10,16 @@ const DOP = (n: number) =>
 const pct = (n: number) =>
   n.toLocaleString("es-DO", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
 
+/** Costo con ITBIS incluido (como lo pagamos al suplidor) */
+function costoConItbis(costo: number, exento: boolean): number {
+  return exento ? costo : costo * 1.18;
+}
+
+/** % de ganancia sobre (precioFinal vs costo+ITBIS) */
 function ganancia(precioFinal: number, exento: boolean, costo: number | null): number | null {
   if (costo === null || costo === 0) return null;
-  // precio sin ITBIS
-  const precio = exento ? precioFinal : precioFinal / 1.18;
-  return ((precio - costo) / costo) * 100;
+  const costoTotal = costoConItbis(costo, exento);
+  return ((precioFinal - costoTotal) / costoTotal) * 100;
 }
 
 function calcSubtotal(
@@ -87,11 +92,13 @@ export function VDPEditor({
     const pf = parseFloat(precios[d.id] || "0") || 0;
     const { subtotal, itbis, total } = calcSubtotal(pf, d.exentoItbis, d.cantidad, d.descuento);
     const g = ganancia(pf, d.exentoItbis, d.costo);
-    const costeLine = d.costo !== null ? d.costo * d.cantidad : null;
+    // Costo con ITBIS × cantidad
+    const costoUnit = d.costo !== null ? costoConItbis(d.costo, d.exentoItbis) : null;
+    const costeLine = costoUnit !== null ? costoUnit * d.cantidad : null;
     if (costeLine !== null) totalCosto += costeLine;
     totalVenta += total;
     if (costeLine !== null) totalGanancia += total - costeLine;
-    return { d, pf, subtotal, itbis, total, g, costeLine };
+    return { d, pf, subtotal, itbis, total, g, costoUnit, costeLine };
   });
 
   const totalGananciaPct =
@@ -182,7 +189,7 @@ export function VDPEditor({
               </tr>
             </thead>
             <tbody>
-              {filas.map(({ d, pf, subtotal, itbis, total, g, costeLine }, i) => {
+              {filas.map(({ d, pf, subtotal, itbis, total, g, costoUnit, costeLine }, i) => {
                 const changed =
                   Math.abs(pf - d.precioFinal) > 0.001;
                 const gColor =
@@ -224,9 +231,9 @@ export function VDPEditor({
                       <span className="text-xs">{d.unidad ?? d.unidadMedida}</span>
                     </td>
                     <td className="px-3 py-2 text-right text-muted-foreground tabular-nums">
-                      {d.costo !== null ? (
+                      {costoUnit !== null ? (
                         <span>
-                          RD$ {DOP(d.costo)}
+                          RD$ {DOP(costoUnit)}
                           {costeLine !== null && (
                             <span className="block text-xs">
                               Total: {DOP(costeLine)}
@@ -268,11 +275,6 @@ export function VDPEditor({
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums">
                       <span className="font-medium">RD$ {DOP(total)}</span>
-                      {itbis > 0 && (
-                        <span className="block text-xs text-muted-foreground">
-                          ITBIS: {DOP(itbis)}
-                        </span>
-                      )}
                     </td>
                   </tr>
                 );
@@ -356,8 +358,8 @@ export function VDPEditor({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        * El <strong>% de ganancia</strong> se calcula sobre el costo al momento de registrar el
-        documento. Los precios con ITBIS: el % usa el precio sin ITBIS vs. costo.
+        * El <strong>costo</strong> incluye ITBIS (×1.18). El <strong>% de ganancia</strong>{" "}
+        es: (Precio venta − Costo+ITBIS) / Costo+ITBIS.
       </p>
     </div>
   );
