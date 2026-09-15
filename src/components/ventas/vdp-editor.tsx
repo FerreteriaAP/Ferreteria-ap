@@ -10,15 +10,15 @@ const DOP = (n: number) =>
 const pct = (n: number) =>
   n.toLocaleString("es-DO", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
 
-/** Costo con ITBIS incluido (como lo pagamos al suplidor) */
-function costoConItbis(costo: number, exento: boolean): number {
-  return exento ? costo : costo * 1.18;
+/** Costo con ITBIS (siempre ×1.18 — el suplidor cobra ITBIS independiente de si vendemos exento) */
+function costoConItbis(costo: number): number {
+  return costo * 1.18;
 }
 
-/** % de ganancia sobre (precioFinal vs costo+ITBIS) */
-function ganancia(precioFinal: number, exento: boolean, costo: number | null): number | null {
+/** % de ganancia: (precioFinal − costo×1.18) / (costo×1.18) */
+function ganancia(precioFinal: number, costo: number | null): number | null {
   if (costo === null || costo === 0) return null;
-  const costoTotal = costoConItbis(costo, exento);
+  const costoTotal = costoConItbis(costo);
   return ((precioFinal - costoTotal) / costoTotal) * 100;
 }
 
@@ -91,9 +91,9 @@ export function VDPEditor({
   const filas = venta.detalles.map((d) => {
     const pf = parseFloat(precios[d.id] || "0") || 0;
     const { subtotal, itbis, total } = calcSubtotal(pf, d.exentoItbis, d.cantidad, d.descuento);
-    const g = ganancia(pf, d.exentoItbis, d.costo);
-    // Costo con ITBIS × cantidad
-    const costoUnit = d.costo !== null ? costoConItbis(d.costo, d.exentoItbis) : null;
+    const g = ganancia(pf, d.costo);
+    // Costo con ITBIS × cantidad (siempre ×1.18)
+    const costoUnit = d.costo !== null ? costoConItbis(d.costo) : null;
     const costeLine = costoUnit !== null ? costoUnit * d.cantidad : null;
     if (costeLine !== null) totalCosto += costeLine;
     totalVenta += total;
@@ -185,7 +185,7 @@ export function VDPEditor({
                   Precio nuevo
                 </th>
                 <th className="px-3 py-2.5 text-center">% Ganancia</th>
-                <th className="px-3 py-2.5 text-right">Subtotal</th>
+                <th className="px-3 py-2.5 text-right">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -358,8 +358,8 @@ export function VDPEditor({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        * El <strong>costo</strong> incluye ITBIS (×1.18). El <strong>% de ganancia</strong>{" "}
-        es: (Precio venta − Costo+ITBIS) / Costo+ITBIS.
+        * El <strong>Costo</strong> mostrado es costo del suplidor ×1.18 (con ITBIS). El{" "}
+        <strong>% de ganancia</strong> = (Precio venta − Costo+ITBIS) ÷ Costo+ITBIS.
       </p>
     </div>
   );
