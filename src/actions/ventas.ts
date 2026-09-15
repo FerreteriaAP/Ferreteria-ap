@@ -1470,65 +1470,121 @@ export type VDPVenta = {
   detalles: VDPDetalle[];
 };
 
-export async function getVentaParaVDP(numero: string): Promise<{ venta?: VDPVenta; error?: string }> {
+export type VDPMatch = { id: string; numero: string; tipo: string; cliente: string; total: number; fecha: string };
+
+function mapVentaToVDP(venta: {
+  id: string; numero: string; tipo: string;
+  cliente: { nombre: string };
+  subtotal: unknown; itbis: unknown; total: unknown;
+  fechaEmision: Date;
+  detalles: Array<{
+    id: string; descripcion: string | null; unidad: string | null;
+    cantidad: unknown; precio: unknown; precioFinal: unknown;
+    exentoItbis: boolean; descuento: unknown; subtotal: unknown; itbis: unknown;
+    costoAlVender: unknown;
+    producto: { codigo: string; nombre: string; unidadMedida: string; costoPromedio: unknown; costoUltimo: unknown };
+  }>;
+}): VDPVenta {
+  return {
+    id: venta.id,
+    numero: venta.numero,
+    tipo: venta.tipo,
+    cliente: venta.cliente.nombre,
+    subtotal: Number(venta.subtotal),
+    itbis: Number(venta.itbis),
+    total: Number(venta.total),
+    detalles: venta.detalles.map((d) => ({
+      id: d.id,
+      descripcion: d.descripcion,
+      codigo: d.producto.codigo,
+      nombre: d.descripcion ?? d.producto.nombre,
+      unidad: d.unidad,
+      unidadMedida: d.producto.unidadMedida,
+      cantidad: Number(d.cantidad),
+      precio: Number(d.precio),
+      precioFinal: Number(d.precioFinal),
+      exentoItbis: d.exentoItbis,
+      descuento: Number(d.descuento),
+      subtotal: Number(d.subtotal),
+      itbis: Number(d.itbis),
+      costo: d.costoAlVender
+        ? Number(d.costoAlVender)
+        : d.producto.costoPromedio
+        ? Number(d.producto.costoPromedio)
+        : null,
+    })),
+  };
+}
+
+const VDP_INCLUDE = {
+  cliente: { select: { nombre: true } },
+  detalles: {
+    include: {
+      producto: {
+        select: { codigo: true, nombre: true, unidadMedida: true, costoPromedio: true, costoUltimo: true },
+      },
+    },
+    orderBy: { orden: "asc" as const },
+  },
+} as const;
+
+export async function getVentaParaVDP(
+  q: string
+): Promise<{ venta?: VDPVenta; matches?: VDPMatch[]; error?: string }> {
   const session = await auth();
   const rol = ((session?.user) as { rol?: string })?.rol ?? "";
   if (rol !== "ADMINISTRADOR") return { error: "Solo el administrador puede usar Cálculo VDP" };
 
-  const venta = await prisma.venta.findUnique({
-    where: { numero: numero.trim().toUpperCase() },
-    include: {
-      cliente: { select: { nombre: true } },
-      detalles: {
-        include: {
-          producto: {
-            select: {
-              codigo: true,
-              nombre: true,
-              unidadMedida: true,
-              costoPromedio: true,
-              costoUltimo: true,
-            },
-          },
-        },
-        orderBy: { orden: "asc" },
-      },
-    },
+  const busqueda = q.trim();
+  if (!busqueda) return { error: "Ingresa un número de documento o nombre de cliente" };
+
+  // 1. Buscar por número — contains, sin importar mayúsculas
+  const porNumero = await prisma.venta.findMany({
+    where: { numero: { contains: busqueda, mode: "insensitive" } },
+    include: VDP_INCLUDE,
+    orderBy: { fechaEmision: "desc" },
+    take: 10,
   });
 
-  if (!venta) return { error: `No se encontró el documento "${numero}"` };
+  // 2. Si no hay coincidencia por número, buscar por nombre de cliente
+  const resultados = porNumero.length > 0
+    ? porNumero
+    : await prisma.venta.findMany({
+        where: { cliente: { nombre: { contains: busqueda, mode: "insensitive" } } },
+        include: VDP_INCLUDE,
+        orderBy: { fechaEmision: "desc" },
+        take: 10,
+      });
 
+  if (resultados.length === 0)
+    return { error: `No se encontró ningún documento ni cliente con "${busqueda}"` };
+
+  // Resultado único → cargar directo
+  if (resultados.length === 1) return { venta: mapVentaToVDP(resultados[0]) };
+
+  // Múltiples → devolver lista para que el usuario elija
   return {
-    venta: {
-      id: venta.id,
-      numero: venta.numero,
-      tipo: venta.tipo,
-      cliente: venta.cliente.nombre,
-      subtotal: Number(venta.subtotal),
-      itbis: Number(venta.itbis),
-      total: Number(venta.total),
-      detalles: venta.detalles.map((d) => ({
-        id: d.id,
-        descripcion: d.descripcion,
-        codigo: d.producto.codigo,
-        nombre: d.descripcion ?? d.producto.nombre,
-        unidad: d.unidad,
-        unidadMedida: d.producto.unidadMedida,
-        cantidad: Number(d.cantidad),
-        precio: Number(d.precio),
-        precioFinal: Number(d.precioFinal),
-        exentoItbis: d.exentoItbis,
-        descuento: Number(d.descuento),
-        subtotal: Number(d.subtotal),
-        itbis: Number(d.itbis),
-        costo: d.costoAlVender
-          ? Number(d.costoAlVender)
-          : d.producto.costoPromedio
-          ? Number(d.producto.costoPromedio)
-          : null,
-      })),
-    },
+    matches: resultados.map((v) => ({
+      id: v.id,
+      numero: v.numero,
+      tipo: v.tipo,
+      cliente: v.cliente.nombre,
+      total: Number(v.total),
+      fecha: v.fechaEmision.toISOString(),
+    })),
   };
+}
+
+export async function getVentaVDPById(
+  ventaId: string
+): Promise<{ venta?: VDPVenta; error?: string }> {
+  const session = await auth();
+  const rol = ((session?.user) as { rol?: string })?.rol ?? "";
+  if (rol !== "ADMINISTRADOR") return { error: "Acceso restringido" };
+
+  const venta = await prisma.venta.findUnique({ where: { id: ventaId }, include: VDP_INCLUDE });
+  if (!venta) return { error: "No encontrado" };
+  return { venta: mapVentaToVDP(venta) };
 }
 
 export async function guardarPreciosVDP(

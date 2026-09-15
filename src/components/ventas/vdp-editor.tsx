@@ -374,7 +374,7 @@ export function VDPSearch({ defaultValue }: { defaultValue: string }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!q.trim()) return;
-    router.push(`/ventas/vdp?numero=${encodeURIComponent(q.trim().toUpperCase())}`);
+    router.push(`/ventas/vdp?q=${encodeURIComponent(q.trim())}`);
   }
 
   return (
@@ -383,7 +383,7 @@ export function VDPSearch({ defaultValue }: { defaultValue: string }) {
         type="text"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="ONV/2026/0001 · FAC/2026/0001 · COT/2026/0001"
+        placeholder="OVN/2026/0045 · FAC/2026/0001 · Nombre cliente…"
         autoCapitalize="off"
         autoCorrect="off"
         spellCheck={false}
