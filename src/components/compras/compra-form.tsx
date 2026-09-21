@@ -306,7 +306,7 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
       return { productoId: d.productoId, cantidad: d.cantidad, costo: netoConDesc, itbis: itbisTotal };
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return { ...values, detalles: detallesTransformados, ajustesPrecio, pagoContado } as any;
+    return { ...values, fechaVencimiento: pagoContado ? undefined : values.fechaVencimiento, detalles: detallesTransformados, ajustesPrecio, pagoContado } as any;
   };
 
   const submitFinal = async (values: FormValues, pagoContado?: { metodo: MetodoPago; referencia?: string; cuentaId?: string; notas?: string }) => {
@@ -599,11 +599,15 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
                 onChange={v => {
                   form.setValue("suplidorId", v ?? "");
                   const sup = suplidores.find(s => s.id === v);
-                  const dias = DIAS_CREDITO[sup?.credito ?? ""] ?? 0;
-                  const fechaFact = form.getValues("fechaFactura") || hoy;
-                  const d = new Date(fechaFact + "T00:00:00");
-                  d.setDate(d.getDate() + dias);
-                  form.setValue("fechaVencimiento", d.toISOString().split("T")[0]);
+                  if (!sup || sup.credito === "CONTADO") {
+                    form.setValue("fechaVencimiento", "");
+                  } else {
+                    const dias = DIAS_CREDITO[sup.credito ?? ""] ?? 0;
+                    const fechaFact = form.getValues("fechaFactura") || hoy;
+                    const d = new Date(fechaFact + "T00:00:00");
+                    d.setDate(d.getDate() + dias);
+                    form.setValue("fechaVencimiento", d.toISOString().split("T")[0]);
+                  }
                 }}
                 items={suplidores.map(s => ({
                   id: s.id,
@@ -646,7 +650,8 @@ export function CompraForm({ suplidores, categorias, cuentasBancarias, rol }: Co
               <input className={INPUT_CLS} type="date" {...form.register("fechaFactura", {
                 onChange: e => {
                   const sup = suplidores.find(s => s.id === form.getValues("suplidorId"));
-                  const dias = DIAS_CREDITO[sup?.credito ?? ""] ?? 0;
+                  if (!sup || sup.credito === "CONTADO") return;
+                  const dias = DIAS_CREDITO[sup.credito ?? ""] ?? 0;
                   if (e.target.value) {
                     const d = new Date(e.target.value + "T00:00:00");
                     d.setDate(d.getDate() + dias);
