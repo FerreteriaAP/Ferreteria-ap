@@ -420,21 +420,16 @@ export async function getResumenMensualPL(año: number) {
  `,
  ]);
 
- // Nómina: query separada con fallback por si la tabla no existe aún en producción
- let nominaRows: NRow[] = [];
- try {
-   nominaRows = await prisma.$queryRaw<NRow[]>`
-     SELECT n.mes,
-            SUM(ln."totalBruto" - ln."afpEmpleado" - ln."sfsEmpleado")::text AS nomina
-     FROM nominas n
-     JOIN lineas_nomina ln ON ln."nominaId" = n.id
-     WHERE n.anio = ${año}
-     GROUP BY n.mes
-     ORDER BY n.mes
-   `;
- } catch {
-   // lineas_nomina aún no existe en producción — nómina = 0
- }
+ // Nómina pagada por mes
+ const nominaRows = await prisma.$queryRaw<NRow[]>`
+   SELECT n.mes,
+          SUM(ln."totalBruto" - ln."afpEmpleado" - ln."sfsEmpleado")::text AS nomina
+   FROM nominas n
+   JOIN nomina_empleados ln ON ln."nominaId" = n.id
+   WHERE n.anio = ${año} AND n.estado IN ('PROCESADA', 'PAGADA')
+   GROUP BY n.mes
+   ORDER BY n.mes
+ `;
 
  const totalGastosFijos = Number(gastosFijos[0]?.total ?? 0);
 
