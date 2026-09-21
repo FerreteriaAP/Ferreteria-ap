@@ -88,7 +88,7 @@ const BILLETES = [100, 200, 500, 1000, 2000];
 // MODAL — Pago de factura (rediseñado)
 //
 
-type NCInfo = { id: string; numero: string; monto: number; montoRestante: number; ventaNumero: string; motivo: string };
+type NCInfo = { id: string; numero: string; monto: number; montoRestante: number; ventaNumero: string; motivo: string; clienteNombre?: string };
 
 function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
  factura: FacturaPendiente;
@@ -121,9 +121,9 @@ function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
   if (!val.trim()) return;
   setNcBuscando(true);
   ncTimerRef.current = setTimeout(async () => {
-   const info = await buscarNCPorNumero(val.trim(), factura.cliente.id);
+   const info = await buscarNCPorNumero(val.trim());
    setNcBuscando(false);
-   if (!info) { setNcError("NC no encontrada, ya fue aplicada o no pertenece a este cliente"); return; }
+   if (!info) { setNcError("NC no encontrada o ya fue aplicada"); return; }
    if ("blocked" in info) { setNcError((info as { blocked: true; mensaje: string }).mensaje); return; }
    setNcInfo(info);
    setMontoNC(Math.min(info.montoRestante, factura.total));
@@ -310,6 +310,7 @@ function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
         <div className="flex justify-between items-start gap-2">
          <div>
           <p className="text-xs font-bold font-mono" style={{ color: "#a855f7" }}>{ncInfo.numero}</p>
+          {ncInfo.clienteNombre && <p className="text-[11px] font-medium" style={{ color: "#a855f7" }}>Cliente: {ncInfo.clienteNombre}</p>}
           <p className="text-[11px] text-muted-foreground">Factura origen: {ncInfo.ventaNumero}</p>
           <p className="text-[11px] text-muted-foreground truncate max-w-[200px]">{ncInfo.motivo}</p>
          </div>
@@ -806,9 +807,9 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
   if (!val.trim() || !clienteIdRef.current) return;
   setNcBuscando(true);
   ncTimerRef2.current = setTimeout(async () => {
-   const nc = await buscarNCPorNumero(val.trim(), clienteIdRef.current!);
+   const nc = await buscarNCPorNumero(val.trim());
    setNcBuscando(false);
-   if (!nc) { setNcError("Nota de crédito no encontrada o no pertenece a este cliente"); return; }
+   if (!nc) { setNcError("Nota de crédito no encontrada o ya fue aplicada"); return; }
    if ("blocked" in nc) { setNcError((nc as { blocked: true; mensaje: string }).mensaje); return; }
    setNcSeleccionada(nc);
    setMontoNC(Math.min(nc.montoRestante, totalCobro).toFixed(2));
@@ -972,6 +973,7 @@ function CobroCxCModal({ turnoId, onClose, onOk }: {
        <p className="text-xs font-bold" style={{ color: "#a855f7" }}>NC aplicada: {ncSeleccionada.numero}</p>
        <button type="button" onClick={cancelarNC} className="text-xs text-muted-foreground hover:text-foreground">Quitar</button>
       </div>
+      {ncSeleccionada.clienteNombre && <p className="text-[11px] font-medium" style={{ color: "#a855f7" }}>Cliente: {ncSeleccionada.clienteNombre}</p>}
       <p className="text-[11px] text-muted-foreground">Saldo disponible: {fmtMoney(ncSeleccionada.montoRestante)}</p>
       <div className="flex items-center gap-2">
        <label className="text-xs text-muted-foreground shrink-0">Monto a aplicar</label>

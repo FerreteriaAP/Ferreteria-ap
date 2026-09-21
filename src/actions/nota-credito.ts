@@ -385,16 +385,19 @@ export async function buscarNCsDelCliente(clienteId: string) {
 }
 
 // Buscar NC por número para aplicar en cobro (cajero ingresa el código)
+// La NC puede pertenecer a cualquier cliente — puede ser cedida a otro.
 
-export async function buscarNCPorNumero(ncNumero: string, clienteId: string) {
+export async function buscarNCPorNumero(ncNumero: string, _clienteId?: string) {
  if (!ncNumero.trim()) return null;
  const nc = await prisma.notaCredito.findFirst({
  where: {
  numero: { equals: ncNumero.trim(), mode: "insensitive" },
- clienteId,
  estado: "PENDIENTE",
  },
- include: { venta: { select: { numero: true } } },
+ include: {
+   venta: { select: { numero: true } },
+   cliente: { select: { nombre: true } },
+ },
  });
  if (!nc) return null;
  const montoRestante = Number(nc.montoRestante);
@@ -420,6 +423,7 @@ export async function buscarNCPorNumero(ncNumero: string, clienteId: string) {
  ventaNumero: nc.venta.numero,
  motivo: nc.motivo,
  createdAt: nc.createdAt,
+ clienteNombre: nc.cliente.nombre,
  };
 }
 

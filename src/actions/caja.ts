@@ -470,9 +470,9 @@ export async function procesarPagoCaja(
      notas: `NC ${ncReg.numero}`,
    },
  });
- // Rebajar saldoFavor del cliente (fue acreditado al crear la NC)
+ // Rebajar saldoFavor del dueño original de la NC (puede ser distinto al cliente de la venta si fue cedida)
  await tx.contacto.update({
- where: { id: venta.clienteId },
+ where: { id: ncReg.clienteId },
  data: { saldoFavor: { decrement: montoAplicar } },
  });
  }
