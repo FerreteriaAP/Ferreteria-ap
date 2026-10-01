@@ -394,9 +394,9 @@ export async function getResumenMensualPL(año: number) {
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ THEN dv.cantidad * COALESCE(NULLIF(dv."costoAlVender", 0), p."costoPromedio") / p."factorFraccion"
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ ELSE dv.cantidad * COALESCE(NULLIF(dv."costoAlVender", 0), p."costoPromedio")
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
  END
  )::text AS cogs,
@@ -847,9 +847,9 @@ export async function getVentasPorCliente(opts: { año: number; mes?: number; li
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ THEN dv.cantidad * COALESCE(NULLIF(dv."costoAlVender", 0), p."costoPromedio") / p."factorFraccion"
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ ELSE dv.cantidad * COALESCE(NULLIF(dv."costoAlVender", 0), p."costoPromedio")
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
  END
  )::text AS cogs,
@@ -922,9 +922,9 @@ export async function getTopProductos(opts: { año: number; mes?: number; limit?
  (dv.unidad IS NOT NULL AND dv.unidad <> p."unidadMedida")
  OR (dv.unidad IS NULL AND dv."precioFinal" < p."precioVenta")
  )
- THEN dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio") / p."factorFraccion"
+ THEN dv.cantidad * COALESCE(NULLIF(dv."costoAlVender", 0), p."costoPromedio") / p."factorFraccion"
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
- ELSE dv.cantidad * COALESCE(dv."costoAlVender", p."costoPromedio")
+ ELSE dv.cantidad * COALESCE(NULLIF(dv."costoAlVender", 0), p."costoPromedio")
       * CASE WHEN p."exentoItbis" = false THEN 1.18 ELSE 1.0 END
  END
  )::text AS cogs,
