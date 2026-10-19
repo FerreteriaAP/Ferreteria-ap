@@ -277,15 +277,53 @@ export async function getMovimientosProducto(id: string, page = 1, pageSize = 50
  }),
  prisma.movimientoInventario.count({ where: { productoId: id } }),
  ]);
+
+ // Batch-load ventas and compras referenced by these movements
+ const ventaIds = items.filter(m => m.tipoRef === "VENTA" && m.referencia).map(m => m.referencia!);
+ const compraIds = items.filter(m => m.tipoRef === "COMPRA" && m.referencia).map(m => m.referencia!);
+
+ const [ventas, compras] = await Promise.all([
+ ventaIds.length > 0
+ ? prisma.venta.findMany({
+ where: { id: { in: ventaIds } },
+ select: { id: true, numero: true, cliente: { select: { nombre: true } } },
+ })
+ : [],
+ compraIds.length > 0
+ ? prisma.compra.findMany({
+ where: { id: { in: compraIds } },
+ select: { id: true, numero: true, suplidor: { select: { nombre: true } } },
+ })
+ : [],
+ ]);
+
+ const ventaMap = new Map(ventas.map(v => [v.id, v]));
+ const compraMap = new Map(compras.map(c => [c.id, c]));
+
  return {
- items: items.map(m => ({
+ items: items.map(m => {
+ let contraparte: string | null = null;
+ let docNumero: string | null = null;
+ if (m.tipoRef === "VENTA" && m.referencia) {
+ const v = ventaMap.get(m.referencia);
+ contraparte = v?.cliente?.nombre ?? null;
+ docNumero = v?.numero ?? null;
+ } else if (m.tipoRef === "COMPRA" && m.referencia) {
+ const c = compraMap.get(m.referencia);
+ contraparte = c?.suplidor?.nombre ?? null;
+ docNumero = c?.numero ?? null;
+ }
+ return {
  ...m,
  cantidad: Number(m.cantidad),
  stockAntes: Number(m.stockAntes),
- stockDespues:Number(m.stockDespues),
+ stockDespues: Number(m.stockDespues),
  costo: m.costo != null ? Number(m.costo) : null,
  createdAt: m.createdAt.toISOString(),
- })),
+ contraparte,
+ docNumero,
+ };
+ }),
  total,
  pages: Math.ceil(total / pageSize),
  };
