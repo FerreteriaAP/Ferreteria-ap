@@ -484,8 +484,8 @@ export async function getResumenMensualPL(año: number) {
  gastosModulo, // desglose para reportes
  gananciaBruta,
  gananciaNeta,
- margenBruto: cogs > 0 ? (gananciaBruta / cogs) * 100 : 0,
- margenNeto: cogs > 0 ? (gananciaNeta / cogs) * 100 : 0,
+ margenBruto: ventas > 0 ? (gananciaBruta / ventas) * 100 : 0,
+ margenNeto: ventas > 0 ? (gananciaNeta / ventas) * 100 : 0,
  num,
  };
  });

@@ -50,7 +50,7 @@ function Chip({ v }: { v: number | null }) {
  if (v === null) return <span className="text-muted-foreground text-xs">—</span>;
  const pos = v >= 0;
  return (
- <span className={cn("text-xs font-medium", pos ? "text-green-700 dark:text-green-400" : "text-destructive")}> {pos ? "" : ""} {Math.abs(v).toFixed(1)}%
+ <span className={cn("text-xs font-medium", pos ? "text-green-700 dark:text-green-400" : "text-destructive")}>{pos ? "▲" : "▼"} {Math.abs(v).toFixed(1)}%
  </span> );
 }
 
@@ -86,8 +86,8 @@ export default async function AnaliticasPage({ searchParams }: PageProps) {
  const plCogs = periodoMeses.reduce((s, m) => s + m.cogs, 0);
  const totalFacturas = periodoMeses.reduce((s, m) => s + m.num, 0);
 
- const plMargenBruto = plCogs > 0 ? (plGananciaBruta / plCogs) * 100 : 0;
- const plMargenNeto = plCogs > 0 ? (plGananciaNeta / plCogs) * 100 : 0;
+ const plMargenBruto = plVentas > 0 ? (plGananciaBruta / plVentas) * 100 : 0;
+ const plMargenNeto = plVentas > 0 ? (plGananciaNeta / plVentas) * 100 : 0;
 
  // Margen neto promedio mensual (solo meses con ventas)
  const mesesConVentas = periodoMeses.filter((m) => m.ventas > 0);
