@@ -32,3 +32,27 @@ export async function setTemaActivo(tema: string): Promise<{ ok: boolean; error?
     return { ok: false, error: "Error al guardar el tema" };
   }
 }
+
+const COOKIE_MOBILE = "ap-mobile";
+
+export async function setMobileMode(activo: boolean): Promise<{ ok: boolean }> {
+  try {
+    const session = await auth();
+    if (!session?.user) return { ok: false };
+
+    const jar = await cookies();
+    if (activo) {
+      jar.set(COOKIE_MOBILE, "1", {
+        maxAge:   COOKIE_MAX_AGE,
+        path:     "/",
+        sameSite: "lax",
+        httpOnly: false,
+      });
+    } else {
+      jar.delete(COOKIE_MOBILE);
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}

@@ -309,6 +309,31 @@ body {
    Las páginas de impresión (factura, conduce, nómina, etc.) viven dentro
    del DashboardLayout. En @media print ocultamos el header, el banner de
    empleado/vendedor y el padding del <main> para que solo quede el doc. */
+/* ── MODO MOBILE ─────────────────────────────────────────────────────────────
+   Clase .mobile-mode en <main> — activada por cookie ap-mobile=1
+   Solo afecta el dispositivo donde se activa (cookie por navegador).
+   ─────────────────────────────────────────────────────────────────────────── */
+.mobile-mode {
+  font-size: 1.08rem;
+}
+.mobile-mode button,
+.mobile-mode [role="button"],
+.mobile-mode a {
+  min-height: 44px;
+  min-width: 44px;
+}
+.mobile-mode input,
+.mobile-mode select,
+.mobile-mode textarea {
+  font-size: 1rem !important; /* evita zoom automático en iOS (< 16px lo dispara) */
+  min-height: 44px;
+}
+.mobile-mode table th,
+.mobile-mode table td {
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
 @media print {
   /* Header de navegación */
   header,

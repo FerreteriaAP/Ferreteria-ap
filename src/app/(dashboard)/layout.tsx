@@ -60,8 +60,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { alertas, cajaAbierta } = await getHeaderData(user.rol ?? "");
 
   // Tema activo — por cookie del usuario (independiente por usuario/navegador)
-  const jar = await cookies();
+  const jar        = await cookies();
   const temaActual = jar.get("ap-tema")?.value ?? "dark-ops";
+  const mobileMode = jar.get("ap-mobile")?.value === "1";
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--background)" }}>
@@ -76,7 +77,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         mostrarTema={user.rol !== "ADMINISTRADOR"}
       />
       <SelectOnFocus />
-      <main className="flex-1 p-6" style={{ backgroundColor: "var(--background)" }}>
+      <main className={`flex-1 p-6${mobileMode ? " mobile-mode" : ""}`} style={{ backgroundColor: "var(--background)" }}>
         {children}
       </main>
     </div>

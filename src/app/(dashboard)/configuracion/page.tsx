@@ -2,17 +2,19 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { TemaSelector } from "@/components/configuracion/tema-selector";
+import { MobileModeToggle } from "@/components/configuracion/mobile-mode-toggle";
 import { EmpresaForm, CuentasBancariasPanel } from "@/components/configuracion/empresa-form";
 import { UsuariosPanel } from "@/components/configuracion/usuarios-panel";
 import { getEmpresaConfig, getCuentasBancarias } from "@/actions/empresa";
 import { getUsuarios } from "@/actions/usuarios";
-import { Palette, Building2, Users } from "lucide-react";
+import { Palette, Building2, Users, Smartphone } from "lucide-react";
 
 const TEMAS_VALIDOS = ["dark-ops", "gris-claro", "azul-metal", "dark-multicolor", "carbon"];
 
 async function getConfig() {
  const jar = await cookies();
- const cookieTema = jar.get("ap-tema")?.value;
+ const cookieTema    = jar.get("ap-tema")?.value;
+ const mobileActivo = jar.get("ap-mobile")?.value === "1";
 
  const [empleados, contactos, productos, usuarios, temaConfig] = await Promise.all([
  prisma.empleado.count(),
@@ -26,10 +28,10 @@ async function getConfig() {
  contactos,
  productos,
  usuarios,
- // Cookie tiene prioridad (tema por usuario), fallback a DB global
  temaActual: (cookieTema && TEMAS_VALIDOS.includes(cookieTema))
    ? cookieTema
    : (temaConfig?.valor ?? "dark-ops"),
+ mobileActivo,
  };
 }
 
@@ -56,6 +58,15 @@ export default async function ConfiguracionPage() {
  > <Palette size={16} style={{ color: "var(--primary)" }} /> </div> <div> <h2 className="font-semibold text-sm" style={{ color: "var(--foreground)" }}> Tema visual del sistema
  </h2> <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}> Cambia el aspecto para todos los usuarios · 5 temas disponibles
  </p> </div> </div> <TemaSelector temaActual={stats.temaActual} /> </div> )}
+
+ {/* Modo mobile — disponible para todos */}
+ <div
+ className="rounded-2xl p-6" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
+ > <div className="flex items-center gap-3 mb-5"> <div
+ className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(var(--primary-rgb, 244 119 23) / 0.12)" }}
+ > <Smartphone size={16} style={{ color: "var(--primary)" }} /> </div> <div> <h2 className="font-semibold text-sm" style={{ color: "var(--foreground)" }}>Interfaz</h2> <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>Preferencias de visualización · solo este dispositivo</p> </div> </div>
+ <MobileModeToggle activo={stats.mobileActivo} />
+ </div>
 
  {/* Datos de la empresa — solo admin */}
  {esAdmin && (
