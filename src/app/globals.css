@@ -316,8 +316,8 @@ body {
 .mobile-mode {
   font-size: 1.08rem;
 }
-.mobile-mode button,
-.mobile-mode [role="button"],
+.mobile-mode button:not([data-toggle]),
+.mobile-mode [role="button"]:not([data-toggle]),
 .mobile-mode a {
   min-height: 44px;
   min-width: 44px;
