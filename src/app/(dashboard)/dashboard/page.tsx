@@ -61,12 +61,12 @@ function ModuleCard({ label, href, Icon, badge = 0, moduleKey }: {
     <Link
       href={href}
       data-module={moduleKey}
-      className="mod-card-link group relative flex flex-col items-center justify-between pt-5 sm:pt-7 pb-0 px-2 sm:px-3
+      className="mod-card-link group relative flex flex-col items-center justify-between pt-7 pb-0 px-3
         rounded-2xl transition-all duration-150 cursor-pointer select-none overflow-hidden w-full h-full"
       style={{
         backgroundColor: "var(--card-bg-hex)",
         border: "1px solid var(--card-border-hex)",
-        minHeight: 100,
+        minHeight: 130,
       }}
     >
       {badge > 0 && (
@@ -79,12 +79,12 @@ function ModuleCard({ label, href, Icon, badge = 0, moduleKey }: {
         </span>
       )}
 
-      <div className="flex items-center justify-center mb-2 sm:mb-3">
-        <Icon size={26} strokeWidth={1.6} className="sm:w-[30px] sm:h-[30px]" style={{ color: iconColorVar }} />
+      <div className="flex items-center justify-center mb-3">
+        <Icon size={30} strokeWidth={1.6} style={{ color: iconColorVar }} />
       </div>
 
       <p
-        className="text-center font-medium leading-tight mb-3 text-[11px] sm:text-[13px]"
+        className="text-center font-medium leading-tight mb-3 text-[13px]"
         style={{ color: "var(--card-fg-hex, var(--foreground))" }}
       >
         {label}
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
   const totalAlertas = (verCxC ? stats.cxcVencidas + stats.cxpVencidas : 0) + (verStock ? stats.stockBajo : 0);
 
   return (
-    <div className="flex flex-col gap-6 max-w-[960px] mx-auto w-full pt-4 sm:pt-16">
+    <div className="flex flex-col gap-6 max-w-[960px] mx-auto w-full pt-16" data-dashboard-root>
 
       {/* Panel de módulos */}
       <div
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
           </h2>
         </div>
 
-        <div className="grid gap-3 grid-cols-3 sm:grid-cols-4 lg:grid-cols-6">
+        <div className="grid gap-3" data-grid="modules" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
           {modulos.map((m) => (
             <ModuleCard
               key={m.key}

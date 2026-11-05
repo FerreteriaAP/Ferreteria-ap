@@ -334,6 +334,36 @@ body {
   padding-bottom: 0.6rem;
 }
 
+/* Mobile mode — dashboard grid responsive */
+.mobile-mode [data-grid="modules"] {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+@media (min-width: 640px) {
+  .mobile-mode [data-grid="modules"] {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+@media (min-width: 1024px) {
+  .mobile-mode [data-grid="modules"] {
+    grid-template-columns: repeat(6, 1fr) !important;
+  }
+}
+.mobile-mode [data-grid="modules"] .mod-card-link {
+  min-height: 100px !important;
+}
+.mobile-mode [data-dashboard-root] {
+  padding-top: 1rem !important;
+}
+
+/* Toggle pill — dimensiones fijas inmunes a .mobile-mode */
+button.toggle-pill {
+  width: 44px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  min-width: 44px !important;
+  max-height: 24px !important;
+}
+
 @media print {
   /* Header de navegación */
   header,

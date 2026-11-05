@@ -35,7 +35,7 @@ export function MobileModeToggle({ activo }: { activo: boolean }) {
         disabled={pending}
         aria-pressed={enabled}
         data-toggle
-        className="relative flex-shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2"
+        className="toggle-pill relative flex-shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2"
         style={{
           backgroundColor: enabled ? "var(--primary)" : "var(--border)",
           width: 44,
