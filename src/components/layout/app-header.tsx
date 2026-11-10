@@ -51,7 +51,7 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
       }}
     >
       {/* Left: Logo + divider + caja status */}
-      <div className="flex items-center gap-0">
+      <div className="flex items-center">
         <button
           type="button"
           onClick={irAlDashboard}
@@ -71,16 +71,18 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
               fontWeight="900" fontSize="84" letterSpacing="-3"
               style={{ fill: "var(--accent-hex)" }}>AP</text>
           </svg>
-          <span className="ml-2.5 flex items-baseline gap-0.5 leading-none select-none">
+          {/* Nombre de la app — se oculta en mobile */}
+          <span className="ml-2.5 hidden sm:flex items-baseline gap-0.5 leading-none select-none">
             <span style={{ color: "var(--accent-hex)", fontWeight: 900, fontSize: 17, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>F</span>
             <span style={{ color: "var(--foreground)", fontWeight: 900, fontSize: 17, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>ERRETERÍA</span>
           </span>
         </button>
 
-        <div className="mx-5 h-7 w-px" style={{ backgroundColor: "var(--border)" }} />
+        {/* Divider — solo desktop */}
+        <div className="hidden sm:block mx-5 h-7 w-px" style={{ backgroundColor: "var(--border)" }} />
 
-        {/* Caja status indicator */}
-        <div className="flex items-center gap-2">
+        {/* Caja status — dot siempre, texto solo en desktop */}
+        <div className="flex items-center gap-2 ml-3 sm:ml-0">
           <span className="relative flex h-2.5 w-2.5 shrink-0">
             <span
               className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
@@ -91,18 +93,21 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
               style={{ backgroundColor: cajaAbierta ? "#22c55e" : "#ef4444" }}
             />
           </span>
-          <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em" }}>
+          <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em" }}>
             {cajaAbierta ? "Caja abierta" : "Caja cerrada"}
           </span>
         </div>
       </div>
 
-      {/* Right: Date + Bell + User */}
+      {/* Right: Date (desktop) + Bell + User */}
       <div className="flex items-center gap-3">
 
-        <DateWidget />
+        {/* Fecha — solo desktop */}
+        <div className="hidden sm:block">
+          <DateWidget />
+        </div>
 
-        <div className="h-6 w-px" style={{ backgroundColor: "var(--border)" }} />
+        <div className="hidden sm:block h-6 w-px" style={{ backgroundColor: "var(--border)" }} />
 
         <Link
           href="/alertas"
