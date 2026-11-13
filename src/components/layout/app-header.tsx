@@ -71,10 +71,10 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
               fontWeight="900" fontSize="84" letterSpacing="-3"
               style={{ fill: "var(--accent-hex)" }}>AP</text>
           </svg>
-          {/* Nombre de la app — se oculta en mobile */}
-          <span className="ml-2.5 hidden sm:flex items-baseline gap-0.5 leading-none select-none">
-            <span style={{ color: "var(--accent-hex)", fontWeight: 900, fontSize: 17, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>F</span>
-            <span style={{ color: "var(--foreground)", fontWeight: 900, fontSize: 17, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>ERRETERÍA</span>
+          {/* Nombre de la app */}
+          <span className="ml-2.5 flex items-baseline gap-0.5 leading-none select-none">
+            <span style={{ color: "var(--accent-hex)", fontWeight: 900, fontSize: "clamp(13px, 3.5vw, 17px)", fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>F</span>
+            <span style={{ color: "var(--foreground)", fontWeight: 900, fontSize: "clamp(13px, 3.5vw, 17px)", fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>ERRETERÍA</span>
           </span>
         </button>
 
