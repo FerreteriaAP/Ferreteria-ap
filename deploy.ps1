@@ -1,26 +1,39 @@
-Set-Location C:\Users\Administrator\ferreteria-ap
+$ROOT = "C:\Users\Administrator\ferreteria-ap"
+$LOCK = "C:\deploy.lock"
+$LOG  = "C:\deploy.log"
+
+Set-Location $ROOT
 
 # KILLSWITCH: si existe este archivo, el auto-deploy queda bloqueado
 if (Test-Path "C:\KILLSWITCH_ACTIVE") {
-    $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    Add-Content C:\deploy.log "[$ts] KILLSWITCH activo — deploy bloqueado."
+    Add-Content $LOG "[ $(Get-Date -f 'yyyy-MM-dd HH:mm:ss') ] KILLSWITCH activo — deploy bloqueado."
     exit 0
 }
 
-# Verificar si hay cambios nuevos en GitHub
-git fetch origin main 2>&1 | Out-Null
-$local  = git rev-parse HEAD
-$remote = git rev-parse origin/main
+# Lock: evita builds concurrentes
+if (Test-Path $LOCK) { exit 0 }
+"building" | Out-File $LOCK
 
-if ($local -ne $remote) {
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    Add-Content C:\deploy.log "[$timestamp] Cambios detectados - desplegando..."
+try {
+    # Verificar si hay cambios nuevos en GitHub
+    git fetch origin main 2>&1 | Out-Null
+    $local  = git rev-parse HEAD
+    $remote = git rev-parse origin/main
+
+    if ($local -eq $remote) { exit 0 }
+
+    $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
+    Add-Content $LOG "[$ts] Cambios detectados — desplegando..."
 
     git pull origin main 2>&1 | Out-Null
 
-    # Build
-    Add-Content C:\deploy.log "[$timestamp] Iniciando build..."
+    $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
+    Add-Content $LOG "[$ts] Build iniciado..."
     pnpm build 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Add-Content $LOG "[$ts] ERROR: build falló (exit $LASTEXITCODE) — deploy cancelado."
+        exit 1
+    }
 
     # Liberar puerto 3000 si está ocupado por otro proceso
     $pid3000 = (netstat -ano | findstr ":3000 " | Where-Object { $_ -match "LISTENING" } |
@@ -29,8 +42,12 @@ if ($local -ne $remote) {
         taskkill /F /PID $pid3000 2>&1 | Out-Null
     }
 
-    # Reiniciar PM2
-    pm2 restart ferreteria 2>&1 | Out-Null
+    # Reiniciar PM2 (nombre correcto: ferreteria-ap)
+    pm2 restart ferreteria-ap 2>&1 | Out-Null
 
-    Add-Content C:\deploy.log "[$timestamp] Deploy completado OK."
+    $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
+    Add-Content $LOG "[$ts] Deploy completado OK."
+
+} finally {
+    Remove-Item $LOCK -ErrorAction SilentlyContinue
 }
