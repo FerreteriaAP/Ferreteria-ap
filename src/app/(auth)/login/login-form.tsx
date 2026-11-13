@@ -74,12 +74,33 @@ export function LoginForm() {
 
  if (restoring) {
    return (
-     <Card>
-       <CardContent className="flex flex-col items-center justify-center py-12 gap-3">
-         <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#f97316", borderTopColor: "transparent" }} />
-         <p className="text-sm text-muted-foreground">Restableciendo sesión...</p>
-       </CardContent>
-     </Card>
+     <div style={{
+       position: "fixed", inset: 0, zIndex: 9999,
+       background: "var(--background, #0d0d0d)",
+       display: "flex", flexDirection: "column",
+       alignItems: "center", justifyContent: "center", gap: 28,
+     }}>
+       {/* Octágono AP */}
+       <svg width="110" height="110" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+         <polygon points="133.7,10 181.3,57.6 181.3,142.4 133.7,190 66.3,190 18.7,142.4 18.7,57.6 66.3,10"
+           style={{ fill: "var(--card-bg-hex, #111923)", stroke: "var(--foreground, #fff)", strokeWidth: 7, strokeLinejoin: "round" }} />
+         <polygon points="127,23 170,66 170,134 127,177 73,177 30,134 30,66 73,23"
+           style={{ fill: "none", stroke: "var(--foreground, #fff)", strokeWidth: 3, strokeLinejoin: "round" }} />
+         <text x="100" y="100" dominantBaseline="central" textAnchor="middle"
+           fontFamily="Arial Black, Impact, sans-serif" fontWeight="900" fontSize="84" letterSpacing="-3"
+           style={{ fill: "var(--accent-hex, #f97316)" }}>AP</text>
+       </svg>
+       {/* Wordmark */}
+       <div style={{ display: "flex", alignItems: "baseline", gap: 2, userSelect: "none" }}>
+         <span style={{ color: "var(--accent-hex, #f97316)", fontWeight: 900, fontSize: 30, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>F</span>
+         <span style={{ color: "var(--foreground, #fff)", fontWeight: 900, fontSize: 30, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>ERRETERÍA</span>
+       </div>
+       {/* Spinner */}
+       <div style={{ width: 28, height: 28, borderRadius: "50%",
+         border: "2.5px solid rgba(249,115,22,0.25)", borderTopColor: "#f97316",
+         animation: "spin 0.75s linear infinite" }} />
+       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+     </div>
    );
  }
 
