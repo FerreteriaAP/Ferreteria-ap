@@ -2,6 +2,15 @@ $ROOT = "C:\Users\Administrator\ferreteria-ap"
 $LOCK = "C:\deploy.lock"
 $LOG  = "C:\deploy.log"
 
+# Task Scheduler corre con PATH minimo — inyectar rutas de git y pnpm
+$env:PATH = "C:\Program Files\Git\cmd;" +
+            "C:\Program Files\nodejs;" +
+            "$env:APPDATA\npm;" +
+            "$env:APPDATA\pnpm;" +
+            "C:\Users\Administrator\AppData\Roaming\npm;" +
+            "C:\Users\Administrator\AppData\Local\pnpm;" +
+            $env:PATH
+
 Set-Location $ROOT
 
 # KILLSWITCH: si existe este archivo, el auto-deploy queda bloqueado
