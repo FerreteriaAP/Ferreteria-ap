@@ -21,20 +21,26 @@ if (Test-Path "C:\KILLSWITCH_ACTIVE") {
 }
 
 # ── Función: arrancar la app como proceso independiente ──────────────────────
+# UseShellExecute=$true crea un proceso completamente desacoplado de la sesión
+# actual (evita que Windows Job Objects lo mate al cerrar la sesión SSH o la
+# tarea de Task Scheduler).
 function Start-App {
     $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName  = "node.exe"
-    $psi.Arguments = "`"$ROOT\node_modules\next\dist\bin\next`" start"
+    $psi.FileName      = "cmd.exe"
+    $psi.Arguments     = "/c `"node.exe `"`"$ROOT\node_modules\next\dist\bin\next`"`" start`""
     $psi.WorkingDirectory  = $ROOT
-    $psi.UseShellExecute   = $false
-    $psi.CreateNoWindow    = $true
-    $psi.RedirectStandardOutput = $false
-    $psi.RedirectStandardError  = $false
+    $psi.UseShellExecute   = $true
+    $psi.WindowStyle       = [System.Diagnostics.ProcessWindowStyle]::Hidden
     $proc = [System.Diagnostics.Process]::Start($psi)
-    if ($proc) {
-        $proc.Id | Out-File $PID_FILE -Encoding ascii
-        $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
-        Add-Content $LOG "[$ts] App arrancada (PID $($proc.Id))."
+    Start-Sleep -Seconds 3
+    $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
+    $pid3000 = if ($conn) { $conn.OwningProcess } else { 0 }
+    $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
+    if ($pid3000) {
+        $pid3000 | Out-File $PID_FILE -Encoding ascii
+        Add-Content $LOG "[$ts] App arrancada (PID $pid3000)."
+    } else {
+        Add-Content $LOG "[$ts] WARN: app arrancada pero port 3000 no detectado aún."
     }
 }
 
