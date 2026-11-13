@@ -25,12 +25,12 @@ function Ensure-RunnerTask {
     $q = schtasks /Query /TN "FerreteriRun" 2>&1
     if ("$q" -match "FerreteriRun") { return }
 
-    $script = @'
-$env:PATH = "C:\Program Files\nodejs;C:\Users\Administrator\AppData\Local\pnpm;C:\Program Files\Git\cmd;" + $env:PATH
-Set-Location C:\Users\Administrator\ferreteria-ap
-node.exe node_modules\next\dist\bin\next start
-'@
-    $script | Out-File -FilePath "C:\ferreteria-runner.ps1" -Encoding UTF8
+    $lines = @(
+        '$env:PATH = "C:\Program Files\nodejs;C:\Users\Administrator\AppData\Local\pnpm;C:\Program Files\Git\cmd;" + $env:PATH',
+        'Set-Location C:\Users\Administrator\ferreteria-ap',
+        'node.exe node_modules\next\dist\bin\next start'
+    )
+    [System.IO.File]::WriteAllLines("C:\ferreteria-runner.ps1", $lines)
 
     $action   = New-ScheduledTaskAction -Execute "powershell.exe" `
                     -Argument "-NonInteractive -ExecutionPolicy Bypass -File C:\ferreteria-runner.ps1"
