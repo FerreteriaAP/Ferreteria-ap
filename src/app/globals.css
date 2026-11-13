@@ -352,6 +352,10 @@ body {
   }
 }
 .mobile-mode [data-grid="modules"] .mod-card-link {
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
   height: 100% !important;
   min-height: unset !important;
 }
