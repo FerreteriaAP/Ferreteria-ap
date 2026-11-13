@@ -61,12 +61,12 @@ function ModuleCard({ label, href, Icon, badge = 0, moduleKey }: {
     <Link
       href={href}
       data-module={moduleKey}
-      className="mod-card-link group relative flex flex-col items-center justify-between pt-7 pb-0 px-3
+      className="mod-card-link group relative flex flex-col items-center justify-center gap-2 py-3 px-3
         rounded-2xl transition-all duration-150 cursor-pointer select-none overflow-hidden w-full h-full"
       style={{
         backgroundColor: "var(--card-bg-hex)",
         border: "1px solid var(--card-border-hex)",
-        minHeight: 130,
+        minHeight: 108,
       }}
     >
       {badge > 0 && (
@@ -79,12 +79,12 @@ function ModuleCard({ label, href, Icon, badge = 0, moduleKey }: {
         </span>
       )}
 
-      <div className="flex items-center justify-center mb-3">
+      <div className="flex items-center justify-center">
         <Icon size={30} strokeWidth={1.6} style={{ color: iconColorVar }} />
       </div>
 
       <p
-        className="text-center font-medium leading-tight mb-3 text-[13px]"
+        className="text-center font-medium leading-tight text-[12px]"
         style={{ color: "var(--card-fg-hex, var(--foreground))" }}
       >
         {label}

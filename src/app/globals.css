@@ -337,19 +337,23 @@ body {
 /* Mobile mode — dashboard grid responsive */
 .mobile-mode [data-grid="modules"] {
   grid-template-columns: repeat(3, 1fr) !important;
+  grid-auto-rows: 108px;
 }
 @media (min-width: 640px) {
   .mobile-mode [data-grid="modules"] {
     grid-template-columns: repeat(4, 1fr) !important;
+    grid-auto-rows: 115px;
   }
 }
 @media (min-width: 1024px) {
   .mobile-mode [data-grid="modules"] {
     grid-template-columns: repeat(6, 1fr) !important;
+    grid-auto-rows: 130px;
   }
 }
 .mobile-mode [data-grid="modules"] .mod-card-link {
-  min-height: 100px !important;
+  height: 100% !important;
+  min-height: unset !important;
 }
 .mobile-mode [data-dashboard-root] {
   padding-top: 1rem !important;
