@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { AppHeader } from "@/components/layout/app-header";
 import { SelectOnFocus } from "@/components/ui/select-on-focus";
+import { SessionKeeper } from "@/components/session-keeper";
 
 async function getHeaderData(rol: string) {
   // Roles que pueden ver alertas de CxC y CxP (contabilidad / administración)
@@ -77,6 +78,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         mostrarTema={user.rol !== "ADMINISTRADOR"}
       />
       <SelectOnFocus />
+      <SessionKeeper />
       <main className={`flex-1 p-6${mobileMode ? " mobile-mode" : ""}`} style={{ backgroundColor: "var(--background)" }}>
         {children}
       </main>

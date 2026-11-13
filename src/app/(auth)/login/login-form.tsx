@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -23,6 +23,30 @@ export function LoginForm() {
  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
  const [error, setError] = useState<string | null>(null);
  const [loading, setLoading] = useState(false);
+ const [restoring, setRestoring] = useState(true);
+
+ // Al abrir la app en iOS, intentar restaurar sesión desde device token guardado
+ useEffect(() => {
+   const tryRestore = async () => {
+     try {
+       const token = localStorage.getItem("ap_dt");
+       if (!token) { setRestoring(false); return; }
+       const res = await signIn("device-token", { token, redirect: false });
+       if (res?.ok) {
+         router.push(callbackUrl);
+         router.refresh();
+         return;
+       }
+       // Token inválido o expirado — limpiar
+       localStorage.removeItem("ap_dt");
+     } catch {
+       // localStorage no disponible (modo privado)
+     }
+     setRestoring(false);
+   };
+   tryRestore();
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
 
  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
  resolver: zodResolver(loginSchema),
@@ -47,6 +71,17 @@ export function LoginForm() {
  router.push(callbackUrl);
  router.refresh();
  };
+
+ if (restoring) {
+   return (
+     <Card>
+       <CardContent className="flex flex-col items-center justify-center py-12 gap-3">
+         <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#f97316", borderTopColor: "transparent" }} />
+         <p className="text-sm text-muted-foreground">Restableciendo sesión...</p>
+       </CardContent>
+     </Card>
+   );
+ }
 
  return (
  <Card> <CardHeader className="space-y-1 pb-4"> <CardTitle className="text-xl">Iniciar sesión</CardTitle> <CardDescription>Ingresa tus credenciales para continuar</CardDescription> </CardHeader> <CardContent> <form onSubmit={handleSubmit(onSubmit)} className="space-y-4"> <div className="space-y-2"> <Label htmlFor="email">Email</Label> <Input
