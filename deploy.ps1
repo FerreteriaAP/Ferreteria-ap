@@ -1,9 +1,7 @@
 $ROOT = "C:\Users\Administrator\ferreteria-ap"
 $LOCK = "C:\deploy.lock"
 $LOG  = "C:\deploy.log"
-$PID_FILE = "C:\ferreteria-ap.pid"
 
-# Task Scheduler corre con PATH minimo — inyectar rutas de git y pnpm
 $env:PATH = "C:\Program Files\Git\cmd;" +
             "C:\Program Files\nodejs;" +
             "$env:APPDATA\npm;" +
@@ -14,62 +12,77 @@ $env:PATH = "C:\Program Files\Git\cmd;" +
 
 Set-Location $ROOT
 
-# KILLSWITCH: si existe este archivo, todo queda bloqueado
 if (Test-Path "C:\KILLSWITCH_ACTIVE") {
     Add-Content $LOG "[ $(Get-Date -f 'yyyy-MM-dd HH:mm:ss') ] KILLSWITCH activo — bloqueado."
     exit 0
 }
 
-# ── Función: arrancar la app como proceso independiente ──────────────────────
-# UseShellExecute=$true crea un proceso completamente desacoplado de la sesión
-# actual (evita que Windows Job Objects lo mate al cerrar la sesión SSH o la
-# tarea de Task Scheduler).
-function Start-App {
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName      = "cmd.exe"
-    $psi.Arguments     = "/c `"node.exe `"`"$ROOT\node_modules\next\dist\bin\next`"`" start`""
-    $psi.WorkingDirectory  = $ROOT
-    $psi.UseShellExecute   = $true
-    $psi.WindowStyle       = [System.Diagnostics.ProcessWindowStyle]::Hidden
-    $proc = [System.Diagnostics.Process]::Start($psi)
-    Start-Sleep -Seconds 3
-    $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
-    $pid3000 = if ($conn) { $conn.OwningProcess } else { 0 }
+# ── Crear tarea FerreteriRun si no existe ────────────────────────────────────
+# FerreteriRun es una tarea completamente independiente de FerreteriaDeploy.
+# Al correr via schtasks /Run, corre en su propio Job Object y no muere
+# cuando FerreteriaDeploy termina (soluciona el problema de Windows Job Objects).
+function Ensure-RunnerTask {
+    $q = schtasks /Query /TN "FerreteriRun" 2>&1
+    if ("$q" -match "FerreteriRun") { return }
+
+    $script = @'
+$env:PATH = "C:\Program Files\nodejs;C:\Users\Administrator\AppData\Local\pnpm;C:\Program Files\Git\cmd;" + $env:PATH
+Set-Location C:\Users\Administrator\ferreteria-ap
+node.exe node_modules\next\dist\bin\next start
+'@
+    $script | Out-File -FilePath "C:\ferreteria-runner.ps1" -Encoding UTF8
+
+    $action   = New-ScheduledTaskAction -Execute "powershell.exe" `
+                    -Argument "-NonInteractive -ExecutionPolicy Bypass -File C:\ferreteria-runner.ps1"
+    $settings = New-ScheduledTaskSettingsSet `
+                    -AllowStartIfOnBatteries `
+                    -DontStopIfGoingOnBatteries `
+                    -ExecutionTimeLimit (New-TimeSpan -Days 365) `
+                    -RestartCount 10 `
+                    -RestartInterval (New-TimeSpan -Minutes 1) `
+                    -MultipleInstances IgnoreNew
+    $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+    Register-ScheduledTask -TaskName "FerreteriRun" -Action $action `
+        -Settings $settings -Principal $principal -Force | Out-Null
+
     $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
-    if ($pid3000) {
-        $pid3000 | Out-File $PID_FILE -Encoding ascii
-        Add-Content $LOG "[$ts] App arrancada (PID $pid3000)."
+    Add-Content $LOG "[$ts] Tarea FerreteriRun creada OK."
+}
+
+# ── Arrancar app via tarea independiente ─────────────────────────────────────
+function Start-App {
+    Ensure-RunnerTask
+    schtasks /Run /TN "FerreteriRun" 2>&1 | Out-Null
+    Start-Sleep -Seconds 8
+    $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
+    $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
+    if ($conn) {
+        Add-Content $LOG "[$ts] App UP (PID $($conn.OwningProcess))."
     } else {
-        Add-Content $LOG "[$ts] WARN: app arrancada pero port 3000 no detectado aún."
+        Add-Content $LOG "[$ts] WARN: FerreteriRun lanzada, port 3000 aun no responde."
     }
 }
 
-# ── Función: matar el proceso en puerto 3000 ─────────────────────────────────
+# ── Detener app ───────────────────────────────────────────────────────────────
 function Stop-App {
+    schtasks /End /TN "FerreteriRun" 2>&1 | Out-Null
+    Start-Sleep -Seconds 2
     $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
     if ($conn) {
         Stop-Process -Force -Id $conn.OwningProcess -ErrorAction SilentlyContinue
-        Start-Sleep -Milliseconds 500
-    }
-    # También matar por PID guardado
-    if (Test-Path $PID_FILE) {
-        $savedPid = [int](Get-Content $PID_FILE -ErrorAction SilentlyContinue)
-        if ($savedPid) { Stop-Process -Force -Id $savedPid -ErrorAction SilentlyContinue }
-        Remove-Item $PID_FILE -ErrorAction SilentlyContinue
+        Start-Sleep -Milliseconds 800
     }
 }
 
-# ── WATCHDOG: si la app no está corriendo, levantarla ───────────────────────
+# ── WATCHDOG ─────────────────────────────────────────────────────────────────
 $escuchando = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
 if (-not $escuchando) {
     $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
     Add-Content $LOG "[$ts] App caida — reiniciando..."
-    Stop-App
     Start-App
 }
 
-# ── DEPLOY: revisar si hay cambios en GitHub ─────────────────────────────────
-# Lock: evita builds concurrentes
+# ── DEPLOY ────────────────────────────────────────────────────────────────────
 if (Test-Path $LOCK) { exit 0 }
 "building" | Out-File $LOCK
 
@@ -90,11 +103,10 @@ try {
     pnpm build 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) {
         $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
-        Add-Content $LOG "[$ts] ERROR: build falló (exit $LASTEXITCODE) — deploy cancelado."
+        Add-Content $LOG "[$ts] ERROR: build fallo (exit $LASTEXITCODE) — deploy cancelado."
         exit 1
     }
 
-    # Recargar: matar proceso viejo y arrancar con el build nuevo
     Stop-App
     Start-App
 
