@@ -51,8 +51,9 @@ try {
         taskkill /F /PID $pid3000 2>&1 | Out-Null
     }
 
-    # Reiniciar PM2 (nombre correcto: ferreteria-ap)
-    pm2 restart ferreteria-ap 2>&1 | Out-Null
+    # Recargar app via ecosystem.config.js (funciona aunque el proceso no exista)
+    pm2 reload ecosystem.config.js --update-env 2>&1 | Out-Null
+    pm2 save 2>&1 | Out-Null
 
     $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
     Add-Content $LOG "[$ts] Deploy completado OK."
