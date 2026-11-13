@@ -12,7 +12,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-4 mb-8">
 
           {/* Octágono AP */}
-          <svg width="80" height="80" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="100" height="100" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon
               points="133.7,10 181.3,57.6 181.3,142.4 133.7,190 66.3,190 18.7,142.4 18.7,57.6 66.3,10"
               style={{ fill: "var(--card-bg-hex, #111923)", stroke: "var(--foreground)", strokeWidth: 7, strokeLinejoin: "round" }}
@@ -38,28 +38,14 @@ export default function LoginPage() {
 
           {/* Wordmark */}
           <div className="flex items-baseline gap-0.5 select-none">
-            <span style={{ color: "var(--accent-hex)", fontWeight: 900, fontSize: 22, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>F</span>
-            <span style={{ color: "var(--foreground)", fontWeight: 900, fontSize: 22, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>ERRETERÍA</span>
+            <span style={{ color: "var(--accent-hex)", fontWeight: 900, fontSize: 25, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>F</span>
+            <span style={{ color: "var(--foreground)", fontWeight: 900, fontSize: 25, fontFamily: "'Arial Black', sans-serif", letterSpacing: "-0.02em" }}>ERRETERÍA</span>
           </div>
         </div>
 
-        {/* Card del formulario */}
-        <div
-          className="rounded-2xl p-7"
-          style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
-        >
-          <div className="mb-6">
-            <h1 className="text-lg font-bold mb-1" style={{ color: "var(--foreground)" }}>
-              Iniciar sesión
-            </h1>
-            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
-              Ingresa tus credenciales para continuar
-            </p>
-          </div>
-          <Suspense>
-            <LoginForm />
-          </Suspense>
-        </div>
+        <Suspense>
+          <LoginForm />
+        </Suspense>
 
         <p className="text-center text-xs mt-5" style={{ color: "var(--muted-foreground)" }}>
           Sistema interno — solo personal autorizado
