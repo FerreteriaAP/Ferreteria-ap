@@ -43,7 +43,7 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
 
   return (
     <header
-      className="h-[72px] shrink-0 w-full flex items-center justify-between px-6 z-50"
+      className="h-[72px] shrink-0 w-full flex items-center justify-between px-3 sm:px-6 z-50"
       style={{
         backgroundColor: "var(--header-bg-hex)",
         borderBottom: "1px solid var(--border)",
@@ -100,7 +100,7 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
       </div>
 
       {/* Right: Date (desktop) + Bell + User */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 shrink-0">
 
         {/* Fecha — solo desktop */}
         <div className="hidden sm:block">
