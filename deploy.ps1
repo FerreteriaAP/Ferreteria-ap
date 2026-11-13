@@ -1,3 +1,4 @@
+# -*- coding: ascii -*-
 $ROOT = "C:\Users\Administrator\ferreteria-ap"
 $LOCK = "C:\deploy.lock"
 $LOG  = "C:\deploy.log"
@@ -13,45 +14,17 @@ $env:PATH = "C:\Program Files\Git\cmd;" +
 Set-Location $ROOT
 
 if (Test-Path "C:\KILLSWITCH_ACTIVE") {
-    Add-Content $LOG "[ $(Get-Date -f 'yyyy-MM-dd HH:mm:ss') ] KILLSWITCH activo — bloqueado."
+    Add-Content $LOG "[ $(Get-Date -f 'yyyy-MM-dd HH:mm:ss') ] KILLSWITCH activo."
     exit 0
 }
 
-# ── Crear tarea FerreteriRun si no existe ────────────────────────────────────
-# FerreteriRun es una tarea completamente independiente de FerreteriaDeploy.
-# Al correr via schtasks /Run, corre en su propio Job Object y no muere
-# cuando FerreteriaDeploy termina (soluciona el problema de Windows Job Objects).
-function Ensure-RunnerTask {
-    $q = schtasks /Query /TN "FerreteriRun" 2>&1
-    if ("$q" -match "FerreteriRun") { return }
-
-    $lines = @(
-        '$env:PATH = "C:\Program Files\nodejs;C:\Users\Administrator\AppData\Local\pnpm;C:\Program Files\Git\cmd;" + $env:PATH',
-        'Set-Location C:\Users\Administrator\ferreteria-ap',
-        'node.exe node_modules\next\dist\bin\next start'
-    )
-    [System.IO.File]::WriteAllLines("C:\ferreteria-runner.ps1", $lines)
-
-    $action   = New-ScheduledTaskAction -Execute "powershell.exe" `
-                    -Argument "-NonInteractive -ExecutionPolicy Bypass -File C:\ferreteria-runner.ps1"
-    $settings = New-ScheduledTaskSettingsSet `
-                    -AllowStartIfOnBatteries `
-                    -DontStopIfGoingOnBatteries `
-                    -ExecutionTimeLimit (New-TimeSpan -Days 365) `
-                    -RestartCount 10 `
-                    -RestartInterval (New-TimeSpan -Minutes 1) `
-                    -MultipleInstances IgnoreNew
-    $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-    Register-ScheduledTask -TaskName "FerreteriRun" -Action $action `
-        -Settings $settings -Principal $principal -Force | Out-Null
-
-    $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
-    Add-Content $LOG "[$ts] Tarea FerreteriRun creada OK."
-}
-
-# ── Arrancar app via tarea independiente ─────────────────────────────────────
 function Start-App {
-    Ensure-RunnerTask
+    $q = schtasks /Query /TN "FerreteriRun" 2>&1
+    if ("$q" -notmatch "FerreteriRun") {
+        $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
+        Add-Content $LOG "[$ts] ERROR: tarea FerreteriRun no existe. Ejecutar scripts/setup-runner.ps1 primero."
+        return
+    }
     schtasks /Run /TN "FerreteriRun" 2>&1 | Out-Null
     Start-Sleep -Seconds 8
     $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
@@ -63,7 +36,6 @@ function Start-App {
     }
 }
 
-# ── Detener app ───────────────────────────────────────────────────────────────
 function Stop-App {
     schtasks /End /TN "FerreteriRun" 2>&1 | Out-Null
     Start-Sleep -Seconds 2
@@ -74,15 +46,15 @@ function Stop-App {
     }
 }
 
-# ── WATCHDOG ─────────────────────────────────────────────────────────────────
+# Watchdog: si la app no esta corriendo, levantarla
 $escuchando = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
 if (-not $escuchando) {
     $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
-    Add-Content $LOG "[$ts] App caida — reiniciando..."
+    Add-Content $LOG "[$ts] App caida - reiniciando..."
     Start-App
 }
 
-# ── DEPLOY ────────────────────────────────────────────────────────────────────
+# Deploy: revisar si hay cambios en GitHub
 if (Test-Path $LOCK) { exit 0 }
 "building" | Out-File $LOCK
 
@@ -94,7 +66,7 @@ try {
     if ($local -eq $remote) { exit 0 }
 
     $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
-    Add-Content $LOG "[$ts] Cambios detectados ($($remote.Substring(0,7))) — desplegando..."
+    Add-Content $LOG "[$ts] Cambios detectados ($($remote.Substring(0,7))) - desplegando..."
 
     git pull origin main 2>&1 | Out-Null
 
@@ -103,7 +75,7 @@ try {
     pnpm build 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) {
         $ts = Get-Date -f "yyyy-MM-dd HH:mm:ss"
-        Add-Content $LOG "[$ts] ERROR: build fallo (exit $LASTEXITCODE) — deploy cancelado."
+        Add-Content $LOG "[$ts] ERROR: build fallo (exit $LASTEXITCODE) - deploy cancelado."
         exit 1
     }
 
