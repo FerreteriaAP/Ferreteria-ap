@@ -22,13 +22,21 @@ export const authConfig: NextAuthConfig = {
  authorized({ auth, request: { nextUrl } }) {
  const isLoggedIn = !!auth?.user;
  const isOnLogin = nextUrl.pathname.startsWith("/login");
+ const isOnRestore = nextUrl.pathname.startsWith("/restore");
 
- if (isOnLogin) {
- if (isLoggedIn) return Response.redirect(new URL("/dashboard", nextUrl));
+ if (isOnLogin || isOnRestore) {
+ if (isLoggedIn && isOnLogin) return Response.redirect(new URL("/dashboard", nextUrl));
  return true;
  }
 
- if (!isLoggedIn) return false;
+ if (!isLoggedIn) {
+ // Redirigir a /restore (pantalla de carga) en lugar de /login directamente.
+ // /restore intenta restaurar la sesión desde localStorage (iOS) y solo
+ // muestra el login si no hay token guardado.
+ const restoreUrl = new URL("/restore", nextUrl);
+ restoreUrl.searchParams.set("to", nextUrl.pathname + (nextUrl.search || ""));
+ return Response.redirect(restoreUrl);
+ }
 
  const path = nextUrl.pathname;
  const rol = (auth?.user as { rol?: string })?.rol ?? "";
