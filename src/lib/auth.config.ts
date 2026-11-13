@@ -6,7 +6,18 @@ export const authConfig: NextAuthConfig = {
  pages: {
  signIn: "/login",
  },
- session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 }, // 30 días — sesión persistente en mobile
+ session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
+ cookies: {
+   sessionToken: {
+     options: {
+       httpOnly: true,
+       sameSite: "lax" as const,
+       path: "/",
+       secure: process.env.NODE_ENV === "production",
+       maxAge: 30 * 24 * 60 * 60,
+     },
+   },
+ },
  callbacks: {
  authorized({ auth, request: { nextUrl } }) {
  const isLoggedIn = !!auth?.user;
