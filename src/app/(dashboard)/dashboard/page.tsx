@@ -84,7 +84,7 @@ function ModuleCard({ label, href, Icon, badge = 0, moduleKey }: {
       </div>
 
       <p
-        className="text-center font-medium leading-tight mb-3 text-[13px]"
+        className="text-center font-medium leading-tight mb-4 text-[13px]"
         style={{ color: "var(--card-fg-hex, var(--foreground))" }}
       >
         {label}
