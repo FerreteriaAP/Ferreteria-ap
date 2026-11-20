@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition } from "react";
+import { useState, useRef, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,13 +24,9 @@ export function AppHeader({ name, email, rol, initials, alertas = 0, cajaAbierta
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const [, startLogo] = useTransition();
-
   function irAlDashboard() {
-    startLogo(async () => {
-      await clearVendedorActivo();
-      router.push("/dashboard");
-    });
+    clearVendedorActivo(); // fire-and-forget — no bloquea la navegación
+    router.push("/dashboard");
   }
 
   useEffect(() => {

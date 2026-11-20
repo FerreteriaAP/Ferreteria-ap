@@ -1105,11 +1105,11 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
  // Facturas visibles = las del servidor menos las ya procesadas localmente
  const facturas = initialFacturas.filter(f => !removedIds.has(f.id));
 
- // Auto-refresh cada 7 s para recibir nuevas facturas del PDV
+ // Auto-refresh cada 20 s para recibir nuevas facturas del PDV
  useEffect(() => {
   const id = setInterval(() => {
    if (!modal) router.refresh();
-  }, 7000);
+  }, 20000);
   return () => clearInterval(id);
  }, [modal, router]);
 
@@ -1185,19 +1185,19 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
      <AccionBtn
       icon={<TrendingDown size={24} />} label="Gasto" desc="Efectivo pagado"
-      color="red" onClick={() => setModal("gasto")}
+      onClick={() => setModal("gasto")}
      />
      <AccionBtn
       icon={<ShoppingCart size={24} />} label="Compras" desc="Mercancía en efectivo"
-      color="orange" onClick={() => setModal("compra")}
+      onClick={() => setModal("compra")}
      />
      <AccionBtn
       icon={<Banknote size={24} />} label="Préstamo" desc="A empleado"
-      color="blue" onClick={() => setModal("prestamo")}
+      onClick={() => setModal("prestamo")}
      />
      <AccionBtn
       icon={<HandCoins size={24} />} label="Cobro CxC" desc="Pago de cliente"
-      color="green" onClick={() => setModal("cobro_cxc")}
+      onClick={() => setModal("cobro_cxc")}
      />
     </div>
    </div>
@@ -1273,7 +1273,7 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
     <AccionBtn
      icon={<FileX2 size={24} />} label="Nota de Crédito" desc="Crédito a cliente"
-     color="purple" onClick={() => setModal("nota_credito")}
+     onClick={() => setModal("nota_credito")}
     />
    </div>
 
@@ -1306,30 +1306,22 @@ export function CajaDashboard({ turnoId, facturas: initialFacturas, empleados, c
 
 // Componentes auxiliares UI
 
-const ACCION_COLORS = {
- red:    { bg: "#ef444430", border: "#ef444470", text: "#ef4444" },
- orange: { bg: "#f9731630", border: "#f9731670", text: "#f97316" },
- blue:   { bg: "#3b82f630", border: "#3b82f670", text: "#3b82f6" },
- green:  { bg: "#16a34a30", border: "#16a34a70", text: "#16a34a" },
- purple: { bg: "#a855f730", border: "#a855f770", text: "#a855f7" },
-};
-
-function AccionBtn({ icon, label, desc, color, onClick }: {
- icon: ReactNode; label: string; desc: string;
- color: "red" | "orange" | "blue" | "green" | "purple"; onClick: () => void;
+function AccionBtn({ icon, label, desc, onClick }: {
+ icon: ReactNode; label: string; desc: string; onClick: () => void;
 }) {
- const c = ACCION_COLORS[color];
  return (
   <button
    onClick={onClick}
-   className="rounded-xl px-4 py-3.5 text-left transition-all hover:brightness-110 active:scale-[0.97]"
-   style={{ backgroundColor: "color-mix(in oklch, var(--foreground) 9%, var(--card))", border: "1px solid var(--border)" }}
+   className="rounded-xl px-4 py-3.5 text-left transition-all active:scale-[0.97]"
+   style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}
+   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--muted-foreground)"; }}
+   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
   >
    <div className="flex items-center gap-3 mb-1">
-    <span className="text-muted-foreground">{icon}</span>
-    <p className="text-sm font-bold" style={{ color: c.text }}>{label}</p>
+    <span style={{ color: "var(--muted-foreground)" }}>{icon}</span>
+    <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{label}</p>
    </div>
-   <p className="text-xs text-muted-foreground pl-9">{desc}</p>
+   <p className="text-xs pl-9" style={{ color: "var(--muted-foreground)" }}>{desc}</p>
   </button>
  );
 }

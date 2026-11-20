@@ -28,7 +28,7 @@ export function ClienteRapidoModal({ onClose, onCreado }: Props) {
  const [nombre, setNombre] = useState("");
  const [telefono, setTelefono] = useState("");
  const [rnc, setRnc] = useState("");
- const [tipoNcf, setTipoNcf] = useState<"B01" | "B02" | "B14" | "B15">("B02");
+ const [tipoNcf, setTipoNcf] = useState<"E31" | "E32">("E32");
  const [direccion, setDireccion] = useState("");
  const [sector, setSector] = useState("");
  const nombreRef = useRef<HTMLInputElement>(null);
@@ -101,8 +101,8 @@ export function ClienteRapidoModal({ onClose, onCreado }: Props) {
  onChange={e => setRnc(e.target.value)}
  placeholder="000-00000-0" className="mt-1 w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" /> </div> <div> <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tipo comprobante</label> <select
  value={tipoNcf}
- onChange={e => setTipoNcf(e.target.value as "B01" | "B02" | "B14" | "B15")}
- className="mt-1 w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" > <option value="B02">B02 – Consumidor Final</option> <option value="B01">B01 – Crédito Fiscal</option> <option value="B14">B14 – Régimen Especial</option> <option value="B15">B15 – Gubernamental</option> </select> </div> </div> {/* Dirección de entrega */}
+ onChange={e => setTipoNcf(e.target.value as "E31" | "E32")}
+ className="mt-1 w-full h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" > <option value="E32">E32 – Consumo Electrónico</option> <option value="E31">E31 – Crédito Fiscal Electrónico</option> </select> </div> </div> {/* Dirección de entrega */}
  <div> <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Dirección de entrega (opcional)</label> <input
  type="text" value={direccion}
  onChange={e => setDireccion(e.target.value)}

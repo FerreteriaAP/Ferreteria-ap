@@ -547,6 +547,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                   conduceRecibido={conduceRecibido}
                   todosConducesEntregados={todosEntregados}
                   modoVendedor={modoVendedor}
+                  clienteRnc={venta.cliente.rnc}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   conduces={venta.conduces.map((c: any) => ({
                     id:               c.id,

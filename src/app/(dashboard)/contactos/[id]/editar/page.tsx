@@ -18,7 +18,7 @@ export default async function EditarContactoPage({ params }: PageProps) {
  nombre: contacto.nombre,
  nombreLegal: contacto.nombreLegal ?? "",
  rnc: contacto.rnc ?? "",
- tipoComprobante: contacto.tipoComprobante,
+ tipoComprobante: contacto.tipoComprobante as "B01" | "B02" | "B14" | "B15" | "E31" | "E32",
  email: contacto.email ?? "",
  telefono: contacto.telefono ?? "",
  telefonoAlt: contacto.telefonoAlt ?? "",
