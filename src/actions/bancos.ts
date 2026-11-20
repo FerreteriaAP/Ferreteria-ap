@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Queries 
 
@@ -90,7 +91,7 @@ export async function registrarTransaccion(data: {
  saldoDespues,
  descripcion: data.descripcion,
  referencia: data.referencia || null,
- fecha: new Date(data.fecha),
+ fecha: fechaInputRD(data.fecha),
  notas: data.notas || null,
  },
  });

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { rangoFechas } from "@/lib/rangos";
 import { Printer } from "lucide-react";
+import { hoyRD } from "@/lib/fechas";
 
 // Tipos de período disponibles 
 
@@ -38,7 +39,7 @@ export function ReportesFiltro({ tipo: tipoProp, fecha: fechaProp, mes: mesProp,
  const router = useRouter();
  const pathname = usePathname();
 
- const todayStr = new Date().toISOString().slice(0, 10);
+ const todayStr = hoyRD();
  const mesStr = todayStr.slice(0, 7);
 
  const [tipo, setTipo] = useState(tipoProp || "mes");

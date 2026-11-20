@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getReportePrestamos } from "@/actions/caja";
 import { getEmpleadosActivos } from "@/actions/caja";
 import { prisma } from "@/lib/prisma";
+import { hoyRD, mesRD } from "@/lib/fechas";
 
 interface PageProps {
  searchParams: Promise<{
@@ -12,10 +13,9 @@ interface PageProps {
 }
 
 function primerDiaMes() {
- const d = new Date(); d.setDate(1);
- return d.toISOString().slice(0, 10);
+ return mesRD() + "-01";
 }
-function hoy() { return new Date().toISOString().slice(0, 10); }
+function hoy() { return hoyRD(); }
 
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 

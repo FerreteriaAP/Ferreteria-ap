@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Queries 
 
@@ -85,7 +86,7 @@ export async function crearGasto(data: {
  categoriaId: data.categoriaId,
  descripcion: data.descripcion,
  monto: data.monto,
- fecha: new Date(data.fecha),
+ fecha: fechaInputRD(data.fecha),
  metodo: data.metodo || null,
  cuentaId: data.cuentaId || null,
  notas: data.notas || null,

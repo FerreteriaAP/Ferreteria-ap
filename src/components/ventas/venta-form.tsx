@@ -10,6 +10,7 @@ import { crearCotizacion, actualizarCotizacion, buscarProductosVenta, type Venta
 import { completarDatosCliente } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
 import { Search, X, ShoppingCart, AlertCircle, Scissors, UserPen, Plus, Check } from "lucide-react";
+import { hoyRD } from "@/lib/fechas";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -157,7 +158,7 @@ export function VentaForm({
   const prevClienteIdRef = useRef(initialClienteId); // detectar cambio real (no mount)
   const [direccionId,  setDireccionId]  = useState(initialDireccionId);
   const [credito,      setCredito]      = useState<"CONTADO"|"DIAS_10"|"DIAS_15"|"DIAS_30"|"DIAS_45"|"DIAS_60"|"DIAS_90">(initialCredito);
-  const [fechaEntrega, setFechaEntrega] = useState(initialFechaEntrega ?? new Date().toISOString().slice(0, 10));
+  const [fechaEntrega, setFechaEntrega] = useState(initialFechaEntrega ?? hoyRD());
   const [notas,        setNotas]        = useState(initialNotas);
 
   // Productos

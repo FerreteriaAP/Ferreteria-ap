@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { pagarMultiplesCxC } from "@/actions/contabilidad";
+import { hoyRD } from "@/lib/fechas";
 
 interface Props {
   cxcId:    string;
@@ -27,7 +28,7 @@ export function CobrarCxcBtn({ cxcId, ventaId, numero, saldo, cliente }: Props) 
   const [open, setOpen] = useState(false);
   const [isPending, start] = useTransition();
 
-  const hoy = new Date().toISOString().split("T")[0];
+  const hoy = hoyRD();
   const [monto,     setMonto]     = useState("");
   const [metodo,    setMetodo]    = useState<string>("EFECTIVO");
   const [fecha,     setFecha]     = useState(hoy);

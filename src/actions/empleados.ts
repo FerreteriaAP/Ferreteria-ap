@@ -5,6 +5,7 @@ import { Prisma } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 
 import { cap, formatCedula } from "@/lib/format";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Queries 
 
@@ -91,8 +92,8 @@ export async function crearEmpleado(data: {
  apellido: cap(data.apellido),
  telefono: data.telefono || null,
  email: data.email || null,
- fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento) : null,
- fechaIngreso: new Date(data.fechaIngreso),
+ fechaNacimiento: data.fechaNacimiento ? fechaInputRD(data.fechaNacimiento) : null,
+ fechaIngreso: fechaInputRD(data.fechaIngreso),
  cargo: data.cargo,
  departamento: data.departamento || null,
  salarioBase: data.salarioBase,
@@ -140,8 +141,8 @@ export async function actualizarEmpleado(id: string, data: Partial<{
  ...(nombre   ? { nombre: cap(nombre) } : {}),
  ...(apellido ? { apellido: cap(apellido) } : {}),
  ...(cedula   ? { cedula: formatCedula(cedula) } : {}),
- ...(fechaNacimiento ? { fechaNacimiento: new Date(fechaNacimiento) } : {}),
- ...(fechaIngreso ? { fechaIngreso: new Date(fechaIngreso) } : {}),
+ ...(fechaNacimiento ? { fechaNacimiento: fechaInputRD(fechaNacimiento) } : {}),
+ ...(fechaIngreso ? { fechaIngreso: fechaInputRD(fechaIngreso) } : {}),
  },
  });
 

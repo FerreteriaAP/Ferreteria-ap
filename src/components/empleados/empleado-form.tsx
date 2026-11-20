@@ -10,8 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { crearEmpleado } from "@/actions/empleados";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 export function EmpleadoForm() {
  const router = useRouter();

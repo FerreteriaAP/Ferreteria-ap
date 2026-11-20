@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { crearGasto } from "@/actions/gastos";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
 type Categoria = { id: string; nombre: string; tipo: string };
 
@@ -17,7 +18,7 @@ interface GastoFormProps {
  categorias: Categoria[];
 }
 
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 export function GastoForm({ categorias }: GastoFormProps) {
  const router = useRouter();

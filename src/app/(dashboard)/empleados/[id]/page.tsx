@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MesFiltroEmpleado } from "@/components/empleados/mes-filtro-empleado";
 import { User, Banknote, CreditCard, BarChart2 } from "lucide-react";
+import { mesRD } from "@/lib/fechas";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -82,7 +83,7 @@ export default async function EmpleadoPage({ params, searchParams }: PageProps) 
   const esVendedor = empleado.usuario?.rol === "VENDEDOR";
   const mostrarActividad = esAdmin && esVendedor;
 
-  const mesDefault = new Date().toISOString().slice(0, 7);
+  const mesDefault = mesRD();
   const filtro = sp.filtro ?? mesDefault;
 
   const stats = mostrarActividad

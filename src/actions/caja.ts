@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { generarNumero } from "@/lib/numeracion";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Helpers 
 
@@ -321,7 +322,7 @@ export async function procesarPagoCaja(
  let diasCredito: number | undefined;
  if (montoCredito > 0) {
    if (opciones?.vencimientoCredito) {
-     fechaVencimiento = new Date(opciones.vencimientoCredito);
+     fechaVencimiento = fechaInputRD(opciones.vencimientoCredito);
    } else {
      diasCredito = venta.credito === "DIAS_10" ? 10 : venta.credito === "DIAS_15" ? 15 : venta.credito === "DIAS_30" ? 30 : venta.credito === "DIAS_45" ? 45 : venta.credito === "DIAS_60" ? 60 : venta.credito === "DIAS_90" ? 90 : 30;
      fechaVencimiento = new Date();

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { GrupoColapsable } from "./grupo-colapsable";
 import { pagarMultiplesCxP, type PagoMasivoCxPItem } from "@/actions/contabilidad";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -79,7 +80,7 @@ function ModalPlanillaPago({ compras, grupos, onClose, onOk }: ModalProps) {
   const [metodo, setMetodo] = useState("EFECTIVO");
   const [referencia, setRef] = useState("");
   const [notas, setNotas]   = useState("");
-  const [fecha, setFecha]   = useState(() => new Date().toISOString().slice(0, 10));
+  const [fecha, setFecha]   = useState(() => hoyRD());
 
   const total = compras.reduce((s, c) => s + c.saldo, 0);
 

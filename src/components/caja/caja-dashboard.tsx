@@ -25,6 +25,7 @@ import {
  CheckCircle2,
  Printer,
 } from "lucide-react";
+import { hoyRD, sumarDiasRD } from "@/lib/fechas";
 
 // Tipos
 
@@ -137,12 +138,9 @@ function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
  const esConsumidorFinal = factura.cliente.id === consumidorFinalId;
  const metodosFiltrados = METODOS.filter(m => !(m.id === "CREDITO" && esConsumidorFinal));
 
- // Fecha vencimiento crédito — default: 30 días desde hoy
- const hoy = new Date();
- const defaultVencimiento = new Date(hoy);
- defaultVencimiento.setDate(defaultVencimiento.getDate() + 30);
+ // Fecha vencimiento crédito — default: 30 días desde hoy (hora de RD)
  const [vencimientoCredito, setVencimientoCredito] = useState(
-  defaultVencimiento.toISOString().split("T")[0]
+  sumarDiasRD(30)
  );
 
  const hayCredito = lineasPago.some(l => l.metodo === "CREDITO");
@@ -439,7 +437,7 @@ function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
        <input
         type="date"
         value={vencimientoCredito}
-        min={new Date().toISOString().split("T")[0]}
+        min={hoyRD()}
         onChange={e => setVencimientoCredito(e.target.value)}
         className="w-full h-9 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
        />

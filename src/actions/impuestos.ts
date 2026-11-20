@@ -8,6 +8,7 @@ import {
  type TipoImpuesto,
  type PagoImpuestoRow,
 } from "@/lib/impuestos-config";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Consulta 
 
@@ -78,13 +79,13 @@ export async function upsertPagoImpuesto(
  where: { tipo_mes_anio: { tipo, mes, anio } },
  create: {
  tipo, mes, anio, monto, pagado,
- fechaPago: fechaPago ? new Date(fechaPago) : null,
+ fechaPago: fechaPago ? fechaInputRD(fechaPago) : null,
  referencia: referencia ?? null,
  notas: notas ?? null,
  },
  update: {
  monto, pagado,
- fechaPago: fechaPago ? new Date(fechaPago) : null,
+ fechaPago: fechaPago ? fechaInputRD(fechaPago) : null,
  referencia: referencia ?? null,
  notas: notas ?? null,
  },

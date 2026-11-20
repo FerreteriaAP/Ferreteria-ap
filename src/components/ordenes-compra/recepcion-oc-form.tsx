@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { confirmarRecepcionOC } from "@/actions/ordenes-compra";
 import { cn } from "@/lib/utils";
 import { FileWarning, AlertCircle } from "lucide-react";
+import { hoyRD } from "@/lib/fechas";
 
 // ── Diseño ────────────────────────────────────────────────────────────────────
 
@@ -89,7 +90,7 @@ const ITBIS_RATE = 0.18;
 const costoNetoFn = (costo: number, itbisPct: number) =>
   itbisPct === 0 ? costo / (1 + ITBIS_RATE) : costo;
 
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 const fmt = (n: number) => n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function addDays(dateStr: string, days: number): string {

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { procesarNomina, marcarNominaPagada, recalcularPrestamosNomina, eliminarNomina } from "@/actions/nominas";
 import { BtnEliminarDocumento } from "@/components/shared/btn-eliminar-documento";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
 interface Props {
   nominaId: string;
@@ -13,7 +14,7 @@ interface Props {
   estado: string;
 }
 
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 const BTN_BASE =
   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none";

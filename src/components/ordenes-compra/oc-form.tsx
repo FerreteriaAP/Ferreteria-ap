@@ -14,6 +14,7 @@ import { crearOrdenCompra, type OcInput } from "@/actions/ordenes-compra";
 import { buscarProductosPorKeyword, getProductoPorCodigo } from "@/actions/productos";
 import { buscarSuplidores } from "@/actions/contactos";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
 // Quitar Select — no se usa para suplidor (reemplazado por typeahead)
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ const FormSchema = z.object({
 type FormValues = z.infer<typeof FormSchema>;
 
 const UNIDADES = ["UND","PIE","M","M2","M3","KG","LB","GLL","FND","CJA","RLL","PLG","TN","SACO","QUINTAL","METRO3"];
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 const ROW_BORDER: React.CSSProperties = {
   borderBottom: "1px solid color-mix(in oklch, var(--border) 35%, transparent)",

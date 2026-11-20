@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getEmpleadosActivos } from "@/actions/caja";
 import { getReportePrestamos } from "@/actions/caja";
 import { ReportePrestamosClient } from "@/components/nominas/reporte-prestamos-client";
+import { hoyRD, mesRD } from "@/lib/fechas";
 
 interface PageProps {
  searchParams: Promise<{
@@ -13,12 +14,10 @@ interface PageProps {
 
 // Fecha de hoy y primer día del mes actual como defaults
 function hoy() {
- return new Date().toISOString().slice(0, 10);
+ return hoyRD();
 }
 function primerDiaMes() {
- const d = new Date();
- d.setDate(1);
- return d.toISOString().slice(0, 10);
+ return mesRD() + "-01";
 }
 
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

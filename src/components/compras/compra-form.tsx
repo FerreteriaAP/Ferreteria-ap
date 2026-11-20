@@ -16,6 +16,7 @@ import { DialogDescription } from "@/components/ui/dialog";
 import { getProductoPorCodigo, buscarProductosPorKeyword, siguienteCodigoPorCategoria, crearProducto } from "@/actions/productos";
 import { cn } from "@/lib/utils";
 import { Search, RotateCcw, AlertCircle, PackagePlus, X, ShoppingCart, FileWarning, CreditCard } from "lucide-react";
+import { hoyRD } from "@/lib/fechas";
 
 // ── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -90,7 +91,7 @@ const TIPOS_NCF = [
 ];
 const UNIDADES = ["UND","PIE","M","M2","M3","KG","LB","GLL","FND","CJA","RLL","PLG","TN"];
 const DRAFT_KEY = "ferreteria-compra-draft-v2";
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 

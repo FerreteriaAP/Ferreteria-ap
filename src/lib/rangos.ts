@@ -1,3 +1,4 @@
+import { hoyRD } from "@/lib/fechas";
 // Helper puro — sin "use server", solo cálculo de rangos de fecha
 
 export interface RangoParams {
@@ -10,8 +11,7 @@ export interface RangoParams {
 }
 
 export function rangoFechas(p: RangoParams): { desde: Date; hasta: Date; label: string } {
- const hoy = new Date();
- const todayStr = hoy.toISOString().slice(0, 10);
+ const todayStr = hoyRD();
 
  switch (p.tipo) {
 

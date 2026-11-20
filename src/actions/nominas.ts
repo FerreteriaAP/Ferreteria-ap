@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { fechaInputRD } from "@/lib/fechas";
 
 // TSS rates RD (2024)
 const AFP_EMP = 0.0287; // Empleado AFP
@@ -218,7 +219,7 @@ export async function crearNomina(data: {
  periodo: data.periodo,
  mes: data.mes,
  anio: data.anio,
- fechaPago: data.fechaPago ? new Date(data.fechaPago) : null,
+ fechaPago: data.fechaPago ? fechaInputRD(data.fechaPago) : null,
  totalBruto,
  totalDescuentos,
  totalNeto,
@@ -311,7 +312,7 @@ export async function procesarNomina(id: string) {
 export async function marcarNominaPagada(id: string, fechaPago: string) {
  await prisma.nomina.update({
  where: { id },
- data: { estado: "PAGADA", fechaPago: new Date(fechaPago) },
+ data: { estado: "PAGADA", fechaPago: fechaInputRD(fechaPago) },
  });
  revalidatePath(`/nominas/${id}`);
  return { ok: true };

@@ -10,6 +10,7 @@ import { pagarMultiplesCxC, type PagoMasivoCxCItem } from "@/actions/contabilida
 import { cn } from "@/lib/utils";
 import { FileText, Printer, CheckCircle2 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { hoyRD } from "@/lib/fechas";
 
 // Tipos 
 
@@ -86,7 +87,7 @@ function ModalPlanillaPago({ facturas, grupos, onClose, onOk }: ModalProps) {
   const [metodo, setMetodo] = useState("EFECTIVO");
   const [referencia, setRef] = useState("");
   const [notas, setNotas] = useState("");
-  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
+  const [fecha, setFecha] = useState(() => hoyRD());
   const [pagoExitoso, setPagoExitoso] = useState<PagoExitoso | null>(null);
 
   // Monto editable por factura (inicializa con el saldo completo)

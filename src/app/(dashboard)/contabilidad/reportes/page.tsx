@@ -8,6 +8,7 @@ import { DineroRecibidoTabla } from "@/components/contabilidad/dinero-recibido-t
 import { NcTabla } from "@/components/contabilidad/nc-tabla";
 import { cn } from "@/lib/utils";
 import { auth } from "@/lib/auth";
+import { hoyRD } from "@/lib/fechas";
 
 export const metadata = { title: "Reportes de Caja — Ferretería AP" };
 
@@ -40,7 +41,7 @@ export default async function ReportesCajaPage({ searchParams }: PageProps) {
   const reporte = soloMovimientos ? "movimientos" : (p.reporte ?? "cierres");
 
   // Movimientos: si no tiene filtro explícito, defaultear a hoy; resto → mes actual
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = hoyRD();
   const tieneFiltrExplicito = p.tipo !== undefined;
   const tipo  = tieneFiltrExplicito ? p.tipo! : (reporte === "movimientos" ? "dia" : "mes");
   const fecha = tieneFiltrExplicito ? p.fecha : (reporte === "movimientos" ? todayStr : undefined);

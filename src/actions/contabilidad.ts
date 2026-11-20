@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Helpers 
 
@@ -1113,7 +1114,7 @@ export async function pagarMultiplesCxC(
  if (!metodo) return { error: "Selecciona la forma de pago" };
  if (!fecha) return { error: "Indica la fecha de pago" };
 
- const fechaDate = new Date(fecha);
+ const fechaDate = fechaInputRD(fecha);
 
  for (const p of pagos) {
  await prisma.$transaction(async (tx) => {
@@ -1196,7 +1197,7 @@ export async function pagarMultiplesCxP(
  if (!metodo) return { error: "Selecciona la forma de pago" };
  if (!fecha) return { error: "Indica la fecha de pago" };
 
- const fechaDate = new Date(fecha);
+ const fechaDate = fechaInputRD(fecha);
 
  for (const p of pagos) {
  await prisma.$transaction(async (tx) => {

@@ -8,6 +8,7 @@ import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Schemas 
 
@@ -49,9 +50,7 @@ const CompraSchema = z.object({
  * desfase de -1 día que ocurre cuando UTC+0 (servidor) guarda medianoche
  * y la zona horaria local (DR = UTC-4) lo interpreta como el día anterior.
  */
-function parseFechaLocal(str: string): Date {
- return new Date(str + "T12:00:00.000Z");
-}
+const parseFechaLocal = fechaInputRD;
 
 export type CompraInput = z.infer<typeof CompraSchema>;
 
@@ -323,7 +322,7 @@ export async function registrarPago(compraId: string, data: PagoInput) {
  data: {
  compraId,
  monto,
- fecha: new Date(fecha),
+ fecha: fechaInputRD(fecha),
  metodo,
  referencia: referencia || null,
  cuentaId: cuentaId || null,

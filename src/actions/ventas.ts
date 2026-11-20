@@ -7,6 +7,7 @@ import { getVendedorActivoId } from "@/actions/vendedor-activo";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generarNumero } from "@/lib/numeracion";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Types 
 
@@ -516,7 +517,7 @@ export async function crearCotizacion(input: VentaInput) {
  credito: input.credito as TipoCredito,
  diasCredito: dias,
  fechaVencimiento: vence,
- fechaEntrega: input.fechaEntrega ? new Date(input.fechaEntrega) : null,
+ fechaEntrega: input.fechaEntrega ? fechaInputRD(input.fechaEntrega) : null,
  notas: input.notas || null,
  subtotal,
  itbis: totalItbis,
@@ -596,7 +597,7 @@ export async function actualizarCotizacion(id: string, input: VentaInput) {
  credito: input.credito as TipoCredito,
  diasCredito: dias,
  fechaVencimiento: vence,
- fechaEntrega: input.fechaEntrega ? new Date(input.fechaEntrega) : null,
+ fechaEntrega: input.fechaEntrega ? fechaInputRD(input.fechaEntrega) : null,
  notas: input.notas || null,
  subtotal,
  itbis: totalItbis,
@@ -876,7 +877,7 @@ export async function registrarPagoVenta(ventaId: string, data: {
  data: {
  ventaId,
  monto: data.monto,
- fecha: new Date(data.fecha),
+ fecha: fechaInputRD(data.fecha),
  metodo: data.metodo,
  referencia: data.referencia || null,
  },

@@ -8,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { buttonVariants } from "@/components/ui/button";
 import { registrarPago } from "@/actions/compras";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
 interface PagoCompraFormProps {
  compraId: string;
  saldo: number;
 }
 
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 export function PagoCompraForm({ compraId, saldo }: PagoCompraFormProps) {
  const router = useRouter();

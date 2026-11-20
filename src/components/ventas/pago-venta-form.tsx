@@ -8,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { buttonVariants } from "@/components/ui/button";
 import { registrarPagoVenta } from "@/actions/ventas";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
 interface Props {
  ventaId: string;
  saldo: number;
 }
 
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 export function PagoVentaForm({ ventaId, saldo }: Props) {
  const router = useRouter();

@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { registrarTransaccion } from "@/actions/bancos";
 import { cn } from "@/lib/utils";
+import { hoyRD } from "@/lib/fechas";
 
 type Cuenta = { id: string; banco: string; nombre: string; tipo: string; saldo: unknown };
 
@@ -16,7 +17,7 @@ interface TransaccionFormProps {
  cuentas: Cuenta[];
 }
 
-const hoy = new Date().toISOString().split("T")[0];
+const hoy = hoyRD();
 
 export function TransaccionForm({ cuentas }: TransaccionFormProps) {
  const router = useRouter();

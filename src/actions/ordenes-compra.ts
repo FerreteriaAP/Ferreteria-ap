@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { clearVendedorActivo } from "@/actions/vendedor-activo";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { fechaInputRD } from "@/lib/fechas";
 
 // Schemas 
 
@@ -157,7 +158,7 @@ export async function crearOrdenCompra(data: OcInput) {
  suplidorId,
  usuarioId: ocUsuarioId,
  estado: "BORRADOR",
- fechaEntrega: fechaEntrega ? new Date(fechaEntrega) : null,
+ fechaEntrega: fechaEntrega ? fechaInputRD(fechaEntrega) : null,
  notas: notas || null,
  subtotal,
  itbis: itbisTotal,
@@ -256,8 +257,8 @@ export async function confirmarRecepcionOC(ordenId: string, data: RecepcionInput
  noFacturaSuplidor: noFacturaSuplidor || null,
  ncf: ncf || null,
  tipoNcfCompra: tipoNcfCompra || null,
- fechaFactura: new Date(fechaFactura),
- fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : null,
+ fechaFactura: fechaInputRD(fechaFactura),
+ fechaVencimiento: fechaVencimiento ? fechaInputRD(fechaVencimiento) : null,
  subtotal,
  itbis: totalItbis,
  total,
@@ -317,8 +318,8 @@ export async function confirmarRecepcionOC(ordenId: string, data: RecepcionInput
  monto: total,
  montoPagado: 0,
  saldo: total,
- fechaEmision: new Date(fechaFactura),
- fechaVencimiento: new Date(fechaVencimiento),
+ fechaEmision: fechaInputRD(fechaFactura),
+ fechaVencimiento: fechaInputRD(fechaVencimiento),
  estado: "PENDIENTE",
  },
  });
