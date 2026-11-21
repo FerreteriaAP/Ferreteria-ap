@@ -27,7 +27,7 @@ export interface VentaInput {
  clienteId: string;
  direccionId?: string;
  credito: "CONTADO" | "DIAS_10" | "DIAS_15" | "DIAS_30" | "DIAS_45" | "DIAS_60" | "DIAS_90";
- tipoNcf?: "B01" | "B02" | "B14" | "B15" | "E31" | "E32" | "E34";
+ tipoNcf?: "B01" | "B02" | "B14" | "B15";
  fechaEntrega?: string;
  notas?: string;
  detalles: DetalleVentaInput[];

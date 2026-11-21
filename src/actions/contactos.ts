@@ -23,7 +23,7 @@ const ContactoSchema = z.object({
  nombre: z.string().min(1, "Nombre requerido"),
  nombreLegal: z.string().optional(),
  rnc: z.string().optional(),
- tipoComprobante: z.enum(["B01", "B02", "B14", "B15", "E31", "E32"]).default("E32"),
+ tipoComprobante: z.enum(["B01", "B02", "B14", "B15"]).default("B02"),
  email: z.string().email("Email inválido").optional().or(z.literal("")),
  telefono: z.string().optional(),
  telefonoAlt: z.string().optional(),

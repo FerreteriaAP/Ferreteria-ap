@@ -72,7 +72,7 @@ const FormSchema = z.object({
   nombre:            z.string().min(1, "Nombre requerido"),
   nombreLegal:       z.string().optional(),
   rnc:               z.string().optional(),
-  tipoComprobante:   z.enum(["B01", "B02", "B14", "B15", "E31", "E32"]),
+  tipoComprobante:   z.enum(["B01", "B02", "B14", "B15"]),
   email:             z.string().optional(),
   telefono:          z.string().optional(),
   telefonoAlt:       z.string().optional(),
@@ -106,7 +106,7 @@ export function ContactoForm({ contactoId, defaultValues }: ContactoFormProps) {
     resolver: zodResolver(FormSchema) as any,
     defaultValues: {
       tipo: "CLIENTE",
-      tipoComprobante: "E32",
+      tipoComprobante: "B02",
       credito: "CONTADO",
       esEmisorElectronico: false,
       activo: true,
@@ -171,12 +171,10 @@ export function ContactoForm({ contactoId, defaultValues }: ContactoFormProps) {
             <Select value={form.watch("tipoComprobante")} onValueChange={v => form.setValue("tipoComprobante", v as FormValues["tipoComprobante"])}>
               <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="E31">E31 — Crédito Fiscal Electrónico</SelectItem>
-                <SelectItem value="E32">E32 — Consumo Electrónico</SelectItem>
-                <SelectItem value="B01">B01 — Crédito Fiscal (físico)</SelectItem>
-                <SelectItem value="B02">B02 — Consumidor Final (físico)</SelectItem>
-                <SelectItem value="B14">B14 — Regímenes Especiales (físico)</SelectItem>
-                <SelectItem value="B15">B15 — Gubernamentales (físico)</SelectItem>
+                <SelectItem value="B01">B01 — Crédito Fiscal</SelectItem>
+                <SelectItem value="B02">B02 — Consumidor Final</SelectItem>
+                <SelectItem value="B14">B14 — Regímenes Especiales</SelectItem>
+                <SelectItem value="B15">B15 — Gubernamentales</SelectItem>
               </SelectContent>
             </Select>
           </Field>

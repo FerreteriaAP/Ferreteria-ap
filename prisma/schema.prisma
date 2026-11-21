@@ -33,13 +33,10 @@ enum TipoContacto {
 }
 
 enum TipoComprobante {
-  B01 // Crédito Fiscal (físico — solo compras mientras haya suplidores sin migrar)
-  B02 // Consumidor Final (físico — solo compras)
-  B14 // Regímenes Especiales (físico — solo compras)
-  B15 // Gubernamentales (físico — solo compras)
-  E31 // Crédito Fiscal Electrónico
-  E32 // Consumo Electrónico
-  E34 // Nota de Crédito Electrónica
+  B01 // Crédito Fiscal
+  B02 // Consumidor Final
+  B14 // Regímenes Especiales
+  B15 // Gubernamentales
 }
 
 enum EstadoOrdenCompra {
@@ -893,18 +890,6 @@ model SecuenciaDocumento {
   updatedAt DateTime @updatedAt
 
   @@map("secuencias_documento")
-}
-
-// Lleva el contador de NCF electrónicos emitidos por tipo
-model SecuenciaEcf {
-  id        String          @id @default(cuid())
-  tipo      TipoComprobante @unique // E31, E32, E34
-  desde     Int             // primer número autorizado (siempre 1)
-  hasta     Int             // límite autorizado (ej. 150 para E31)
-  siguiente Int             @default(1) // próximo a usar
-  updatedAt DateTime        @updatedAt
-
-  @@map("secuencias_ecf")
 }
 
 // ─── PDV / CAJA ───────────────────────────────────────────────────────────────

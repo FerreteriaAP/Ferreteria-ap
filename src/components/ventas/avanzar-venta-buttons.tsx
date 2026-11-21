@@ -42,7 +42,6 @@ interface Props {
   conduces?: ConduceResumen[];
   detalles?: DetalleResumen[];
   modoVendedor?: boolean;
-  clienteRnc?: string | null;
 }
 
 // Estilos de pill reutilizables
@@ -187,7 +186,7 @@ function ConduceConfirmCard({
 // ────────────────────────────────────────────────────────────────────────────
 
 export function AvanzarVentaButtons({
-  ventaId, tipo, conduceId, conduceRecibido, todosConducesEntregados, conduces = [], detalles = [], modoVendedor = false, clienteRnc,
+  ventaId, tipo, conduceId, conduceRecibido, todosConducesEntregados, conduces = [], detalles = [], modoVendedor = false,
 }: Props) {
   // Para el gate de factura: todos los conduces deben estar confirmados.
   // Si no hay conduces array, cae al valor de conduceRecibido (caso legacy).
@@ -208,7 +207,7 @@ export function AvanzarVentaButtons({
 
   const [mostrarFactura,   setMostrarFactura]    = useState(false);
   const [ncf,              setNcf]               = useState("");
-  const [tipoNcf,          setTipoNcf]           = useState<"E31" | "E32" | "">(clienteRnc ? "E31" : "E32");
+  const [tipoNcf,          setTipoNcf]           = useState("B02");
 
   const run = async (
     fn: () => Promise<{ error?: string; ok?: boolean; id?: string; numero?: string }>,
@@ -407,33 +406,25 @@ export function AvanzarVentaButtons({
         >
           <p className="font-semibold text-sm">Datos de la factura</p>
           <div className="space-y-1">
-            <Label className="text-xs">Tipo de comprobante</Label>
-            <Select value={tipoNcf} onValueChange={(v) => {
-              setTipoNcf(v as "E31" | "E32" | "");
-              if (v === "") setNcf(""); // sin comprobante no lleva NCF
-            }}>
-              <SelectTrigger className="h-8"><SelectValue placeholder="Seleccionar…" /></SelectTrigger>
+            <Label className="text-xs">Tipo NCF</Label>
+            <Select value={tipoNcf} onValueChange={(v) => setTipoNcf((v ?? "B02") as string)}>
+              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
               <SelectContent style={{ backgroundColor: "var(--card)", color: "var(--foreground)" }}>
-                <SelectItem value="E31">E31 — Crédito Fiscal Electrónico{clienteRnc ? ` (${clienteRnc})` : ""}</SelectItem>
-                <SelectItem value="E32">E32 — Consumo Electrónico</SelectItem>
-                <SelectItem value="">Sin comprobante fiscal</SelectItem>
+                <SelectItem value="B01">B01 — Crédito Fiscal</SelectItem>
+                <SelectItem value="B02">B02 — Consumidor Final</SelectItem>
+                <SelectItem value="B14">B14 — Régimen Especial</SelectItem>
+                <SelectItem value="B15">B15 — Gubernamental</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {tipoNcf !== "" && (
-            <div className="space-y-1">
-              <Label className="text-xs">NCF</Label>
-              <Input
-                value={ncf}
-                onChange={(e) => setNcf(e.target.value.toUpperCase())}
-                className="h-8 font-mono"
-                placeholder={tipoNcf === "E31" ? "E310000000001" : "E320000000001"}
-              />
-              <p className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>
-                Se asignará automáticamente al conectar GTI
-              </p>
-            </div>
-          )}
+          <div className="space-y-1">
+            <Label className="text-xs">NCF</Label>
+            <Input
+              value={ncf}
+              onChange={(e) => setNcf(e.target.value)}
+              className="h-8 font-mono" placeholder="B020000000001"
+            />
+          </div>
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => run(

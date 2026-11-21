@@ -104,7 +104,7 @@ export async function getConsumidorFinal() {
   let cf = await prisma.contacto.findFirst({ where: { nombre: "Consumidor Final" } });
   if (!cf) {
     cf = await prisma.contacto.create({
-      data: { tipo: "CLIENTE", nombre: "Consumidor Final", tipoComprobante: "E32" },
+      data: { tipo: "CLIENTE", nombre: "Consumidor Final", tipoComprobante: "B02" },
     });
   }
   return cf;
@@ -116,7 +116,7 @@ export interface ClienteRapidoInput {
   nombre: string;
   telefono?: string;
   rnc?: string;
-  tipoComprobante: "B01" | "B02" | "B14" | "B15" | "E31" | "E32";
+  tipoComprobante: "B01" | "B02" | "B14" | "B15";
   direccion?: string;
   sector?: string;
 }
@@ -210,7 +210,7 @@ export interface LineaPDV {
 export interface VentaPDVInput {
   clienteId: string;
   turnoId?: string;
-  tipoNcf: "E31" | "E32" | null;
+  tipoNcf: "B01" | "B02" | "B14" | "B15";
   lineas: LineaPDV[];
   direccionId?: string;
   notas?: string;
