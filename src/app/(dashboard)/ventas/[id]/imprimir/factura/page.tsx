@@ -191,15 +191,19 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
               {isLast && (
                 <>
                   <div className="bot-grid">
-                    <div className="ncf-box">
-                      <div className="ncf-label">COMPROBANTE FISCAL ELECTRÓNICO</div>
-                      {v.ecfEncf
-                        ? <EcfRepresentacion datos={{ ...v, referencia: v.id }} variante="carta" />
-                        : v.ncf
+                    {v.ecfEncf ? (
+                      <div className="ncf-ecf">
+                        <EcfRepresentacion datos={{ ...v, referencia: v.id }} variante="carta" />
+                      </div>
+                    ) : (
+                      <div className="ncf-box">
+                        <div className="ncf-label">COMPROBANTE FISCAL ELECTRÓNICO</div>
+                        {v.ncf
                           ? <div className="ncf-value">{v.ncf}</div>
                           : <div className="ncf-placeholder">NCF / QR pendiente de configuración DGII</div>
-                      }
-                    </div>
+                        }
+                      </div>
+                    )}
                     <div className="tot-area">
                       <table className="tot-tbl">
                         <tbody>
@@ -330,6 +334,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
         /* Totales + NCF */
         .bot-grid { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: start; margin-bottom: 20px; }
         .ncf-box { border: 1px dashed #ccc; border-radius: 4px; padding: 10px 12px; min-height: 60px; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+        .ncf-ecf { align-self: start; }
         .ncf-label { font-size: 7.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 4px; }
         .ncf-value { font-size: 13px; font-weight: 700; font-family: monospace; color: #333; }
         .ncf-placeholder { font-size: 9px; color: #ccc; font-style: italic; }
