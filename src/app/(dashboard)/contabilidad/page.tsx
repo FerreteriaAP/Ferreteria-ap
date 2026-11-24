@@ -4,20 +4,30 @@ import { auth } from "@/lib/auth";
 import type { LucideProps } from "lucide-react";
 import {
   HandCoins, TrendingDown, BarChart3,
-  Receipt, ScrollText, Calculator,
+  Receipt, ScrollText, Calculator, QrCode,
 } from "lucide-react";
+import { ecfActivo } from "@/lib/ecf";
 
 async function getBadges() {
   const hoy = new Date();
-  const [cxcVencidas, cxpVencidas] = await Promise.all([
+  const [cxcVencidas, cxpVencidas, ecfAtencion] = await Promise.all([
     prisma.cuentaPorCobrar.count({
       where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
     }),
     prisma.cuentaPorPagar.count({
       where: { estado: { in: ["PENDIENTE", "PAGADO_PARCIAL"] }, fechaVencimiento: { lt: hoy } },
     }).catch(() => 0),
+    // e-CF rechazados, por verificar o facturas que se quedaron sin e-CF
+    prisma.venta.count({
+      where: {
+        OR: [
+          { ecfEstado: { in: ["rechazado", "verificar", "error_interno"] } },
+          { tipo: "FACTURADA", ecfEncf: null, ecfError: { not: null } },
+        ],
+      },
+    }).catch(() => 0),
   ]);
-  return { cxcVencidas, cxpVencidas: Number(cxpVencidas) };
+  return { cxcVencidas, cxpVencidas: Number(cxpVencidas), ecfAtencion: Number(ecfAtencion) };
 }
 
 function ModuleCard({ label, sub, href, Icon, color, badge = 0 }: {
@@ -93,6 +103,7 @@ export default async function ContabilidadPage() {
     { label: "Gastos",             sub: "Por categoría",   href: "/contabilidad/gastos",    Icon: Receipt,     color: "#f43f5e", badge: 0              },
     { label: "Reportes",           sub: "Informes",        href: "/contabilidad/reportes",  Icon: ScrollText,  color: "#64748b", badge: 0              },
     { label: "Impuestos",          sub: "ITBIS / DGII",    href: "/contabilidad/impuestos",       Icon: Calculator,  color: "#f97316", badge: 0                },
+    ...(ecfActivo() ? [{ label: "e-CF", sub: "Comprobantes electrónicos", href: "/contabilidad/ecf", Icon: QrCode, color: "#16a34a", badge: b.ecfAtencion }] : []),
   ].filter(m => !(ocultarAnaliticas && m.href === "/contabilidad/analiticas"));
 
   return (
