@@ -163,6 +163,37 @@ Viene de Atrio Business. Había dos errores:
 
 ---
 
+## e-CF directo con la DGII (Conector KRP), rama `feat/ecf-krp`
+
+> 2026-11-24. **No está en `main`.** Se prueba en localhost y en el ambiente de pruebas de la DGII (TesteCF) antes del corte. Isai decide cuándo se fusiona.
+
+Ferretería AP ya está **certificada** como emisor electrónico (paso 15 finalizado; la certificación se hizo con GTI). En vez de pagar a GTI por la conexión, se usa el **Conector e-CF de KRP Consulting** (gratis, vía el contable): un servicio Python que corre en el servidor Windows (`C:\KRP_ECF`), firma con nuestro `.p12` y envía directo a la DGII. Su documentación está en el paquete `krp_ecf_conector` (README, API.md, INSTALACION.md, CORTE.md).
+
+**Cómo está integrado:**
+- `src/lib/ecf.ts`: cliente HTTP del conector (`127.0.0.1:8085`, encabezado `X-API-Key`).
+- `src/lib/ecf-servicio.ts`: arma el documento desde la venta o la nota de crédito, emite y guarda los campos `ecf*`. Cada línea se manda de modo que el total cuadre **al centavo** con lo cobrado; si no, el conector rechaza la factura.
+- Los tipos B de la app se **mantienen** (B01, B02, B14, B15) y se convierten al enviar: B01→31, B02→32, B14→44, B15→45; nota de crédito→34. **No** se agregan E31/E32 al enum: eso fue lo que tumbó el PDV el 20 nov.
+- Puntos de emisión: `facturarVenta` (síncrono), `procesarPagoCaja` (asíncrono, ticket en <1 s) y `crearNotaCredito` (34, referencia la factura original).
+- Validación **antes** de facturar o cobrar: por ejemplo, B01 sin RNC da error y no se gasta número.
+- Facturas y notas con e-CF **no** se pueden editar, eliminar ni anular: se corrigen con nota de crédito.
+- Impresión (ticket, carta y nota de crédito): razón social FERRETERIA AP SRL, e-NCF, QR (SVG del conector), código de seguridad y fecha de firma.
+- Pantalla **Contabilidad → e-CF** (`/contabilidad/ecf`): estado del conector, rechazados y pendientes, con botones Emitir / Reintentar / Reemitir.
+- `src/instrumentation.ts`: cada 3 min actualiza el estado de los e-CF en proceso.
+
+**Variables de entorno** (`.env` del servidor y de la Mac, nunca en git):
+```
+ECF_ACTIVO=false          # true activa todo; false = la app funciona como antes
+ECF_URL=http://127.0.0.1:8085
+ECF_API_KEY=              # la clave de [api] en C:\KRP_ECF\config\config.toml
+```
+
+**⚠️ Orden obligatorio al pasar a producción:**
+1. **Primero** aplicar la migración `prisma/migrations/20261124000000_ecf_conector/migration.sql` en la base de producción. Solo agrega columnas y se puede correr dos veces sin problema. Si se publica el código sin las columnas, **todas** las consultas de ventas fallan.
+2. Después fusionar a `main` (despliega), con `ECF_ACTIVO=false`.
+3. El día del corte: seguir `CORTE.md` del conector y luego poner `ECF_ACTIVO=true` y reiniciar la app.
+
+---
+
 ## Pendientes
 
 ### 1. 🔴 Migraciones atrasadas respecto al schema (afecta e-CF en producción)

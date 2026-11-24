@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { getNotaCredito } from "@/actions/nota-credito";
 import { EMPRESA } from "@/lib/empresa";
 import { PrintBtn } from "@/components/caja/print-btn";
+import { EcfRepresentacion, tituloEcf } from "@/components/print/ecf-representacion";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -68,7 +69,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
 
         {/* DOCUMENTO */}
         <div className="centro">
-          <div className="doc-tipo">NOTA DE CRÉDITO</div>
+          <div className="doc-tipo">{tituloEcf(nc)?.toUpperCase() ?? "NOTA DE CRÉDITO"}</div>
         </div>
         <div>
           <div className="doc-num">Nota No. {nc.numero}</div>
@@ -77,7 +78,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
             <div className="doc-ref">Factura original: {nc.venta.numero}</div>
           )}
           {nc.venta?.ncf && (
-            <div className="doc-ref">NCF: {nc.venta.ncf}</div>
+            <div className="doc-ref">{nc.venta.ncf.startsWith("E") ? "e-NCF" : "NCF"} modificado: {nc.venta.ncf}</div>
           )}
         </div>
 
@@ -157,6 +158,13 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         <div className="campo"><span>Ref. Nota:</span><span>{nc.numero}</span></div>
 
         <div className="dbl"></div>
+
+        {nc.ecfEncf && (
+          <>
+            <EcfRepresentacion datos={{ ...nc, referencia: `nc_${nc.id}` }} variante="ticket" />
+            <div className="guion"></div>
+          </>
+        )}
 
         {/* FOOTER */}
         <div className="centro">

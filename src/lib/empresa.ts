@@ -11,6 +11,8 @@ export const BRAND_DARK = "#000204";
 
 export const EMPRESA = {
   nombre:    "Ferretería AP",
+  /** Razón social EXACTA registrada en la DGII (va en los e-CF y su representación impresa). */
+  razonSocial: "FERRETERIA AP SRL",
   rnc:       "1-31-91217-6",
   tel:       "+1 829-584-9708",
   cel:       "+1 829-584-9708",   // tiene WhatsApp

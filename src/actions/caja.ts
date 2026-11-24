@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { generarNumero } from "@/lib/numeracion";
 import { fechaInputRD } from "@/lib/fechas";
+import { ecfActivo } from "@/lib/ecf";
+import { documentoDesdeVenta, emitirVenta } from "@/lib/ecf-servicio";
 
 // Helpers 
 
@@ -306,6 +308,15 @@ export async function procesarPagoCaja(
  return { error: `El total pagado (${(totalPagado + montoCredito + montoNC).toFixed(2)}) no coincide con el total de la venta (${totalVenta.toFixed(2)})` };
  }
 
+ // e-CF: validar antes de cobrar que los datos alcancen (p. ej. RNC del cliente en B01).
+ // El NCF lo asigna el conector; se ignora cualquier NCF escrito a mano.
+ const conEcf = ecfActivo();
+ if (conEcf) {
+ const pre = await documentoDesdeVenta(ventaId);
+ if ("error" in pre) return { error: pre.error };
+ if (opciones?.ncf) opciones = { ...opciones, ncf: undefined };
+ }
+
  // Determinar estado de pago
  let estadoPago: "PAGADO" | "PAGADO_PARCIAL" | "PENDIENTE" = "PAGADO";
  if (montoCredito > 0 && totalPagado < totalVenta) {
@@ -479,11 +490,24 @@ export async function procesarPagoCaja(
  }
  });
 
+ // e-CF en modo asíncrono: responde en menos de 1 s con e-NCF, código y QR para
+ // imprimir el ticket; la DGII se notifica en segundo plano. Si el conector no
+ // responde, la venta queda cobrada y aparece en "Comprobantes electrónicos".
+ let ecfError: string | undefined;
+ if (conEcf) {
+ const formas = [
+ ...pagos.map((p) => ({ metodo: p.metodo, monto: p.monto })),
+ ...(montoNC > 0 ? [{ metodo: "NC", monto: montoNC }] : []),
+ ];
+ const r = await emitirVenta(ventaId, { asincrono: true, formas });
+ if ("error" in r) ecfError = r.error;
+ }
+
  revalidatePath("/caja");
  revalidatePath("/pdv");
  revalidatePath("/ventas");
  revalidatePath("/contabilidad/cxc");
- return { ok: true, numero: numFactura };
+ return { ok: true, numero: numFactura, ...(ecfError ? { ecfError } : {}) };
 
  } catch (err) {
  console.error("procesarPagoCaja:", err);
@@ -510,6 +534,9 @@ export async function eliminarFacturaPDV(ventaId: string) {
   if (!venta) return { error: "Venta no encontrada" };
   if (venta.tipo !== "FACTURADA") return { error: "Solo se pueden eliminar facturas confirmadas" };
   if (!venta.turnoId) return { error: "Esta factura no es de caja (PDV)" };
+  if (venta.ecfEncf) {
+    return { error: `Esta factura tiene e-CF ${venta.ecfEncf} reportado a la DGII y no se puede eliminar. Haz una nota de crédito por el total.` };
+  }
 
   const userId = session!.user!.id!;
 

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 import { auth } from "@/lib/auth";
 import { generarNumero } from "@/lib/numeracion";
+import { ecfActivo } from "@/lib/ecf";
+import { emitirNotaCredito } from "@/lib/ecf-servicio";
 import { revalidatePath } from "next/cache";
 
 async function getUserId() {
@@ -117,11 +119,19 @@ export async function crearNotaCredito(input: CrearNotaCreditoInput) {
   }
  });
 
+ // e-CF 34 (nota de crédito electrónica) referenciando la factura original.
+ // Si la factura original no tenía comprobante fiscal, no se reporta.
+ let ecfError: string | undefined;
+ if (ecfActivo() && ncId) {
+  const r = await emitirNotaCredito(ncId);
+  if ("error" in r) ecfError = r.error;
+ }
+
  revalidatePath("/caja");
  revalidatePath(`/ventas/${input.ventaId}`);
  revalidatePath("/contabilidad/cxc");
  revalidatePath(`/contabilidad/cxc/estado/${venta.clienteId}`);
- return { ok: true, numero, id: ncId };
+ return { ok: true, numero, id: ncId, ...(ecfError ? { ecfError } : {}) };
 }
 
 // Obtener facturas para nota de crédito (facturadas del turno actual o búsqueda) 
@@ -281,6 +291,9 @@ export async function editarNotaCredito(id: string, data: {
 
  // Si se anula una NC pendiente, devolver el saldoFavor al cliente (restar)
  const anulando = data.estado === "ANULADA" && nc.estado === "PENDIENTE";
+ if (data.estado === "ANULADA" && nc.ecfEncf) {
+ return { error: `Esta nota de crédito tiene e-CF ${nc.ecfEncf} reportado a la DGII y no se puede anular.` };
+ }
 
  await prisma.$transaction(async (tx) => {
  await tx.notaCredito.update({

@@ -42,6 +42,8 @@ interface Props {
   conduces?: ConduceResumen[];
   detalles?: DetalleResumen[];
   modoVendedor?: boolean;
+  /** Con e-CF activo el NCF lo asigna el conector: no se escribe a mano. */
+  ecfActivo?: boolean;
 }
 
 // Estilos de pill reutilizables
@@ -186,7 +188,7 @@ function ConduceConfirmCard({
 // ────────────────────────────────────────────────────────────────────────────
 
 export function AvanzarVentaButtons({
-  ventaId, tipo, conduceId, conduceRecibido, todosConducesEntregados, conduces = [], detalles = [], modoVendedor = false,
+  ventaId, tipo, conduceId, conduceRecibido, todosConducesEntregados, conduces = [], detalles = [], modoVendedor = false, ecfActivo = false,
 }: Props) {
   // Para el gate de factura: todos los conduces deben estar confirmados.
   // Si no hay conduces array, cae al valor de conduceRecibido (caso legacy).
@@ -417,6 +419,11 @@ export function AvanzarVentaButtons({
               </SelectContent>
             </Select>
           </div>
+          {ecfActivo ? (
+            <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+              El e-NCF se asigna automáticamente y se reporta a la DGII al confirmar.
+            </p>
+          ) : (
           <div className="space-y-1">
             <Label className="text-xs">NCF</Label>
             <Input
@@ -425,6 +432,7 @@ export function AvanzarVentaButtons({
               className="h-8 font-mono" placeholder="B020000000001"
             />
           </div>
+          )}
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => run(

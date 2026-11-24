@@ -551,6 +551,17 @@ model Venta {
   // Código de seguridad anti-fraude para devoluciones (formato XXXX-XXXX)
   // Solo visible para ADMINISTRADOR en el sistema; se imprime en el ticket/factura física
   codigoSeguridad  String?
+  // e-CF (Conector KRP / DGII). Solo se llenan con ECF_ACTIVO=true.
+  ecfTipo               Int?      // 31, 32, 34, 44 o 45
+  ecfEncf               String?   @unique // e-NCF asignado por el conector (E320000000001)
+  ecfEstado             String?   // firmado | en_proceso | aceptado | aceptado_condicional | pendiente_envio | verificar | rechazado | error_interno
+  ecfCodigoSeguridad    String?   // 6 caracteres de la DGII (≠ codigoSeguridad interno)
+  ecfFechaFirma         String?   // "DD-MM-AAAA HH:MM:SS"
+  ecfFechaVencSecuencia String?   // null en 32 y 34
+  ecfQrUrl              String?
+  ecfMensajes           Json?
+  ecfError              String?   // último error al llamar al conector (red, validación)
+  ecfActualizado        DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
@@ -988,6 +999,17 @@ model NotaCredito {
   montoRestante Decimal  @db.Decimal(12, 2)  // saldo disponible (se reduce con cada aplicación)
   estado     String   @default("PENDIENTE") // "PENDIENTE" | "APLICADA"
   notas      String?  @db.Text
+  // e-CF (Conector KRP / DGII). Solo se llenan con ECF_ACTIVO=true.
+  ecfTipo               Int?      // 31, 32, 34, 44 o 45
+  ecfEncf               String?   @unique // e-NCF asignado por el conector (E320000000001)
+  ecfEstado             String?   // firmado | en_proceso | aceptado | aceptado_condicional | pendiente_envio | verificar | rechazado | error_interno
+  ecfCodigoSeguridad    String?   // 6 caracteres de la DGII (≠ codigoSeguridad interno)
+  ecfFechaFirma         String?   // "DD-MM-AAAA HH:MM:SS"
+  ecfFechaVencSecuencia String?   // null en 32 y 34
+  ecfQrUrl              String?
+  ecfMensajes           Json?
+  ecfError              String?   // último error al llamar al conector (red, validación)
+  ecfActualizado        DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

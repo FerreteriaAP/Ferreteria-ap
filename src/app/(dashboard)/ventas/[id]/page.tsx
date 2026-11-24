@@ -10,6 +10,8 @@ import { BtnEliminarDocumento } from "@/components/shared/btn-eliminar-documento
 import { BtnVolverVentas } from "@/components/ventas/btn-volver-ventas";
 import { eliminarVenta } from "@/actions/ventas";
 import { AdminEditarDetalles } from "@/components/ventas/admin-editar-detalles";
+import { EcfEstadoCard } from "@/components/ventas/ecf-estado-card";
+import { ecfActivo } from "@/lib/ecf";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -288,7 +290,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
                 ...(venta.cliente.rnc ? [{ label: "RNC", value: <span className="font-mono">{venta.cliente.rnc}</span> }] : []),
                 { label: "Fecha emisión", value: new Date(venta.fechaEmision).toLocaleDateString("es-DO") },
                 ...(venta.fechaVencimiento ? [{ label: "Vencimiento", value: new Date(venta.fechaVencimiento).toLocaleDateString("es-DO") }] : []),
-                ...(venta.ncf ? [{ label: "NCF", value: <span className="font-mono">{venta.ncf} ({venta.tipoNcf})</span> }] : []),
+                ...(venta.ncf ? [{ label: venta.ecfEncf ? "e-NCF" : "NCF", value: <span className="font-mono">{venta.ncf} ({venta.tipoNcf})</span> }] : []),
                 ...(venta.notas ? [{ label: "Notas", value: <span className="text-xs">{venta.notas}</span> }] : []),
               ].map((row, i) => (
                 <div key={i} className="contents">
@@ -530,6 +532,11 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
             )}
           </div>
 
+          {/* e-CF: estado y acciones (emitir, reintentar, reemitir) */}
+          {venta.tipo === "FACTURADA" && (venta.ecfEncf || venta.ecfError || ecfActivo()) && (
+            <EcfEstadoCard ventaId={id} ecf={venta} />
+          )}
+
           {/* Acciones del flujo */}
           {venta.tipo !== "CANCELADA" && venta.tipo !== "FACTURADA" && (
             <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: CARD_BG }}>
@@ -542,6 +549,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
               <div className="p-4">
                 <AvanzarVentaButtons
                   ventaId={id}
+                  ecfActivo={ecfActivo()}
                   tipo={venta.tipo}
                   conduceId={conduceId}
                   conduceRecibido={conduceRecibido}

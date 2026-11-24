@@ -195,6 +195,9 @@ function PagoModal({ factura, turnoId, consumidorFinalId, onClose, onOk }: {
     vencimientoCredito: hayCredito ? vencimientoCredito : undefined,
    });
    if ("error" in res && res.error) { setError(res.error); return; }
+   if ("ecfError" in res && res.ecfError) {
+    alert(`La venta se cobró, pero el comprobante electrónico (e-CF) NO se emitió:\n\n${res.ecfError}\n\nEl ticket saldrá sin e-NCF. Avisa al administrador: se emite desde "Comprobantes electrónicos".`);
+   }
    onOk();
   });
  };

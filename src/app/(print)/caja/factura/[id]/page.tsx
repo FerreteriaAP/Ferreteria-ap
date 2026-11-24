@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { getVenta } from "@/actions/ventas";
 import { EMPRESA, CREDITO_LABEL, NCF_LABEL } from "@/lib/empresa";
 import { AutoPrint } from "@/components/caja/auto-print";
+import { EcfRepresentacion, tituloEcf } from "@/components/print/ecf-representacion";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -85,12 +86,12 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
 
         {/* DOCUMENTO */}
         <div className="centro">
-          <div className="doc-tipo">{v.tipoNcf ? (NCF_LABEL[v.tipoNcf] ?? "FACTURA DE VENTA") : "FACTURA DE VENTA"}</div>
+          <div className="doc-tipo">{tituloEcf(v) ?? (v.tipoNcf ? (NCF_LABEL[v.tipoNcf] ?? "FACTURA DE VENTA") : "FACTURA DE VENTA")}</div>
         </div>
         <div>
           <div className="doc-num">Factura No. {v.numero}</div>
           <div className="doc-sub">{fecha}</div>
-          {v.ncf && <div className="doc-sub">NCF: {v.ncf}</div>}
+          {v.ncf && <div className="doc-sub">{v.ecfEncf ? "e-NCF" : "NCF"}: {v.ncf}</div>}
         </div>
 
         <div className="guion"></div>
@@ -187,6 +188,14 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
                 Conserve esta factura para solicitar devoluciones.
               </div>
             </div>
+            <div className="guion"></div>
+          </>
+        )}
+
+        {/* e-CF: representación impresa (QR, código de seguridad, fecha de firma) */}
+        {v.ecfEncf && (
+          <>
+            <EcfRepresentacion datos={{ ...v, referencia: v.id }} variante="ticket" />
             <div className="guion"></div>
           </>
         )}

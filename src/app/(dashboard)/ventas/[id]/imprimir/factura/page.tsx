@@ -4,6 +4,7 @@ import { PrintButtons } from "@/components/nominas/print-buttons";
 import { PrintLogo } from "@/components/print/logo";
 import { EMPRESA, getBancosEmpresa, CREDITO_LABEL, NCF_LABEL } from "@/lib/empresa";
 import { auth } from "@/lib/auth";
+import { EcfRepresentacion, tituloEcf } from "@/components/print/ecf-representacion";
 
 interface PageProps { params: Promise<{ id: string }> }
 
@@ -32,7 +33,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
     : null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tieneDesc = v.detalles.some((d: any) => Number(d.descuento) > 0);
-  const tipoLabel = v.tipoNcf ? (NCF_LABEL[v.tipoNcf] ?? "Factura") : "Factura";
+  const tipoLabel = tituloEcf(v) ?? (v.tipoNcf ? (NCF_LABEL[v.tipoNcf] ?? "Factura") : "Factura");
 
   // Split items into pages of ITEMS_PER_PAGE
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +81,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
                     </div>
                     <div className="tipo-box">
                       <div className="tipo-titulo">{tipoLabel}</div>
-                      {v.ncf && <div className="tipo-det"><strong>NCF:</strong> {v.ncf}</div>}
+                      {v.ncf && <div className="tipo-det"><strong>{v.ecfEncf ? "e-NCF" : "NCF"}:</strong> {v.ncf}</div>}
                       <div className="tipo-det"><strong>No.:</strong> {v.numero}</div>
                     </div>
                   </div>
@@ -190,9 +191,11 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
                   <div className="bot-grid">
                     <div className="ncf-box">
                       <div className="ncf-label">COMPROBANTE FISCAL ELECTRÓNICO</div>
-                      {v.ncf
-                        ? <div className="ncf-value">{v.ncf}</div>
-                        : <div className="ncf-placeholder">NCF / QR pendiente de configuración DGII</div>
+                      {v.ecfEncf
+                        ? <EcfRepresentacion datos={{ ...v, referencia: v.id }} variante="carta" />
+                        : v.ncf
+                          ? <div className="ncf-value">{v.ncf}</div>
+                          : <div className="ncf-placeholder">NCF / QR pendiente de configuración DGII</div>
                       }
                     </div>
                     <div className="tot-area">

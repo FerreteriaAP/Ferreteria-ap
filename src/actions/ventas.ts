@@ -8,6 +8,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generarNumero } from "@/lib/numeracion";
 import { fechaInputRD } from "@/lib/fechas";
+import { ecfActivo } from "@/lib/ecf";
+import { documentoDesdeVenta, emitirVenta } from "@/lib/ecf-servicio";
 
 // Types 
 
@@ -46,6 +48,14 @@ const PREFIJOS: Record<string, string> = {
 };
 async function siguienteNumero(tipo: string): Promise<string> {
   return generarNumero(tipo, PREFIJOS[tipo] ?? tipo);
+}
+
+// Una factura con e-CF ya reportado a la DGII no se puede modificar: se corrige con nota de crédito.
+async function bloqueoEcf(ventaId: string): Promise<string | null> {
+ const v = await prisma.venta.findUnique({ where: { id: ventaId }, select: { ecfEncf: true } });
+ return v?.ecfEncf
+ ? `Esta factura tiene e-CF ${v.ecfEncf} reportado a la DGII y no se puede modificar. Haz una nota de crédito.`
+ : null;
 }
 
 function calcularDiasCredito(credito: string): number | null {
@@ -775,6 +785,16 @@ export async function facturarVenta(ventaId: string, data: {
  return { error: "Solo se puede facturar desde Conduce u Orden de Venta" };
  }
 
+ // e-CF: el número lo asigna el conector; se ignora cualquier NCF escrito a mano.
+ // Antes de facturar se valida que los datos alcancen (p. ej. RNC del cliente en B01),
+ // para no dejar una factura que después no se pueda emitir.
+ const conEcf = ecfActivo();
+ if (conEcf) {
+ data = { ...data, ncf: "" };
+ const pre = await documentoDesdeVenta(ventaId, { tipoNcf: data.tipoNcf || null });
+ if ("error" in pre) return { error: pre.error };
+ }
+
  // Validar unicidad del NCF (comprobante fiscal único por factura)
  if (data.ncf) {
  const existente = await prisma.venta.findFirst({
@@ -846,10 +866,19 @@ export async function facturarVenta(ventaId: string, data: {
  }
  });
 
+ // e-CF después de confirmar la factura. Si falla (conector caído, rechazo de datos),
+ // la factura queda hecha y en su página aparece el aviso con el botón "Emitir e-CF",
+ // que repite la llamada con la misma referencia (no duplica).
+ let ecfError: string | undefined;
+ if (conEcf) {
+ const r = await emitirVenta(ventaId);
+ if ("error" in r) ecfError = r.error;
+ }
+
  revalidatePath(`/ventas/${ventaId}`);
  revalidatePath("/ventas");
  revalidatePath("/cxc");
- return { ok: true };
+ return { ok: true, ...(ecfError ? { ecfError } : {}) };
 }
 
 // Registrar cobro 
@@ -1236,6 +1265,7 @@ export async function eliminarVenta(id: string) {
 export async function recalcularPreciosKolmen(ventaId: string) {
  const session = await auth();
  if (!session?.user?.id) return { error: "No autorizado" };
+  { const b = await bloqueoEcf(ventaId); if (b) return { error: b }; }
 
  const venta = await prisma.venta.findUnique({
  where: { id: ventaId },
@@ -1320,6 +1350,7 @@ export async function adminEditarDetalle(input: {
   if (!detalle) return { error: "Línea no encontrada" };
 
   const ventaId = detalle.venta.id;
+  { const b = await bloqueoEcf(ventaId); if (b) return { error: b }; }
   const exento  = detalle.producto.exentoItbis;
 
   // precio = base sin ITBIS; subtotal = precio × cantidad × (1 - descuento%)
@@ -1364,6 +1395,7 @@ export async function adminAgregarDetalle(input: {
   if (rol !== "ADMINISTRADOR") return { error: "Acceso restringido a administrador" };
 
   const { ventaId, productoId, cantidad, precioFinal, descuento = 0, unidad } = input;
+  { const b = await bloqueoEcf(ventaId); if (b) return { error: b }; }
   if (cantidad <= 0)    return { error: "Cantidad debe ser mayor a 0" };
   if (precioFinal < 0) return { error: "Precio inválido" };
 
@@ -1424,6 +1456,7 @@ export async function adminEliminarDetalle(detalleId: string) {
   if (!detalle) return { error: "Línea no encontrada" };
 
   const ventaId = detalle.venta.id;
+  { const b = await bloqueoEcf(ventaId); if (b) return { error: b }; }
 
   await prisma.$transaction(async (tx) => {
     await tx.detalleVenta.delete({ where: { id: detalleId } });
@@ -1595,6 +1628,7 @@ export async function guardarPreciosVDP(
   const session = await auth();
   const rol = ((session?.user) as { rol?: string })?.rol ?? "";
   if (rol !== "ADMINISTRADOR") return { error: "Solo el administrador puede usar Cálculo VDP" };
+  { const b = await bloqueoEcf(ventaId); if (b) return { error: b }; }
 
   await prisma.$transaction(async (tx) => {
     for (const item of items) {
