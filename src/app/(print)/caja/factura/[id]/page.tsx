@@ -75,7 +75,7 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
             <text x="35" y="35" dominantBaseline="central" textAnchor="middle"
               fontFamily="'Arial Black', Impact, sans-serif" fontSize="26" fontWeight="900" fill="#000">AP</text>
           </svg>
-          <div className="emp-nom">FERRETERIA AP</div>
+          <div className="emp-nom">{v.ecfEncf ? EMPRESA.razonSocial : "FERRETERIA AP"}</div>
           <div className="emp-lin">{EMPRESA.dir}</div>
           <div className="emp-lin">{EMPRESA.ciudad}</div>
           <div className="emp-lin">RNC: {EMPRESA.rnc}</div>
@@ -92,6 +92,7 @@ export default async function ReciboVentaPDV({ params }: PageProps) {
           <div className="doc-num">Factura No. {v.numero}</div>
           <div className="doc-sub">{fecha}</div>
           {v.ncf && <div className="doc-sub">{v.ecfEncf ? "e-NCF" : "NCF"}: {v.ncf}</div>}
+          {v.ecfFechaVencSecuencia && <div className="doc-sub">Válido hasta: {v.ecfFechaVencSecuencia}</div>}
         </div>
 
         <div className="guion"></div>

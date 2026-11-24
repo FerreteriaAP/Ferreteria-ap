@@ -1,10 +1,9 @@
 /**
- * Bloque de Representación Impresa del e-CF (DGII): razón social y RNC del emisor,
- * tipo de comprobante, e-NCF, vencimiento de la secuencia, QR, código de seguridad
- * y fecha de firma. Server component: trae el QR en SVG del conector local.
- * Solo se muestra si el documento tiene e-NCF.
+ * Parte inferior de la Representación Impresa del e-CF (DGII): QR, código de
+ * seguridad y fecha de firma. La razón social, el tipo de comprobante, el e-NCF y
+ * su vencimiento van en el encabezado de cada impresión (sin repetirlos aquí).
+ * Server component: trae el QR en SVG del conector local. Solo con e-NCF.
  */
-import { EMPRESA } from "@/lib/empresa";
 import { qrSvgECF, TIPO_ECF_NOMBRE } from "@/lib/ecf";
 
 export interface DatosEcfImpresion {
@@ -42,18 +41,6 @@ export async function EcfRepresentacion({ datos, variante }: { datos: DatosEcfIm
         <div style={{ border: "2px solid #000", padding: "4px", fontWeight: 900, fontSize: ticket ? "11px" : "13px", marginBottom: "6px" }}>
           COMPROBANTE NO VÁLIDO — {datos.ecfEstado === "rechazado" ? "RECHAZADO POR LA DGII" : "PENDIENTE DE CORRECCIÓN"}
         </div>
-      )}
-      <div style={{ fontSize: ticket ? "9px" : "10px", fontWeight: 700 }}>
-        {EMPRESA.razonSocial} · RNC {EMPRESA.rnc.replace(/\D/g, "")}
-      </div>
-      <div style={{ fontSize: ticket ? "10px" : "11px", fontWeight: 700, marginTop: "2px" }}>
-        {tituloEcf(datos)}
-      </div>
-      <div style={{ fontSize: ticket ? "12px" : "13px", fontWeight: 900, fontFamily: "monospace", letterSpacing: "0.05em" }}>
-        e-NCF: {datos.ecfEncf}
-      </div>
-      {datos.ecfFechaVencSecuencia && (
-        <div style={{ fontSize: ticket ? "9px" : "10px" }}>Válido hasta: {datos.ecfFechaVencSecuencia}</div>
       )}
       <div style={{ display: "flex", justifyContent: "center", margin: "4px 0" }}>
         {svg ? (

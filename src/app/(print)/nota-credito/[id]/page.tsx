@@ -58,7 +58,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
             <text x="35" y="35" dominantBaseline="central" textAnchor="middle"
               fontFamily="'Arial Black', Impact, sans-serif" fontSize="26" fontWeight="900" fill="#000">AP</text>
           </svg>
-          <div className="emp-nom">FERRETERIA AP</div>
+          <div className="emp-nom">{nc.ecfEncf ? EMPRESA.razonSocial : "FERRETERIA AP"}</div>
           <div className="emp-lin">{EMPRESA.dir}</div>
           <div className="emp-lin">{EMPRESA.ciudad}</div>
           <div className="emp-lin">RNC: {EMPRESA.rnc}</div>
@@ -73,6 +73,7 @@ export default async function ImprimirNotaCredito({ params }: PageProps) {
         </div>
         <div>
           <div className="doc-num">Nota No. {nc.numero}</div>
+          {nc.ecfEncf && <div className="doc-num">e-NCF: {nc.ecfEncf}</div>}
           <div className="doc-sub">{fecha}</div>
           {nc.venta?.numero && (
             <div className="doc-ref">Factura original: {nc.venta.numero}</div>

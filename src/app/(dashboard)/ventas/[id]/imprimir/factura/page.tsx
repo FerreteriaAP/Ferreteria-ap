@@ -70,6 +70,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
 
                   <div className="header-grid">
                     <div>
+                      {v.ecfEncf && <div className="emp-det"><strong>{EMPRESA.razonSocial}</strong></div>}
                       <div className="emp-det">RNC: {EMPRESA.rnc}</div>
                       <div className="emp-det">Tel.: {EMPRESA.tel} (WhatsApp) · {EMPRESA.email}</div>
                       <div className="emp-det">{EMPRESA.dir}</div>
@@ -82,6 +83,7 @@ export default async function ImprimirFacturaPage({ params }: PageProps) {
                     <div className="tipo-box">
                       <div className="tipo-titulo">{tipoLabel}</div>
                       {v.ncf && <div className="tipo-det"><strong>{v.ecfEncf ? "e-NCF" : "NCF"}:</strong> {v.ncf}</div>}
+                      {v.ecfFechaVencSecuencia && <div className="tipo-det"><strong>Válido hasta:</strong> {v.ecfFechaVencSecuencia}</div>}
                       <div className="tipo-det"><strong>No.:</strong> {v.numero}</div>
                     </div>
                   </div>
