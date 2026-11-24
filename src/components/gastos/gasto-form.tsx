@@ -11,6 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { crearGasto } from "@/actions/gastos";
 import { cn } from "@/lib/utils";
 import { hoyRD } from "@/lib/fechas";
+import { ComprobanteFiscalCampos, fiscalParaEnviar, fiscalVacio } from "@/components/shared/comprobante-fiscal-campos";
 
 type Categoria = { id: string; nombre: string; tipo: string };
 
@@ -26,6 +27,8 @@ export function GastoForm({ categorias }: GastoFormProps) {
  const [error, setError] = useState<string | null>(null);
  const [categoriaId, setCategoriaId] = useState("");
  const [metodo, setMetodo] = useState("EFECTIVO");
+ const [monto, setMonto] = useState("");
+ const [fiscal, setFiscal] = useState(fiscalVacio());
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
  e.preventDefault();
@@ -38,10 +41,11 @@ export function GastoForm({ categorias }: GastoFormProps) {
  const result = await crearGasto({
  categoriaId,
  descripcion: fd.get("descripcion") as string,
- monto: Number(fd.get("monto")),
+ monto: Number(monto),
  fecha: fd.get("fecha") as string,
  metodo: metodo || undefined,
  notas: fd.get("notas") as string || undefined,
+ fiscal: fiscalParaEnviar(fiscal),
  });
 
  setLoading(false);
@@ -51,6 +55,8 @@ export function GastoForm({ categorias }: GastoFormProps) {
  (e.target as HTMLFormElement).reset();
  setCategoriaId("");
  setMetodo("EFECTIVO");
+ setMonto("");
+ setFiscal(fiscalVacio());
  router.refresh();
  };
 
@@ -63,7 +69,7 @@ export function GastoForm({ categorias }: GastoFormProps) {
  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" > <option value="">— Seleccionar categoría —</option> {categorias.map((c) => (
  <option key={c.id} value={c.id}> {c.nombre} ({c.tipo === "FIJO" ? "Fijo" : "Variable"})
  </option> ))}
- </select> </div> <div className="space-y-1.5"> <Label>Descripción *</Label> <Input name="descripcion" required placeholder="Descripción del gasto" /> </div> <div className="space-y-1.5"> <Label>Monto (RD$) *</Label> <Input name="monto" type="number" step="0.01" min="0.01" required /> </div> <div className="space-y-1.5"> <Label>Fecha *</Label> <Input name="fecha" type="date" defaultValue={hoy} required /> </div> <div className="space-y-1.5"> <Label>Método de pago</Label> <Select value={metodo} onValueChange={(v) => setMetodo((v ?? "EFECTIVO") as string)}> <SelectTrigger><SelectValue /></SelectTrigger> <SelectContent> <SelectItem value="EFECTIVO">Efectivo</SelectItem> <SelectItem value="CHEQUE">Cheque</SelectItem> <SelectItem value="TRANSFERENCIA">Transferencia</SelectItem> <SelectItem value="TARJETA">Tarjeta</SelectItem> </SelectContent> </Select> </div> <div className="space-y-1.5"> <Label>Notas</Label> <Textarea name="notas" rows={2} placeholder="Observaciones opcionales" /> </div> <Separator /> <button
+ </select> </div> <div className="space-y-1.5"> <Label>Descripción *</Label> <Input name="descripcion" required placeholder="Descripción del gasto" /> </div> <div className="space-y-1.5"> <Label>Monto (RD$) *</Label> <Input name="monto" type="number" step="0.01" min="0.01" required value={monto} onChange={(ev) => setMonto(ev.target.value)} /> </div> <div className="space-y-1.5"> <Label>Fecha *</Label> <Input name="fecha" type="date" defaultValue={hoy} required /> </div> <div className="space-y-1.5"> <Label>Método de pago</Label> <Select value={metodo} onValueChange={(v) => setMetodo((v ?? "EFECTIVO") as string)}> <SelectTrigger><SelectValue /></SelectTrigger> <SelectContent> <SelectItem value="EFECTIVO">Efectivo</SelectItem> <SelectItem value="CHEQUE">Cheque</SelectItem> <SelectItem value="TRANSFERENCIA">Transferencia</SelectItem> <SelectItem value="TARJETA">Tarjeta</SelectItem> </SelectContent> </Select> </div> <ComprobanteFiscalCampos value={fiscal} onChange={setFiscal} monto={Number(monto) || 0} /> <div className="space-y-1.5"> <Label>Notas</Label> <Textarea name="notas" rows={2} placeholder="Observaciones opcionales" /> </div> <Separator /> <button
  type="submit" disabled={loading}
  className={cn("w-full h-9 rounded-md px-4 text-sm font-semibold transition-colors", loading && "opacity-50 pointer-events-none")}
  style={{ border: "1.5px solid #F47717", color: "#F47717", background: "transparent" }}

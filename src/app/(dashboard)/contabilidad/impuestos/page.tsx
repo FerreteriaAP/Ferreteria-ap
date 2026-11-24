@@ -107,6 +107,28 @@ export default async function ImpuestosPage({ searchParams }: PageProps) {
         </Link>
       )}
 
+      {/* Formatos de envío de datos DGII (606 compras/gastos, 607 ventas) */}
+      <div className="rounded-xl border p-4 space-y-3" style={{ backgroundColor: CARD_BG }}>
+        <div>
+          <p className="font-semibold text-sm">Formatos DGII — {MESES_COMPLETOS[mes]} {año}</p>
+          <p className="text-xs text-muted-foreground">
+            606: compras y gastos con NCF del suplidor · 607: ventas con comprobante fiscal. Antes de enviar, valida el TXT con la herramienta de pre-validación de la DGII.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {(["606", "607"] as const).map((f) => (["txt", "xlsx"] as const).map((t) => (
+            <a
+              key={f + t}
+              href={`/api/dgii?formato=${f}&periodo=${año}${String(mes).padStart(2, "0")}&tipo=${t}`}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all hover:brightness-110"
+              style={{ borderColor: "color-mix(in oklch, var(--accent-hex) 40%, var(--border))", color: "var(--accent-hex)" }}
+            >
+              ⬇ {f} {t === "txt" ? "TXT" : "Excel"}
+            </a>
+          )))}
+        </div>
+      </div>
+
       {/* KPI carga fiscal total */}
       {cargaFiscalTotal > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

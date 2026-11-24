@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { generarNumero } from "@/lib/numeracion";
 import { fechaInputRD } from "@/lib/fechas";
 import { ecfActivo } from "@/lib/ecf";
+import { normalizarFiscal, type FiscalInput } from "@/lib/dgii";
 import { documentoDesdeVenta, emitirVenta } from "@/lib/ecf-servicio";
 
 // Helpers 
@@ -614,10 +615,13 @@ export interface GastoInput {
  concepto: string;
  monto: number;
  notas?: string;
+ fiscal?: FiscalInput;
 }
 
 export async function registrarGasto(input: GastoInput) {
  if (!input.concepto || input.monto <= 0) return { error: "Datos inválidos" };
+ const fiscal = normalizarFiscal(input.fiscal, input.monto);
+ if ("error" in fiscal) return { error: fiscal.error };
 
  const turno = await prisma.turnoCaja.findUnique({ where: { id: input.turnoId } });
  if (!turno || turno.estado !== "ABIERTO") return { error: "Turno no disponible" };
@@ -630,6 +634,13 @@ export async function registrarGasto(input: GastoInput) {
  concepto: input.concepto,
  monto: input.monto,
  notas: input.notas ?? null,
+ ...(fiscal.data.ncf ? {
+ suplidorRnc: fiscal.data.suplidorRnc,
+ suplidorNombre: fiscal.data.suplidorNombre,
+ ncf: fiscal.data.ncf,
+ itbis: fiscal.data.itbis,
+ tipo606: fiscal.data.tipo606,
+ } : {}),
  },
  });
 
@@ -645,10 +656,13 @@ export interface CompraInput {
  concepto: string; // nombre del suplidor o descripción
  monto: number;
  notas?: string;
+ fiscal?: FiscalInput;
 }
 
 export async function registrarCompraEnCaja(input: CompraInput) {
  if (!input.concepto || input.monto <= 0) return { error: "Datos inválidos" };
+ const fiscal = normalizarFiscal(input.fiscal, input.monto);
+ if ("error" in fiscal) return { error: fiscal.error };
 
  const turno = await prisma.turnoCaja.findUnique({ where: { id: input.turnoId } });
  if (!turno || turno.estado !== "ABIERTO") return { error: "Turno no disponible" };
@@ -661,6 +675,13 @@ export async function registrarCompraEnCaja(input: CompraInput) {
  concepto: input.concepto,
  monto: input.monto,
  notas: input.notas ?? null,
+ ...(fiscal.data.ncf ? {
+ suplidorRnc: fiscal.data.suplidorRnc,
+ suplidorNombre: fiscal.data.suplidorNombre,
+ ncf: fiscal.data.ncf,
+ itbis: fiscal.data.itbis,
+ tipo606: fiscal.data.tipo606,
+ } : {}),
  },
  });
 

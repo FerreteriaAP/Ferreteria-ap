@@ -787,6 +787,12 @@ model Gasto {
   adjunto     String? // URL/path factura o recibo
   notas       String?  @db.Text
   usuarioId   String
+  // Comprobante fiscal del suplidor (para el Formato 606 de la DGII). Opcional.
+  suplidorRnc    String?  // RNC (9) o cédula (11), sin guiones
+  suplidorNombre String?
+  ncf            String?  // B01… / E31… del suplidor
+  tipo606        String?  // código "01".."11" (Tipo de Bienes y Servicios Comprados)
+  esServicio     Boolean  @default(true) // true = Monto en Servicios; false = en Bienes
   createdAt   DateTime @default(now())
 
   categoria CategoriaGasto @relation(fields: [categoriaId], references: [id])
@@ -968,6 +974,13 @@ model MovimientoCaja {
 
   // Solo para PRESTAMO: ID del empleado al que se le prestó
   empleadoId        String?
+
+  // Solo GASTO / COMPRA_MERCANCIA con comprobante fiscal (Formato 606). Opcional.
+  suplidorRnc    String?
+  suplidorNombre String?
+  ncf            String?
+  itbis          Decimal? @db.Decimal(12, 2)
+  tipo606        String?  // "01".."11"
 
   // Solo para COBRO_CXC: ID de la CxC que se está pagando
   cxcId             String?

@@ -192,6 +192,14 @@ ECF_API_KEY=              # la clave de [api] en C:\KRP_ECF\config\config.toml
 2. Después fusionar a `main` (despliega), con `ECF_ACTIVO=false`.
 3. El día del corte: seguir `CORTE.md` del conector y luego poner `ECF_ACTIVO=true` y reiniciar la app.
 
+### Formatos DGII 606 y 607 (misma rama)
+- **Contabilidad → Impuestos → Formatos DGII**: descarga en **TXT** (para la OFV) y en **Excel** el mes que esté elegido arriba (`/api/dgii?formato=606|607&periodo=AAAAMM&tipo=txt|xlsx`; solo administrador y asistente).
+- Estructura según los instructivos oficiales de la DGII (606: feb. 2026; 607: dic. 2025). Validar el TXT con la herramienta de pre-validación de la DGII antes del primer envío.
+- **606**: compras (módulo Compras, tipo 09) + gastos (`/gastos`) + gastos y compras de Caja, **solo los que tienen NCF**. Para eso se agregaron campos opcionales de comprobante fiscal (RNC, nombre, NCF, ITBIS, tipo 606) al formulario de gastos y a los botones Gasto y Compras de Caja. Migración `20261124000001_fiscal_gastos` (solo columnas nuevas; aplicarla **antes** de publicar, igual que la del e-CF).
+- **607**: ventas facturadas con NCF y notas de crédito con e-CF. Las de consumo (B02/E32) menores de RD$250,000 no van en el TXT (regla DGII). Van en una hoja aparte del Excel, para control. Para Ferretería AP el 607 es solo de control: no es obligatorio.
+- Se usan desde el período **diciembre 2026** (inicio de la facturación electrónica).
+- El Excel se genera sin librerías (`src/lib/xlsx.ts`), porque el deploy del servidor no instala dependencias nuevas.
+
 ---
 
 ## Pendientes

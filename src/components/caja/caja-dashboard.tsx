@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect, type ReactNode, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { ComprobanteFiscalCampos, fiscalParaEnviar, fiscalVacio } from "@/components/shared/comprobante-fiscal-campos";
 import {
  procesarPagoCaja,
  eliminarFacturaPendiente,
@@ -502,13 +503,14 @@ function GastoModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () =
  const [error, setError] = useState<string | null>(null);
  const [concepto, setConcepto] = useState("");
  const [monto, setMonto] = useState("");
+ const [fiscal, setFiscal] = useState(fiscalVacio("02"));
 
  const handleSubmit = (e: FormEvent) => {
   e.preventDefault();
   if (!concepto.trim() || !parseFloat(monto)) { setError("Completa todos los campos"); return; }
   setError(null);
   startTransition(async () => {
-   const res = await registrarGasto({ turnoId, concepto, monto: parseFloat(monto) });
+   const res = await registrarGasto({ turnoId, concepto, monto: parseFloat(monto), fiscal: fiscalParaEnviar(fiscal) });
    if ("error" in res && res.error) { setError(res.error); return; }
    onOk();
   });
@@ -525,6 +527,7 @@ function GastoModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () =
      <input type="number" required min="0.01" step="0.01" value={monto} onChange={e => setMonto(e.target.value)}
       placeholder="0.00" className={INPUT_CLS + " font-mono text-right"} />
     </Field>
+    <ComprobanteFiscalCampos value={fiscal} onChange={setFiscal} monto={parseFloat(monto) || 0} inputClassName={INPUT_CLS} mostrarNaturaleza={false} />
     {error && <ErrorMsg>{error}</ErrorMsg>}
     <ModalActions onClose={onClose} label="Registrar gasto" isPending={isPending} />
    </form>
@@ -542,6 +545,7 @@ function CompraModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () 
  const [concepto, setConcepto] = useState("");
  const [monto, setMonto] = useState("");
  const [notas, setNotas] = useState("");
+ const [fiscal, setFiscal] = useState(fiscalVacio("09", false));
  const [sugs, setSugs] = useState<{ id: string; nombre: string; rnc: string | null }[]>([]);
  const [mostrarSugs, setMostrarSugs] = useState(false);
  const debRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -556,8 +560,10 @@ function CompraModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () 
   }, 300);
  };
 
- const seleccionar = (nombre: string) => {
+ const seleccionar = (nombre: string, rnc?: string | null) => {
   setConcepto(nombre); setSugs([]); setMostrarSugs(false);
+  // Prellenar los datos fiscales con el suplidor elegido
+  setFiscal(f => ({ ...f, suplidorNombre: nombre, suplidorRnc: rnc ?? f.suplidorRnc }));
  };
 
  const handleSubmit = (e: FormEvent) => {
@@ -565,7 +571,7 @@ function CompraModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () 
   if (!concepto.trim() || !parseFloat(monto)) { setError("Completa todos los campos"); return; }
   setError(null);
   startTransition(async () => {
-   const res = await registrarCompraEnCaja({ turnoId, concepto, monto: parseFloat(monto), notas: notas || undefined });
+   const res = await registrarCompraEnCaja({ turnoId, concepto, monto: parseFloat(monto), notas: notas || undefined, fiscal: fiscalParaEnviar(fiscal) });
    if ("error" in res && res.error) { setError(res.error); return; }
    onOk();
   });
@@ -582,7 +588,7 @@ function CompraModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () 
       {mostrarSugs && (
        <div className="absolute z-50 top-full mt-1 left-0 right-0 rounded-xl border bg-popover shadow-lg overflow-hidden">
         {sugs.map(s => (
-         <button key={s.id} type="button" onMouseDown={() => seleccionar(s.nombre)}
+         <button key={s.id} type="button" onMouseDown={() => seleccionar(s.nombre, s.rnc)}
           className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors flex items-center justify-between gap-2">
           <span className="font-medium">{s.nombre}</span>
           {s.rnc && <span className="text-xs text-muted-foreground font-mono">{s.rnc}</span>}
@@ -601,6 +607,7 @@ function CompraModal({ turnoId, onClose, onOk }: { turnoId: string; onClose: () 
      <input type="text" value={notas} onChange={e => setNotas(e.target.value)}
       placeholder="Factura, referencia..." className={INPUT_CLS} />
     </Field>
+    <ComprobanteFiscalCampos value={fiscal} onChange={setFiscal} monto={parseFloat(monto) || 0} inputClassName={INPUT_CLS} mostrarNaturaleza={false} />
     {error && <ErrorMsg>{error}</ErrorMsg>}
     <ModalActions onClose={onClose} label="Registrar compra" isPending={isPending} />
    </form>

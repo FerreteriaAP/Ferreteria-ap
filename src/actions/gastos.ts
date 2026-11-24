@@ -5,6 +5,7 @@ import { Prisma } from "@/generated/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { fechaInputRD } from "@/lib/fechas";
+import { normalizarFiscal, type FiscalInput } from "@/lib/dgii";
 
 // Queries 
 
@@ -65,9 +66,13 @@ export async function crearGasto(data: {
  metodo?: string;
  cuentaId?: string;
  notas?: string;
+ fiscal?: FiscalInput;
 }) {
  const session = await auth();
  if (!session?.user?.id) return { error: "No autorizado" };
+
+ const fiscal = normalizarFiscal(data.fiscal, data.monto);
+ if ("error" in fiscal) return { error: fiscal.error };
 
  // Número usando secuencia
  const seq = await prisma.secuenciaDocumento.findUnique({ where: { tipo: "GASTO" } });
@@ -91,6 +96,7 @@ export async function crearGasto(data: {
  cuentaId: data.cuentaId || null,
  notas: data.notas || null,
  usuarioId: session.user.id,
+ ...fiscal.data,
  },
  });
 
