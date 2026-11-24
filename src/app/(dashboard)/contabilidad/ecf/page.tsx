@@ -32,6 +32,17 @@ export default async function EcfPage() {
     <div className="space-y-6 p-4 md:p-6 max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
+          <Link
+            href="/contabilidad/impuestos"
+            className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1 rounded-full transition-all hover:brightness-110 mb-1"
+            style={{
+              backgroundColor: "color-mix(in oklch, var(--accent-hex) 18%, transparent)",
+              color: "var(--accent-hex)",
+              border: "1px solid color-mix(in oklch, var(--accent-hex) 40%, transparent)",
+            }}
+          >
+            ← Impuestos
+          </Link>
           <h1 className="text-xl font-bold">Comprobantes electrónicos (e-CF)</h1>
           <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
             {p.activo ? "Facturación electrónica ACTIVA (conector KRP → DGII)." : "Facturación electrónica desactivada (ECF_ACTIVO=false)."}

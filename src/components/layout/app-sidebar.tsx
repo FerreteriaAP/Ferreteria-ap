@@ -38,7 +38,6 @@ import {
  BookOpen,
  BarChart3,
  Calculator,
- QrCode,
  Monitor,
  Vault,
 } from "lucide-react";
@@ -81,7 +80,6 @@ const navItems = [
  { label: "CxP", href: "/contabilidad/cxp", icon: ArrowUpFromLine },
  { label: "Analíticas", href: "/contabilidad/analiticas", icon: BarChart3 },
  { label: "Impuestos", href: "/contabilidad/impuestos", icon: Calculator },
- { label: "e-CF", href: "/contabilidad/ecf", icon: QrCode },
  { label: "Gastos", href: "/contabilidad/gastos", icon: Receipt },
  ],
  },

@@ -3,6 +3,8 @@ import { getResumenITBIS } from "@/actions/contabilidad";
 import { getPagosImpuesto } from "@/actions/impuestos";
 import { PagosImpuestosEditor } from "@/components/contabilidad/pagos-impuestos-editor";
 import { cn } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
+import { ecfActivo } from "@/lib/ecf";
 
 interface PageProps {
   searchParams: Promise<{ año?: string; mes?: string }>;
@@ -20,9 +22,20 @@ export default async function ImpuestosPage({ searchParams }: PageProps) {
   const año = Number(params.año ?? now.getFullYear());
   const mes = Number(params.mes ?? (now.getMonth() + 1));
 
-  const [data, pagosOtros] = await Promise.all([
+  const [data, pagosOtros, ecfAtencion] = await Promise.all([
     getResumenITBIS({ año, mes }),
     getPagosImpuesto(mes, año),
+    // e-CF rechazados, por verificar o facturas que se quedaron sin e-CF
+    ecfActivo()
+      ? prisma.venta.count({
+          where: {
+            OR: [
+              { ecfEstado: { in: ["rechazado", "verificar", "error_interno"] } },
+              { tipo: "FACTURADA", ecfEncf: null, ecfError: { not: null } },
+            ],
+          },
+        })
+      : Promise.resolve(0),
   ]);
 
   const añosDisp = Array.from({ length: now.getFullYear() - 2022 }, (_, i) => 2023 + i);
@@ -69,6 +82,30 @@ export default async function ImpuestosPage({ searchParams }: PageProps) {
           </button>
         </form>
       </div>
+
+      {/* e-CF: comprobantes fiscales electrónicos (conector DGII) */}
+      {ecfActivo() && (
+        <Link
+          href="/contabilidad/ecf"
+          className="flex items-center justify-between gap-3 rounded-xl border p-4 transition-all hover:brightness-110"
+          style={{
+            backgroundColor: "color-mix(in oklch, #16a34a 6%, var(--card))",
+            borderColor: `color-mix(in oklch, ${ecfAtencion > 0 ? "#dc2626" : "#16a34a"} 35%, var(--border))`,
+          }}
+        >
+          <div>
+            <p className="font-semibold text-sm">Comprobantes electrónicos (e-CF)</p>
+            <p className="text-xs text-muted-foreground">Estado del conector DGII, facturas rechazadas o pendientes</p>
+          </div>
+          {ecfAtencion > 0 ? (
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ backgroundColor: "#dc2626" }}>
+              {ecfAtencion} requiere{ecfAtencion !== 1 ? "n" : ""} atención
+            </span>
+          ) : (
+            <span className="text-xs font-semibold" style={{ color: "#16a34a" }}>Ver →</span>
+          )}
+        </Link>
+      )}
 
       {/* KPI carga fiscal total */}
       {cargaFiscalTotal > 0 && (
