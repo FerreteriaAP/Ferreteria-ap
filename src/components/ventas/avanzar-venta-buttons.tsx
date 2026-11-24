@@ -410,7 +410,17 @@ export function AvanzarVentaButtons({
           <div className="space-y-1">
             <Label className="text-xs">Tipo NCF</Label>
             <Select value={tipoNcf} onValueChange={(v) => setTipoNcf((v ?? "B02") as string)}>
-              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-8">
+                <SelectValue>
+                  {(v: string) => ({
+                    B01: ecfActivo ? "E31 — Crédito Fiscal" : "B01 — Crédito Fiscal",
+                    B02: ecfActivo ? "E32 — Consumo" : "B02 — Consumidor Final",
+                    B14: "B14 — Régimen Especial",
+                    B15: "B15 — Gubernamental",
+                    SIN: "Sin comprobante",
+                  } as Record<string, string>)[v] ?? v}
+                </SelectValue>
+              </SelectTrigger>
               <SelectContent style={{ backgroundColor: "var(--card)", color: "var(--foreground)" }}>
                 {ecfActivo ? (
                   <>

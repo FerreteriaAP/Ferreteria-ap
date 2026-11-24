@@ -114,7 +114,7 @@ async function llamar<T>(ruta: string, init: RequestInit & { timeoutMs?: number 
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    throw new ErrorEcf(`No se pudo conectar con el conector e-CF (${msg})`, 0);
+    throw new ErrorEcf(`El conector e-CF no responde en ${BASE()}: revisa que esté encendido (tarea "KRP Conector eCF" en el servidor) y la conexión. (${msg})`, 0);
   }
   const texto = await r.text();
   let data: unknown = null;
