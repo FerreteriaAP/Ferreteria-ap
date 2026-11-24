@@ -533,7 +533,7 @@ export default async function VentaPage({ params, searchParams }: PageProps) {
           </div>
 
           {/* e-CF: estado y acciones (emitir, reintentar, reemitir) */}
-          {venta.tipo === "FACTURADA" && (venta.ecfEncf || venta.ecfError || ecfActivo()) && (
+          {venta.tipo === "FACTURADA" && (venta.ecfEncf || venta.ecfError || (ecfActivo() && venta.tipoNcf)) && (
             <EcfEstadoCard ventaId={id} ecf={venta} />
           )}
 

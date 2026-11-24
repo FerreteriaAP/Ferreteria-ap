@@ -412,16 +412,28 @@ export function AvanzarVentaButtons({
             <Select value={tipoNcf} onValueChange={(v) => setTipoNcf((v ?? "B02") as string)}>
               <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
               <SelectContent style={{ backgroundColor: "var(--card)", color: "var(--foreground)" }}>
-                <SelectItem value="B01">B01 — Crédito Fiscal</SelectItem>
-                <SelectItem value="B02">B02 — Consumidor Final</SelectItem>
-                <SelectItem value="B14">B14 — Régimen Especial</SelectItem>
-                <SelectItem value="B15">B15 — Gubernamental</SelectItem>
+                {ecfActivo ? (
+                  <>
+                    <SelectItem value="B02">E32 — Consumo</SelectItem>
+                    <SelectItem value="B01">E31 — Crédito Fiscal</SelectItem>
+                    <SelectItem value="SIN">Sin comprobante</SelectItem>
+                  </>
+                ) : (
+                  <>
+                    <SelectItem value="B01">B01 — Crédito Fiscal</SelectItem>
+                    <SelectItem value="B02">B02 — Consumidor Final</SelectItem>
+                    <SelectItem value="B14">B14 — Régimen Especial</SelectItem>
+                    <SelectItem value="B15">B15 — Gubernamental</SelectItem>
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
           {ecfActivo ? (
             <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              El e-NCF se asigna automáticamente y se reporta a la DGII al confirmar.
+              {tipoNcf === "SIN"
+                ? "Se factura sin comprobante fiscal: no se reporta a la DGII."
+                : "El e-NCF se asigna automáticamente y se reporta a la DGII al confirmar."}
             </p>
           ) : (
           <div className="space-y-1">
@@ -436,7 +448,7 @@ export function AvanzarVentaButtons({
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => run(
-                () => facturarVenta(ventaId, { ncf, tipoNcf }),
+                () => facturarVenta(ventaId, { ncf, tipoNcf: tipoNcf === "SIN" ? "" : tipoNcf }),
               )}
               disabled={loading}
               className={PILL + " w-full justify-center"}

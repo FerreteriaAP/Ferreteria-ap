@@ -122,11 +122,13 @@ interface Props {
   consumidorFinal: { id: string; nombre: string };
   topProductos: Producto[];
   puedeEditarPrecio: boolean;
+  /** Con e-CF activo el selector muestra E32 / E31 / Sin comprobante (internamente B02 / B01 / null). */
+  ecfActivo?: boolean;
 }
 
 // Componente
 
-export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEditarPrecio }: Props) {
+export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEditarPrecio, ecfActivo = false }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -194,7 +196,10 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
   const [cliente, setCliente] = useState<Cliente>({
     ...consumidorFinal, rnc: null, tipoComprobante: "B02", telefono: null, direcciones: [],
   });
-  const [tipoNcf, setTipoNcf] = useState<"B01" | "B02" | "B14" | "B15">("B02");
+  const [tipoNcf, setTipoNcf] = useState<"B01" | "B02" | "B14" | "B15" | "">("B02");
+  // Con e-CF los tipos B se envían como su equivalente electrónico (B02→E32, B01→E31…)
+  const etiquetaNcf = (t: string) =>
+    !t ? "Sin NCF" : ecfActivo ? ({ B02: "E32", B01: "E31", B14: "E44", B15: "E45" } as Record<string, string>)[t] ?? t : t;
   const [queryCliente, setQueryCliente] = useState("");
   const [sugsCliente, setSugsCliente] = useState<Cliente[]>([]);
   const [showClienteSearch, setShowClienteSearch] = useState(false);
@@ -374,7 +379,7 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
         : undefined;
       const notaFinal = [notas.trim(), notaAlerta].filter(Boolean).join(" | ") || undefined;
 
-      const res = await crearVentaPendiente({ clienteId: cliente.id, turnoId, tipoNcf, lineas, direccionId, notas: notaFinal });
+      const res = await crearVentaPendiente({ clienteId: cliente.id, turnoId, tipoNcf: tipoNcf || null, lineas, direccionId, notas: notaFinal });
       if ("error" in res && res.error) { setError(res.error); return; }
       setEnviado(res.numero ?? null);
     });
@@ -551,8 +556,9 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                     "text-[10px] px-1.5 py-0.5 rounded font-semibold shrink-0",
                     tipoNcf === "B01" ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300" :
                     tipoNcf === "B14" ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700" :
+                    tipoNcf === "" ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400" :
                     "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-                  )}>{tipoNcf}</span>
+                  )}>{etiquetaNcf(tipoNcf)}</span>
                 </button>
 
                 {showClienteSearch && (
@@ -591,10 +597,20 @@ export function PDVTerminal({ turnoId, consumidorFinal, topProductos, puedeEdita
                 onChange={e => setTipoNcf(e.target.value as typeof tipoNcf)}
                 className="h-9 rounded-lg border bg-background px-2 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-ring shrink-0"
               >
-                <option value="B02">B02</option>
-                <option value="B01">B01</option>
-                <option value="B14">B14</option>
-                <option value="B15">B15</option>
+                {ecfActivo ? (
+                  <>
+                    <option value="B02">E32 – Consumo</option>
+                    <option value="B01">E31 – Crédito fiscal</option>
+                    <option value="">Sin comprobante</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="B02">B02</option>
+                    <option value="B01">B01</option>
+                    <option value="B14">B14</option>
+                    <option value="B15">B15</option>
+                  </>
+                )}
               </select>
             </div>
 

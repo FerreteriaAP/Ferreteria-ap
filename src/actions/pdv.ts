@@ -210,7 +210,7 @@ export interface LineaPDV {
 export interface VentaPDVInput {
   clienteId: string;
   turnoId?: string;
-  tipoNcf: "B01" | "B02" | "B14" | "B15";
+  tipoNcf: "B01" | "B02" | "B14" | "B15" | null; // null = sin comprobante fiscal
   lineas: LineaPDV[];
   direccionId?: string;
   notas?: string;
@@ -250,7 +250,7 @@ export async function crearVentaPendiente(input: VentaPDVInput) {
         vendedorId: (await getVendedorActivoId()) ?? userId,
         turnoId: input.turnoId ?? null,
         direccionId: input.direccionId ?? null,
-        tipoNcf: input.tipoNcf as TipoComprobante,
+        tipoNcf: (input.tipoNcf || null) as TipoComprobante | null,
         credito: "CONTADO",
         subtotal,
         itbis,

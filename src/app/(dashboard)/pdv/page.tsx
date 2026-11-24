@@ -5,6 +5,7 @@ import { PDVTerminal } from "@/components/pdv/pdv-terminal";
 import { BannerVendedor } from "@/components/vendedor/banner-vendedor";
 import { VendedorSelector } from "@/components/vendedor/vendedor-selector";
 import { auth } from "@/lib/auth";
+import { ecfActivo } from "@/lib/ecf";
 
 export const metadata = { title: "Punto de Venta — Ferretería AP" };
 
@@ -117,6 +118,7 @@ export default async function PDVPage() {
         turnoId={turno?.id}
         topProductos={productos}
         puedeEditarPrecio={puedeEditarPrecio}
+        ecfActivo={ecfActivo()}
       />
     </div>
   );

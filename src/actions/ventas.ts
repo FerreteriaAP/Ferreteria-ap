@@ -788,9 +788,10 @@ export async function facturarVenta(ventaId: string, data: {
  // e-CF: el número lo asigna el conector; se ignora cualquier NCF escrito a mano.
  // Antes de facturar se valida que los datos alcancen (p. ej. RNC del cliente en B01),
  // para no dejar una factura que después no se pueda emitir.
- const conEcf = ecfActivo();
+ // "Sin comprobante" (tipoNcf vacío) no lleva e-CF.
+ const conEcf = ecfActivo() && !!data.tipoNcf;
+ if (ecfActivo()) data = { ...data, ncf: "" };
  if (conEcf) {
- data = { ...data, ncf: "" };
  const pre = await documentoDesdeVenta(ventaId, { tipoNcf: data.tipoNcf || null });
  if ("error" in pre) return { error: pre.error };
  }

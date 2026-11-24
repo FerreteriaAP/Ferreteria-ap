@@ -311,7 +311,8 @@ export async function procesarPagoCaja(
 
  // e-CF: validar antes de cobrar que los datos alcancen (p. ej. RNC del cliente en B01).
  // El NCF lo asigna el conector; se ignora cualquier NCF escrito a mano.
- const conEcf = ecfActivo();
+ // "Sin comprobante" (tipoNcf vacío) no lleva e-CF.
+ const conEcf = ecfActivo() && !!venta.tipoNcf;
  if (conEcf) {
  const pre = await documentoDesdeVenta(ventaId);
  if ("error" in pre) return { error: pre.error };
