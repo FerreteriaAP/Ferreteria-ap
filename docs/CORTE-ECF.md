@@ -26,7 +26,7 @@ Ya probado: E32 y E31 aceptados en TesteCF, "Sin comprobante", impresión carta 
    - en el `.env` de la app: `ECF_URL=http://127.0.0.1:8085` y `ECF_API_KEY` (clave de `C:\KRP_ECF\config\config.toml`);
    - en el conector: registrar los **rangos reales** (`secuencia-agregar --ambiente produccion ...`) y cambiar `ambiente = "produccion"` en `config.toml`;
    - correr `verificar` y reiniciar el servicio.
-5. **Cloudflare:** publicar `fe.ferreteriaap.com` → `localhost:8086`, con reglas para que no bloquee a la DGII (INSTALACION.md §6). Comprobar desde fuera:
+5. ✅ *(hecho el 2026-11-26)* **Cloudflare:** publicar `fe.ferreteriaap.com` → `localhost:8086`, con reglas para que no bloquee a la DGII (INSTALACION.md §6). Comprobar desde fuera:
    - `/fe/autenticacion/api/semilla` debe dar 200;
    - `/fe/recepcion/api/ecf` debe dar 405.
 6. **OFV → Mantenimiento Directorio FE:** cambiar las 3 URLs (Autenticación, Recepción, Aprobación Comercial) de GTI a `https://fe.ferreteriaap.com/...`.
@@ -35,5 +35,12 @@ Ya probado: E32 y E31 aceptados en TesteCF, "Sin comprobante", impresión carta 
 9. Con eso funcionando:
    - activar la seguridad del receptor (`exigir_token = true`, `exigir_firma_valida = true`);
    - dar de baja GTI.
+
+**Túnel de Cloudflare (2026-11-26):**
+- `C:\Users\Administrator\.cloudflared\config.yml` ahora incluye `fe.ferreteriaap.com → http://localhost:8086`. Backup en `config.yml.bak-20261126`.
+- Se creó el DNS de `fe` con `cloudflared tunnel route dns`.
+- El túnel ahora arranca solo con la tarea **"Cloudflared Tunnel"** (SYSTEM, al iniciar el servidor, se reinicia si falla). Antes no arrancaba solo tras un reinicio.
+- Comprobado desde fuera: semilla 200; recepción y aprobación comercial 405 (correcto: solo aceptan POST); ferreteriaap.com sigue arriba.
+- Pendiente: en el panel de Cloudflare, regla para no desafiar a la DGII en `fe.ferreteriaap.com` (Bot Fight Mode / WAF).
 
 **Vuelta atrás:** `ECF_ACTIVO=false` y reiniciar la app. La app sigue facturando como antes.
